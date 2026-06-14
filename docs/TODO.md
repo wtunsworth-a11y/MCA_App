@@ -23,6 +23,13 @@ Items in this list require action from outside this session (assets, decisions, 
 
 ---
 
+## API Keys / Data Access
+
+- [ ] **NASA FIRMS API key** — Register for a free API key at https://firms.modaps.eosdis.nasa.gov/api/ to access VIIRS near real-time fire alert data.
+- [ ] **Global Forest Watch (GFW) GLAD alerts** — Check data access requirements at https://www.globalforestwatch.org/. May require a data access agreement depending on usage. Contact GFW team early to confirm terms.
+
+---
+
 ## Accounts / Services to Set Up
 
 - [ ] **Supabase project** — Create a Supabase project (free tier to start) for the database and auth backend. Share the project URL and anon key when ready.

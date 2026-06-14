@@ -15,7 +15,7 @@ Items in this list require action from outside this session (assets, decisions, 
 
 ## Decisions Needed
 
-- [ ] **Acknowledgements — roles of partners** — What are the roles of CIFOR-ICRAF and Oro Provincial Government? (e.g. implementing partner, technical support, provincial partner, co-funder?) This determines how they are labelled on the Acknowledgements screen.
+- [x] **Acknowledgements — roles of partners** — CIFOR-ICRAF: Implementing Agency. MCF: Users. Oro Provincial Government: Project Partner. EU logo includes "Funded by the European Union" text (standard EU co-funding branding). ✓ Confirmed 2026-06-14
 - [ ] **Acknowledgements — permanence** — Are CIFOR-ICRAF and Oro Provincial Government also permanent/hardwired like the EU, or are they Admin-addable entries that could apply to future versions funded differently?
 - [ ] **Acknowledgements — logo layout** — Should logos appear in a row of four, or stacked with accompanying role descriptions?
 - [ ] **Jitsi server** — A self-hosted Jitsi Meet server is required before the Meetings module can launch video calls. Recommended: DigitalOcean Sydney droplet (~$24/month for testing). Decision needed on when to set this up.

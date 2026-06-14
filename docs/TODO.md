@@ -41,10 +41,29 @@ Items in this list require action from outside this session (assets, decisions, 
 
 ## Content Needed
 
+- [ ] **Dummy data for prototype** — User to provide realistic names, places, facility details, and activity data. See `docs/dummy_data.md` for the full specification of what is needed. Once received, prototype will be rebuilt with data wired in.
 - [ ] **PNG public holiday list** — Provide or confirm source for Papua New Guinea public holidays (used in Service Delivery Monitoring scheduling).
 - [ ] **School holiday periods** — Provide annual school holiday calendar for PNG (used in SDM scheduling).
 - [ ] **Facility list** — Provide the list of health facilities and schools within MCA clan territories (name, type, GPS coordinates) for upload into the admin panel.
 - [ ] **Species list** — Provide the species list to be used in the Biodiversity Survey module (when protocol is defined).
+- [ ] **Committee quorum requirements** — Provide the quorum threshold (minimum members required) for each committee (Zone Sub-Committees × 11, MCF Board). Used to gate votes in the Meetings module.
+- [ ] **Acknowledgement page text** — Draft full text for each partner block (EU, CIFOR-ICRAF, Oro Provincial Government, MCF) including any legal disclaimer language required by the EU co-funding agreement.
+
+---
+
+## Prototype Rebuild Queue (changes collected from review — ready to build once dummy data received)
+
+- [ ] Acknowledgements screen: 4 logo placeholders (EU · CIFOR-ICRAF · Oro Provincial Government · MCF) with role labels
+- [ ] Three logo placeholders in every screen header
+- [ ] New "Recent Activity" module tile + map screen with activity layers (MaFIA transect lines, Observation points colour-coded by type, Patrol route lines, SDM facility points colour-coded by compliance), time filter (7 days / 30 days / 1 year), scaled by access tier
+- [ ] Performance Monitoring: add monthly grid calendar (colour-coded dots per day) + link to Recent Activity map
+- [ ] MaFIA setup flow reorder: transect → navigate to start → fingerprint verify → begin survey
+- [ ] Weather conditions moved from setup into Transect Description section of the survey
+- [ ] MaFIA matrix: all questions A–H (71 rows), conditional rows labelled *(conditional)*, Module H as free-text below matrix
+- [ ] Meetings: new meeting creation flow (5 steps: details → agenda draft → submit to members → member input → chairman approval)
+- [ ] Meetings: motion recording flow (attendance → quorum check/notification → record motion → verify wording → seconder → vote count → lock)
+- [ ] Meetings: quorum gate — blocks votes if not met; quorum result auto-inserted into minutes; discussion-only mode if quorum not met
+- [ ] Wire in dummy data across all screens
 
 ---
 

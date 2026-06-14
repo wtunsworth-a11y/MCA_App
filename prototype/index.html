@@ -994,6 +994,88 @@ select.msel {
 .stub-title { font-size: 1rem; font-weight: 700; color: #1B5E20; margin-bottom: 10px; }
 .stub-desc { font-size: 0.84rem; color: #666; line-height: 1.5; }
 
+/* ── Logo placeholder in top bar ── */
+.logo-ph {
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.22);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.52rem; font-weight: 700; color: rgba(255,255,255,0.72);
+  text-align: center; line-height: 1.25; flex-shrink: 0;
+}
+/* ── Acknowledgements link on login ── */
+.ack-link-btn {
+  background: none; border: none; color: rgba(255,255,255,0.55);
+  font-size: 0.72rem; font-family: inherit; cursor: pointer;
+  text-decoration: underline; margin-top: 8px; display: block;
+}
+.ack-close-btn {
+  background: none; border: 2px solid #2E7D32; border-radius: 20px;
+  color: #2E7D32; font-size: 0.88rem; font-weight: 600;
+  padding: 10px 28px; cursor: pointer; font-family: inherit;
+  margin: 0 auto; display: block;
+}
+/* ── Compass / GPS navigation gate ── */
+.nav-gate-card {
+  background: #FFF8E1; border: 1.5px solid #FFE082;
+  border-radius: 12px; padding: 14px; margin-bottom: 12px;
+}
+.nav-gate-card.arrived { background: #e8f5e9; border-color: #a5d6a7; }
+.compass-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.compass-info .c-bearing { font-size: 0.95rem; font-weight: 700; color: #1B5E20; }
+.compass-info .c-dist { font-size: 0.79rem; color: #777; margin-top: 2px; }
+.btn-arrive {
+  width: 100%; background: #F57F17; color: #fff; border: none;
+  border-radius: 20px; padding: 10px 18px; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; font-family: inherit;
+}
+.btn-arrive:disabled { background: #bbb; cursor: default; }
+.gate-hint { font-size: 0.73rem; color: #E65100; text-align: center; margin-bottom: 8px; }
+/* ── MaFIA sticky question column ── */
+.matrix-table th:first-child,
+.matrix-table td:first-child {
+  position: sticky; left: 0; z-index: 2; background: #fff;
+}
+.matrix-table th:first-child { background: #f5f5f5; z-index: 3; }
+.mod-a-s { background: #c8e6c9 !important; }
+.mod-d-s { background: #fff3e0 !important; }
+/* ── Map screen ── */
+#screen-map { background: #263238; }
+.map-full { flex: 1; overflow: hidden; background: #b0bec5; }
+.map-full svg { width: 100%; height: 100%; display: block; }
+.map-controls {
+  background: #fff; border-top: 1px solid #e0e0e0;
+  padding: 8px 12px; flex-shrink: 0;
+  display: flex; gap: 7px; overflow-x: auto;
+}
+.map-controls::-webkit-scrollbar { display: none; }
+.layer-pill {
+  padding: 5px 12px; border-radius: 16px; white-space: nowrap;
+  border: 1.5px solid #a5d6a7; background: #fafafa;
+  font-size: 0.74rem; color: #444; cursor: pointer;
+  font-family: inherit; flex-shrink: 0; transition: all 0.15s;
+}
+.layer-pill.active { background: #2E7D32; color: #fff; border-color: #2E7D32; }
+/* ── Performance monitoring ── */
+.perf-metric {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.83rem;
+}
+.perf-metric:last-child { border-bottom: none; }
+.pm-label { color: #555; }
+.pm-val { font-weight: 700; }
+.pm-val.good { color: #2E7D32; }
+.pm-val.warn { color: #F57F17; }
+.pm-val.bad  { color: #c62828; }
+.progress-bar { background: #e0e0e0; border-radius: 4px; height: 5px; margin-top: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #2E7D32, #66BB6A); }
+.progress-fill.warn { background: linear-gradient(90deg, #F57F17, #FFB300); }
+.effort-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.83rem;
+}
+.effort-row:last-child { border-bottom: none; }
+
 /* Toast */
 .toast {
   position: absolute;
@@ -1076,6 +1158,7 @@ select.msel {
       <div class="fp-footer">
         <span class="eu-pill">EU</span>
         Supported by the European Union
+        <button class="ack-link-btn" onclick="nav('screen-ack')">View Acknowledgements</button>
       </div>
     </div>
 
@@ -1084,18 +1167,19 @@ select.msel {
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-dashboard">
       <div class="dash-top">
-        <div class="dash-greeting">Good morning, John 👋</div>
-        <div class="dash-clan">Afore Clan | Zone 7B</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="dash-greeting">Good morning, John 👋</div>
+            <div class="dash-clan">Afore Clan | Zone 7B</div>
+          </div>
+          <div class="logo-ph" style="width:44px;height:44px;font-size:0.55rem;">MCF<br>Logo</div>
+        </div>
       </div>
       <div class="scroll-content" style="padding-bottom:8px;">
         <div class="module-grid">
           <div class="module-tile" onclick="nav('screen-patrol-stub')">
             <span class="module-emoji">🌿</span>
             <span class="module-name">Patrol</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-biodiversity-stub')">
-            <span class="module-emoji">🦜</span>
-            <span class="module-name">Biodiversity Survey</span>
           </div>
           <div class="module-tile" onclick="nav('screen-observations')">
             <span class="module-emoji">👁️</span>
@@ -1121,14 +1205,14 @@ select.msel {
             <span class="module-emoji">👥</span>
             <span class="module-name">Community Data</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-threat-stub')">
-            <span class="module-emoji">⚠️</span>
-            <span class="module-name">Threat / Incident</span>
+          <div class="module-tile" onclick="nav('screen-performance')">
+            <span class="module-emoji">📈</span>
+            <span class="module-name">Performance Monitoring</span>
           </div>
           <div class="module-tile disabled">
             <span class="coming-badge">Coming Soon</span>
             <span class="module-emoji">🌱</span>
-            <span class="module-name">Biodiversity Monitoring</span>
+            <span class="module-name">Biodiversity</span>
           </div>
         </div>
       </div>
@@ -1155,6 +1239,7 @@ select.msel {
       <div class="top-bar">
         <button class="back-btn" onclick="goBack()">←</button>
         <div><div class="bar-title">Observations</div></div>
+        <div class="logo-ph">MCF<br>Logo</div>
       </div>
       <div class="scroll-content">
         <div class="obs-list">
@@ -1253,6 +1338,7 @@ select.msel {
           <div class="bar-title">MaFIA Tool</div>
           <div class="bar-subtitle">Transect Setup</div>
         </div>
+        <div class="logo-ph">MCF<br>Logo</div>
       </div>
       <div class="scroll-content">
         <div id="mafiaLoading" style="padding:40px 20px;text-align:center;">
@@ -1336,6 +1422,35 @@ select.msel {
               <span id="mafiaFpTxt">Tap to Verify Identity</span>
             </button>
 
+            <!-- GPS navigation gate — shown after FP verify -->
+            <div id="mafiaNavGate" style="display:none;">
+              <div class="nav-gate-card" id="navGateCard">
+                <div style="font-size:0.82rem;font-weight:700;color:#E65100;margin-bottom:8px;">📍 Navigate to Transect Start Point</div>
+                <div class="compass-row">
+                  <!-- Compass SVG -->
+                  <svg width="72" height="72" viewBox="0 0 72 72" style="flex-shrink:0;">
+                    <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
+                    <text x="33" y="10" fill="#333" font-size="9" font-family="Arial" font-weight="bold">N</text>
+                    <text x="33" y="68" fill="#aaa" font-size="9" font-family="Arial">S</text>
+                    <text x="2" y="40" fill="#aaa" font-size="9" font-family="Arial">W</text>
+                    <text x="61" y="40" fill="#aaa" font-size="9" font-family="Arial">E</text>
+                    <!-- Bearing 324° = NNW: rotate arrow by 324° around centre -->
+                    <g transform="rotate(324, 36, 36)">
+                      <polygon points="36,8 32,42 36,38 40,42" fill="#2E7D32"/>
+                      <polygon points="36,64 32,42 36,46 40,42" fill="#ccc"/>
+                    </g>
+                  </svg>
+                  <div class="compass-info">
+                    <div class="c-bearing">Walk NNW · 324°</div>
+                    <div class="c-dist">~340 m away</div>
+                    <div class="c-dist" style="margin-top:4px;font-size:0.72rem;">GPS updates every 5 sec</div>
+                  </div>
+                </div>
+                <div class="gate-hint" id="navGateHint">Survey questions unlock within 30 m of start point</div>
+                <button class="btn-arrive" id="btnArrive" onclick="mafiaArrive()">Simulate: I've Reached Start Point ✓</button>
+              </div>
+            </div>
+
             <button class="btn-primary" id="mafiaBeginBtn" disabled onclick="nav('screen-mafia-matrix')">Begin Survey</button>
           </div>
         </div>
@@ -1352,8 +1467,9 @@ select.msel {
           <div class="bar-title">MaFIA Survey — ST1</div>
           <div class="bar-subtitle">Transect 1 | Zone 7B</div>
         </div>
+        <div class="logo-ph">MCF<br>Logo</div>
       </div>
-      <div class="matrix-note">📱 Scroll right to see all sub-transects</div>
+      <div class="matrix-note">📋 Questions fixed left — scroll right for sub-transects ST1–ST5</div>
       <div class="st-progress">
         <span class="st-chip done">ST1 ✓</span>
         <span class="st-chip done">ST2 ✓</span>
@@ -1371,7 +1487,7 @@ select.msel {
               </tr>
             </thead>
             <tbody>
-              <tr class="mod-header"><td colspan="6" class="mod-a">MODULE A — Habitat Condition</td></tr>
+              <tr class="mod-header"><td class="mod-a mod-a-s">MODULE A — Topography &amp; Physical Setting</td><td class="mod-a"></td><td class="mod-a"></td><td class="mod-a"></td><td class="mod-a"></td><td class="mod-a"></td></tr>
               <!-- A1 Terrain -->
               <tr>
                 <td>A1 — Terrain</td>
@@ -1427,7 +1543,7 @@ select.msel {
                 <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
               </tr>
               <!-- Module D -->
-              <tr class="mod-header"><td colspan="6" class="mod-d">MODULE D — Species Count</td></tr>
+              <tr class="mod-header"><td class="mod-d mod-d-s">MODULE D — Vegetation &amp; Species Count</td><td class="mod-d"></td><td class="mod-d"></td><td class="mod-d"></td><td class="mod-d"></td><td class="mod-d"></td></tr>
               <!-- D1 Large trees -->
               <tr>
                 <td>D1 — Large trees (&gt;40cm DBH)</td>
@@ -1489,7 +1605,7 @@ select.msel {
             <span class="chip">19 June 2026</span>
           </div>
           <div class="section-label">Assigned Facilities</div>
-          <div class="facility-card" onclick="openFacility('Afore Health Centre')">
+          <div class="facility-card" onclick="openFacility('Afore Health Centre','health')">
             <div class="fac-header">
               <span class="fac-icon">🏥</span>
               <div><div class="fac-name">Afore Health Centre</div><div class="fac-type">Health Facility</div></div>
@@ -1497,7 +1613,7 @@ select.msel {
             <div class="fac-meta">📅 Due: 8 June 2026</div>
             <span class="badge-pending">⏳ Pending</span>
           </div>
-          <div class="facility-card" onclick="openFacility('Niniuri Primary School')">
+          <div class="facility-card" onclick="openFacility('Niniuri Primary School','school')">
             <div class="fac-header">
               <span class="fac-icon">🏫</span>
               <div><div class="fac-name">Niniuri Primary School</div><div class="fac-type">Primary Education</div></div>
@@ -1563,8 +1679,8 @@ select.msel {
             + Add New Staff Member
           </button>
 
-          <div class="form-group">
-            <label class="form-label">Total students present today: <span class="req">*</span></label>
+          <div class="form-group" id="studentCountGroup" style="display:none;">
+            <label class="form-label">Total students present today <span class="req">*</span></label>
             <input type="number" class="form-input" placeholder="e.g. 42" min="0"/>
           </div>
 
@@ -1785,7 +1901,7 @@ select.msel {
          STUB SCREENS
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-patrol-stub">
-      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Patrol</div></div></div>
+      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Patrol</div></div><div class="logo-ph">MCF<br>Logo</div></div>
       <div class="scroll-content"><div class="stub-body">
         <div class="stub-icon">🌿</div>
         <div class="stub-title">Patrol Module</div>
@@ -1793,30 +1909,178 @@ select.msel {
       </div></div>
     </div>
 
-    <div class="screen" id="screen-biodiversity-stub">
-      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Biodiversity Survey</div></div></div>
-      <div class="scroll-content"><div class="stub-body">
-        <div class="stub-icon">🦜</div>
-        <div class="stub-title">Biodiversity Survey</div>
-        <div class="stub-desc">Structured survey forms linked to the MaFIA transect tool and species identification databases will appear here.</div>
-      </div></div>
+    <!-- ══════════════════════════════════════
+         SCREEN: ACKNOWLEDGEMENTS
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-ack" style="background:#f0f4f0;">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Acknowledgements</div></div>
+        <div class="logo-ph">MCF<br>Logo</div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14">
+          <div class="section-label" style="padding-left:0;">Project Funding</div>
+          <div class="eu-block">
+            <div class="eu-left">
+              <div class="eu-stars">⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐</div>
+              <div class="eu-label">EUROPEAN UNION</div>
+            </div>
+            <div class="eu-right">Version 1 of this application is fully funded by the European Union through the Managalas Conservation Fund project. This acknowledgement is permanent.</div>
+          </div>
+          <div class="card" style="font-size:0.79rem;color:#555;line-height:1.5;padding:12px 16px;">
+            The contents of this application are the sole responsibility of the Managalas Conservation Fund and do not necessarily reflect the views of the European Union.
+          </div>
+          <div class="section-label" style="padding-left:0;margin-top:4px;">Implementing Organisation</div>
+          <div class="mcf-block">MANAGALAS CONSERVATION FUND</div>
+          <div class="version">v1.0.0-prototype &nbsp;|&nbsp; MCA Clan Steward App</div>
+        </div>
+      </div>
     </div>
 
+    <!-- ══════════════════════════════════════
+         SCREEN: MAP
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-map">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">MCA Map</div><div class="bar-subtitle">Managalas Conservation Area</div></div>
+        <div class="logo-ph">MCF<br>Logo</div>
+      </div>
+      <div class="map-full">
+        <svg viewBox="0 0 390 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="390" height="480" fill="#b0bec5"/>
+          <defs>
+            <pattern id="mapgrid" width="32" height="32" patternUnits="userSpaceOnUse">
+              <path d="M32 0 L0 0 0 32" fill="none" stroke="#90a4ae" stroke-width="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="390" height="480" fill="url(#mapgrid)" opacity="0.5"/>
+          <!-- MCA outer boundary -->
+          <polygon points="80,60 160,30 240,40 310,70 350,140 360,230 330,330 270,400 180,430 100,410 50,340 30,240 40,150" fill="#2E7D32" opacity="0.18" stroke="#1B5E20" stroke-width="2"/>
+          <!-- Zone outlines (approximate) -->
+          <polygon points="80,60 160,30 200,80 130,130 80,100" fill="#388E3C" opacity="0.22" stroke="#2E7D32" stroke-width="1"/>
+          <polygon points="160,30 240,40 250,100 200,80" fill="#43A047" opacity="0.2" stroke="#2E7D32" stroke-width="1"/>
+          <polygon points="240,40 310,70 290,150 250,100" fill="#388E3C" opacity="0.2" stroke="#2E7D32" stroke-width="1"/>
+          <polygon points="310,70 350,140 320,200 290,150" fill="#2E7D32" opacity="0.25" stroke="#1B5E20" stroke-width="1"/>
+          <polygon points="350,140 360,230 330,260 320,200" fill="#43A047" opacity="0.2" stroke="#2E7D32" stroke-width="1"/>
+          <polygon points="130,130 200,80 250,100 290,150 260,220 200,260 140,240 100,180" fill="#388E3C" opacity="0.18" stroke="#2E7D32" stroke-width="1"/>
+          <polygon points="260,220 330,260 310,330 270,400 200,380 200,300" fill="#2E7D32" opacity="0.22" stroke="#1B5E20" stroke-width="1"/>
+          <polygon points="100,180 140,240 200,260 200,300 150,330 100,290 50,240 50,180" fill="#43A047" opacity="0.18" stroke="#2E7D32" stroke-width="1"/>
+          <polygon points="150,330 200,300 200,380 180,430 120,400 100,360" fill="#388E3C" opacity="0.2" stroke="#2E7D32" stroke-width="1"/>
+          <!-- Clan dots -->
+          <circle cx="120" cy="90" r="5" fill="#1B5E20" opacity="0.7"/>
+          <circle cx="195" cy="60" r="5" fill="#1B5E20" opacity="0.7"/>
+          <circle cx="270" cy="115" r="5" fill="#1B5E20" opacity="0.7"/>
+          <circle cx="325" cy="175" r="5" fill="#1B5E20" opacity="0.7"/>
+          <circle cx="340" cy="240" r="5" fill="#1B5E20" opacity="0.7"/>
+          <circle cx="200" cy="180" r="5" fill="#F57F17" opacity="0.9"/>
+          <circle cx="175" cy="210" r="4" fill="#1B5E20" opacity="0.7"/>
+          <circle cx="230" cy="250" r="4" fill="#1B5E20" opacity="0.7"/>
+          <circle cx="120" cy="235" r="4" fill="#1B5E20" opacity="0.7"/>
+          <circle cx="260" cy="320" r="4" fill="#1B5E20" opacity="0.7"/>
+          <circle cx="165" cy="365" r="4" fill="#1B5E20" opacity="0.7"/>
+          <!-- Fire alert -->
+          <circle cx="285" cy="145" r="12" fill="#c62828" opacity="0.75"/>
+          <text x="279" y="151" fill="#fff" font-size="13" font-family="Arial">🔥</text>
+          <!-- You are here -->
+          <circle cx="200" cy="180" r="10" fill="none" stroke="#F57F17" stroke-width="2.5" opacity="0.8"/>
+          <!-- Labels -->
+          <text x="185" y="28" fill="#1B5E20" font-size="11" font-weight="bold" font-family="Arial" opacity="0.85">Managalas Conservation Area</text>
+          <text x="175" y="178" fill="#fff" font-size="9" font-family="Arial" font-weight="bold">You</text>
+        </svg>
+      </div>
+      <div class="map-controls">
+        <button class="layer-pill active" id="lp-mca" onclick="toggleLayer('mca')">MCA Boundary</button>
+        <button class="layer-pill active" id="lp-zones" onclick="toggleLayer('zones')">Zones</button>
+        <button class="layer-pill active" id="lp-clans" onclick="toggleLayer('clans')">Clans</button>
+        <button class="layer-pill" id="lp-fire" onclick="toggleLayer('fire')">🔥 Fire Alerts</button>
+        <button class="layer-pill" id="lp-forest" onclick="toggleLayer('forest')">🌳 Forest Change</button>
+      </div>
+      <nav class="bottom-nav">
+        <button class="nav-item" onclick="bottomNav('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+        <button class="nav-item active" onclick="bottomNav('map')"><span class="nav-icon">🗺️</span><span class="nav-label">Map</span></button>
+        <button class="nav-item" onclick="bottomNav('alerts')"><span class="nav-icon">🔔</span><span class="nav-label">Alerts</span></button>
+        <button class="nav-item" onclick="bottomNav('profile')"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
+      </nav>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: PERFORMANCE MONITORING
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-performance" style="background:#f0f4f0;">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Performance Monitoring</div></div>
+        <div class="logo-ph">MCF<br>Logo</div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14">
+          <div class="section-label" style="padding-left:0;">My Performance — June 2026</div>
+          <div class="card">
+            <div class="perf-metric">
+              <span class="pm-label">Task Completion Rate</span>
+              <span class="pm-val good">87%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:87%"></div></div>
+            <div class="perf-metric" style="margin-top:8px;">
+              <span class="pm-label">GPS Compliance</span>
+              <span class="pm-val good">94%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:94%"></div></div>
+            <div class="perf-metric" style="margin-top:8px;">
+              <span class="pm-label">On-Time Rate</span>
+              <span class="pm-val warn">78%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill warn" style="width:78%"></div></div>
+            <div class="perf-metric" style="margin-top:8px;">
+              <span class="pm-label">SDM Visits This Month</span>
+              <span class="pm-val good">2 / 2 ✓</span>
+            </div>
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Zone 7B Sub-Committee</div>
+          <div class="card">
+            <div class="perf-metric">
+              <span class="pm-label">Meetings held (Q2)</span>
+              <span class="pm-val warn">4 / 6</span>
+            </div>
+            <div class="perf-metric">
+              <span class="pm-label">Minutes submitted</span>
+              <span class="pm-val warn">3 / 4</span>
+            </div>
+            <div class="perf-metric">
+              <span class="pm-label">Avg. attendance</span>
+              <span class="pm-val good">82%</span>
+            </div>
+            <div class="perf-metric">
+              <span class="pm-label">Minutes overdue</span>
+              <span class="pm-val bad">1 set</span>
+            </div>
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Monthly Effort Report — June 2026</div>
+          <div class="card" style="padding:10px 16px;">
+            <div class="effort-row"><span>🌿 Patrol</span><span style="font-weight:600;color:#2E7D32;">× 3</span></div>
+            <div class="effort-row"><span>🏥 SDM Visits</span><span style="font-weight:600;color:#2E7D32;">× 2</span></div>
+            <div class="effort-row"><span>📊 MaFIA Survey</span><span style="font-weight:600;color:#2E7D32;">× 1</span></div>
+            <div class="effort-row"><span>👁️ Observations</span><span style="font-weight:600;color:#2E7D32;">× 5</span></div>
+            <div class="effort-row"><span>🤝 Meetings attended</span><span style="font-weight:600;color:#2E7D32;">× 2</span></div>
+          </div>
+          <button class="btn-outline" onclick="toast('Monthly report downloaded ✓')">⬇ Download Effort Report</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: COMMUNITY DATA STUB
+    ══════════════════════════════════════ -->
     <div class="screen" id="screen-community-stub">
-      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Community Data</div></div></div>
+      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Community Data</div></div><div class="logo-ph">MCF<br>Logo</div></div>
       <div class="scroll-content"><div class="stub-body">
         <div class="stub-icon">👥</div>
         <div class="stub-title">Community Data</div>
         <div class="stub-desc">Household survey tools, demographic data entry, and community mapping features will be available here.</div>
-      </div></div>
-    </div>
-
-    <div class="screen" id="screen-threat-stub">
-      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Threat / Incident</div></div></div>
-      <div class="scroll-content"><div class="stub-body">
-        <div class="stub-icon">⚠️</div>
-        <div class="stub-title">Threat / Incident Reporting</div>
-        <div class="stub-desc">Log poaching, illegal logging, boundary disputes and other threats. Incidents are routed to the MCF coordination team.</div>
       </div></div>
     </div>
 
@@ -1834,9 +2098,8 @@ const ALL_SCREENS = [
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-sdm','screen-facility',
   'screen-alerts','screen-meetings','screen-meeting-detail',
-  'screen-profile',
-  'screen-patrol-stub','screen-biodiversity-stub',
-  'screen-community-stub','screen-threat-stub'
+  'screen-map','screen-performance','screen-ack','screen-profile',
+  'screen-patrol-stub','screen-community-stub'
 ];
 
 let currentScreen = 'screen-splash';
@@ -1922,7 +2185,9 @@ function bottomNav(dest) {
     showScreen('screen-dashboard');
     setNavActive(0);
   } else if (dest === 'map') {
-    toast('Interactive map — coming soon');
+    history.push(currentScreen);
+    showScreen('screen-map');
+    setNavActive(1);
   } else if (dest === 'alerts') {
     history.push(currentScreen);
     showScreen('screen-alerts');
@@ -1947,12 +2212,19 @@ function openObsEntry(type) {
 
 /* ── MaFIA Setup ── */
 let mafiaVerified = false;
+let mafiaArrived = false;
 
 function initMafia() {
   mafiaVerified = false;
+  mafiaArrived = false;
   document.getElementById('mafiaBeginBtn').disabled = true;
   document.getElementById('mafiaFpBtn').classList.remove('verified');
   document.getElementById('mafiaFpTxt').textContent = 'Tap to Verify Identity';
+  document.getElementById('mafiaNavGate').style.display = 'none';
+  document.getElementById('navGateCard').classList.remove('arrived');
+  document.getElementById('btnArrive').disabled = false;
+  document.getElementById('btnArrive').textContent = 'Simulate: I\'ve Reached Start Point ✓';
+  document.getElementById('navGateHint').textContent = 'Survey questions unlock within 30 m of start point';
   document.getElementById('mafiaLoading').style.display = 'block';
   document.getElementById('mafiaContent').style.display = 'none';
   setTimeout(() => {
@@ -1968,8 +2240,22 @@ function mafiaVerify() {
     mafiaVerified = true;
     document.getElementById('mafiaFpBtn').classList.add('verified');
     document.getElementById('mafiaFpTxt').textContent = '✓ Identity Verified';
-    document.getElementById('mafiaBeginBtn').disabled = false;
+    document.getElementById('mafiaNavGate').style.display = 'block';
+    checkMafiaReady();
   }, 900);
+}
+
+function mafiaArrive() {
+  mafiaArrived = true;
+  document.getElementById('navGateCard').classList.add('arrived');
+  document.getElementById('navGateHint').textContent = '✓ At start point — survey unlocked';
+  document.getElementById('btnArrive').disabled = true;
+  document.getElementById('btnArrive').textContent = '✓ Arrived at Start Point';
+  checkMafiaReady();
+}
+
+function checkMafiaReady() {
+  document.getElementById('mafiaBeginBtn').disabled = !(mafiaVerified && mafiaArrived);
 }
 
 function wx(group, onId, offId) {
@@ -1994,8 +2280,10 @@ function tc(btn, delta) {
 }
 
 /* ── SDM ── */
-function openFacility(name) {
+function openFacility(name, type) {
   document.getElementById('facilityTitle').textContent = name;
+  const sc = document.getElementById('studentCountGroup');
+  sc.style.display = (type === 'school') ? 'block' : 'none';
   nav('screen-facility');
 }
 
@@ -2004,6 +2292,12 @@ function atnd(btn, state) {
   const row = btn.closest('.attend-toggle');
   row.querySelectorAll('.attend-btn').forEach(b => b.classList.remove('present','absent'));
   btn.classList.add(state);
+}
+
+/* ── Map Layer Toggles ── */
+function toggleLayer(id) {
+  const pill = document.getElementById('lp-' + id);
+  if (pill) pill.classList.toggle('active');
 }
 
 /* ── Meetings Tabs ── */

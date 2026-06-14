@@ -342,6 +342,8 @@ Stewards record observed threats or incidents within or near the MCA.
 | Timestamp | Datetime (auto) |
 | Submitting Steward | Linked to verified identity |
 
+> **Note:** Threat and incident types are now captured under the Observations module (Section 8.8). The separate Threat / Incident module has been merged into Observations. Threat type remains an Admin-configurable observation type within that module.
+
 ---
 
 ### 8.4 Community Data
@@ -505,6 +507,8 @@ Two visits are scheduled per facility per month using randomly generated working
 - Steward records all staff names (health facilities) and teacher names plus student enrolment count (education facilities).
 - This record becomes the baseline roster for the facility.
 
+> **Note:** Student enrolment count is recorded for education facilities only. Health facility visits record staff attendance only — no student count field is shown or required for health facilities.
+
 **Subsequent visits:**
 - Steward compares against the baseline roster.
 - Records: present / absent for each person on the roster.
@@ -614,6 +618,10 @@ The Steward walks the transect line three times:
 1. **Enter:** Initial walk along the transect.
 2. **Verify:** Second walk to confirm observations.
 3. **Confirm:** Final walk to complete data entry.
+
+#### GPS Gate
+
+The MaFIA data entry form is locked until the Steward is within 30 metres of the transect start point (verified by device GPS). The app displays a compass bearing and walking distance to the start point while the Steward is en route. This gate cannot be bypassed.
 
 #### UI Layout
 
@@ -779,20 +787,80 @@ Free text field, optional, covering the entire transect. Voice-to-text input is 
 
 ---
 
-### 8.11 Performance Management (Deferred)
+### 8.11 Performance Management (Active — V1)
 
-This module is scoped for a future release. It tracks duty compliance across all tiers and provides visibility into the reliability and responsiveness of system participants.
+This module tracks duty compliance across all tiers and provides visibility into the reliability and responsiveness of system participants.
+
+#### Clan Steward — Personal Dashboard
+
+The Performance Monitoring screen is accessible from the main dashboard. It displays metrics for the logged-in Steward and their zone committee.
+
+**Personal Metrics:**
+
+| Metric | Description |
+|---|---|
+| Task Completion Rate | Percentage of assigned tasks completed on time |
+| GPS Compliance | Percentage of submissions with valid GPS coordinates within expected range |
+| On-Time Rate | Percentage of visits and submissions made within valid time windows |
+| SDM Visits This Month | Count of completed SDM visits against the monthly target (e.g. 2/2) |
+
+**Zone Committee Metrics:**
+
+| Metric | Description |
+|---|---|
+| Meetings Held (quarterly) | Count of committee meetings held against the scheduled target |
+| Minutes Submitted | Count of meeting minutes submitted against the number of meetings held |
+| Average Attendance | Average percentage attendance across committee meetings |
+
+**Monthly Effort Report:**
+
+A summary card lists all tasks completed by the Steward in the current month (patrols, SDM visits, MaFIA surveys, observations). A "Download Report" action is available to export the summary.
 
 #### Metrics by Tier
 
 | Tier | Tracked Metrics |
 |---|---|
-| Clan Steward | Completion rates, GPS integrity, timing compliance |
+| Clan Steward | Completion rates, GPS integrity, timing compliance, SDM visit count |
 | Zone Staff | Meeting scheduling frequency, response to escalations |
 | Secretary | Agenda submission timeliness, minutes turnaround time |
 | Chairman | Approval timeliness for agendas and minutes |
 | MCF Staff | Oversight activity |
-| Committees | Meeting frequency, quorum achievement, decision follow-through |
+| Committees | Meeting frequency, quorum achievement, attendance rates, decision follow-through |
+
+---
+
+### 8.12 Map Module
+
+The Map module provides a visual overview of the Managalas Conservation Area accessible from the bottom navigation bar on the main dashboard.
+
+#### Features
+
+- **MCA Boundary Layer:** Displays the outer boundary polygon of the Managalas Conservation Area.
+- **Zones Layer:** Displays the 11 zone outlines within the MCA boundary, each with Admin-configurable fill and stroke colours.
+- **Clans Layer:** Displays clan locations as labelled points within their respective zones.
+
+#### Layer Toggles
+
+The map screen provides pill-shaped toggle controls below the map to show or hide each layer independently:
+- MCA Boundary
+- Zones
+- Clans
+
+All layers are active by default. Tapping a toggle pill shows or hides the corresponding layer.
+
+#### Legend
+
+A legend card below the layer toggles identifies key map symbols:
+- Fire alert markers (sourced from VIIRS / NASA FIRMS)
+- Forest cover change markers (sourced from Global Forest Watch)
+
+#### Map Technology
+
+The live app uses `flutter_map` with pre-downloaded and cached offline tile sets (see Section 11 — Infrastructure). The prototype renders a stylised SVG representation for demonstration purposes.
+
+#### Access
+
+The Map screen is accessible from the bottom navigation bar on both the Home (Dashboard) and Map screens. It does not require a separate login step — the standard app authentication applies.
 
 ---
 

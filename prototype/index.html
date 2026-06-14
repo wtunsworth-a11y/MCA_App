@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCA App Prototype</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #263238; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; font-family: 'Segoe UI', Arial, sans-serif; }
+
+  .desktop-label { color: #90A4AE; text-align: center; font-size: 13px; margin-bottom: 8px; letter-spacing: 1px; }
+
+  .phone-frame {
+    width: 390px; min-height: 844px; background: #111;
+    border-radius: 50px; padding: 12px;
+    box-shadow: 0 0 0 2px #444, 0 0 0 4px #222, 0 30px 80px rgba(0,0,0,0.7);
+    position: relative; flex-shrink: 0;
+  }
+  .phone-notch {
+    width: 130px; height: 28px; background: #111;
+    border-radius: 0 0 18px 18px; margin: 0 auto 0;
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    z-index: 100;
+  }
+  .phone-screen {
+    width: 100%; min-height: 820px; background: #F5F5F5;
+    border-radius: 40px; overflow: hidden; position: relative;
+  }
+  .prototype-banner {
+    background: #B71C1C; color: white; text-align: center;
+    font-size: 10px; padding: 3px; letter-spacing: 1px; font-weight: bold;
+    position: sticky; top: 0; z-index: 999;
+  }
+
+  /* SCREENS */
+  .screen { display: none; flex-direction: column; min-height: 820px; }
+  .screen.active { display: flex; }
+
+  /* TOP BAR */
+  .top-bar {
+    background: #1B5E20; color: white; padding: 36px 16px 12px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .top-bar.accent { background: #2E7D32; }
+  .top-bar h2 { font-size: 18px; font-weight: 600; flex: 1; }
+  .back-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; padding: 4px; }
+  .top-bar-logo { width: 32px; height: 32px; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    background: white; border-top: 1px solid #E0E0E0;
+    display: flex; padding: 8px 0 16px; margin-top: auto;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    gap: 2px; cursor: pointer; padding: 4px;
+    font-size: 10px; color: #757575;
+    transition: color 0.2s;
+  }
+  .nav-item.active { color: #2E7D32; }
+  .nav-item span:first-child { font-size: 20px; }
+
+  /* CONTENT */
+  .content { flex: 1; overflow-y: auto; padding: 16px; }
+  .content.no-pad { padding: 0; }
+
+  /* CARDS */
+  .card {
+    background: white; border-radius: 12px; padding: 16px;
+    margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .card-title { font-size: 14px; font-weight: 600; color: #212121; margin-bottom: 4px; }
+  .card-sub { font-size: 12px; color: #757575; }
+
+  /* MODULE GRID */
+  .module-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .module-tile {
+    background: white; border-radius: 16px; padding: 16px 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s; text-align: center;
+    border: 2px solid transparent;
+  }
+  .module-tile:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); border-color: #A5D6A7; }
+  .module-tile.disabled { opacity: 0.5; cursor: not-allowed; }
+  .module-tile .icon { font-size: 32px; }
+  .module-tile .label { font-size: 11px; font-weight: 600; color: #333; line-height: 1.3; }
+  .module-tile .badge { background: #FF8F00; color: white; font-size: 9px; padding: 2px 6px; border-radius: 8px; }
+
+  /* BUTTONS */
+  .btn {
+    background: #2E7D32; color: white; border: none; border-radius: 24px;
+    padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer;
+    width: 100%; transition: background 0.2s;
+  }
+  .btn:hover { background: #1B5E20; }
+  .btn.outline {
+    background: none; border: 2px solid #2E7D32; color: #2E7D32;
+  }
+  .btn.amber { background: #F57F17; }
+  .btn.amber:hover { background: #E65100; }
+  .btn.small { padding: 8px 16px; font-size: 12px; width: auto; }
+  .btn.danger { background: #C62828; }
+
+  /* FORM ELEMENTS */
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%; border: 1px solid #DDD; border-radius: 8px;
+    padding: 10px 12px; font-size: 14px; color: #333;
+  }
+  .form-input:focus { outline: none; border-color: #2E7D32; }
+  textarea.form-input { resize: vertical; min-height: 80px; }
+
+  /* TOGGLE */
+  .toggle-group { display: flex; gap: 8px; }
+  .toggle-btn {
+    flex: 1; padding: 8px; border: 2px solid #DDD; border-radius: 8px;
+    background: white; cursor: pointer; font-size: 12px; font-weight: 600;
+    color: #757575; transition: all 0.15s;
+  }
+  .toggle-btn.selected { border-color: #2E7D32; background: #E8F5E9; color: #1B5E20; }
+
+  /* YES/NO */
+  .yn-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #F0F0F0; gap: 8px; }
+  .yn-label { flex: 1; font-size: 13px; color: #333; }
+  .yn-sub { font-size: 10px; color: #999; }
+  .yn-buttons { display: flex; gap: 4px; }
+  .yn-btn {
+    width: 44px; height: 32px; border-radius: 6px; border: 1.5px solid #DDD;
+    background: white; font-size: 11px; font-weight: 700; cursor: pointer; color: #999;
+  }
+  .yn-btn.yes.selected { background: #E8F5E9; border-color: #2E7D32; color: #1B5E20; }
+  .yn-btn.no.selected { background: #FFEBEE; border-color: #C62828; color: #C62828; }
+
+  /* TALLY */
+  .tally-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #F0F0F0; gap: 8px; }
+  .tally-label { flex: 1; font-size: 12px; color: #333; }
+  .tally-controls { display: flex; align-items: center; gap: 8px; }
+  .tally-btn { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #2E7D32; background: white; color: #2E7D32; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .tally-count { width: 36px; text-align: center; font-size: 16px; font-weight: 700; color: #1B5E20; }
+
+  /* STATUS CHIP */
+  .chip { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .chip.green { background: #E8F5E9; color: #1B5E20; }
+  .chip.amber { background: #FFF8E1; color: #F57F17; }
+  .chip.red { background: #FFEBEE; color: #C62828; }
+  .chip.blue { background: #E3F2FD; color: #1565C0; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: #E0E0E0; margin: 12px 0; }
+  .section-label { font-size: 11px; font-weight: 700; color: #9E9E9E; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+
+  /* LIST ITEM */
+  .list-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #F0F0F0; gap: 12px; cursor: pointer; }
+  .list-item:hover { background: #F9FBE7; margin: 0 -16px; padding: 12px 16px; }
+  .list-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .list-item-content { flex: 1; }
+  .list-item-title { font-size: 14px; font-weight: 600; color: #212121; }
+  .list-item-sub { font-size: 12px; color: #757575; }
+  .list-arrow { color: #BDBDBD; font-size: 16px; }
+
+  /* GPS BOX */
+  .gps-box { background: #E8F5E9; border-radius: 8px; padding: 10px 12px; display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .gps-icon { font-size: 18px; }
+  .gps-coords { font-size: 11px; color: #388E3C; font-family: monospace; }
+
+  /* MAP PLACEHOLDER */
+  .map-placeholder {
+    background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 40%, #81C784 70%, #66BB6A 100%);
+    border-radius: 12px; height: 180px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; position: relative; overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .map-placeholder .map-label { color: #1B5E20; font-size: 12px; font-weight: 600; }
+  .map-grid { position: absolute; inset: 0; opacity: 0.15; background-image: linear-gradient(#1B5E20 1px, transparent 1px), linear-gradient(90deg, #1B5E20 1px, transparent 1px); background-size: 30px 30px; }
+  .map-crosshair { font-size: 28px; z-index: 1; }
+  .transect-line { position: absolute; width: 120px; height: 3px; background: #E53935; border-radius: 2px; transform: rotate(-30deg); }
+  .transect-dot { width: 10px; height: 10px; background: #E53935; border-radius: 50%; border: 2px solid white; position: absolute; }
+  .transect-dot.start { top: 40%; left: 25%; }
+  .transect-dot.end { bottom: 30%; right: 22%; }
+
+  /* ATTENDANCE */
+  .staff-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #F0F0F0; gap: 10px; }
+  .staff-avatar { width: 36px; height: 36px; border-radius: 18px; background: #C8E6C9; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #2E7D32; font-weight: 700; }
+  .staff-name { flex: 1; font-size: 13px; color: #333; }
+
+  /* AGENDA */
+  .agenda-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F0F0F0; }
+  .agenda-num { width: 24px; height: 24px; border-radius: 12px; background: #E8F5E9; color: #2E7D32; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .agenda-num.fixed { background: #1B5E20; color: white; }
+  .agenda-text { font-size: 13px; color: #333; flex: 1; }
+  .agenda-fixed-label { font-size: 10px; color: #9E9E9E; }
+
+  /* PROFILE */
+  .profile-avatar { width: 80px; height: 80px; border-radius: 40px; background: #C8E6C9; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 12px; }
+  .profile-name { text-align: center; font-size: 20px; font-weight: 700; color: #1B5E20; }
+  .profile-role { text-align: center; font-size: 13px; color: #757575; margin-bottom: 16px; }
+  .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #F0F0F0; }
+  .info-key { font-size: 12px; color: #9E9E9E; }
+  .info-val { font-size: 12px; font-weight: 600; color: #333; }
+
+  /* ALERT ITEMS */
+  .alert-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F0F0F0; }
+  .alert-dot { width: 10px; height: 10px; border-radius: 5px; margin-top: 4px; flex-shrink: 0; }
+  .alert-dot.fire { background: #E53935; }
+  .alert-dot.forest { background: #E65100; }
+  .alert-content { flex: 1; }
+  .alert-title { font-size: 13px; font-weight: 600; color: #333; }
+  .alert-sub { font-size: 11px; color: #757575; }
+
+  /* MATRIX TABLE */
+  .matrix-wrap { overflow-x: auto; }
+  table.matrix { border-collapse: collapse; width: 100%; min-width: 500px; font-size: 11px; }
+  table.matrix th { background: #1B5E20; color: white; padding: 8px 6px; text-align: center; position: sticky; top: 0; }
+  table.matrix th.q-col { text-align: left; min-width: 120px; }
+  table.matrix td { padding: 6px; border-bottom: 1px solid #E0E0E0; vertical-align: middle; }
+  table.matrix td.q-label { background: #F5F5F5; font-weight: 600; color: #333; padding: 6px 8px; }
+  table.matrix td.module-header { background: #2E7D32; color: white; font-weight: 700; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 5px 8px; }
+  .cell-yn { display: flex; gap: 3px; justify-content: center; }
+  .cell-yn-btn { width: 28px; height: 22px; border-radius: 4px; border: 1px solid #DDD; background: white; font-size: 9px; font-weight: 700; cursor: pointer; color: #999; }
+  .cell-yn-btn.yes.sel { background: #E8F5E9; border-color: #2E7D32; color: #1B5E20; }
+  .cell-yn-btn.no.sel { background: #FFEBEE; border-color: #C62828; color: #C62828; }
+  .cell-tally { display: flex; align-items: center; gap: 3px; justify-content: center; }
+  .cell-tally-btn { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #2E7D32; background: white; color: #2E7D32; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .cell-tally-val { width: 20px; text-align: center; font-size: 13px; font-weight: 700; color: #1B5E20; }
+  .progress-dots { display: flex; gap: 6px; justify-content: center; padding: 8px; }
+  .progress-dot { padding: 3px 10px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+  .progress-dot.done { background: #E8F5E9; color: #1B5E20; }
+  .progress-dot.current { background: #2E7D32; color: white; }
+  .progress-dot.pending { background: #F5F5F5; color: #BDBDBD; }
+
+  /* FINGERPRINT SCREEN */
+  .fp-screen { background: linear-gradient(180deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%); min-height: 820px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; gap: 24px; }
+  .fp-logo { margin-bottom: 8px; }
+  .fp-title { color: white; font-size: 22px; font-weight: 700; text-align: center; }
+  .fp-subtitle { color: #A5D6A7; font-size: 14px; text-align: center; }
+  .fp-icon-wrap { width: 120px; height: 120px; border-radius: 60px; border: 3px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; background: rgba(255,255,255,0.1); }
+  .fp-icon-wrap:hover { border-color: white; background: rgba(255,255,255,0.2); transform: scale(1.05); }
+  .fp-icon-wrap.scanning { animation: pulse 1s infinite; border-color: #FFD54F; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,213,79,0.4); } 50% { box-shadow: 0 0 0 16px rgba(255,213,79,0); } }
+  .fp-hint { color: #C8E6C9; font-size: 12px; text-align: center; }
+  .eu-badge { background: rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 16px; text-align: center; }
+  .eu-badge p { color: #C8E6C9; font-size: 10px; line-height: 1.5; }
+
+  /* SPLASH */
+  .splash-screen { background: linear-gradient(180deg, #1B5E20 0%, #33691E 100%); min-height: 820px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 40px; }
+  .splash-title { color: white; font-size: 24px; font-weight: 700; text-align: center; line-height: 1.3; }
+  .splash-sub { color: #C8E6C9; font-size: 14px; text-align: center; }
+  .loader { width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .splash-org { color: #A5D6A7; font-size: 12px; text-align: center; margin-top: 8px; }
+
+  /* OBSERVATION TYPE */
+  .obs-type-card { display: flex; align-items: center; gap: 14px; background: white; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.07); cursor: pointer; transition: transform 0.15s; border-left: 4px solid #2E7D32; }
+  .obs-type-card:hover { transform: translateX(3px); }
+  .obs-type-icon { font-size: 28px; width: 48px; text-align: center; }
+  .obs-type-title { font-size: 14px; font-weight: 600; color: #333; }
+  .obs-type-sub { font-size: 11px; color: #9E9E9E; }
+
+  /* MEDIA BUTTONS */
+  .media-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .media-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: #F5F5F5; border: 1.5px dashed #BDBDBD; border-radius: 10px; padding: 14px; cursor: pointer; font-size: 11px; color: #757575; }
+  .media-btn span:first-child { font-size: 24px; }
+  .media-btn:hover { background: #E8F5E9; border-color: #2E7D32; color: #1B5E20; }
+
+  /* WEATHER TOGGLES */
+  .weather-group { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+  .weather-toggle { flex: 1; }
+  .weather-label { font-size: 10px; color: #9E9E9E; text-align: center; margin-bottom: 4px; }
+
+  /* FACILITY CARD */
+  .facility-card { background: white; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.07); cursor: pointer; display: flex; gap: 12px; align-items: center; }
+  .facility-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .facility-health { background: #FFEBEE; }
+  .facility-edu { background: #E3F2FD; }
+  .facility-name { font-size: 13px; font-weight: 600; color: #333; }
+  .facility-due { font-size: 11px; color: #F57F17; font-weight: 600; }
+
+  /* SCREEN SLIDE */
+  .screen { animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div style="text-align:center">
+<p class="desktop-label">MCA APP — INTERACTIVE PROTOTYPE</p>
+
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="phone-screen">
+    <div class="prototype-banner">⚠ PROTOTYPE — NOT REAL DATA</div>
+
+    <!-- ====== SPLASH ====== -->
+    <div class="screen active splash-screen" id="screen-splash">
+      <svg width="90" height="90" viewBox="0 0 90 90">
+        <circle cx="45" cy="45" r="44" fill="rgba(255,255,255,0.15)"/>
+        <ellipse cx="45" cy="38" rx="22" ry="24" fill="#A5D6A7"/>
+        <ellipse cx="36" cy="32" rx="14" ry="18" fill="#C8E6C9"/>
+        <rect x="42" y="56" width="6" height="18" rx="3" fill="#8D6E63"/>
+        <ellipse cx="38" cy="58" rx="12" ry="10" fill="#81C784" opacity="0.7"/>
+      </svg>
+      <p class="splash-title">Managalas<br>Conservation Area</p>
+      <p class="splash-sub">Clan Steward App</p>
+      <div class="loader"></div>
+      <p class="splash-org">Managalas Conservation Fund</p>
+      <button class="btn" style="margin-top:16px; background:rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.5);" onclick="showScreen('screen-login')">Continue →</button>
+    </div>
+
+    <!-- ====== FINGERPRINT LOGIN ====== -->
+    <div class="screen fp-screen" id="screen-login">
+      <div class="fp-logo">
+        <svg width="60" height="60" viewBox="0 0 60 60">
+          <circle cx="30" cy="30" r="29" fill="rgba(255,255,255,0.15)"/>
+          <ellipse cx="30" cy="26" rx="14" ry="16" fill="#A5D6A7"/>
+          <ellipse cx="23" cy="22" rx="9" ry="12" fill="#C8E6C9"/>
+          <rect x="27" y="38" width="5" height="12" rx="2.5" fill="#8D6E63"/>
+        </svg>
+      </div>
+      <p class="fp-title">Welcome back</p>
+      <p class="fp-subtitle">Verify your identity to continue</p>
+      <div class="fp-icon-wrap" id="fp-btn" onclick="simulateFingerprint()">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <path d="M32 8C19 8 8 19 8 32s11 24 24 24 24-11 24-24S45 8 32 8z" stroke="white" stroke-width="2" fill="none"/>
+          <path d="M20 32c0-6.6 5.4-12 12-12s12 5.4 12 12" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <path d="M24 32c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <path d="M28 32c0-2.2 1.8-4 4-4s4 1.8 4 4v4" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <path d="M20 38c0 6.6 5.4 12 12 12" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M44 38c0 3-1 5.8-2.8 8" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <p class="fp-hint" id="fp-hint">Tap fingerprint to verify</p>
+      <div class="eu-badge">
+        <p>V1 funded by the <strong style="color:white">European Union</strong><br>Managalas Conservation Fund © 2026</p>
+      </div>
+    </div>
+
+    <!-- ====== DASHBOARD ====== -->
+    <div class="screen" id="screen-dashboard">
+      <div class="top-bar">
+        <svg width="36" height="36" viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="17" fill="rgba(255,255,255,0.2)"/>
+          <ellipse cx="18" cy="15" rx="9" ry="10" fill="#A5D6A7"/>
+          <rect x="15.5" y="22" width="4" height="8" rx="2" fill="#8D6E63"/>
+        </svg>
+        <div style="flex:1">
+          <h2 style="font-size:16px">Kila Morea</h2>
+          <p style="font-size:11px; color:#A5D6A7">Clan: Afore · Zone 7B</p>
+        </div>
+        <span style="font-size:22px; cursor:pointer" onclick="showScreen('screen-profile')">👤</span>
+      </div>
+      <div class="content">
+        <div class="card" style="background:linear-gradient(135deg,#2E7D32,#1B5E20); color:white; margin-bottom:16px;">
+          <p style="font-size:11px; opacity:0.8;">Next monitoring day</p>
+          <p style="font-size:18px; font-weight:700; margin:4px 0;">8 June 2026</p>
+          <p style="font-size:12px; opacity:0.8;">Afore Health Centre + Niniuri Primary School</p>
+        </div>
+        <p class="section-label">Modules</p>
+        <div class="module-grid">
+          <div class="module-tile" onclick="showScreen('screen-patrol')">
+            <span class="icon">🥾</span>
+            <span class="label">Patrol</span>
+          </div>
+          <div class="module-tile" onclick="showScreen('screen-bio-survey')">
+            <span class="icon">🌿</span>
+            <span class="label">Biodiversity Survey</span>
+          </div>
+          <div class="module-tile" onclick="showScreen('screen-observations')">
+            <span class="icon">👁️</span>
+            <span class="label">Observations</span>
+          </div>
+          <div class="module-tile" onclick="showScreen('screen-sdm')">
+            <span class="icon">🏫</span>
+            <span class="label">Service Delivery</span>
+            <span class="badge">Due 8 Jun</span>
+          </div>
+          <div class="module-tile" onclick="showScreen('screen-alerts')">
+            <span class="icon">🔥</span>
+            <span class="label">Environmental Alerts</span>
+          </div>
+          <div class="module-tile" onclick="showScreen('screen-mafia')">
+            <span class="icon">🌲</span>
+            <span class="label">MaFIA Tool</span>
+          </div>
+          <div class="module-tile" onclick="showScreen('screen-meetings')">
+            <span class="icon">📅</span>
+            <span class="label">Meetings</span>
+          </div>
+          <div class="module-tile" onclick="showScreen('screen-community')">
+            <span class="icon">🏘️</span>
+            <span class="label">Community Data</span>
+          </div>
+          <div class="module-tile" onclick="showScreen('screen-threat')">
+            <span class="icon">⚠️</span>
+            <span class="label">Threat / Incident</span>
+          </div>
+          <div class="module-tile disabled">
+            <span class="icon">🔬</span>
+            <span class="label">Biodiversity Monitoring</span>
+            <span class="badge" style="background:#9E9E9E">Coming Soon</span>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item active" onclick="showScreen('screen-dashboard')"><span>🏠</span><span>Home</span></div>
+        <div class="nav-item" onclick="showScreen('screen-map')"><span>🗺️</span><span>Map</span></div>
+        <div class="nav-item" onclick="showScreen('screen-alerts')"><span>🔔</span><span>Alerts</span></div>
+        <div class="nav-item" onclick="showScreen('screen-profile')"><span>👤</span><span>Profile</span></div>
+      </div>
+    </div>
+
+    <!-- ====== PATROL ====== -->
+    <div class="screen" id="screen-patrol">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-dashboard')">←</button>
+        <h2>Patrol</h2>
+      </div>
+      <div class="content">
+        <div class="gps-box"><span class="gps-icon">📍</span><span class="gps-coords">Lat: -9.1452° Lng: 148.3917°</span><span class="chip green" style="margin-left:auto">Within clan ✓</span></div>
+        <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="text" value="14 June 2026" readonly></div>
+        <div class="form-group"><label class="form-label">Steward Name(s)</label><input class="form-input" type="text" value="Kila Morea"></div>
+        <div class="form-group"><label class="form-label">Start Time</label><input class="form-input" type="text" value="07:30"></div>
+        <div class="form-group"><label class="form-label">End Time</label><input class="form-input" type="text" value="14:00"></div>
+        <div class="form-group"><label class="form-label">Distance Covered (km)</label><input class="form-input" type="number" value="8.2"></div>
+        <div class="form-group"><label class="form-label">GPS Track</label>
+          <div class="map-placeholder"><div class="map-grid"></div><span class="map-crosshair">+</span><div class="map-label" style="margin-top:4px">Recording track...</div></div>
+        </div>
+        <div class="form-group"><label class="form-label">Observations / Notes</label><textarea class="form-input">Observed fresh pig tracks near northern boundary. Stream crossing at ridge point clear.</textarea></div>
+        <button class="btn" onclick="alert('Patrol saved locally. Will sync when connected.')">Submit Patrol</button>
+      </div>
+    </div>
+
+    <!-- ====== OBSERVATIONS LIST ====== -->
+    <div class="screen" id="screen-observations">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-dashboard')">←</button>
+        <h2>Observations</h2>
+      </div>
+      <div class="content">
+        <p class="section-label" style="margin-bottom:12px">Select observation type</p>
+        <div class="obs-type-card" onclick="showObsEntry('Cultural Event','🎭','Traditional ceremony, dance, cultural practice')"><span class="obs-type-icon">🎭</span><div><div class="obs-type-title">Cultural Event</div><div class="obs-type-sub">Traditional ceremony, dance, cultural practice</div></div></div>
+        <div class="obs-type-card" onclick="showObsEntry('Wildlife Sighting','🦜','Animal seen or heard in the area')"><span class="obs-type-icon">🦜</span><div><div class="obs-type-title">Wildlife Sighting</div><div class="obs-type-sub">Animal seen or heard in the area</div></div></div>
+        <div class="obs-type-card" onclick="showObsEntry('Hunting Event','🏹','Hunting activity by community members')"><span class="obs-type-icon">🏹</span><div><div class="obs-type-title">Hunting Event</div><div class="obs-type-sub">Hunting activity by community members</div></div></div>
+        <div class="obs-type-card" onclick="showObsEntry('Non-Compliance','🚫','Activity that does not comply with conservation rules')"><span class="obs-type-icon">🚫</span><div><div class="obs-type-title">Non-Compliance</div><div class="obs-type-sub">Unauthorised activity within conservation area</div></div></div>
+        <div class="obs-type-card" onclick="showObsEntry('Social Unrest','⚡','Community dispute or social issue')"><span class="obs-type-icon">⚡</span><div><div class="obs-type-title">Social Unrest</div><div class="obs-type-sub">Community dispute or social issue</div></div></div>
+        <div class="obs-type-card" onclick="showObsEntry('Natural Disaster','🌊','Flood, landslide, earthquake or garden damage')"><span class="obs-type-icon">🌊</span><div><div class="obs-type-title">Natural Disaster</div><div class="obs-type-sub">Flood, landslide, earthquake, garden damage</div></div></div>
+        <div class="obs-type-card" onclick="showObsEntry('Forest Fire','🔥','Active fire or evidence of fire in forest')"><span class="obs-type-icon">🔥</span><div><div class="obs-type-title">Forest Fire</div><div class="obs-type-sub">Active fire or evidence of fire in forest</div></div></div>
+      </div>
+    </div>
+
+    <!-- ====== OBSERVATION ENTRY ====== -->
+    <div class="screen" id="screen-obs-entry">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-observations')">←</button>
+        <h2 id="obs-entry-title">Wildlife Sighting</h2>
+      </div>
+      <div class="content">
+        <div style="text-align:center; font-size:48px; margin-bottom:8px" id="obs-entry-icon">🦜</div>
+        <div class="gps-box"><span class="gps-icon">📍</span><span class="gps-coords">Lat: -9.1461° Lng: 148.3923°<br>Captured automatically</span><span class="chip green" style="margin-left:auto">✓</span></div>
+        <div class="form-group">
+          <label class="form-label">Short Description <span style="color:#C62828">*</span></label>
+          <input class="form-input" type="text" placeholder="Describe what you observed...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Add Media (optional)</label>
+          <div class="media-btns">
+            <div class="media-btn"><span>📷</span><span>Photo</span></div>
+            <div class="media-btn"><span>🎙️</span><span>Voice Note</span></div>
+            <div class="media-btn"><span>🎥</span><span>Video</span></div>
+            <div class="media-btn"><span>📝</span><span>Long Text</span></div>
+          </div>
+        </div>
+        <button class="btn" onclick="alert('Observation saved locally. Will sync when connected.')">Submit Observation</button>
+      </div>
+    </div>
+
+    <!-- ====== BIO SURVEY ====== -->
+    <div class="screen" id="screen-bio-survey">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-dashboard')">←</button>
+        <h2>Biodiversity Survey</h2>
+      </div>
+      <div class="content">
+        <div class="card">
+          <p class="card-title">🎲 Generating Random Transect...</p>
+          <p class="card-sub">Both endpoints confirmed inside clan boundary</p>
+        </div>
+        <div class="map-placeholder">
+          <div class="map-grid"></div>
+          <div class="transect-line"></div>
+          <div class="transect-dot start"></div>
+          <div class="transect-dot end"></div>
+          <div class="map-label" style="position:absolute; bottom:8px; font-size:10px">Clan: Afore · Zone 7B</div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="info-row"><span class="info-key">Start point</span><span class="info-val" style="font-family:monospace; font-size:11px">-9.1432, 148.3887</span></div>
+          <div class="info-row"><span class="info-key">End point</span><span class="info-val" style="font-family:monospace; font-size:11px">-9.1441, 148.3906</span></div>
+          <div class="info-row"><span class="info-key">Bearing</span><span class="info-val">127° SE</span></div>
+          <div class="info-row" style="border:none"><span class="info-key">Length</span><span class="info-val">100m</span></div>
+        </div>
+        <div class="card">
+          <p class="card-sub" style="margin-bottom:8px">Distance to start point from your location</p>
+          <p style="font-size:28px; font-weight:700; color:#1B5E20; text-align:center">340m <span style="font-size:14px; color:#757575">→ 127°</span></p>
+        </div>
+        <button class="btn amber" style="margin-bottom:8px" onclick="alert('Navigate to start point using bearing shown.')">🧭 Navigate to Start</button>
+        <button class="btn">Begin Survey at Start Point</button>
+      </div>
+    </div>
+
+    <!-- ====== MaFIA TOOL - SETUP ====== -->
+    <div class="screen" id="screen-mafia">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-dashboard')">←</button>
+        <h2>MaFIA Tool</h2>
+      </div>
+      <div class="content">
+        <div class="card" style="background:#E8F5E9">
+          <p style="font-size:11px; color:#2E7D32; font-weight:600;">Managalas Forest Integrity Assessment</p>
+        </div>
+        <div class="map-placeholder">
+          <div class="map-grid"></div>
+          <div class="transect-line"></div>
+          <div class="transect-dot start"></div>
+          <div class="transect-dot end"></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="info-row"><span class="info-key">Start GPS</span><span class="info-val" style="font-family:monospace; font-size:11px">-9.1419, 148.3894</span></div>
+          <div class="info-row"><span class="info-key">End GPS</span><span class="info-val" style="font-family:monospace; font-size:11px">-9.1428, 148.3913</span></div>
+          <div class="info-row"><span class="info-key">Bearing</span><span class="info-val">112° ESE</span></div>
+          <div class="info-row" style="border:none"><span class="info-key">Length</span><span class="info-val">100m (5 × 20m)</span></div>
+        </div>
+        <p class="form-label">Weather Conditions</p>
+        <div class="weather-group">
+          <div class="weather-toggle">
+            <div class="weather-label">Cloud</div>
+            <div class="toggle-group" style="flex-direction:column; gap:4px">
+              <button class="toggle-btn selected" onclick="selectToggle(this,'cloud')">☁️ Cloudy</button>
+              <button class="toggle-btn" onclick="selectToggle(this,'cloud')">☀️ Sunny</button>
+            </div>
+          </div>
+          <div class="weather-toggle">
+            <div class="weather-label">Rain</div>
+            <div class="toggle-group" style="flex-direction:column; gap:4px">
+              <button class="toggle-btn" onclick="selectToggle(this,'rain')">🌧️ Rainy</button>
+              <button class="toggle-btn selected" onclick="selectToggle(this,'rain')">🌤️ Dry</button>
+            </div>
+          </div>
+          <div class="weather-toggle">
+            <div class="weather-label">Wind</div>
+            <div class="toggle-group" style="flex-direction:column; gap:4px">
+              <button class="toggle-btn" onclick="selectToggle(this,'wind')">💨 Windy</button>
+              <button class="toggle-btn selected" onclick="selectToggle(this,'wind')">🍃 Calm</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="background:#FFF8E1; margin-bottom:12px; display:flex; gap:10px; align-items:center">
+          <span style="font-size:24px">👆</span>
+          <div>
+            <p style="font-size:12px; font-weight:600; color:#E65100">Fingerprint Required</p>
+            <p style="font-size:11px; color:#757575">In-field verification before survey begins</p>
+          </div>
+          <button class="btn small amber" style="flex-shrink:0" onclick="alert('Fingerprint verified ✓')">Verify</button>
+        </div>
+        <button class="btn" onclick="showScreen('screen-mafia-matrix')">Begin Survey →</button>
+      </div>
+    </div>
+
+    <!-- ====== MaFIA MATRIX ====== -->
+    <div class="screen" id="screen-mafia-matrix">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-mafia')">←</button>
+        <h2>MaFIA Survey</h2>
+      </div>
+      <div style="background:#E8F5E9; padding:8px 16px;">
+        <p style="font-size:10px; color:#2E7D32; text-align:center; margin-bottom:4px">🔄 Rotate phone to landscape for best view</p>
+        <div class="progress-dots">
+          <div class="progress-dot done">ST1 ✓</div>
+          <div class="progress-dot current">ST2 ●</div>
+          <div class="progress-dot pending">ST3</div>
+          <div class="progress-dot pending">ST4</div>
+          <div class="progress-dot pending">ST5</div>
+        </div>
+      </div>
+      <div class="content no-pad" style="overflow-x:auto; padding:8px">
+        <div class="matrix-wrap">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th class="q-col">Question</th>
+                <th>ST1</th><th>ST2</th><th>ST3</th><th>ST4</th><th>ST5</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" class="module-header">Module A — Topography</td></tr>
+              <tr>
+                <td class="q-label">A1. Dominant landform</td>
+                <td><select style="font-size:10px; width:60px; border:1px solid #DDD; border-radius:4px; padding:2px"><option>Flat</option><option>Slight</option><option>Steep</option></select></td>
+                <td><select style="font-size:10px; width:60px; border:1px solid #DDD; border-radius:4px; padding:2px"><option>Flat</option><option selected>Slight</option><option>Steep</option></select></td>
+                <td><select style="font-size:10px; width:60px; border:1px solid #DDD; border-radius:4px; padding:2px"><option>Flat</option><option>Slight</option><option>Steep</option></select></td>
+                <td><select style="font-size:10px; width:60px; border:1px solid #DDD; border-radius:4px; padding:2px"><option>Flat</option><option>Slight</option><option>Steep</option></select></td>
+                <td><select style="font-size:10px; width:60px; border:1px solid #DDD; border-radius:4px; padding:2px"><option>Flat</option><option>Slight</option><option>Steep</option></select></td>
+              </tr>
+              <tr><td class="q-label">A2. Rocky outcrops</td><td><div class="cell-yn"><button class="cell-yn-btn yes sel" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no sel" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td></tr>
+              <tr><td class="q-label">A3. Caves / shelters</td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no sel" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no sel" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td></tr>
+              <tr><td class="q-label">A4. Flowing waterway</td><td><div class="cell-yn"><button class="cell-yn-btn yes sel" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no sel" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td></tr>
+              <tr><td colspan="6" class="module-header">Module D — Vegetation (Tally)</td></tr>
+              <tr><td class="q-label">D1. Thin saplings</td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">7</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td></tr>
+              <tr><td class="q-label">D2. Small stems</td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">3</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td></tr>
+              <tr><td class="q-label">D3. Medium trees</td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">12</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td></tr>
+              <tr><td class="q-label">D4. Very large trees</td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">2</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td><td><div class="cell-tally"><button class="cell-tally-btn" onclick="tallyChange(this,-1)">−</button><span class="cell-tally-val">0</span><button class="cell-tally-btn" onclick="tallyChange(this,1)">+</button></div></td></tr>
+              <tr><td colspan="6" class="module-header">Module G — Use</td></tr>
+              <tr><td class="q-label">G5. Trees cut/stumps</td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no sel" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td><td><div class="cell-yn"><button class="cell-yn-btn yes" onclick="toggleCell(this,'yes')">Y</button><button class="cell-yn-btn no" onclick="toggleCell(this,'no')">N</button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:12px">
+          <p style="font-size:11px; color:#9E9E9E; text-align:center; margin-bottom:12px">Showing sample rows. Full survey: Modules A–G across all 5 sub-transects.</p>
+          <button class="btn" onclick="alert('All 5 sub-transects must be complete before submitting.')">Submit MaFIA Survey</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== SERVICE DELIVERY MONITORING ====== -->
+    <div class="screen" id="screen-sdm">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-dashboard')">←</button>
+        <h2>Service Delivery</h2>
+      </div>
+      <div class="content">
+        <div class="card" style="background:#E8F5E9; border-left: 4px solid #2E7D32">
+          <p class="card-title">📅 Your monitoring days — June 2026</p>
+          <div style="display:flex; gap:12px; margin-top:8px">
+            <div style="flex:1; background:white; border-radius:8px; padding:10px; text-align:center">
+              <p style="font-size:22px; font-weight:700; color:#1B5E20">8</p>
+              <p style="font-size:11px; color:#757575">June · Day 1</p>
+              <span class="chip amber">Due soon</span>
+            </div>
+            <div style="flex:1; background:white; border-radius:8px; padding:10px; text-align:center">
+              <p style="font-size:22px; font-weight:700; color:#1B5E20">19</p>
+              <p style="font-size:11px; color:#757575">June · Day 2</p>
+              <span class="chip blue">Upcoming</span>
+            </div>
+          </div>
+        </div>
+        <p class="section-label">Assigned Facilities</p>
+        <div class="facility-card" onclick="showScreen('screen-facility-visit')">
+          <div class="facility-icon facility-health">🏥</div>
+          <div style="flex:1">
+            <div class="facility-name">Afore Health Centre</div>
+            <div class="facility-due">⏰ Due 8 June · 9am–11am or 2pm–3pm</div>
+            <div style="font-size:11px; color:#9E9E9E">Health facility · 4 staff on roster</div>
+          </div>
+          <span class="list-arrow">›</span>
+        </div>
+        <div class="facility-card" onclick="showScreen('screen-facility-visit')">
+          <div class="facility-icon facility-edu">🏫</div>
+          <div style="flex:1">
+            <div class="facility-name">Niniuri Primary School</div>
+            <div class="facility-due">⏰ Due 8 June · 9am–11am or 2pm–3pm</div>
+            <div style="font-size:11px; color:#9E9E9E">Education · 6 teachers · 127 students enrolled</div>
+          </div>
+          <span class="list-arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== FACILITY VISIT ====== -->
+    <div class="screen" id="screen-facility-visit">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-sdm')">←</button>
+        <h2>Afore Health Centre</h2>
+      </div>
+      <div class="content">
+        <div class="card" style="background:#FFF8E1; border-left: 4px solid #F57F17; margin-bottom:12px">
+          <p style="font-size:12px; font-weight:600; color:#E65100">⏰ Valid visit window</p>
+          <p style="font-size:12px; color:#555">9:00am – 11:00am  |  2:00pm – 3:00pm</p>
+          <p style="font-size:13px; font-weight:700; color:#1B5E20; margin-top:6px">Current time: 10:23am ✓</p>
+        </div>
+        <div class="gps-box"><span class="gps-icon">📍</span><div><span class="gps-coords">Lat: -9.1501° Lng: 148.3844°</span><br><span style="font-size:10px; color:#388E3C">Within 50m of facility ✓</span></div></div>
+        <p class="section-label">Staff Attendance</p>
+        <div class="staff-row">
+          <div class="staff-avatar">M</div>
+          <span class="staff-name">Dr. Maria Kovara</span>
+          <div class="toggle-group" style="gap:6px">
+            <button class="toggle-btn selected" style="padding:6px 10px; font-size:11px" onclick="selectToggle(this,'staff1')">Present</button>
+            <button class="toggle-btn" style="padding:6px 10px; font-size:11px" onclick="selectToggle(this,'staff1')">Absent</button>
+          </div>
+        </div>
+        <div class="staff-row">
+          <div class="staff-avatar">J</div>
+          <span class="staff-name">Nurse John Sapi</span>
+          <div class="toggle-group" style="gap:6px">
+            <button class="toggle-btn" style="padding:6px 10px; font-size:11px" onclick="selectToggle(this,'staff2')">Present</button>
+            <button class="toggle-btn selected" style="padding:6px 10px; font-size:11px" onclick="selectToggle(this,'staff2')">Absent</button>
+          </div>
+        </div>
+        <div class="staff-row">
+          <div class="staff-avatar">A</div>
+          <span class="staff-name">Aid Post Orderly Anna Ila</span>
+          <div class="toggle-group" style="gap:6px">
+            <button class="toggle-btn selected" style="padding:6px 10px; font-size:11px" onclick="selectToggle(this,'staff3')">Present</button>
+            <button class="toggle-btn" style="padding:6px 10px; font-size:11px" onclick="selectToggle(this,'staff3')">Absent</button>
+          </div>
+        </div>
+        <button class="btn outline" style="margin:12px 0" onclick="alert('Add new staff member form')">+ Add New Staff Member</button>
+        <button class="btn" onclick="alert('Facility visit saved locally. Will sync when connected.')">Submit Visit</button>
+      </div>
+    </div>
+
+    <!-- ====== ENVIRONMENTAL ALERTS ====== -->
+    <div class="screen" id="screen-alerts">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-dashboard')">←</button>
+        <h2>Environmental Alerts</h2>
+      </div>
+      <div class="content">
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+          <div><p class="card-title">Viewing: Zone 7B</p><p class="card-sub">Last updated: 2 hours ago</p></div>
+          <button class="btn small" onclick="alert('Refreshing data...')">🔄 Refresh</button>
+        </div>
+        <div class="map-placeholder" style="height:200px">
+          <div class="map-grid"></div>
+          <div style="position:absolute; top:30%; left:40%; font-size:24px">🔥</div>
+          <div style="position:absolute; top:55%; left:60%; font-size:18px">🔥</div>
+          <div style="position:absolute; top:45%; left:25%; font-size:16px; color:#E65100">⬛</div>
+          <div class="map-label" style="position:absolute; bottom:8px">Zone 7B · Managalas CA</div>
+        </div>
+        <p class="section-label">🔥 VIIRS Fire Alerts</p>
+        <div class="alert-item">
+          <div class="alert-dot fire"></div>
+          <div class="alert-content">
+            <div class="alert-title">Active fire detected</div>
+            <div class="alert-sub">-9.131°, 148.401° · 11 June 2026 10:42am · Confidence: High</div>
+          </div>
+          <span class="chip red">High</span>
+        </div>
+        <div class="alert-item">
+          <div class="alert-dot fire"></div>
+          <div class="alert-content">
+            <div class="alert-title">Active fire detected</div>
+            <div class="alert-sub">-9.148°, 148.421° · 10 June 2026 2:18pm · Confidence: Medium</div>
+          </div>
+          <span class="chip amber">Med</span>
+        </div>
+        <div class="divider"></div>
+        <p class="section-label">🌲 GFW Forest Cover Change</p>
+        <div class="alert-item">
+          <div class="alert-dot forest"></div>
+          <div class="alert-content">
+            <div class="alert-title">GLAD deforestation alert</div>
+            <div class="alert-sub">-9.162°, 148.388° · Week of 2 June 2026 · ~0.8 ha</div>
+          </div>
+          <span class="chip red">New</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== MEETINGS ====== -->
+    <div class="screen" id="screen-meetings">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-dashboard')">←</button>
+        <h2>Meetings</h2>
+      </div>
+      <div class="content">
+        <div style="display:flex; gap:0; margin-bottom:16px; background:#E8F5E9; border-radius:8px; padding:3px">
+          <button class="toggle-btn selected" style="border-radius:6px; border:none" onclick="selectToggle(this,'meetingtab')">Upcoming</button>
+          <button class="toggle-btn" style="border-radius:6px; border:none" onclick="selectToggle(this,'meetingtab')">Past</button>
+        </div>
+        <div class="card" style="border-left:4px solid #2E7D32; cursor:pointer" onclick="showScreen('screen-meeting-detail')">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start">
+            <div>
+              <p class="card-title">Zone 7B Sub-Committee</p>
+              <p class="card-sub">📅 20 June 2026 · 10:00am</p>
+              <p class="card-sub">📍 Afore Village Hall</p>
+            </div>
+            <span class="chip amber">Draft</span>
+          </div>
+          <div class="divider"></div>
+          <p style="font-size:11px; color:#757575">Agenda: Pending Chairman approval · 5 items · 8 invited</p>
+          <button class="btn small" style="margin-top:8px; background:#E53935" onclick="event.stopPropagation(); alert('Joining Jitsi meeting...')">📹 Join Meeting</button>
+        </div>
+        <div class="card" style="border-left:4px solid #1565C0; cursor:pointer">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start">
+            <div>
+              <p class="card-title">MCF Board Meeting</p>
+              <p class="card-sub">📅 28 June 2026 · 9:00am</p>
+              <p class="card-sub">📍 Via Jitsi (online)</p>
+            </div>
+            <span class="chip blue">Confirmed</span>
+          </div>
+          <div class="divider"></div>
+          <p style="font-size:11px; color:#757575">Agenda approved · 7 items · 12 invited</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== MEETING DETAIL ====== -->
+    <div class="screen" id="screen-meeting-detail">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-meetings')">←</button>
+        <h2>Zone 7B Sub-Committee</h2>
+      </div>
+      <div class="content">
+        <div class="card" style="margin-bottom:12px">
+          <div class="info-row"><span class="info-key">Date</span><span class="info-val">20 June 2026</span></div>
+          <div class="info-row"><span class="info-key">Time</span><span class="info-val">10:00am</span></div>
+          <div class="info-row"><span class="info-key">Location</span><span class="info-val">Afore Village Hall</span></div>
+          <div class="info-row" style="border:none"><span class="info-key">Status</span><span class="chip amber">Pending Chairman Approval</span></div>
+        </div>
+        <p class="section-label">Agenda</p>
+        <div class="agenda-item"><div class="agenda-num fixed">1</div><div><div class="agenda-text">Opening Prayer</div><div class="agenda-fixed-label">Fixed item</div></div></div>
+        <div class="agenda-item"><div class="agenda-num fixed">2</div><div><div class="agenda-text">Apologies</div><div class="agenda-fixed-label">Fixed item</div></div></div>
+        <div class="agenda-item"><div class="agenda-num fixed">3</div><div><div class="agenda-text">Review of Minutes — 15 April 2026</div><div class="agenda-fixed-label">Fixed item</div></div></div>
+        <div class="agenda-item"><div class="agenda-num">4</div><div class="agenda-text">Water Resource Management Plan Q3</div></div>
+        <div class="agenda-item"><div class="agenda-num">5</div><div class="agenda-text">Patrol Schedule Review — July to September</div></div>
+        <div class="agenda-item"><div class="agenda-num">6</div><div class="agenda-text">MaFIA Survey Results Presentation</div></div>
+        <div class="agenda-item"><div class="agenda-num fixed">7</div><div><div class="agenda-text">Any Other Business</div><div class="agenda-fixed-label">Fixed item</div></div></div>
+        <div class="agenda-item"><div class="agenda-num fixed">8</div><div><div class="agenda-text">Date and Time of Next Meeting</div><div class="agenda-fixed-label">Fixed item</div></div></div>
+        <div class="agenda-item" style="border:none"><div class="agenda-num fixed">9</div><div><div class="agenda-text">Closing Prayer</div><div class="agenda-fixed-label">Fixed item</div></div></div>
+        <button class="btn outline" style="margin-bottom:8px" onclick="alert('Suggest an agenda item to the Secretary')">+ Suggest Agenda Item</button>
+        <p class="section-label" style="margin-top:4px">Attendance</p>
+        <div class="staff-row"><div class="staff-avatar">K</div><span class="staff-name">Kila Morea <span style="font-size:10px; color:#9E9E9E">(You)</span></span><span class="chip green">Confirmed</span></div>
+        <div class="staff-row"><div class="staff-avatar">P</div><span class="staff-name">Peter Ovoru</span><span class="chip green">Confirmed</span></div>
+        <div class="staff-row"><div class="staff-avatar">S</div><span class="staff-name">Susan Aiari</span><span class="chip amber">Pending</span></div>
+        <div style="height:12px"></div>
+        <button class="btn danger" onclick="alert('Launching Jitsi meeting room...')">📹 Join Video Meeting</button>
+      </div>
+    </div>
+
+    <!-- ====== THREAT/INCIDENT ====== -->
+    <div class="screen" id="screen-threat">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-dashboard')">←</button>
+        <h2>Threat / Incident</h2>
+      </div>
+      <div class="content">
+        <div class="gps-box"><span class="gps-icon">📍</span><span class="gps-coords">Lat: -9.1474° Lng: 148.3931°</span></div>
+        <div class="form-group">
+          <label class="form-label">Threat Type <span style="color:#C62828">*</span></label>
+          <select class="form-input">
+            <option>Select threat type...</option>
+            <option>Illegal logging</option>
+            <option selected>Encroachment</option>
+            <option>Poaching</option>
+            <option>Fire</option>
+            <option>Mining</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Severity</label>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="selectToggle(this,'severity')">Low</button>
+            <button class="toggle-btn selected" onclick="selectToggle(this,'severity')">Medium</button>
+            <button class="toggle-btn" onclick="selectToggle(this,'severity')">High</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description <span style="color:#C62828">*</span></label>
+          <textarea class="form-input">Garden cleared beyond agreed boundary near northern ridge. Approximately 0.5 hectares affected.</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Evidence</label>
+          <div class="media-btns">
+            <div class="media-btn" style="background:#FFF8E1; border-color:#F57F17"><span>📷</span><span style="color:#E65100">1 photo added</span></div>
+            <div class="media-btn"><span>🎥</span><span>Video</span></div>
+          </div>
+        </div>
+        <button class="btn danger" onclick="alert('Threat report saved locally. Will sync when connected.')">Submit Report</button>
+      </div>
+    </div>
+
+    <!-- ====== COMMUNITY DATA ====== -->
+    <div class="screen" id="screen-community">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-dashboard')">←</button>
+        <h2>Community Data</h2>
+      </div>
+      <div class="content">
+        <div class="card" style="background:#E8F5E9; margin-bottom:12px">
+          <p style="font-size:11px; color:#2E7D32; font-weight:600;">Clan: Afore · Zone 7B</p>
+          <p style="font-size:11px; color:#757575">Baseline loaded from previous visit</p>
+        </div>
+        <div class="form-group"><label class="form-label">Village Name</label><input class="form-input" value="Afore Village" type="text"></div>
+        <div class="form-group"><label class="form-label">Total Persons</label><input class="form-input" value="193" type="number"></div>
+        <div class="form-group"><label class="form-label">Males</label><input class="form-input" value="99" type="number"></div>
+        <div class="form-group"><label class="form-label">Females</label><input class="form-input" value="94" type="number"></div>
+        <div class="form-group"><label class="form-label">Households</label><input class="form-input" value="57" type="number"></div>
+        <div class="form-group"><label class="form-label">Primary Livelihood</label><select class="form-input"><option>Subsistence farming</option><option>Cash cropping</option><option>Fishing</option><option>Mixed</option></select></div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input">New household established near eastern boundary. Family of 6.</textarea></div>
+        <button class="btn" onclick="alert('Community data saved locally. Will sync when connected.')">Submit</button>
+      </div>
+    </div>
+
+    <!-- ====== MAP ====== -->
+    <div class="screen" id="screen-map">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-dashboard')">←</button>
+        <h2>Map</h2>
+      </div>
+      <div class="content no-pad">
+        <div style="background:linear-gradient(135deg,#C8E6C9,#A5D6A7,#81C784,#4CAF50); height:600px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
+          <div style="position:absolute; inset:0; opacity:0.15; background-image:linear-gradient(#1B5E20 1px,transparent 1px),linear-gradient(90deg,#1B5E20 1px,transparent 1px); background-size:40px 40px;"></div>
+          <div style="background:rgba(27,94,32,0.85); padding:12px 20px; border-radius:12px; text-align:center; z-index:1">
+            <p style="color:white; font-size:14px; font-weight:700;">MCA Boundary Map</p>
+            <p style="color:#C8E6C9; font-size:12px;">Zone 7B highlighted</p>
+            <p style="color:#A5D6A7; font-size:11px; margin-top:4px;">Offline tiles loaded</p>
+          </div>
+          <div style="position:absolute; bottom:20px; right:16px; display:flex; flex-direction:column; gap:8px">
+            <button class="btn small" style="width:40px; height:40px; border-radius:20px; padding:0; font-size:20px">+</button>
+            <button class="btn small" style="width:40px; height:40px; border-radius:20px; padding:0; font-size:20px">−</button>
+          </div>
+          <div style="position:absolute; bottom:20px; left:16px">
+            <button class="btn small">📍 My Location</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== PROFILE ====== -->
+    <div class="screen" id="screen-profile">
+      <div class="top-bar accent">
+        <button class="back-btn" onclick="showScreen('screen-dashboard')">←</button>
+        <h2>Profile</h2>
+      </div>
+      <div class="content">
+        <div class="profile-avatar">🌿</div>
+        <p class="profile-name">Kila Morea</p>
+        <p class="profile-role">Clan Steward · Afore · Zone 7B</p>
+        <div class="card">
+          <div class="info-row"><span class="info-key">Clan</span><span class="info-val">Afore (Zone 7B)</span></div>
+          <div class="info-row"><span class="info-key">Ward</span><span class="info-val">Niniuri</span></div>
+          <div class="info-row"><span class="info-key">LLG</span><span class="info-val">Afore Rural LLG</span></div>
+          <div class="info-row"><span class="info-key">Enrolled</span><span class="info-val">3 March 2026</span></div>
+          <div class="info-row" style="border:none"><span class="info-key">Device</span><span class="info-val">Assigned device ✓</span></div>
+        </div>
+        <div class="card">
+          <p class="section-label">Performance</p>
+          <div class="info-row"><span class="info-key">Surveys completed</span><span class="info-val" style="color:#1B5E20; font-weight:700">12</span></div>
+          <div class="info-row"><span class="info-key">Monitoring days completed</span><span class="info-val" style="color:#1B5E20; font-weight:700">4/4</span></div>
+          <div class="info-row" style="border:none"><span class="info-key">Reliability score</span><span class="info-val" style="color:#1B5E20; font-weight:700">100%</span></div>
+        </div>
+        <div class="card" style="background:#E8F5E9">
+          <p style="font-size:11px; font-weight:600; color:#1B5E20; margin-bottom:6px">Acknowledgements</p>
+          <p style="font-size:11px; color:#333; line-height:1.6;">This application was developed with funding from the <strong>European Union</strong> under the Managalas Conservation Programme V1.</p>
+          <div style="margin-top:10px; padding:8px; background:rgba(255,255,255,0.6); border-radius:6px; text-align:center">
+            <svg width="48" height="32" viewBox="0 0 48 32"><rect width="48" height="32" fill="#003399" rx="3"/><g fill="#FFCC00" transform="translate(24,16)">
+              <circle cx="0" cy="-9" r="1.5"/><circle cx="4.5" cy="-7.7" r="1.5"/><circle cx="7.7" cy="-4.5" r="1.5"/><circle cx="9" cy="0" r="1.5"/><circle cx="7.7" cy="4.5" r="1.5"/><circle cx="4.5" cy="7.7" r="1.5"/><circle cx="0" cy="9" r="1.5"/><circle cx="-4.5" cy="7.7" r="1.5"/><circle cx="-7.7" cy="4.5" r="1.5"/><circle cx="-9" cy="0" r="1.5"/><circle cx="-7.7" cy="-4.5" r="1.5"/><circle cx="-4.5" cy="-7.7" r="1.5"/>
+            </g></svg>
+            <p style="font-size:9px; color:#003399; font-weight:700; margin-top:4px">European Union</p>
+          </div>
+        </div>
+        <p style="text-align:center; font-size:10px; color:#9E9E9E; margin-top:8px">MCA App v1.0.0 · Managalas Conservation Fund</p>
+      </div>
+    </div>
+
+  </div><!-- /phone-screen -->
+</div><!-- /phone-frame -->
+</div>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector('.phone-screen').scrollTop = 0;
+}
+
+function showObsEntry(type, icon, sub) {
+  document.getElementById('obs-entry-title').textContent = type;
+  document.getElementById('obs-entry-icon').textContent = icon;
+  showScreen('screen-obs-entry');
+}
+
+function simulateFingerprint() {
+  const btn = document.getElementById('fp-btn');
+  const hint = document.getElementById('fp-hint');
+  btn.classList.add('scanning');
+  hint.textContent = 'Scanning...';
+  setTimeout(() => {
+    btn.classList.remove('scanning');
+    hint.textContent = '✓ Verified — Kila Morea';
+    hint.style.color = '#FFD54F';
+    setTimeout(() => showScreen('screen-dashboard'), 800);
+  }, 1800);
+}
+
+function selectToggle(btn, group) {
+  btn.closest('.toggle-group, .weather-toggle').querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function toggleCell(btn, type) {
+  const parent = btn.closest('.cell-yn');
+  parent.querySelectorAll('.cell-yn-btn').forEach(b => { b.classList.remove('yes', 'no', 'sel'); });
+  btn.classList.add(type, 'sel');
+}
+
+function tallyChange(btn, delta) {
+  const wrap = btn.closest('.cell-tally');
+  const val = wrap.querySelector('.cell-tally-val');
+  val.textContent = Math.max(0, parseInt(val.textContent) + delta);
+}
+
+// Auto-advance splash
+setTimeout(() => {
+  // stay on splash — user clicks continue
+}, 2000);
+</script>
+</body>
+</html>

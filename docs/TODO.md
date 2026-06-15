@@ -42,7 +42,7 @@ Items in this list require action from outside this session (assets, decisions, 
 ## Content Needed
 
 - [ ] **Dummy data for prototype** — User to provide realistic names, places, facility details, and activity data. See `docs/dummy_data.md` for the full specification of what is needed. Once received, prototype will be rebuilt with data wired in.
-- [ ] **PNG public holiday list** — Provide or confirm source for Papua New Guinea public holidays (used in Service Delivery Monitoring scheduling).
+- [x] **PNG public holiday list** — 2026 confirmed via National Gazette; 2027 estimated (King's Birthday date needs gazette confirmation when released). See `docs/dummy_data.md`. ✓ Provided 2026-06-15
 - [ ] **School holiday periods** — Provide annual school holiday calendar for PNG (used in SDM scheduling).
 - [ ] **Facility list** — Provide the list of health facilities and schools within MCA clan territories (name, type, GPS coordinates) for upload into the admin panel.
 - [ ] **Species list** — Provide the species list to be used in the Biodiversity Survey module (when protocol is defined).

@@ -197,20 +197,41 @@ Duration: 2h 45min | Distance: 3.1 km
 
 ---
 
-## 11. PNG Public Holidays (sample — for SDM scheduling)
+## 11. PNG Public Holidays
 
-| Date | Holiday |
-|---|---|
-| 1 Jan | New Year's Day |
-| 18 Apr | Good Friday |
-| 21 Apr | Easter Monday |
-| 26 May | Queen's Birthday |
-| 23 Jul | Remembrance Day |
-| 16 Sep | Repentance Day |
-| 17 Sep | Independence Day |
-| 3 Nov | Milne Bay Day |
-| 25 Dec | Christmas Day |
-| 26 Dec | Boxing Day |
+### 2026 (per National Gazette)
+
+| Date | Day | Holiday |
+|---|---|---|
+| 1 Jan 2026 | Thursday | New Year's Day |
+| 26 Feb 2026 | Thursday | National Remembrance Day (Sir Michael Somare) |
+| 3 Apr 2026 | Friday | Good Friday |
+| 4 Apr 2026 | Saturday | Easter Saturday |
+| 5 Apr 2026 | Sunday | Easter Sunday |
+| 6 Apr 2026 | Monday | Easter Monday |
+| 17 Jun 2026 | Wednesday | King's Birthday |
+| 23 Jul 2026 | Thursday | National Remembrance Day |
+| 26 Aug 2026 | Wednesday | National Repentance Day |
+| 16 Sep 2026 | Wednesday | Independence Day |
+| 25 Dec 2026 | Friday | Christmas Day |
+| 26 Dec 2026 | Saturday | Boxing Day |
+
+### 2027 (estimated — official gazette not yet released)
+
+| Date | Day | Holiday | Note |
+|---|---|---|---|
+| 1 Jan 2027 | Friday | New Year's Day | |
+| 26 Feb 2027 | Friday | National Remembrance Day (Sir Michael Somare) | |
+| 26 Mar 2027 | Friday | Good Friday | |
+| 27 Mar 2027 | Saturday | Easter Saturday | |
+| 28 Mar 2027 | Sunday | Easter Sunday | |
+| 29 Mar 2027 | Monday | Easter Monday | |
+| ~10 Jun 2027 | Thursday | King's Birthday | ⚠ Estimated — confirm via gazette |
+| 23 Jul 2027 | Friday | National Remembrance Day | |
+| 26 Aug 2027 | Thursday | National Repentance Day | |
+| 16 Sep 2027 | Thursday | Independence Day | |
+| 25 Dec 2027 | Saturday | Christmas Day | |
+| 26 Dec 2027 | Sunday | Boxing Day | |
 
 ---
 

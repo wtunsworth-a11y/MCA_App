@@ -6,10 +6,11 @@ Items in this list require action from outside this session (assets, decisions, 
 
 ## Assets Needed
 
-- [ ] **EU logo** — Provide the official EU emblem (SVG or PNG). Will be used on the Acknowledgements screen and login footer. Alternative: confirm if the code-rendered EU flag (blue rectangle, 12 gold stars in a circle) is acceptable.
-- [ ] **CIFOR-ICRAF logo** — Provide logo file (SVG or PNG preferred). Will appear on the Acknowledgements screen.
-- [ ] **Oro Provincial Government logo** — Provide crest or logo file (SVG or PNG preferred). Will appear on the Acknowledgements screen.
-- [ ] **MCF logo** — Provide the Managalas Conservation Fund logo (SVG or PNG preferred). Will replace all "MCF Logo" placeholder boxes in the app header and Acknowledgements screen.
+- [x] **EU logo** — Standard EU flag + "Funded by the European Union" text. Provided 2026-06-15. Save to `prototype/assets/logo-eu.png`.
+- [x] **CIFOR-ICRAF logo** — EU-FCCB Papua New Guinea (Bird of Paradise + tree). This is the CIFOR-ICRAF project logo for this engagement. Provided 2026-06-15. Save to `prototype/assets/logo-cifor.png`.
+- [x] **Oro Provincial Government logo** — Circular badge with Birdwing butterfly, green/yellow/black. Provided 2026-06-15. Save to `prototype/assets/logo-oro.png`.
+- [x] **MCF logo** — Managalas Conservation Foundation circular seal, wildlife scene, "KUAEFIENAMI". Provided 2026-06-15. Save to `prototype/assets/logo-mcf.png`.
+- [ ] **Save logos to repo** — Copy the four logo files into `prototype/assets/` and push from your laptop. Name them: `logo-eu.png`, `logo-cifor.png`, `logo-oro.png`, `logo-mcf.png`.
 
 ---
 

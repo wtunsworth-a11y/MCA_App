@@ -1076,6 +1076,81 @@ select.msel {
 }
 .effort-row:last-child { border-bottom: none; }
 
+/* ── Matrix conditional tag ── */
+.cond-tag { font-size:0.62rem; color:#888; margin-left:3px; }
+
+/* ── Calendar ── */
+.cal-month-hdr { font-size:0.88rem; font-weight:700; color:#1B5E20; text-align:center; margin-bottom:6px; }
+.cal-header { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:2px; }
+.cal-header div { font-size:0.58rem; font-weight:600; color:#999; text-align:center; padding:3px 0; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.cal-day { background:#fff; border-radius:6px; padding:4px 2px 3px; min-height:36px; text-align:center; }
+.cal-day.empty { background:transparent; }
+.cal-num { font-size:0.68rem; font-weight:600; color:#444; display:block; }
+.cal-dots { display:flex; flex-wrap:wrap; gap:1px; justify-content:center; margin-top:2px; }
+.cal-dot { width:6px; height:6px; border-radius:50%; }
+.cal-legend { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.cal-leg-item { display:flex; align-items:center; gap:3px; font-size:0.67rem; color:#555; }
+.cal-leg-dot { width:8px; height:8px; border-radius:50%; }
+
+/* ── Step progress dots ── */
+.step-dots { display:flex; gap:6px; justify-content:center; margin-bottom:14px; }
+.step-dot { width:8px; height:8px; border-radius:50%; background:#e0e0e0; }
+.step-dot.active { background:#2E7D32; }
+
+/* ── New Meeting button ── */
+.btn-new-meeting {
+  width:calc(100% - 28px); margin:10px 14px 0;
+  background:#fff; border:2px solid #2E7D32; color:#2E7D32;
+  border-radius:24px; padding:11px 24px; font-size:0.9rem; font-weight:600;
+  cursor:pointer; font-family:inherit; display:block;
+}
+
+/* ── Agenda variable items ── */
+.agenda-var-item { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid #f0f0f0; font-size:0.86rem; }
+.agenda-fixed-item { display:flex; align-items:center; gap:6px; padding:7px 0; color:#aaa; font-size:0.83rem; border-bottom:1px solid #f0f0f0; }
+
+/* ── Quorum card ── */
+.quorum-card { border-radius:12px; padding:12px 14px; margin-bottom:12px; border:1.5px solid #a5d6a7; background:#e8f5e9; }
+.quorum-card.warn { background:#FFF8E1; border-color:#FFE082; }
+.quorum-title { font-size:0.88rem; font-weight:700; margin-bottom:2px; }
+
+/* ── Motion screens ── */
+.motion-instruction { background:#FFF8E1; border-left:4px solid #FFE082; padding:10px 12px; font-size:0.8rem; color:#5D4037; border-radius:0 6px 6px 0; margin-bottom:12px; }
+.motion-text-display { background:#f9f9f9; border:2px solid #2E7D32; border-radius:12px; padding:16px; font-size:1rem; font-weight:600; color:#1B5E20; line-height:1.5; margin-bottom:14px; }
+.vote-counter-row { display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid #f5f5f5; }
+.vote-label { font-size:0.88rem; color:#333; }
+.vote-ctrl { display:flex; align-items:center; gap:12px; }
+.vote-count { font-size:1.1rem; font-weight:700; min-width:24px; text-align:center; }
+.vote-btn { background:#f0f0f0; border:none; border-radius:50%; width:30px; height:30px; font-size:1rem; cursor:pointer; font-family:inherit; }
+.vote-outcome { border-radius:12px; padding:14px; text-align:center; font-size:1.05rem; font-weight:800; margin-bottom:14px; border:2px solid #a5d6a7; background:#e8f5e9; color:#1B5E20; }
+.vote-outcome.failed { background:#ffebee; color:#c62828; border-color:#ef9a9a; }
+.locked-card { background:#e8f5e9; border:2px solid #2E7D32; border-radius:16px; padding:20px; text-align:center; margin-bottom:14px; }
+.locked-badge { background:#2E7D32; color:#fff; border-radius:10px; padding:4px 14px; font-size:0.75rem; font-weight:700; letter-spacing:0.06em; display:inline-block; margin-bottom:8px; }
+.locked-motion-text { font-size:0.88rem; color:#555; line-height:1.5; margin:10px 0 6px; }
+
+/* ── Recent Activity map ── */
+.time-filter-row { display:flex; gap:8px; padding:10px 14px 0; }
+.time-filter-pill { padding:5px 13px; border-radius:16px; border:1.5px solid #ccc; background:#fafafa; font-size:0.77rem; color:#555; cursor:pointer; font-family:inherit; }
+.time-filter-pill.active { background:#2E7D32; color:#fff; border-color:#2E7D32; }
+.layer-row { display:flex; flex-wrap:wrap; gap:7px; padding:10px 14px 0; }
+.layer-pill { padding:5px 11px; border-radius:14px; border:1.5px solid #a5d6a7; background:#e8f5e9; color:#1B5E20; font-size:0.74rem; font-weight:600; cursor:pointer; font-family:inherit; }
+.layer-pill.off { background:#f0f0f0; border-color:#ccc; color:#888; }
+.map-legend { padding:10px 14px; }
+.legend-item { display:flex; align-items:center; gap:6px; font-size:0.72rem; color:#555; margin-bottom:4px; }
+.legend-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.legend-line { width:18px; height:3px; border-radius:2px; flex-shrink:0; }
+
+/* ── Acknowledgements logo grid ── */
+.ack-logo-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+.ack-logo-card { border:1.5px solid #e0e0e0; border-radius:12px; padding:16px 10px; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:90px; text-align:center; background:#fff; }
+.ack-logo-ph { width:52px; height:52px; border-radius:8px; background:#e8f5e9; display:flex; align-items:center; justify-content:center; font-size:0.58rem; font-weight:700; color:#1B5E20; text-align:center; line-height:1.3; margin-bottom:6px; }
+.ack-role { font-size:0.68rem; color:#888; }
+
+/* ── Logo placeholders in top bar ── */
+.top-logos { display:flex; gap:3px; flex-shrink:0; }
+.logo-ph { width:26px; height:26px; background:rgba(255,255,255,0.22); border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:0.37rem; font-weight:700; color:rgba(255,255,255,0.85); text-align:center; line-height:1.2; flex-shrink:0; }
+
 /* Toast */
 .toast {
   position: absolute;
@@ -1394,61 +1469,42 @@ select.msel {
               </div>
             </div>
 
-            <!-- Weather toggles -->
-            <div class="card weather-section">
-              <div class="ws-title">Weather Conditions</div>
-              <div class="weather-row">
-                <button class="weather-pill" id="wp-cloudy" onclick="wx('sky','cloudy','sunny')">☁️ Cloudy</button>
-                <button class="weather-pill" id="wp-sunny" onclick="wx('sky','sunny','cloudy')">☀️ Sunny</button>
+            <!-- GPS navigation gate — always visible -->
+            <div class="nav-gate-card" id="navGateCard">
+              <div style="font-size:0.82rem;font-weight:700;color:#E65100;margin-bottom:8px;">📍 Navigate to Transect Start Point</div>
+              <div class="compass-row">
+                <svg width="72" height="72" viewBox="0 0 72 72" style="flex-shrink:0;">
+                  <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
+                  <text x="33" y="10" fill="#333" font-size="9" font-family="Arial" font-weight="bold">N</text>
+                  <text x="33" y="68" fill="#aaa" font-size="9" font-family="Arial">S</text>
+                  <text x="2" y="40" fill="#aaa" font-size="9" font-family="Arial">W</text>
+                  <text x="61" y="40" fill="#aaa" font-size="9" font-family="Arial">E</text>
+                  <g transform="rotate(324, 36, 36)">
+                    <polygon points="36,8 32,42 36,38 40,42" fill="#2E7D32"/>
+                    <polygon points="36,64 32,42 36,46 40,42" fill="#ccc"/>
+                  </g>
+                </svg>
+                <div class="compass-info">
+                  <div class="c-bearing">Walk NNW · 324°</div>
+                  <div class="c-dist">~340 m away</div>
+                  <div class="c-dist" style="margin-top:4px;font-size:0.72rem;">GPS updates every 5 sec</div>
+                </div>
               </div>
-              <div class="weather-row">
-                <button class="weather-pill" id="wp-rainy" onclick="wx('precip','rainy','dry')">🌧️ Rainy</button>
-                <button class="weather-pill" id="wp-dry" onclick="wx('precip','dry','rainy')">🌤️ Dry</button>
-              </div>
-              <div class="weather-row">
-                <button class="weather-pill" id="wp-windy" onclick="wx('wind','windy','calm')">💨 Windy</button>
-                <button class="weather-pill" id="wp-calm" onclick="wx('wind','calm','windy')">🌬️ Calm</button>
-              </div>
+              <div class="gate-hint" id="navGateHint">Walk to start point — fingerprint verify unlocks when within 30 m</div>
+              <button class="btn-arrive" id="btnArrive" onclick="mafiaArrive()">Simulate: I've Reached Start Point ✓</button>
             </div>
 
-            <!-- FP verify -->
-            <button class="fp-verify-btn" id="mafiaFpBtn" onclick="mafiaVerify()">
-              <svg width="28" height="28" viewBox="0 0 120 120" fill="none">
-                <path d="M16 74 Q14 26 60 20 Q106 26 104 74" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
-                <path d="M30 80 Q28 38 60 32 Q92 38 90 80" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-                <path d="M44 88 Q41 48 60 44 Q79 48 76 88" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
-                <ellipse cx="60" cy="62" rx="10" ry="11" stroke="currentColor" stroke-width="3" fill="none"/>
-              </svg>
-              <span id="mafiaFpTxt">Tap to Verify Identity</span>
-            </button>
-
-            <!-- GPS navigation gate — shown after FP verify -->
-            <div id="mafiaNavGate" style="display:none;">
-              <div class="nav-gate-card" id="navGateCard">
-                <div style="font-size:0.82rem;font-weight:700;color:#E65100;margin-bottom:8px;">📍 Navigate to Transect Start Point</div>
-                <div class="compass-row">
-                  <!-- Compass SVG -->
-                  <svg width="72" height="72" viewBox="0 0 72 72" style="flex-shrink:0;">
-                    <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
-                    <text x="33" y="10" fill="#333" font-size="9" font-family="Arial" font-weight="bold">N</text>
-                    <text x="33" y="68" fill="#aaa" font-size="9" font-family="Arial">S</text>
-                    <text x="2" y="40" fill="#aaa" font-size="9" font-family="Arial">W</text>
-                    <text x="61" y="40" fill="#aaa" font-size="9" font-family="Arial">E</text>
-                    <!-- Bearing 324° = NNW: rotate arrow by 324° around centre -->
-                    <g transform="rotate(324, 36, 36)">
-                      <polygon points="36,8 32,42 36,38 40,42" fill="#2E7D32"/>
-                      <polygon points="36,64 32,42 36,46 40,42" fill="#ccc"/>
-                    </g>
-                  </svg>
-                  <div class="compass-info">
-                    <div class="c-bearing">Walk NNW · 324°</div>
-                    <div class="c-dist">~340 m away</div>
-                    <div class="c-dist" style="margin-top:4px;font-size:0.72rem;">GPS updates every 5 sec</div>
-                  </div>
-                </div>
-                <div class="gate-hint" id="navGateHint">Survey questions unlock within 30 m of start point</div>
-                <button class="btn-arrive" id="btnArrive" onclick="mafiaArrive()">Simulate: I've Reached Start Point ✓</button>
-              </div>
+            <!-- FP verify — shown after arriving -->
+            <div id="mafiaFpSection" style="display:none;">
+              <button class="fp-verify-btn" id="mafiaFpBtn" onclick="mafiaVerify()">
+                <svg width="28" height="28" viewBox="0 0 120 120" fill="none">
+                  <path d="M16 74 Q14 26 60 20 Q106 26 104 74" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+                  <path d="M30 80 Q28 38 60 32 Q92 38 90 80" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                  <path d="M44 88 Q41 48 60 44 Q79 48 76 88" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
+                  <ellipse cx="60" cy="62" rx="10" ry="11" stroke="currentColor" stroke-width="3" fill="none"/>
+                </svg>
+                <span id="mafiaFpTxt">Tap to Verify Identity</span>
+              </button>
             </div>
 
             <button class="btn-primary" id="mafiaBeginBtn" disabled onclick="nav('screen-mafia-matrix')">Begin Survey</button>
@@ -1580,11 +1636,52 @@ select.msel {
                 <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
                 <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
               </tr>
+              <!-- MODULE E — Undergrowth -->
+              <tr class="mod-header" style="background:#f3e5f5;"><td style="position:sticky;left:0;z-index:3;background:#f3e5f5;font-weight:700;color:#4A148C;padding:6px 8px;">MODULE E — Undergrowth &amp; Cultivation</td><td style="background:#f3e5f5;"></td><td style="background:#f3e5f5;"></td><td style="background:#f3e5f5;"></td><td style="background:#f3e5f5;"></td><td style="background:#f3e5f5;"></td></tr>
+              <tr><td>E1 — Garden crops</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>E2 — Cash crops</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <!-- MODULE F — Wildlife -->
+              <tr class="mod-header" style="background:#e8f5e9;"><td style="position:sticky;left:0;z-index:3;background:#e8f5e9;font-weight:700;color:#1B5E20;padding:6px 8px;">MODULE F — Wildlife Indicators</td><td style="background:#e8f5e9;"></td><td style="background:#e8f5e9;"></td><td style="background:#e8f5e9;"></td><td style="background:#e8f5e9;"></td><td style="background:#e8f5e9;"></td></tr>
+              <tr><td>F1 — Mammals seen</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn an" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
+              <tr><td>F2 — Birds seen</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">2</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
+              <tr><td>F3 — Bird calls</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">7</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">4</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
+              <tr><td>F4 — Reptiles seen</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn an" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn an" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td></tr>
+              <tr><td>F5 — Frogs seen</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">2</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn an" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
+              <tr><td>F6 — Frogs heard</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">4</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
+              <tr><td>F7 — Insects seen</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">5</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
+              <tr><td>F8 — Insects heard</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">8</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">6</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
+              <tr><td>F9 — Leeches</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn an" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td></tr>
+              <tr><td>F10 — Bird feathers</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>F11 — Fur or skin</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>F12 — Bones / carcasses</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>F13 — Nests / burrows</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>F14 — Fruit eaten by animals</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>F15 — Footprints / dung</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <!-- MODULE G — Human Use -->
+              <tr class="mod-header" style="background:#fff9c4;"><td style="position:sticky;left:0;z-index:3;background:#fff9c4;font-weight:700;color:#827717;padding:6px 8px;">MODULE G — Human Use</td><td style="background:#fff9c4;"></td><td style="background:#fff9c4;"></td><td style="background:#fff9c4;"></td><td style="background:#fff9c4;"></td><td style="background:#fff9c4;"></td></tr>
+              <tr><td>G1 — Animal traps / hunting</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>G2 — Burnt patches</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>G3 — Fire / campfire signs</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>G4 — Forest food collection</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>G5 — Trees cut / stumps</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>G6 — Stumps &lt; hands <span style="font-size:0.65rem;color:#888;">(if G5=Y)</span></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
+              <tr><td>G7 — Stumps &gt; hands &lt; arms <span style="font-size:0.65rem;color:#888;">(if G5=Y)</span></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
+              <tr><td>G8 — Stumps &gt; arms <span style="font-size:0.65rem;color:#888;">(if G5=Y)</span></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
+              <tr><td>G9 — Old / abandoned garden</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>G10 — Riverbank digging</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>G11 — Pruned / ring-barked</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>G12 — Roads / tracks</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
+              <tr><td>G13 — Human voices / activity</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
             </tbody>
           </table>
         </div>
-        <div class="p14" style="padding-top:10px;">
-          <button class="btn-primary" onclick="toast('Matrix data saved ✓')">Save &amp; Continue</button>
+        <!-- Module H: Comments -->
+        <div style="padding:10px 14px 4px;">
+          <div style="font-size:0.8rem;font-weight:700;color:#333;margin-bottom:6px;">H — Comments (whole transect)</div>
+          <textarea class="form-input" style="min-height:80px;width:100%;" placeholder="Add any additional observations or notes for the whole transect…"></textarea>
+        </div>
+        <div class="p14" style="padding-top:8px;">
+          <button class="btn-primary" onclick="toast('Survey data saved ✓')">Save &amp; Continue</button>
         </div>
       </div>
     </div>
@@ -1768,6 +1865,7 @@ select.msel {
         <button class="back-btn" onclick="goBack()">←</button>
         <div><div class="bar-title">Meetings</div></div>
       </div>
+      <button class="btn-new-meeting" onclick="nav('screen-new-meeting-1')">+ New Meeting</button>
       <div class="tab-row">
         <button class="tab-btn active" id="t-upcoming" onclick="switchTab('upcoming')">Upcoming</button>
         <button class="tab-btn" id="t-past" onclick="switchTab('past')">Past</button>
@@ -1852,7 +1950,8 @@ select.msel {
             </div>
           </div>
 
-          <div style="margin-top:14px;">
+          <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;">
+            <button class="btn-primary" onclick="nav('screen-meeting-active')">Start Meeting (Secretary)</button>
             <button class="btn-primary blue" onclick="toast('Jitsi: joining meeting room…')">Join Meeting (Jitsi)</button>
           </div>
         </div>
@@ -2068,6 +2167,22 @@ select.msel {
             <div class="effort-row"><span>🤝 Meetings attended</span><span style="font-weight:600;color:#2E7D32;">× 2</span></div>
           </div>
           <button class="btn-outline" onclick="toast('Monthly report downloaded ✓')">⬇ Download Effort Report</button>
+
+          <div class="section-label" style="padding-left:0;margin-top:14px;">Activity Calendar — June 2026</div>
+          <div class="card" style="padding:12px;">
+            <div class="cal-month-hdr">June 2026</div>
+            <div class="cal-header">
+              <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+            </div>
+            <div class="cal-grid" id="calendarGrid"></div>
+            <div class="cal-legend">
+              <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#2E7D32;"></div>Completed</div>
+              <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#c62828;"></div>Missed</div>
+              <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#1976D2;"></div>Ad-hoc</div>
+              <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#F57F17;"></div>Upcoming</div>
+            </div>
+          </div>
+          <button class="btn-outline" onclick="nav('screen-recent-activity')" style="margin-top:4px;">🗺 View Recent Activity Map</button>
         </div>
       </div>
     </div>
@@ -2084,6 +2199,267 @@ select.msel {
       </div></div>
     </div>
 
+    <!-- ══ NEW MEETING STEP 1 ══ -->
+    <div class="screen" id="screen-new-meeting-1">
+      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">New Meeting</div><div class="bar-subtitle">Step 1 of 3 — Details</div></div></div>
+      <div class="scroll-content"><div class="p14">
+        <div class="step-dots"><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">Committee</label>
+            <select class="form-input" style="padding:9px 11px;">
+              <option selected>Zone 7B Sub-Committee</option><option>MCF Board</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" value="2026-06-20">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time</label>
+            <input type="time" class="form-input" value="10:00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <input type="text" class="form-input" placeholder="e.g. Afore Village Hall" value="Afore Village Hall">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="nav('screen-new-meeting-2')">Next →</button>
+      </div></div>
+    </div>
+
+    <!-- ══ NEW MEETING STEP 2 ══ -->
+    <div class="screen" id="screen-new-meeting-2">
+      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Draft Agenda</div><div class="bar-subtitle">Step 2 of 3</div></div></div>
+      <div class="scroll-content"><div class="p14">
+        <div class="step-dots"><div class="step-dot active"></div><div class="step-dot active"></div><div class="step-dot"></div></div>
+        <div class="card" style="padding:10px 14px;">
+          <div class="agenda-fixed-item">🔒 Opening Prayer</div>
+          <div class="agenda-fixed-item">🔒 Apologies</div>
+          <div class="agenda-fixed-item">🔒 Review of Previous Minutes</div>
+          <div style="font-size:0.72rem;font-weight:700;color:#1B5E20;padding:8px 0 4px;border-top:1px solid #f0f0f0;margin-top:4px;">Variable Agenda Items</div>
+          <div id="agendaVarList">
+            <div class="agenda-var-item"><span>Water Resource Management Update</span><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1.1rem;">×</button></div>
+            <div class="agenda-var-item"><span>Patrol Schedule — Q3 2026</span><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1.1rem;">×</button></div>
+            <div class="agenda-var-item"><span>SDM Facility Report — May/June</span><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1.1rem;">×</button></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <input type="text" id="agendaInput" class="form-input" placeholder="Add agenda item…" style="flex:1;">
+            <button class="btn-sm green" onclick="addAgendaItem()" style="flex-shrink:0;white-space:nowrap;">Add</button>
+          </div>
+          <div style="border-top:1px solid #f0f0f0;margin-top:8px;padding-top:4px;">
+            <div class="agenda-fixed-item">🔒 Any Other Business</div>
+            <div class="agenda-fixed-item">🔒 Date of Next Meeting</div>
+            <div class="agenda-fixed-item">🔒 Closing Prayer</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="nav('screen-new-meeting-3')">Next →</button>
+      </div></div>
+    </div>
+
+    <!-- ══ NEW MEETING STEP 3 ══ -->
+    <div class="screen" id="screen-new-meeting-3">
+      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Send to Attendees</div><div class="bar-subtitle">Step 3 of 3</div></div></div>
+      <div class="scroll-content"><div class="p14">
+        <div class="step-dots"><div class="step-dot active"></div><div class="step-dot active"></div><div class="step-dot active"></div></div>
+        <div class="card">
+          <div style="font-size:0.95rem;font-weight:700;color:#1B5E20;margin-bottom:6px;">Zone 7B Sub-Committee Meeting</div>
+          <div style="font-size:0.82rem;color:#666;">📅 20 June 2026 &nbsp;·&nbsp; 🕙 10:00 am &nbsp;·&nbsp; 📍 Afore Village Hall</div>
+          <div style="margin-top:12px;font-size:0.82rem;font-weight:600;color:#333;">Send agenda to:</div>
+          <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;"><input type="checkbox" checked> John Kapari (you)</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;"><input type="checkbox" checked> Maria Ove</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;"><input type="checkbox" checked> Thomas Arua (Secretary)</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;"><input type="checkbox" checked> Grace Kari</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;"><input type="checkbox" checked> Peter Tari</label>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="toast('Meeting agenda sent to attendees ✓');setTimeout(()=>nav('screen-meetings'),600)">Send to Attendees</button>
+      </div></div>
+    </div>
+
+    <!-- ══ MEETING ACTIVE ══ -->
+    <div class="screen" id="screen-meeting-active">
+      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Meeting in Progress</div><div class="bar-subtitle">Zone 7B Sub-Committee · 20 Jun 2026</div></div></div>
+      <div class="scroll-content"><div class="p14">
+        <div class="quorum-card">
+          <div class="quorum-title">✓ Quorum Met — 6 of 9 members present</div>
+          <div style="font-size:0.77rem;color:#2E7D32;">Binding decisions can be recorded</div>
+        </div>
+        <div class="section-label" style="padding-left:0;">Attendance</div>
+        <div class="card" style="padding:4px 14px;">
+          <div class="staff-row"><div><div class="staff-name">John Kapari (You)</div></div><div class="attend-toggle"><button class="attend-btn present" onclick="atnd(this,'present')">Present</button><button class="attend-btn" onclick="atnd(this,'absent')">Absent</button></div></div>
+          <div class="staff-row"><div><div class="staff-name">Maria Ove</div></div><div class="attend-toggle"><button class="attend-btn present" onclick="atnd(this,'present')">Present</button><button class="attend-btn" onclick="atnd(this,'absent')">Absent</button></div></div>
+          <div class="staff-row"><div><div class="staff-name">Thomas Arua</div></div><div class="attend-toggle"><button class="attend-btn present" onclick="atnd(this,'present')">Present</button><button class="attend-btn" onclick="atnd(this,'absent')">Absent</button></div></div>
+          <div class="staff-row"><div><div class="staff-name">Grace Kari</div></div><div class="attend-toggle"><button class="attend-btn present" onclick="atnd(this,'present')">Present</button><button class="attend-btn" onclick="atnd(this,'absent')">Absent</button></div></div>
+          <div class="staff-row"><div><div class="staff-name">Peter Tari</div></div><div class="attend-toggle"><button class="attend-btn present" onclick="atnd(this,'present')">Present</button><button class="attend-btn" onclick="atnd(this,'absent')">Absent</button></div></div>
+          <div class="staff-row"><div><div class="staff-name">Samuel Omu</div></div><div class="attend-toggle"><button class="attend-btn present" onclick="atnd(this,'present')">Present</button><button class="attend-btn" onclick="atnd(this,'absent')">Absent</button></div></div>
+          <div class="staff-row"><div><div class="staff-name">Ruth Sela</div></div><div class="attend-toggle"><button class="attend-btn" onclick="atnd(this,'present')">Present</button><button class="attend-btn absent" onclick="atnd(this,'absent')">Absent</button></div></div>
+          <div class="staff-row"><div><div class="staff-name">Lina Kasi</div></div><div class="attend-toggle"><button class="attend-btn" onclick="atnd(this,'present')">Present</button><button class="attend-btn absent" onclick="atnd(this,'absent')">Absent</button></div></div>
+          <div class="staff-row"><div><div class="staff-name">David Bako</div></div><div class="attend-toggle"><button class="attend-btn" onclick="atnd(this,'present')">Present</button><button class="attend-btn absent" onclick="atnd(this,'absent')">Absent</button></div></div>
+        </div>
+        <button class="btn-primary" onclick="nav('screen-motion-entry')" style="margin-bottom:8px;">📝 Record Motion</button>
+        <button class="btn-outline-red" onclick="toast('Meeting ended — summary saved ✓');setTimeout(()=>goBack(),900)">End Meeting</button>
+      </div></div>
+    </div>
+
+    <!-- ══ MOTION ENTRY ══ -->
+    <div class="screen" id="screen-motion-entry">
+      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Record Motion</div></div></div>
+      <div class="scroll-content"><div class="p14">
+        <div class="form-group">
+          <label class="form-label">Motion Text<span class="req">*</span></label>
+          <textarea id="motionText" class="form-input" style="min-height:100px;" placeholder="Enter the motion as stated by the proposer…">That the Zone 7B Sub-Committee endorses the proposed Q3 patrol schedule as presented by John Kapari and recommends its submission to MCF for approval.</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Proposed by</label>
+          <input type="text" class="form-input" value="Thomas Arua">
+        </div>
+        <button class="btn-primary" onclick="prepMotionVerify()">Pause for Wording Verification →</button>
+      </div></div>
+    </div>
+
+    <!-- ══ MOTION VERIFY ══ -->
+    <div class="screen" id="screen-motion-verify">
+      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Verify Motion Wording</div></div></div>
+      <div class="scroll-content"><div class="p14">
+        <div class="motion-instruction">📢 Read aloud to all participants. Confirm the exact wording before proceeding to vote.</div>
+        <div class="motion-text-display" id="motionVerifyText">That the Zone 7B Sub-Committee endorses the proposed Q3 patrol schedule as presented by John Kapari and recommends its submission to MCF for approval.</div>
+        <button class="btn-primary" onclick="nav('screen-motion-vote')">✓ Wording Confirmed — Proceed to Vote</button>
+      </div></div>
+    </div>
+
+    <!-- ══ MOTION VOTE ══ -->
+    <div class="screen" id="screen-motion-vote">
+      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Record Vote</div></div></div>
+      <div class="scroll-content"><div class="p14">
+        <div class="card" style="padding:10px 14px;margin-bottom:12px;background:#f9f9f9;border:1.5px solid #e0e0e0;">
+          <div style="font-size:0.77rem;color:#888;margin-bottom:4px;">Motion</div>
+          <div style="font-size:0.83rem;color:#333;line-height:1.5;" id="motionVoteText">That the Zone 7B Sub-Committee endorses the proposed Q3 patrol schedule as presented by John Kapari and recommends its submission to MCF for approval.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Seconded by</label>
+          <select class="form-input" style="padding:9px 11px;">
+            <option>Maria Ove</option><option>Thomas Arua</option><option>Grace Kari</option><option>Samuel Omu</option>
+          </select>
+        </div>
+        <div class="card" style="padding:8px 14px;">
+          <div class="vote-counter-row">
+            <span class="vote-label" style="color:#2E7D32;font-weight:600;">For</span>
+            <div class="vote-ctrl">
+              <button class="vote-btn" onclick="changeVote('for',-1)">−</button>
+              <span class="vote-count" id="vFor">6</span>
+              <button class="vote-btn" onclick="changeVote('for',1)">+</button>
+            </div>
+          </div>
+          <div class="vote-counter-row">
+            <span class="vote-label" style="color:#c62828;font-weight:600;">Against</span>
+            <div class="vote-ctrl">
+              <button class="vote-btn" onclick="changeVote('against',-1)">−</button>
+              <span class="vote-count" id="vAgainst">1</span>
+              <button class="vote-btn" onclick="changeVote('against',1)">+</button>
+            </div>
+          </div>
+          <div class="vote-counter-row" style="border-bottom:none;">
+            <span class="vote-label">Abstain</span>
+            <div class="vote-ctrl">
+              <button class="vote-btn" onclick="changeVote('abstain',-1)">−</button>
+              <span class="vote-count" id="vAbstain">0</span>
+              <button class="vote-btn" onclick="changeVote('abstain',1)">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="vote-outcome" id="voteOutcome">CARRIED 6–1</div>
+        <button class="btn-primary" onclick="nav('screen-motion-locked')">🔒 Lock Motion &amp; Record</button>
+      </div></div>
+    </div>
+
+    <!-- ══ MOTION LOCKED ══ -->
+    <div class="screen" id="screen-motion-locked">
+      <div class="top-bar"><button class="back-btn" onclick="showScreen('screen-meeting-active')">←</button><div><div class="bar-title">Motion Recorded</div></div></div>
+      <div class="scroll-content"><div class="p14">
+        <div class="locked-card">
+          <div style="font-size:2rem;margin-bottom:6px;">🔒</div>
+          <div class="locked-badge">LOCKED</div>
+          <div style="font-size:1rem;font-weight:700;color:#1B5E20;margin:8px 0 4px;">Motion Carried</div>
+          <div class="locked-motion-text">That the Zone 7B Sub-Committee endorses the proposed Q3 patrol schedule as presented by John Kapari and recommends its submission to MCF for approval.</div>
+          <div style="font-size:0.8rem;color:#555;margin-top:6px;">Proposed: Thomas Arua &nbsp;·&nbsp; Seconded: Maria Ove</div>
+          <div style="font-size:0.88rem;font-weight:700;color:#1B5E20;margin-top:8px;">6 For &nbsp;·&nbsp; 1 Against &nbsp;·&nbsp; 0 Abstain</div>
+        </div>
+        <button class="btn-outline" onclick="showScreen('screen-meeting-active')">← Resume Meeting</button>
+      </div></div>
+    </div>
+
+    <!-- ══ RECENT ACTIVITY ══ -->
+    <div class="screen" id="screen-recent-activity" style="background:#f0f4f0;">
+      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Recent Activity</div></div></div>
+      <div class="time-filter-row">
+        <button class="time-filter-pill active" id="tf-7" onclick="setTimeFilter('7')">7 Days</button>
+        <button class="time-filter-pill" id="tf-30" onclick="setTimeFilter('30')">30 Days</button>
+        <button class="time-filter-pill" id="tf-365" onclick="setTimeFilter('365')">1 Year</button>
+      </div>
+      <div class="scroll-content">
+        <!-- SVG Activity Map -->
+        <div style="padding:10px 14px 0;">
+          <svg viewBox="0 0 362 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:12px;background:#b0bec5;">
+            <defs>
+              <pattern id="agrid" width="24" height="24" patternUnits="userSpaceOnUse">
+                <path d="M24 0 L0 0 0 24" fill="none" stroke="#90a4ae" stroke-width="0.5"/>
+              </pattern>
+            </defs>
+            <rect width="362" height="210" fill="#b0bec5"/>
+            <rect width="362" height="210" fill="url(#agrid)" opacity="0.4"/>
+            <!-- MCA Boundary -->
+            <polygon points="40,180 80,30 180,18 290,35 330,180 200,195 100,195" fill="#1B5E20" fill-opacity="0.12" stroke="#1B5E20" stroke-width="2"/>
+            <!-- Zone boundary hints -->
+            <line x1="180" y1="18" x2="180" y2="195" stroke="#2E7D32" stroke-width="1" stroke-dasharray="5,4" opacity="0.4"/>
+            <line x1="40" y1="110" x2="330" y2="110" stroke="#2E7D32" stroke-width="1" stroke-dasharray="5,4" opacity="0.4"/>
+            <!-- MaFIA transect lines (dark green) -->
+            <line id="layer-mafia-1" x1="90" y1="145" x2="155" y2="105" stroke="#1B5E20" stroke-width="3"/>
+            <line id="layer-mafia-2" x1="100" y1="130" x2="160" y2="95" stroke="#1B5E20" stroke-width="3"/>
+            <line id="layer-mafia-3" x1="200" y1="110" x2="250" y2="80" stroke="#1B5E20" stroke-width="3"/>
+            <!-- Patrol route (dashed orange) -->
+            <polyline id="layer-patrol-1" points="95,140 100,128 108,118 116,112 124,106 132,101 138,97 136,108 132,116 128,122 120,128 110,134 95,140" fill="none" stroke="#F57F17" stroke-width="2.5" stroke-dasharray="8,4"/>
+            <!-- Observation points -->
+            <circle id="layer-obs-1" cx="120" cy="130" r="7" fill="#1976D2"/>
+            <circle id="layer-obs-2" cx="105" cy="142" r="7" fill="#c62828"/>
+            <circle id="layer-obs-3" cx="220" cy="100" r="7" fill="#c62828"/>
+            <circle id="layer-obs-4" cx="130" cy="118" r="7" fill="#E65100"/>
+            <circle id="layer-obs-5" cx="260" cy="140" r="7" fill="#7B1FA2"/>
+            <circle id="layer-obs-6" cx="140" cy="138" r="7" fill="#388E3C"/>
+            <circle id="layer-obs-7" cx="240" cy="115" r="7" fill="#E65100"/>
+            <!-- SDM facility compliance dots -->
+            <circle id="layer-sdm-1" cx="118" cy="148" r="8" fill="#2E7D32" stroke="#fff" stroke-width="1.5"/>
+            <circle id="layer-sdm-2" cx="215" cy="108" r="8" fill="#F57F17" stroke="#fff" stroke-width="1.5"/>
+            <circle id="layer-sdm-3" cx="255" cy="148" r="8" fill="#2E7D32" stroke="#fff" stroke-width="1.5"/>
+            <!-- Labels -->
+            <text x="55" y="110" fill="#1B5E20" font-size="9" font-family="Arial" font-weight="bold" opacity="0.7">Zone 7B</text>
+            <text x="200" y="110" fill="#1B5E20" font-size="9" font-family="Arial" font-weight="bold" opacity="0.7">Zone 7A</text>
+            <text x="140" y="175" fill="#1B5E20" font-size="9" font-family="Arial" font-weight="bold" opacity="0.7">Zone 9</text>
+          </svg>
+        </div>
+        <!-- Layer toggles -->
+        <div class="layer-row">
+          <button class="layer-pill" id="lp-mafia" onclick="toggleActivityLayer('mafia')">🌿 MaFIA</button>
+          <button class="layer-pill" id="lp-obs" onclick="toggleActivityLayer('obs')">👁 Observations</button>
+          <button class="layer-pill" id="lp-patrol" onclick="toggleActivityLayer('patrol')">🥾 Patrol</button>
+          <button class="layer-pill" id="lp-sdm" onclick="toggleActivityLayer('sdm')">🏥 SDM</button>
+        </div>
+        <!-- Legend -->
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1976D2;"></div>Wildlife Sighting</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c62828;"></div>Non-compliance / Fire</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#E65100;"></div>Hunting / Natural Disaster</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#7B1FA2;"></div>Social Unrest</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#388E3C;"></div>Cultural Event</div>
+          <div class="legend-item"><div class="legend-line" style="background:#1B5E20;"></div>MaFIA Transect</div>
+          <div class="legend-item"><div class="legend-line" style="background:#F57F17;border-top:2px dashed #F57F17;"></div>Patrol Route</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#2E7D32;border:1.5px solid #ccc;"></div>SDM — Compliant</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#F57F17;border:1.5px solid #ccc;"></div>SDM — Partial</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toastEl"></div>
 
@@ -2097,8 +2473,12 @@ const ALL_SCREENS = [
   'screen-observations','screen-obs-entry',
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-sdm','screen-facility',
-  'screen-alerts','screen-meetings','screen-meeting-detail',
-  'screen-map','screen-performance','screen-ack','screen-profile',
+  'screen-alerts',
+  'screen-meetings','screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3',
+  'screen-meeting-detail','screen-meeting-active',
+  'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
+  'screen-map','screen-performance','screen-recent-activity',
+  'screen-ack','screen-profile',
   'screen-patrol-stub','screen-community-stub'
 ];
 
@@ -2124,6 +2504,7 @@ function nav(id) {
   history.push(currentScreen);
   // Side effects on enter
   if (id === 'screen-mafia-setup') initMafia();
+  if (id === 'screen-performance') renderCalendar();
   showScreen(id);
 }
 
@@ -2220,17 +2601,27 @@ function initMafia() {
   document.getElementById('mafiaBeginBtn').disabled = true;
   document.getElementById('mafiaFpBtn').classList.remove('verified');
   document.getElementById('mafiaFpTxt').textContent = 'Tap to Verify Identity';
-  document.getElementById('mafiaNavGate').style.display = 'none';
+  document.getElementById('mafiaFpSection').style.display = 'none';
   document.getElementById('navGateCard').classList.remove('arrived');
   document.getElementById('btnArrive').disabled = false;
   document.getElementById('btnArrive').textContent = 'Simulate: I\'ve Reached Start Point ✓';
-  document.getElementById('navGateHint').textContent = 'Survey questions unlock within 30 m of start point';
+  document.getElementById('navGateHint').textContent = 'Walk to start point — fingerprint verify unlocks when within 30 m';
   document.getElementById('mafiaLoading').style.display = 'block';
   document.getElementById('mafiaContent').style.display = 'none';
   setTimeout(() => {
     document.getElementById('mafiaLoading').style.display = 'none';
     document.getElementById('mafiaContent').style.display = 'block';
   }, 1500);
+}
+
+function mafiaArrive() {
+  mafiaArrived = true;
+  document.getElementById('navGateCard').classList.add('arrived');
+  document.getElementById('navGateHint').textContent = '✓ At start point — verify identity to begin';
+  document.getElementById('btnArrive').disabled = true;
+  document.getElementById('btnArrive').textContent = '✓ Arrived at Start Point';
+  document.getElementById('mafiaFpSection').style.display = 'block';
+  checkMafiaReady();
 }
 
 function mafiaVerify() {
@@ -2240,18 +2631,8 @@ function mafiaVerify() {
     mafiaVerified = true;
     document.getElementById('mafiaFpBtn').classList.add('verified');
     document.getElementById('mafiaFpTxt').textContent = '✓ Identity Verified';
-    document.getElementById('mafiaNavGate').style.display = 'block';
     checkMafiaReady();
   }, 900);
-}
-
-function mafiaArrive() {
-  mafiaArrived = true;
-  document.getElementById('navGateCard').classList.add('arrived');
-  document.getElementById('navGateHint').textContent = '✓ At start point — survey unlocked';
-  document.getElementById('btnArrive').disabled = true;
-  document.getElementById('btnArrive').textContent = '✓ Arrived at Start Point';
-  checkMafiaReady();
 }
 
 function checkMafiaReady() {
@@ -2305,6 +2686,102 @@ function switchTab(tab) {
   ['upcoming','past'].forEach(t => {
     document.getElementById('t-' + t).classList.toggle('active', t === tab);
     document.getElementById('tc-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+/* ── New Meeting ── */
+function addAgendaItem() {
+  const inp = document.getElementById('agendaInput');
+  const list = document.getElementById('agendaVarList');
+  if (!inp.value.trim()) return;
+  const item = document.createElement('div');
+  item.className = 'agenda-var-item';
+  item.innerHTML = '<span>' + inp.value.trim() + '</span><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1.1rem;">×</button>';
+  list.appendChild(item);
+  inp.value = '';
+}
+
+/* ── Motion flow ── */
+function prepMotionVerify() {
+  const txt = document.getElementById('motionText').value.trim();
+  if (!txt) { toast('Please enter motion text'); return; }
+  document.getElementById('motionVerifyText').textContent = txt;
+  document.getElementById('motionVoteText').textContent = txt;
+  nav('screen-motion-verify');
+}
+
+let voteFor = 6, voteAgainst = 1, voteAbstain = 0;
+function changeVote(type, delta) {
+  if (type === 'for')     { voteFor     = Math.max(0, voteFor     + delta); document.getElementById('vFor').textContent     = voteFor; }
+  if (type === 'against') { voteAgainst = Math.max(0, voteAgainst + delta); document.getElementById('vAgainst').textContent = voteAgainst; }
+  if (type === 'abstain') { voteAbstain = Math.max(0, voteAbstain + delta); document.getElementById('vAbstain').textContent = voteAbstain; }
+  updateVoteOutcome();
+}
+function updateVoteOutcome() {
+  const el = document.getElementById('voteOutcome');
+  if (!el) return;
+  if (voteFor > voteAgainst) {
+    el.textContent = 'CARRIED ' + voteFor + '–' + voteAgainst;
+    el.style.background = '#e8f5e9'; el.style.color = '#1B5E20'; el.style.borderColor = '#a5d6a7';
+    el.classList.remove('failed');
+  } else {
+    el.textContent = 'FAILED ' + voteFor + '–' + voteAgainst;
+    el.style.background = '#ffebee'; el.style.color = '#c62828'; el.style.borderColor = '#ef9a9a';
+    el.classList.add('failed');
+  }
+}
+
+/* ── Matrix weather pills ── */
+function wxM(onId, offId) {
+  document.getElementById('wx-' + onId).classList.add('active');
+  document.getElementById('wx-' + offId).classList.remove('active');
+}
+
+/* ── Performance Calendar ── */
+function renderCalendar() {
+  const grid = document.getElementById('calendarGrid');
+  if (!grid || grid.children.length > 0) return;
+  const acts = {
+    2:[{c:'#2E7D32',l:'Patrol'}],
+    4:[{c:'#1976D2',l:'Observation'}],
+    5:[{c:'#2E7D32',l:'Meeting'}],
+    7:[{c:'#1976D2',l:'Observation'}],
+    8:[{c:'#2E7D32',l:'SDM x2'}],
+    9:[{c:'#1976D2',l:'Observation'}],
+    10:[{c:'#2E7D32',l:'MaFIA'}],
+    11:[{c:'#1976D2',l:'Observation'}],
+    12:[{c:'#1976D2',l:'Observation'}],
+    13:[{c:'#2E7D32',l:'Patrol'}],
+    15:[{c:'#c62828',l:'Missed'}],
+    19:[{c:'#F57F17',l:'SDM'}],
+    22:[{c:'#F57F17',l:'MaFIA'}]
+  };
+  // June 1 2026 = Monday (offset 0)
+  let html = '';
+  for (let d = 1; d <= 30; d++) {
+    const a = acts[d] || [];
+    const dots = a.map(x => '<div class="cal-dot" style="background:' + x.c + ';" title="' + x.l + '"></div>').join('');
+    html += '<div class="cal-day"><span class="cal-num">' + d + '</span><div class="cal-dots">' + dots + '</div></div>';
+  }
+  grid.innerHTML = html;
+}
+
+/* ── Time filter (Recent Activity) ── */
+function setTimeFilter(val) {
+  ['7','30','365'].forEach(v => {
+    document.getElementById('tf-' + v).classList.toggle('active', v === val);
+  });
+  toast('Showing last ' + (val === '365' ? '1 year' : val + ' days') + ' of activity');
+}
+
+/* ── Activity layer toggles ── */
+function toggleActivityLayer(type) {
+  const pill = document.getElementById('lp-' + type);
+  const isOn = !pill.classList.contains('off');
+  pill.classList.toggle('off', isOn);
+  // Toggle all SVG elements for this layer
+  document.querySelectorAll('[id^="layer-' + type + '"]').forEach(el => {
+    el.style.display = isOn ? 'none' : '';
   });
 }
 </script>

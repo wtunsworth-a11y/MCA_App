@@ -1,0 +1,24 @@
+Code,Level,Description,Indicator,Baseline,Target,Unit,Responsible,Timeline
+1,Goal,Improved conservation outcomes in the Managalas Conservation Area,Forest cover loss rate,2.5,0.5,%/year,MCF,Dec 2027
+1.1,Outcome,Community-based stewardship is active across all 11 zones,Zones with active Clan Stewards,6,11,zones,MCF,Jun 2026
+1.1.1,Output,Clan Stewards enrolled and equipped,Number of Clan Stewards with enrolled biometric accounts,0,55,stewards,Admin,Mar 2026
+1.1.1.1,Activity,Conduct in-person biometric enrollment workshops,Number of enrollment workshops completed,0,11,workshops,Zone Staff,Feb 2026
+1.1.1.2,Activity,Distribute Android devices to enrolled Stewards,Number of devices distributed and configured,0,55,devices,Admin,Mar 2026
+1.1.2,Output,Clan Stewards conducting regular patrols,Monthly patrol completion rate across all clans,0,80,%,Zone Staff,Ongoing
+1.1.2.1,Activity,Zone Staff conduct monthly patrol check-ins with Stewards,Number of check-ins conducted,0,12,check-ins/zone,Zone Staff,Monthly
+1.2,Outcome,Biodiversity data is systematically collected and verified,Number of verified MaFIA assessments per quarter,0,165,assessments,MCF,Ongoing
+1.2.1,Output,MaFIA transect protocol implemented across all clans,Clans completing at least one MaFIA assessment per quarter,0,55,clans,Zone Staff,Ongoing
+1.2.1.1,Activity,Train Clan Stewards in MaFIA transect methodology,Number of Stewards trained and assessed as competent,0,55,stewards,Technical Advisor,Jan 2026
+1.2.1.2,Activity,Conduct quarterly MaFIA transect assessments,Number of completed and verified MaFIA records,0,55,records/quarter,Clan Stewards,Quarterly
+1.3,Outcome,Service delivery monitoring is conducted at all facilities,Facility visit completion rate,0,90,%,Zone Staff,Ongoing
+1.3.1,Output,Health and education facilities monitored monthly,Number of facilities with two completed visits per month,0,30,facilities,Clan Stewards,Monthly
+1.3.1.1,Activity,Complete scheduled SDM facility visits,Number of completed SDM visits,0,60,visits/month,Clan Stewards,Monthly
+1.3.1.2,Activity,Zone Staff review and escalate SDM non-completion,Number of escalation actions resolved within 7 days,0,100,%,Zone Staff,Monthly
+2,Goal,Effective governance of the Managalas Conservation Area,Committee meetings held vs scheduled,0,100,%,MCF,Ongoing
+2.1,Outcome,Zone Sub-Committees meet regularly and produce quality minutes,Minutes approved within 14 days of meeting,0,90,%,Chairman,Quarterly
+2.1.1,Output,Zone Sub-Committee meetings held quarterly in all 11 zones,Number of Sub-Committee meetings held,0,44,meetings,Zone Staff,Annual
+2.1.1.1,Activity,Secretary schedules and convenes quarterly Sub-Committee meetings,Number of meetings scheduled and held on time,0,4,meetings/zone,Secretary,Quarterly
+2.1.1.2,Activity,Chairman reviews and approves meeting minutes,Minutes approved within 14 days,0,100,%,Chairman,Quarterly
+2.2,Outcome,MCF Board meets and makes strategic decisions,MCF Board meetings held vs scheduled,0,4,meetings/year,MCF,Annual
+2.2.1,Output,MCF Board quarterly meetings conducted,Number of MCF Board meetings with approved minutes,0,4,meetings,MCF Secretary,Annual
+2.2.1.1,Activity,Convene quarterly MCF Board meetings via Jitsi,Number of MCF Board meetings held,0,4,meetings,MCF Secretary,Quarterly

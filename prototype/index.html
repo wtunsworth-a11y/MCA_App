@@ -1830,8 +1830,21 @@ select.msel {
 
         <div class="p14" style="padding-top:6px;padding-bottom:0;">
           <div class="card" style="padding:10px 14px;">
-            <div class="transect-row"><span class="td-label">📅 Date</span><span>18 June 2026</span></div>
-            <div class="transect-row"><span class="td-label">🕘 Start Time</span><span>08:45 am</span></div>
+            <div class="transect-row"><span class="td-label">📅 Date</span><span id="qabbDate">18 June 2026</span></div>
+            <div class="transect-row">
+              <span class="td-label">🕘 Start Time</span>
+              <span style="display:flex;align-items:center;gap:6px;">
+                <input type="time" id="qabbStartTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" value="08:45">
+                <span style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">auto</span>
+              </span>
+            </div>
+            <div class="transect-row">
+              <span class="td-label">🕐 End Time</span>
+              <span style="display:flex;align-items:center;gap:6px;">
+                <input type="time" id="qabbEndTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" placeholder="--:--">
+                <span id="qabbEndAuto" style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">set on submit</span>
+              </span>
+            </div>
             <div class="transect-row">
               <span class="td-label">☁ Weather</span>
               <span>
@@ -1905,7 +1918,7 @@ select.msel {
           <textarea class="form-input" style="min-height:80px;width:100%;" placeholder="Add any additional observations about QABB habitat, threats, or notable sightings…"></textarea>
         </div>
         <div class="p14" style="padding-top:8px;">
-          <button class="btn-primary" style="background:#00695C;" onclick="toast('QABB survey data saved ✓')">Save &amp; Submit</button>
+          <button class="btn-primary" style="background:#00695C;" onclick="submitQabb()">Save &amp; Submit</button>
         </div>
       </div>
     </div>
@@ -2816,6 +2829,7 @@ function nav(id) {
   // Side effects on enter
   if (id === 'screen-mafia-setup') initMafia();
   if (id === 'screen-qabb-setup') initQabb();
+  if (id === 'screen-qabb-matrix') initQabbMatrix();
   if (id === 'screen-performance') renderCalendar();
   showScreen(id);
 }
@@ -3147,6 +3161,28 @@ function qabbVerify() {
 
 function checkQabbReady() {
   document.getElementById('qabbBeginBtn').disabled = !(qabbVerified && qabbArrived);
+}
+
+function initQabbMatrix() {
+  var now = new Date();
+  var hh = String(now.getHours()).padStart(2, '0');
+  var mm = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('qabbStartTime').value = hh + ':' + mm;
+  document.getElementById('qabbEndTime').value = '';
+  document.getElementById('qabbEndAuto').textContent = 'set on submit';
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('qabbDate').textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+}
+
+function submitQabb() {
+  var now = new Date();
+  var hh = String(now.getHours()).padStart(2, '0');
+  var mm = String(now.getMinutes()).padStart(2, '0');
+  if (!document.getElementById('qabbEndTime').value) {
+    document.getElementById('qabbEndTime').value = hh + ':' + mm;
+  }
+  document.getElementById('qabbEndAuto').textContent = 'auto';
+  toast('QABB survey data saved ✓');
 }
 
 function wxQ(onId, offId) {

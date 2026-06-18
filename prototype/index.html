@@ -1288,6 +1288,14 @@ select.msel {
             <span class="module-emoji">🦋</span>
             <span class="module-name">QABB Butterfly Survey</span>
           </div>
+          <div class="module-tile" onclick="nav('screen-water-setup')">
+            <span class="module-emoji">🌊</span>
+            <span class="module-name">Water Quality</span>
+          </div>
+          <div class="module-tile" onclick="nav('screen-pheno-setup')">
+            <span class="module-emoji">🌺</span>
+            <span class="module-name">Phenology Monitoring</span>
+          </div>
         </div>
       </div>
       <nav class="bottom-nav" id="dash-nav">
@@ -1924,6 +1932,331 @@ select.msel {
     </div>
 
     <!-- ══════════════════════════════════════
+         SCREEN: WATER QUALITY SETUP
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-water-setup">
+      <div class="top-bar" style="background:#0277BD;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Water Quality</div>
+          <div class="bar-subtitle">Secchi Disc — Monthly Monitoring</div>
+        </div>
+        <div class="logo-ph">MCF<br>Logo</div>
+      </div>
+      <div class="scroll-content">
+        <div id="waterLoading" style="padding:40px 20px;text-align:center;">
+          <p style="color:#555;font-size:0.88rem;margin-bottom:6px;">Loading monitoring point…</p>
+          <div class="spinner-dots"><span></span><span></span><span></span></div>
+        </div>
+        <div id="waterContent" style="display:none;">
+          <div class="p14" style="padding-bottom:20px;">
+            <div class="map-placeholder">
+              <svg viewBox="0 0 362 130" xmlns="http://www.w3.org/2000/svg">
+                <rect width="362" height="130" fill="#c9dce8"/>
+                <polygon points="217.8,84.1 222.3,88.5 220.5,97.2 172.1,100.2 127.6,104.3 114.0,94.4 78.5,79.3 76.7,75.2 77.9,73.2 72.0,54.3 95.6,35.1 100.3,34.2 136.8,39.0 144.2,54.1 177.0,52.2 205.7,29.1 254.5,20.3 252.6,34.6 249.9,37.5 242.3,43.7 222.5,53.5 217.8,84.1" fill="#E6F1FB" fill-opacity="0.55" stroke="#185FA5" stroke-width="1.5"/>
+                <polygon points="178.6,104.9 152.6,101.8 136.0,78.1 150.9,75.0 226.1,92.2 225.8,96.6 178.6,104.9" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="123.0,107.6 85.4,77.7 136.0,78.1 152.6,101.8 123.0,107.6" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="254.6,68.8 184.7,58.1 183.5,52.8 183.4,48.8 201.3,40.2 291.4,24.0 308.8,36.7 294.4,55.9 254.6,68.8" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="136.0,78.1 85.4,77.7 49.0,72.6 53.8,55.4 115.0,45.1 124.0,46.5 126.9,47.8 160.7,65.2 150.9,75.0 136.0,78.1" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="226.1,92.2 150.9,75.0 160.7,65.2 184.7,58.1 254.6,68.8 226.1,92.2" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <circle cx="146.5" cy="83.1" r="14" fill="#0277BD" opacity="0.25"/>
+                <circle cx="146.5" cy="83.1" r="7" fill="#0277BD" opacity="0.9"/>
+                <circle cx="146.5" cy="83.1" r="3" fill="#fff"/>
+                <text x="162.5" y="87.1" fill="#0277BD" font-size="9" font-weight="bold" font-family="Arial">WQ-7B-03</text>
+                <text x="120.7" y="43.3" fill="#185FA5" font-size="10" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.7">Zone 7B</text>
+              </svg>
+            </div>
+
+            <div class="card" style="padding:12px 16px;">
+              <div class="transect-row"><span class="td-label">🌊 Station</span><span>WQ-7B-03</span></div>
+              <div class="transect-row"><span class="td-label">📍 Location</span><span>Koromba Creek</span></div>
+              <div class="transect-row"><span class="td-label">🧭 Coordinates</span><span>-9.1550° S, 148.3750° E</span></div>
+              <div class="transect-row"><span class="td-label">📅 Schedule</span><span>10th of every month</span></div>
+            </div>
+
+            <div class="nav-gate-card" id="waterNavGateCard">
+              <div style="font-size:0.82rem;font-weight:700;color:#0277BD;margin-bottom:8px;">📍 Navigate to Monitoring Point</div>
+              <div class="compass-row">
+                <svg width="60" height="60" viewBox="0 0 72 72" style="flex-shrink:0;">
+                  <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
+                  <text x="33" y="10" fill="#333" font-size="9" font-family="Arial" font-weight="bold">N</text>
+                  <g transform="rotate(215, 36, 36)">
+                    <polygon points="36,8 32,42 36,38 40,42" fill="#0277BD"/>
+                    <polygon points="36,64 32,42 36,46 40,42" fill="#ccc"/>
+                  </g>
+                </svg>
+                <div class="compass-info">
+                  <div class="c-bearing">Walk SW · 215°</div>
+                  <div class="c-dist"><strong>520 m</strong> to creek</div>
+                  <div id="waterNavHint" style="margin-top:4px;font-size:0.72rem;color:#888;">Walk to monitoring point — unlock within 30 m</div>
+                </div>
+              </div>
+              <button class="btn-outline" id="waterBtnArrive" onclick="waterArrive()" style="margin-top:10px;border-color:#0277BD;color:#0277BD;">Simulate: I've Reached the Creek ✓</button>
+            </div>
+
+            <div id="waterFpSection" style="display:none;">
+              <div style="font-size:0.82rem;font-weight:700;color:#333;margin:14px 0 8px;">Step 2 — Verify Identity</div>
+              <button class="fp-verify-btn" id="waterFpBtn" onclick="waterVerify()" style="border-color:#0277BD;">
+                <svg width="28" height="28" viewBox="0 0 120 120" fill="none">
+                  <path d="M60 10C32.4 10 10 32.4 10 60s22.4 50 50 50 50-22.4 50-50S87.6 10 60 10z" stroke="#0277BD" stroke-width="7" fill="none"/>
+                  <path d="M60 30c-16.6 0-30 13.4-30 30s13.4 30 30 30 30-13.4 30-30-13.4-30-30-30z" stroke="#0277BD" stroke-width="5" fill="none"/>
+                  <circle cx="60" cy="60" r="10" fill="#0277BD"/>
+                </svg>
+                <span id="waterFpTxt" style="font-size:0.8rem;color:#555;">Tap to Verify Identity</span>
+              </button>
+            </div>
+
+            <button class="btn-primary" id="waterBeginBtn" disabled onclick="nav('screen-water-record')" style="background:#0277BD;margin-top:14px;">Begin Water Quality Reading</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: WATER QUALITY RECORDING
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-water-record">
+      <div class="top-bar" style="background:#0277BD;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Water Quality</div>
+          <div class="bar-subtitle">WQ-7B-03 — Koromba Creek</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="matrix-note" style="background:#e1f5fe;border-color:#81d4fa;color:#0277BD;">
+          Lower the Secchi disc until it disappears, then record the depth. Take the reading from the shaded side of the canoe/bank.
+        </div>
+        <div class="p14" style="padding-top:6px;">
+          <div class="card" style="padding:10px 14px;">
+            <div class="transect-row"><span class="td-label">📅 Date</span><span id="waterDate">10 June 2026</span></div>
+            <div class="transect-row">
+              <span class="td-label">🕘 Time</span>
+              <span style="display:flex;align-items:center;gap:6px;">
+                <input type="time" id="waterTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" value="09:15">
+                <span style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">auto</span>
+              </span>
+            </div>
+            <div class="transect-row">
+              <span class="td-label">☁ Weather</span>
+              <span>
+                <button class="weather-pill active" id="wwx-cloudy" onclick="wxW('cloudy','sunny')">☁ Cloudy</button>
+                <button class="weather-pill" id="wwx-sunny" onclick="wxW('sunny','cloudy')">☀ Sunny</button>
+              </span>
+            </div>
+          </div>
+
+          <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;">🔍 Secchi Disc Reading</div>
+          <div class="card" style="padding:14px 16px;text-align:center;">
+            <div style="font-size:0.75rem;color:#888;margin-bottom:8px;">Depth where disc disappears (cm)</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+              <button class="tally-btn" onclick="adjSecchi(-5)" style="width:40px;height:40px;font-size:1.2rem;">−</button>
+              <div>
+                <span id="secchiVal" style="font-size:2.2rem;font-weight:700;color:#0277BD;">45</span>
+                <span style="font-size:0.9rem;color:#888;"> cm</span>
+              </div>
+              <button class="tally-btn" onclick="adjSecchi(5)" style="width:40px;height:40px;font-size:1.2rem;">+</button>
+            </div>
+            <div style="font-size:0.68rem;color:#aaa;margin-top:6px;">Tap +/− to adjust by 5 cm, or type below</div>
+            <input type="number" id="secchiInput" class="form-input" style="width:100px;margin:8px auto 0;text-align:center;font-size:0.85rem;padding:6px;" value="45" min="0" max="500" onchange="document.getElementById('secchiVal').textContent=this.value">
+          </div>
+
+          <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;">🌊 Water Observations</div>
+          <div class="card" style="padding:12px 16px;">
+            <div class="form-group">
+              <label class="form-label">Water Colour</label>
+              <select class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+                <option selected>Clear</option><option>Green</option><option>Brown</option><option>Milky/White</option><option>Dark</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Odour</label>
+              <select class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+                <option selected>None</option><option>Earthy</option><option>Chemical</option><option>Rotten</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Flow</label>
+              <select class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+                <option>Still</option><option selected>Slow</option><option>Moderate</option><option>Fast/Flood</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Visible Pollution or Debris?</label>
+              <div style="display:flex;gap:6px;margin-bottom:6px;">
+                <button class="weather-pill" id="wpol-y" onclick="wxPol('y','n')">Yes</button>
+                <button class="weather-pill active" id="wpol-n" onclick="wxPol('n','y')">No</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes</label>
+              <textarea class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Any other observations about water conditions, upstream activity, recent rain…"></textarea>
+            </div>
+          </div>
+          <button class="btn-primary" style="background:#0277BD;" onclick="submitWater()">Save &amp; Submit Reading</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: PHENOLOGY MONITORING SETUP
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-pheno-setup">
+      <div class="top-bar" style="background:#E65100;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Phenology Monitoring</div>
+          <div class="bar-subtitle">Monthly Observation — Fixed Plot</div>
+        </div>
+        <div class="logo-ph">MCF<br>Logo</div>
+      </div>
+      <div class="scroll-content">
+        <div id="phenoLoading" style="padding:40px 20px;text-align:center;">
+          <p style="color:#555;font-size:0.88rem;margin-bottom:6px;">Loading monitoring plot…</p>
+          <div class="spinner-dots"><span></span><span></span><span></span></div>
+        </div>
+        <div id="phenoContent" style="display:none;">
+          <div class="p14" style="padding-bottom:20px;">
+            <div class="map-placeholder">
+              <svg viewBox="0 0 362 130" xmlns="http://www.w3.org/2000/svg">
+                <rect width="362" height="130" fill="#c9dce8"/>
+                <polygon points="217.8,84.1 222.3,88.5 220.5,97.2 172.1,100.2 127.6,104.3 114.0,94.4 78.5,79.3 76.7,75.2 77.9,73.2 72.0,54.3 95.6,35.1 100.3,34.2 136.8,39.0 144.2,54.1 177.0,52.2 205.7,29.1 254.5,20.3 252.6,34.6 249.9,37.5 242.3,43.7 222.5,53.5 217.8,84.1" fill="#E6F1FB" fill-opacity="0.55" stroke="#185FA5" stroke-width="1.5"/>
+                <polygon points="178.6,104.9 152.6,101.8 136.0,78.1 150.9,75.0 226.1,92.2 225.8,96.6 178.6,104.9" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="123.0,107.6 85.4,77.7 136.0,78.1 152.6,101.8 123.0,107.6" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="254.6,68.8 184.7,58.1 183.5,52.8 183.4,48.8 201.3,40.2 291.4,24.0 308.8,36.7 294.4,55.9 254.6,68.8" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="136.0,78.1 85.4,77.7 49.0,72.6 53.8,55.4 115.0,45.1 124.0,46.5 126.9,47.8 160.7,65.2 150.9,75.0 136.0,78.1" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="226.1,92.2 150.9,75.0 160.7,65.2 184.7,58.1 254.6,68.8 226.1,92.2" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <circle cx="189.6" cy="72.2" r="14" fill="#E65100" opacity="0.25"/>
+                <circle cx="189.6" cy="72.2" r="7" fill="#E65100" opacity="0.9"/>
+                <circle cx="189.6" cy="72.2" r="3" fill="#fff"/>
+                <text x="205.6" y="76.2" fill="#E65100" font-size="9" font-weight="bold" font-family="Arial">P-7B-02</text>
+                <text x="120.7" y="43.3" fill="#185FA5" font-size="10" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.7">Zone 7B</text>
+              </svg>
+            </div>
+
+            <div class="card" style="padding:12px 16px;">
+              <div class="transect-row"><span class="td-label">🌺 Plot</span><span>P-7B-02</span></div>
+              <div class="transect-row"><span class="td-label">📍 Location</span><span>Afore Phenology Plot</span></div>
+              <div class="transect-row"><span class="td-label">🧭 Coordinates</span><span>-9.1400° S, 148.4000° E</span></div>
+              <div class="transect-row"><span class="td-label">📅 Schedule</span><span>10th of every month</span></div>
+              <div class="transect-row"><span class="td-label">🌿 Species</span><span>Vanilla, Cocoa, Coffee, Okari</span></div>
+            </div>
+
+            <div class="nav-gate-card" id="phenoNavGateCard">
+              <div style="font-size:0.82rem;font-weight:700;color:#E65100;margin-bottom:8px;">📍 Navigate to Phenology Plot</div>
+              <div class="compass-row">
+                <svg width="60" height="60" viewBox="0 0 72 72" style="flex-shrink:0;">
+                  <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
+                  <text x="33" y="10" fill="#333" font-size="9" font-family="Arial" font-weight="bold">N</text>
+                  <g transform="rotate(68, 36, 36)">
+                    <polygon points="36,8 32,42 36,38 40,42" fill="#E65100"/>
+                    <polygon points="36,64 32,42 36,46 40,42" fill="#ccc"/>
+                  </g>
+                </svg>
+                <div class="compass-info">
+                  <div class="c-bearing">Walk ENE · 68°</div>
+                  <div class="c-dist"><strong>290 m</strong> to plot</div>
+                  <div id="phenoNavHint" style="margin-top:4px;font-size:0.72rem;color:#888;">Walk to monitoring plot — unlock within 30 m</div>
+                </div>
+              </div>
+              <button class="btn-outline" id="phenoBtnArrive" onclick="phenoArrive()" style="margin-top:10px;border-color:#E65100;color:#E65100;">Simulate: I've Reached the Plot ✓</button>
+            </div>
+
+            <div id="phenoFpSection" style="display:none;">
+              <div style="font-size:0.82rem;font-weight:700;color:#333;margin:14px 0 8px;">Step 2 — Verify Identity</div>
+              <button class="fp-verify-btn" id="phenoFpBtn" onclick="phenoVerify()" style="border-color:#E65100;">
+                <svg width="28" height="28" viewBox="0 0 120 120" fill="none">
+                  <path d="M60 10C32.4 10 10 32.4 10 60s22.4 50 50 50 50-22.4 50-50S87.6 10 60 10z" stroke="#E65100" stroke-width="7" fill="none"/>
+                  <path d="M60 30c-16.6 0-30 13.4-30 30s13.4 30 30 30 30-13.4 30-30-13.4-30-30-30z" stroke="#E65100" stroke-width="5" fill="none"/>
+                  <circle cx="60" cy="60" r="10" fill="#E65100"/>
+                </svg>
+                <span id="phenoFpTxt" style="font-size:0.8rem;color:#555;">Tap to Verify Identity</span>
+              </button>
+            </div>
+
+            <button class="btn-primary" id="phenoBeginBtn" disabled onclick="nav('screen-pheno-record')" style="background:#E65100;margin-top:14px;">Begin Phenology Observation</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: PHENOLOGY RECORDING
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-pheno-record">
+      <div class="top-bar" style="background:#E65100;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Phenology</div>
+          <div class="bar-subtitle">P-7B-02 — Recording</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="matrix-note" style="background:#fff3e0;border-color:#ffcc80;color:#E65100;">
+          Visit each tagged tree/vine and record its current phenophase and health. Same trees each month.
+        </div>
+        <div class="p14" style="padding-top:6px;">
+          <div class="card" style="padding:10px 14px;">
+            <div class="transect-row"><span class="td-label">📅 Date</span><span id="phenoDate">10 June 2026</span></div>
+            <div class="transect-row">
+              <span class="td-label">🕘 Time</span>
+              <span style="display:flex;align-items:center;gap:6px;">
+                <input type="time" id="phenoTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" value="10:00">
+                <span style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">auto</span>
+              </span>
+            </div>
+            <div class="transect-row">
+              <span class="td-label">☁ Weather</span>
+              <span>
+                <button class="weather-pill active" id="pwx-cloudy" onclick="wxP('cloudy','sunny')">☁ Cloudy</button>
+                <button class="weather-pill" id="pwx-sunny" onclick="wxP('sunny','cloudy')">☀ Sunny</button>
+              </span>
+            </div>
+          </div>
+
+            <div class="card" style="padding:10px 14px;margin-bottom:10px;">
+              <div style="font-size:0.85rem;font-weight:700;color:#E65100;margin-bottom:6px;">🌿 Vanilla</div>
+              <div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Phenophase</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill" id="ph-vanilla-vegetative" onclick="setPheno('vanilla','vegetative')" style="font-size:0.68rem;padding:4px 8px;">Vegetative</button><button class="weather-pill active" id="ph-vanilla-flowering" onclick="setPheno('vanilla','flowering')" style="font-size:0.68rem;padding:4px 8px;">Flowering</button><button class="weather-pill" id="ph-vanilla-fruiting" onclick="setPheno('vanilla','fruiting')" style="font-size:0.68rem;padding:4px 8px;">Fruiting</button><button class="weather-pill" id="ph-vanilla-ripe" onclick="setPheno('vanilla','ripe')" style="font-size:0.68rem;padding:4px 8px;">Ripe</button><button class="weather-pill" id="ph-vanilla-dormant" onclick="setPheno('vanilla','dormant')" style="font-size:0.68rem;padding:4px 8px;">Dormant</button></div>
+              <div style="font-size:0.72rem;font-weight:600;color:#555;margin:8px 0 4px;">Health</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill active" id="hp-vanilla-good" onclick="setHealth('vanilla','good')" style="font-size:0.68rem;padding:4px 8px;">Good</button><button class="weather-pill" id="hp-vanilla-fair" onclick="setHealth('vanilla','fair')" style="font-size:0.68rem;padding:4px 8px;">Fair</button><button class="weather-pill" id="hp-vanilla-poor" onclick="setHealth('vanilla','poor')" style="font-size:0.68rem;padding:4px 8px;">Poor</button></div>
+              <input type="text" class="form-input" style="font-size:0.75rem;padding:6px 10px;margin-top:6px;" value="Strong vine growth on host tree" placeholder="Notes...">
+            </div>
+            <div class="card" style="padding:10px 14px;margin-bottom:10px;">
+              <div style="font-size:0.85rem;font-weight:700;color:#E65100;margin-bottom:6px;">🫘 Cocoa</div>
+              <div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Phenophase</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill" id="ph-cocoa-vegetative" onclick="setPheno('cocoa','vegetative')" style="font-size:0.68rem;padding:4px 8px;">Vegetative</button><button class="weather-pill" id="ph-cocoa-flowering" onclick="setPheno('cocoa','flowering')" style="font-size:0.68rem;padding:4px 8px;">Flowering</button><button class="weather-pill active" id="ph-cocoa-fruiting" onclick="setPheno('cocoa','fruiting')" style="font-size:0.68rem;padding:4px 8px;">Fruiting</button><button class="weather-pill" id="ph-cocoa-ripe" onclick="setPheno('cocoa','ripe')" style="font-size:0.68rem;padding:4px 8px;">Ripe</button><button class="weather-pill" id="ph-cocoa-dormant" onclick="setPheno('cocoa','dormant')" style="font-size:0.68rem;padding:4px 8px;">Dormant</button></div>
+              <div style="font-size:0.72rem;font-weight:600;color:#555;margin:8px 0 4px;">Health</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill" id="hp-cocoa-good" onclick="setHealth('cocoa','good')" style="font-size:0.68rem;padding:4px 8px;">Good</button><button class="weather-pill active" id="hp-cocoa-fair" onclick="setHealth('cocoa','fair')" style="font-size:0.68rem;padding:4px 8px;">Fair</button><button class="weather-pill" id="hp-cocoa-poor" onclick="setHealth('cocoa','poor')" style="font-size:0.68rem;padding:4px 8px;">Poor</button></div>
+              <input type="text" class="form-input" style="font-size:0.75rem;padding:6px 10px;margin-top:6px;" placeholder="Notes...">
+            </div>
+            <div class="card" style="padding:10px 14px;margin-bottom:10px;">
+              <div style="font-size:0.85rem;font-weight:700;color:#E65100;margin-bottom:6px;">☕ Coffee</div>
+              <div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Phenophase</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill active" id="ph-coffee-vegetative" onclick="setPheno('coffee','vegetative')" style="font-size:0.68rem;padding:4px 8px;">Vegetative</button><button class="weather-pill" id="ph-coffee-flowering" onclick="setPheno('coffee','flowering')" style="font-size:0.68rem;padding:4px 8px;">Flowering</button><button class="weather-pill" id="ph-coffee-fruiting" onclick="setPheno('coffee','fruiting')" style="font-size:0.68rem;padding:4px 8px;">Fruiting</button><button class="weather-pill" id="ph-coffee-ripe" onclick="setPheno('coffee','ripe')" style="font-size:0.68rem;padding:4px 8px;">Ripe</button><button class="weather-pill" id="ph-coffee-dormant" onclick="setPheno('coffee','dormant')" style="font-size:0.68rem;padding:4px 8px;">Dormant</button></div>
+              <div style="font-size:0.72rem;font-weight:600;color:#555;margin:8px 0 4px;">Health</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill active" id="hp-coffee-good" onclick="setHealth('coffee','good')" style="font-size:0.68rem;padding:4px 8px;">Good</button><button class="weather-pill" id="hp-coffee-fair" onclick="setHealth('coffee','fair')" style="font-size:0.68rem;padding:4px 8px;">Fair</button><button class="weather-pill" id="hp-coffee-poor" onclick="setHealth('coffee','poor')" style="font-size:0.68rem;padding:4px 8px;">Poor</button></div>
+              <input type="text" class="form-input" style="font-size:0.75rem;padding:6px 10px;margin-top:6px;" placeholder="Notes...">
+            </div>
+            <div class="card" style="padding:10px 14px;margin-bottom:10px;">
+              <div style="font-size:0.85rem;font-weight:700;color:#E65100;margin-bottom:6px;">🥜 Okari</div>
+              <div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Phenophase</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill" id="ph-okari-vegetative" onclick="setPheno('okari','vegetative')" style="font-size:0.68rem;padding:4px 8px;">Vegetative</button><button class="weather-pill" id="ph-okari-flowering" onclick="setPheno('okari','flowering')" style="font-size:0.68rem;padding:4px 8px;">Flowering</button><button class="weather-pill" id="ph-okari-fruiting" onclick="setPheno('okari','fruiting')" style="font-size:0.68rem;padding:4px 8px;">Fruiting</button><button class="weather-pill" id="ph-okari-ripe" onclick="setPheno('okari','ripe')" style="font-size:0.68rem;padding:4px 8px;">Ripe</button><button class="weather-pill active" id="ph-okari-dormant" onclick="setPheno('okari','dormant')" style="font-size:0.68rem;padding:4px 8px;">Dormant</button></div>
+              <div style="font-size:0.72rem;font-weight:600;color:#555;margin:8px 0 4px;">Health</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill active" id="hp-okari-good" onclick="setHealth('okari','good')" style="font-size:0.68rem;padding:4px 8px;">Good</button><button class="weather-pill" id="hp-okari-fair" onclick="setHealth('okari','fair')" style="font-size:0.68rem;padding:4px 8px;">Fair</button><button class="weather-pill" id="hp-okari-poor" onclick="setHealth('okari','poor')" style="font-size:0.68rem;padding:4px 8px;">Poor</button></div>
+              <input type="text" class="form-input" style="font-size:0.75rem;padding:6px 10px;margin-top:6px;" value="Large tree, no fruit yet this season" placeholder="Notes...">
+            </div>
+
+          <div class="form-group" style="margin-top:6px;">
+            <label class="form-label">General Notes</label>
+            <textarea class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Overall site conditions, pest activity, recent weather impact…"></textarea>
+          </div>
+          <button class="btn-primary" style="background:#E65100;" onclick="submitPheno()">Save &amp; Submit Observation</button>
+        </div>
+      </div>
+    </div>
+
+        <!-- ══════════════════════════════════════
          SCREEN: SERVICE DELIVERY MONITORING
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-sdm">
@@ -2796,6 +3129,8 @@ const ALL_SCREENS = [
   'screen-observations','screen-obs-entry',
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-qabb-setup','screen-qabb-matrix',
+  'screen-water-setup','screen-water-record',
+  'screen-pheno-setup','screen-pheno-record',
   'screen-sdm','screen-facility',
   'screen-alerts',
   'screen-meetings','screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3',
@@ -2830,6 +3165,10 @@ function nav(id) {
   if (id === 'screen-mafia-setup') initMafia();
   if (id === 'screen-qabb-setup') initQabb();
   if (id === 'screen-qabb-matrix') initQabbMatrix();
+  if (id === 'screen-water-setup') initWater();
+  if (id === 'screen-water-record') initWaterRecord();
+  if (id === 'screen-pheno-setup') initPheno();
+  if (id === 'screen-pheno-record') initPhenoRecord();
   if (id === 'screen-performance') renderCalendar();
   showScreen(id);
 }
@@ -3189,6 +3528,132 @@ function wxQ(onId, offId) {
   document.getElementById('qwx-' + onId).classList.add('active');
   document.getElementById('qwx-' + offId).classList.remove('active');
 }
+
+/* ── Water Quality Setup ── */
+var waterVerifiedFlag = false, waterArrivedFlag = false;
+
+function initWater() {
+  waterVerifiedFlag = false; waterArrivedFlag = false;
+  document.getElementById('waterBeginBtn').disabled = true;
+  document.getElementById('waterFpBtn').classList.remove('verified');
+  document.getElementById('waterFpTxt').textContent = 'Tap to Verify Identity';
+  document.getElementById('waterFpSection').style.display = 'none';
+  document.getElementById('waterNavGateCard').classList.remove('arrived');
+  document.getElementById('waterBtnArrive').disabled = false;
+  document.getElementById('waterBtnArrive').textContent = "Simulate: I’ve Reached the Creek ✓";
+  document.getElementById('waterNavHint').textContent = 'Walk to monitoring point — unlock within 30 m';
+  document.getElementById('waterLoading').style.display = 'block';
+  document.getElementById('waterContent').style.display = 'none';
+  setTimeout(function() {
+    document.getElementById('waterLoading').style.display = 'none';
+    document.getElementById('waterContent').style.display = 'block';
+  }, 1000);
+}
+function waterArrive() {
+  waterArrivedFlag = true;
+  document.getElementById('waterNavGateCard').classList.add('arrived');
+  document.getElementById('waterNavHint').textContent = '✓ At monitoring point — verify identity';
+  document.getElementById('waterBtnArrive').disabled = true;
+  document.getElementById('waterBtnArrive').textContent = '✓ Arrived at Creek';
+  document.getElementById('waterFpSection').style.display = 'block';
+  checkWaterReady();
+}
+function waterVerify() {
+  if (waterVerifiedFlag) return;
+  document.getElementById('waterFpTxt').textContent = 'Verifying…';
+  setTimeout(function() {
+    waterVerifiedFlag = true;
+    document.getElementById('waterFpBtn').classList.add('verified');
+    document.getElementById('waterFpTxt').textContent = '✓ Identity Verified';
+    checkWaterReady();
+  }, 900);
+}
+function checkWaterReady() {
+  document.getElementById('waterBeginBtn').disabled = !(waterVerifiedFlag && waterArrivedFlag);
+}
+function initWaterRecord() {
+  var now = new Date();
+  var hh = String(now.getHours()).padStart(2,'0');
+  var mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('waterTime').value = hh + ':' + mm;
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('waterDate').textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+}
+function adjSecchi(d) {
+  var el = document.getElementById('secchiInput');
+  var v = Math.max(0, parseInt(el.value||0) + d);
+  el.value = v;
+  document.getElementById('secchiVal').textContent = v;
+}
+function submitWater() { toast('Water quality reading saved ✓'); }
+function wxW(on, off) { document.getElementById('wwx-'+on).classList.add('active'); document.getElementById('wwx-'+off).classList.remove('active'); }
+function wxPol(on, off) { document.getElementById('wpol-'+on).classList.add('active'); document.getElementById('wpol-'+off).classList.remove('active'); }
+
+/* ── Phenology Setup ── */
+var phenoVerifiedFlag = false, phenoArrivedFlag = false;
+
+function initPheno() {
+  phenoVerifiedFlag = false; phenoArrivedFlag = false;
+  document.getElementById('phenoBeginBtn').disabled = true;
+  document.getElementById('phenoFpBtn').classList.remove('verified');
+  document.getElementById('phenoFpTxt').textContent = 'Tap to Verify Identity';
+  document.getElementById('phenoFpSection').style.display = 'none';
+  document.getElementById('phenoNavGateCard').classList.remove('arrived');
+  document.getElementById('phenoBtnArrive').disabled = false;
+  document.getElementById('phenoBtnArrive').textContent = "Simulate: I’ve Reached the Plot ✓";
+  document.getElementById('phenoNavHint').textContent = 'Walk to monitoring plot — unlock within 30 m';
+  document.getElementById('phenoLoading').style.display = 'block';
+  document.getElementById('phenoContent').style.display = 'none';
+  setTimeout(function() {
+    document.getElementById('phenoLoading').style.display = 'none';
+    document.getElementById('phenoContent').style.display = 'block';
+  }, 1000);
+}
+function phenoArrive() {
+  phenoArrivedFlag = true;
+  document.getElementById('phenoNavGateCard').classList.add('arrived');
+  document.getElementById('phenoNavHint').textContent = '✓ At monitoring plot — verify identity';
+  document.getElementById('phenoBtnArrive').disabled = true;
+  document.getElementById('phenoBtnArrive').textContent = '✓ Arrived at Plot';
+  document.getElementById('phenoFpSection').style.display = 'block';
+  checkPhenoReady();
+}
+function phenoVerify() {
+  if (phenoVerifiedFlag) return;
+  document.getElementById('phenoFpTxt').textContent = 'Verifying…';
+  setTimeout(function() {
+    phenoVerifiedFlag = true;
+    document.getElementById('phenoFpBtn').classList.add('verified');
+    document.getElementById('phenoFpTxt').textContent = '✓ Identity Verified';
+    checkPhenoReady();
+  }, 900);
+}
+function checkPhenoReady() {
+  document.getElementById('phenoBeginBtn').disabled = !(phenoVerifiedFlag && phenoArrivedFlag);
+}
+function initPhenoRecord() {
+  var now = new Date();
+  var hh = String(now.getHours()).padStart(2,'0');
+  var mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('phenoTime').value = hh + ':' + mm;
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('phenoDate').textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+}
+function setPheno(species, phase) {
+  var phases = ['vegetative','flowering','fruiting','ripe','dormant'];
+  phases.forEach(function(p) {
+    var el = document.getElementById('ph-' + species + '-' + p);
+    if (el) el.classList.toggle('active', p === phase);
+  });
+}
+function setHealth(species, val) {
+  ['good','fair','poor'].forEach(function(h) {
+    var el = document.getElementById('hp-' + species + '-' + h);
+    if (el) el.classList.toggle('active', h === val);
+  });
+}
+function submitPheno() { toast('Phenology observation saved ✓'); }
+function wxP(on, off) { document.getElementById('pwx-'+on).classList.add('active'); document.getElementById('pwx-'+off).classList.remove('active'); }
 </script>
 </body>
 </html>

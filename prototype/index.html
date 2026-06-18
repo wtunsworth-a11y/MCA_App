@@ -1284,10 +1284,9 @@ select.msel {
             <span class="module-emoji">📈</span>
             <span class="module-name">Performance Monitoring</span>
           </div>
-          <div class="module-tile disabled">
-            <span class="coming-badge">Coming Soon</span>
-            <span class="module-emoji">🌱</span>
-            <span class="module-name">Biodiversity</span>
+          <div class="module-tile" onclick="nav('screen-qabb-setup')">
+            <span class="module-emoji">🦋</span>
+            <span class="module-name">QABB Butterfly Survey</span>
           </div>
         </div>
       </div>
@@ -1696,6 +1695,235 @@ select.msel {
     </div>
 
     <!-- ══════════════════════════════════════
+         SCREEN: QABB BUTTERFLY SURVEY SETUP
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-qabb-setup">
+      <div class="top-bar" style="background:#00695C;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">QABB Butterfly Survey</div>
+          <div class="bar-subtitle">Transect Setup</div>
+        </div>
+        <div class="logo-ph">MCF<br>Logo</div>
+      </div>
+      <div class="scroll-content">
+        <div id="qabbLoading" style="padding:40px 20px;text-align:center;">
+          <p style="color:#555;font-size:0.88rem;margin-bottom:6px;">Loading assigned transect…</p>
+          <div class="spinner-dots"><span></span><span></span><span></span></div>
+        </div>
+        <div id="qabbContent" style="display:none;">
+          <div class="p14" style="padding-bottom:20px;">
+
+            <div class="map-placeholder">
+              <svg viewBox="0 0 362 160" xmlns="http://www.w3.org/2000/svg">
+                <rect width="362" height="160" fill="#c9dce8"/>
+                <polygon points="-93.0,168.6 -80.2,149.9 -58.6,147.0 -27.9,127.7 -3.0,130.6 1.9,132.7 8.9,146.7" fill="#E6F1FB" fill-opacity="0.45" stroke="#0C447C" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="-88.2,12.9 -85.6,13.3 -68.9,35.0 -57.3,36.9 7.5,60.9 1.4,73.3 3.3,78.7 -16.1,88.5 -7.2,101.4 -11.0,108.2 -3.0,130.6 -27.9,127.7 -58.6,147.0 -80.2,149.9 -93.0,168.6" fill="#E1F5EE" fill-opacity="0.45" stroke="#085041" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="-18.2,69.4 -48.4,61.8 -40.9,78.0 -18.2,69.4" fill="#E1F5EE" fill-opacity="0.45" stroke="#085041" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="1.9,132.7 -3.0,130.6 -11.0,108.2 -7.2,101.4 -16.1,88.5 3.3,78.7 1.4,73.3 7.5,60.9 -57.3,36.9 -68.9,35.0 -85.6,13.3 -19.5,-11.1 11.7,-0.5 28.7,27.8 47.7,33.6 31.7,55.0 72.0,66.9 77.9,90.1 76.7,92.6 78.5,97.6 114.0,116.2 127.6,128.4 8.9,146.7 1.9,132.7" fill="#FAEEDA" fill-opacity="0.45" stroke="#633806" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="-40.9,78.0 -48.4,61.8 -18.2,69.4 -40.9,78.0" fill="#FAEEDA" fill-opacity="0.45" stroke="#633806" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="47.7,33.6 28.7,27.8 11.7,-0.5 37.4,0.8 86.2,-1.9 87.4,10.5 105.7,28.3 100.3,42.1 95.6,43.2 72.0,66.9 31.7,55.0 47.7,33.6" fill="#FAECE7" fill-opacity="0.45" stroke="#712B13" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="246.9,-52.9 246.9,-52.4 246.9,-48.3 246.9,-41.9 244.3,-38.2 244.7,-37.7 250.4,-34.2 283.4,-29.1 292.1,-26.0 302.4,-24.6 307.3,-22.5 254.5,24.9 205.7,35.8 160.8,39.8 136.8,48.0 100.3,42.1 105.7,28.3 87.4,10.5 86.2,-1.9 37.4,0.8 11.7,-0.5 -19.5,-11.1" fill="#EAF3DE" fill-opacity="0.45" stroke="#27500A" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="144.2,66.6 136.8,48.0 160.8,39.8 205.7,35.8 177.0,64.2 144.2,66.6" fill="#FBEAF0" fill-opacity="0.45" stroke="#72243E" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="320.2,-17.0 337.6,-12.9 338.2,-13.0 338.7,-13.3 341.2,-13.4 349.7,-14.5 353.9,-11.2 356.6,-13.5 360.0,-9.6 358.3,-9.3 359.6,-8.8 360.0,-8.6 362.2,-8.4 366.4,-5.9 383.9,-2.2 386.9,4.4 389.9,7.9 392.6,11.5 392.2,16.5 391.8,19.3 399.4,25.7 404.3,28.4 413.0,30.2 424.0,31.9 431.2,33.7 434.6,36.8 440.0,42.5 443.0,44.8 444.1,48.7 455.5,62.2 464.6,72.1 447.5,119.5 446.0,119.4 443.0,120.4 310.9,147.6 274.3,126.2 227.3,122.3 220.5,119.6 222.3,109.0 217.8,103.5 222.5,65.9 242.3,53.8 249.9,46.1 252.6,42.6 254.5,24.9 307.3,-22.5 320.2,-17.0" fill="#FAEEDA" fill-opacity="0.45" stroke="#854F0B" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="463.8,121.1 453.2,119.9 447.5,119.5" fill="#EEEDFE" fill-opacity="0.45" stroke="#534AB7" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="441.5,120.9 436.2,126.2 433.1,127.9 426.7,134.0 422.9,138.5 420.2,144.1 419.1,151.0 415.7,155.6 409.6,159.9 403.6,164.2 396.7,167.4 391.5,167.9 391.0,168.5 389.1,169.3 383.1,170.5 375.9,174.0 372.1,179.1 370.6,183.4 367.6,185.1 362.7,185.2 357.2,186.5 347.8,187.1 335.3,187.1 320.2,191.4 311.1,195.4 302.0,198.4 301.2,198.8 293.7,199.9 280.0,202.1 266.7,202.9 254.6,202.9 245.5,202.9 233.4,205.2 227.3,209.7 225.8,212.0 127.6,128.4 172.1,123.3 220.5,119.6 227.3,122.3 274.3,126.2 310.9,147.6 443.0,120.4 441.5,120.9" fill="#EEEDFE" fill-opacity="0.45" stroke="#534AB7" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="-19.5,-11.1 -85.6,13.3 -88.2,12.9" fill="#FCEBEB" fill-opacity="0.45" stroke="#A32D2D" stroke-width="1" stroke-dasharray="3,2"/>
+                <polygon points="217.8,103.5 222.3,109.0 220.5,119.6 172.1,123.3 127.6,128.4 114.0,116.2 78.5,97.6 76.7,92.6 77.9,90.1 72.0,66.9 95.6,43.2 100.3,42.1 136.8,48.0 144.2,66.6 177.0,64.2 205.7,35.8 254.5,24.9 252.6,42.6 249.9,46.1 242.3,53.8 222.5,65.9 217.8,103.5" fill="#E6F1FB" fill-opacity="0.6" stroke="#185FA5" stroke-width="2"/>
+                <polygon points="178.6,129.1 152.6,125.3 136.0,96.1 150.9,92.3 226.1,113.5 225.8,118.9 178.6,129.1" fill="#85B7EB" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
+                <polygon points="123.0,132.4 85.4,95.7 136.0,96.1 152.6,125.3 123.0,132.4" fill="#85B7EB" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
+                <polygon points="254.6,84.6 184.7,71.5 183.5,65.0 183.4,60.0 201.3,49.5 291.4,29.6 308.8,45.2 294.4,68.8 254.6,84.6" fill="#85B7EB" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
+                <polygon points="136.0,96.1 85.4,95.7 49.0,89.3 53.8,68.2 115.0,55.4 124.0,57.3 126.9,58.9 160.7,80.2 150.9,92.3 136.0,96.1" fill="#85B7EB" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
+                <polygon points="226.1,113.5 150.9,92.3 160.7,80.2 184.7,71.5 254.6,84.6 226.1,113.5" fill="#85B7EB" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
+                <line x1="198.2" y1="81.8" x2="207.7" y2="77.9" stroke="#00695C" stroke-width="3" stroke-dasharray="10,5"/>
+                <circle cx="198.2" cy="81.8" r="9" fill="#00695C" opacity="0.92"/>
+                <line x1="188.2" y1="81.8" x2="208.2" y2="81.8" stroke="#fff" stroke-width="2"/>
+                <line x1="198.2" y1="71.8" x2="198.2" y2="91.8" stroke="#fff" stroke-width="2"/>
+                <circle cx="207.7" cy="77.9" r="9" fill="#c62828" opacity="0.92"/>
+                <line x1="197.7" y1="77.9" x2="217.7" y2="77.9" stroke="#fff" stroke-width="2"/>
+                <line x1="207.7" y1="67.9" x2="207.7" y2="87.9" stroke="#fff" stroke-width="2"/>
+                <text x="190.2" y="105.8" fill="#00695C" font-size="10" font-weight="bold" font-family="Arial">START</text>
+                <text x="199.7" y="65.9" fill="#c62828" font-size="10" font-weight="bold" font-family="Arial">END</text>
+                <text x="174.1" y="78.2" fill="#185FA5" font-size="11" font-weight="bold" font-family="Arial" text-anchor="middle">Zone 7B</text>
+              </svg>
+            </div>
+
+            <div class="card" style="padding:12px 16px;">
+              <div class="transect-row">
+                <span class="td-label">🦋 Survey</span>
+                <span>QABB Transect #14</span>
+              </div>
+              <div class="transect-row">
+                <span class="td-label">📍 Start</span>
+                <span>-9.1320° S, 148.4050° E</span>
+              </div>
+              <div class="transect-row">
+                <span class="td-label">🏁 End</span>
+                <span>-9.1276° S, 148.4105° E</span>
+              </div>
+              <div class="transect-row">
+                <span class="td-label">🧭 Bearing</span>
+                <span>142° SE</span>
+              </div>
+              <div class="transect-row">
+                <span class="td-label">📏 Length</span>
+                <span>500 m (10 × 50 m sub-transects, 10 m wide)</span>
+              </div>
+            </div>
+
+            <div class="nav-gate-card" id="qabbNavGateCard">
+              <div style="font-size:0.82rem;font-weight:700;color:#00695C;margin-bottom:8px;">📍 Navigate to Transect Start Point</div>
+              <div class="compass-row">
+                <svg width="72" height="72" viewBox="0 0 72 72" style="flex-shrink:0;">
+                  <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
+                  <text x="33" y="10" fill="#333" font-size="9" font-family="Arial" font-weight="bold">N</text>
+                  <text x="33" y="68" fill="#aaa" font-size="9" font-family="Arial">S</text>
+                  <text x="2" y="40" fill="#aaa" font-size="9" font-family="Arial">W</text>
+                  <text x="61" y="40" fill="#aaa" font-size="9" font-family="Arial">E</text>
+                  <g transform="rotate(142, 36, 36)">
+                    <polygon points="36,8 32,42 36,38 40,42" fill="#00695C"/>
+                    <polygon points="36,64 32,42 36,46 40,42" fill="#ccc"/>
+                  </g>
+                </svg>
+                <div class="compass-info">
+                  <div class="c-bearing">Walk SE · 142°</div>
+                  <div class="c-dist"><strong>380 m</strong> to start point</div>
+                  <div id="qabbNavGateHint" style="margin-top:4px;font-size:0.72rem;color:#888;">Walk to start point — fingerprint verify unlocks when within 30 m</div>
+                </div>
+              </div>
+              <button class="btn-outline" id="qabbBtnArrive" onclick="qabbArrive()" style="margin-top:10px;border-color:#00695C;color:#00695C;">Simulate: I've Reached Start Point ✓</button>
+            </div>
+
+            <div id="qabbFpSection" style="display:none;">
+              <div style="font-size:0.82rem;font-weight:700;color:#333;margin:14px 0 8px;">Step 2 — Verify Identity</div>
+              <button class="fp-verify-btn" id="qabbFpBtn" onclick="qabbVerify()" style="border-color:#00695C;">
+                <svg width="28" height="28" viewBox="0 0 120 120" fill="none">
+                  <path d="M60 10C32.4 10 10 32.4 10 60s22.4 50 50 50 50-22.4 50-50S87.6 10 60 10z" stroke="#00695C" stroke-width="7" fill="none"/>
+                  <path d="M60 30c-16.6 0-30 13.4-30 30s13.4 30 30 30 30-13.4 30-30-13.4-30-30-30z" stroke="#00695C" stroke-width="5" fill="none"/>
+                  <circle cx="60" cy="60" r="10" fill="#00695C"/>
+                </svg>
+                <span id="qabbFpTxt" style="font-size:0.8rem;color:#555;">Tap to Verify Identity</span>
+              </button>
+            </div>
+
+            <button class="btn-primary" id="qabbBeginBtn" disabled onclick="nav('screen-qabb-matrix')" style="background:#00695C;margin-top:14px;">Begin QABB Survey</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: QABB BUTTERFLY SURVEY MATRIX
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-qabb-matrix">
+      <div class="top-bar" style="background:#00695C;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">QABB Survey</div>
+          <div class="bar-subtitle">Transect #14 — Recording</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="matrix-note" style="background:#e0f2f1;border-color:#80cbc4;color:#00695C;">
+          Record land use, Aristolochia vine count, and QABB sightings (adults, eggs, caterpillars) for each 50 m sub-transect. Scroll right for all 10 sub-transects.
+        </div>
+
+        <div class="p14" style="padding-top:6px;padding-bottom:0;">
+          <div class="card" style="padding:10px 14px;">
+            <div class="transect-row"><span class="td-label">📅 Date</span><span id="qabbDate">18 June 2026</span></div>
+            <div class="transect-row">
+              <span class="td-label">🕘 Start Time</span>
+              <span style="display:flex;align-items:center;gap:6px;">
+                <input type="time" id="qabbStartTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" value="08:45">
+                <span style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">auto</span>
+              </span>
+            </div>
+            <div class="transect-row">
+              <span class="td-label">🕐 End Time</span>
+              <span style="display:flex;align-items:center;gap:6px;">
+                <input type="time" id="qabbEndTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" placeholder="--:--">
+                <span id="qabbEndAuto" style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">set on submit</span>
+              </span>
+            </div>
+            <div class="transect-row">
+              <span class="td-label">☁ Weather</span>
+              <span>
+                <button class="weather-pill active" id="qwx-cloudy" onclick="wxQ('cloudy','sunny')">☁ Cloudy</button>
+                <button class="weather-pill" id="qwx-sunny" onclick="wxQ('sunny','cloudy')">☀ Sunny</button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="matrix-wrapper">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th>Question</th>
+                <th>ST1<br><span style="font-weight:400;font-size:0.6rem;">0–50m</span></th>
+                <th>ST2<br><span style="font-weight:400;font-size:0.6rem;">50–100m</span></th>
+                <th>ST3<br><span style="font-weight:400;font-size:0.6rem;">100–150m</span></th>
+                <th>ST4<br><span style="font-weight:400;font-size:0.6rem;">150–200m</span></th>
+                <th>ST5<br><span style="font-weight:400;font-size:0.6rem;">200–250m</span></th>
+                <th>ST6<br><span style="font-weight:400;font-size:0.6rem;">250–300m</span></th>
+                <th>ST7<br><span style="font-weight:400;font-size:0.6rem;">300–350m</span></th>
+                <th>ST8<br><span style="font-weight:400;font-size:0.6rem;">350–400m</span></th>
+                <th>ST9<br><span style="font-weight:400;font-size:0.6rem;">400–450m</span></th>
+                <th>ST10<br><span style="font-weight:400;font-size:0.6rem;">450–500m</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background:#e0f2f1;"><td style="position:sticky;left:0;z-index:3;background:#e0f2f1;font-weight:700;color:#00695C;padding:6px 8px;" colspan="11">LAND USE &amp; HABITAT</td></tr>
+              <tr>
+                <td style="position:sticky;left:0;z-index:2;background:#fff;">Land Use</td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" value="gaden" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" value="bus" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" value="bus" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
+              </tr>
+              <tr style="background:#e0f2f1;"><td style="position:sticky;left:0;z-index:3;background:#e0f2f1;font-weight:700;color:#00695C;padding:6px 8px;" colspan="11">HOST PLANT</td></tr>
+              <tr>
+                <td style="position:sticky;left:0;z-index:2;background:#fff;">Aristolochia Vines</td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">8</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">5</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+              </tr>
+              <tr style="background:#e0f2f1;"><td style="position:sticky;left:0;z-index:3;background:#e0f2f1;font-weight:700;color:#00695C;padding:6px 8px;" colspan="11">QABB SIGHTINGS</td></tr>
+              <tr>
+                <td style="position:sticky;left:0;z-index:2;background:#fff;">Adult QABB</td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">2</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+              </tr>
+              <tr>
+                <td style="position:sticky;left:0;z-index:2;background:#fff;">QABB Eggs</td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+              </tr>
+              <tr>
+                <td style="position:sticky;left:0;z-index:2;background:#fff;">QABB Caterpillars</td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">2</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p14" style="padding-top:10px;">
+          <div style="font-size:0.82rem;font-weight:700;color:#333;margin-bottom:6px;">Comments / Notes</div>
+          <textarea class="form-input" style="min-height:80px;width:100%;" placeholder="Add any additional observations about QABB habitat, threats, or notable sightings…"></textarea>
+        </div>
+        <div class="p14" style="padding-top:8px;">
+          <button class="btn-primary" style="background:#00695C;" onclick="submitQabb()">Save &amp; Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
          SCREEN: SERVICE DELIVERY MONITORING
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-sdm">
@@ -1811,21 +2039,41 @@ select.msel {
           <!-- Fire map placeholder -->
           <div class="map-fire-box">
             <svg width="362" height="180" viewBox="0 0 362 180" xmlns="http://www.w3.org/2000/svg">
-              <rect width="362" height="180" fill="#b0bec5"/>
-              <defs>
-                <pattern id="agrid" width="24" height="24" patternUnits="userSpaceOnUse">
-                  <path d="M24 0 L0 0 0 24" fill="none" stroke="#90a4ae" stroke-width="0.5"/>
-                </pattern>
-              </defs>
-              <rect width="362" height="180" fill="url(#agrid)" opacity="0.4"/>
-              <ellipse cx="180" cy="95" rx="145" ry="68" fill="#2E7D32" opacity="0.22"/>
-              <ellipse cx="110" cy="85" rx="75" ry="52" fill="#388E3C" opacity="0.18"/>
-              <circle cx="135" cy="78" r="16" fill="#c62828" opacity="0.82"/>
-              <text x="127" y="84" fill="#fff" font-size="16" font-family="Arial">🔥</text>
-              <circle cx="215" cy="105" r="16" fill="#E65100" opacity="0.78"/>
-              <text x="207" y="111" fill="#fff" font-size="16" font-family="Arial">🔥</text>
-              <rect x="0" y="155" width="362" height="25" fill="rgba(0,0,0,0.15)"/>
-              <text x="85" y="171" fill="#fff" font-size="11" font-weight="bold" font-family="Arial">Zone 7B — Managalas Conservation Area</text>
+              <rect width="362" height="180" fill="#c9dce8"/>
+              <polygon points="218.4,0.0 219.3,0.3 223.7,0.3 226.5,0.5 229.5,0.7 233.0,0.8 234.6,0.8 237.7,1.3 238.8,2.0 239.8,2.4 242.6,3.1 246.2,3.5 248.5,4.0 249.3,4.1 250.8,4.1 252.6,4.4 253.9,5.3 256.1,6.7 256.4,7.5 256.1,8.4 255.8,9.1 256.2,10.5 256.6,11.8 256.1,12.9 256.1,14.5 256.1,15.6 256.1,16.9 256.1,18.5 256.1,18.9 256.5,18.8 259.5,22.3 259.2,23.8 259.2,24.7 259.2,26.8 259.2,29.5 259.2,31.5 259.2,33.0 260.5,34.8 260.5,35.0 260.5,36.3 260.5,38.4 259.5,39.7 259.7,39.8 261.9,41.0 274.5,42.6 277.8,43.7 281.7,44.1 288.5,46.6 295.2,48.0 295.4,48.0 295.6,47.9 296.6,47.8 299.8,47.5 301.4,48.6 302.4,47.8 303.7,49.1 303.1,49.2 303.6,49.3 303.8,49.4 304.6,49.5 306.2,50.3 312.9,51.5 314.0,53.7 315.2,54.9 316.2,56.0 316.1,57.7 315.9,58.6 318.8,60.7 320.7,61.6 324.0,62.2 328.2,62.8 331.0,63.4 332.3,64.4 334.3,66.3 335.5,67.0 335.9,68.3 340.3,72.8 343.7,76.0 345.5,78.1 346.2,79.4 348.1,82.9 351.7,85.0 353.5,86.7 355.3,88.1 358.1,89.4 360.4,90.4 362.0,92.1 361.0,92.8 361.0,93.9 358.5,94.7 355.2,93.5 353.6,93.0 351.6,93.0 349.8,92.8 345.3,92.4 343.5,92.2 339.4,91.8 336.6,91.6 334.9,92.1 332.9,93.9 331.7,94.4 329.3,96.4 327.8,97.9 326.8,99.8 326.4,102.0 325.1,103.6 322.7,105.0 320.4,106.4 317.8,107.4 315.8,107.6 315.6,107.8 314.9,108.1 312.6,108.5 309.8,109.6 308.4,111.3 307.8,112.7 306.6,113.3 304.8,113.3 302.7,113.7 299.1,113.9 294.3,113.9 288.5,115.3 285.1,116.7 281.6,117.7 281.3,117.8 278.4,118.2 273.2,118.9 268.1,119.1 263.5,119.1 260.0,119.1 255.3,119.9 253.0,121.4 252.4,122.2 251.3,122.6 250.1,122.9 247.2,123.1 241.6,123.2 240.1,123.4 237.5,123.5 236.2,123.8 233.5,124.9 232.7,125.8 232.2,127.0 231.9,128.3 232.7,129.0 233.3,130.0 232.6,131.2 232.0,132.1 231.4,132.1 231.6,132.2 227.1,133.3 225.9,134.0 224.3,135.3 223.0,135.9 219.1,136.4 213.5,136.4 208.7,137.1 206.9,137.1 203.0,136.8 198.2,136.8 194.6,138.1 192.9,139.0 191.3,140.7 188.5,142.0 184.8,143.0 180.3,143.5 177.4,143.8 172.6,144.8 168.8,145.3 166.4,145.7 163.9,146.7 160.6,147.7 157.1,148.7 155.5,149.1 154.7,149.7 152.8,150.5 151.7,150.5 151.7,150.5 148.1,151.0 145.8,151.0 142.9,150.8 139.0,150.7 135.1,150.2 132.0,150.0 129.4,149.9 127.8,150.0 127.5,150.1 125.5,150.5 123.2,150.8 117.5,152.2 111.7,153.9 108.2,155.2 106.4,156.4 104.0,157.5 101.1,158.3 99.4,158.7 98.5,158.9 95.9,159.5 94.3,159.7 91.9,161.4 90.4,163.3 87.9,164.5 85.5,165.3 82.2,166.8 79.2,167.7 79.3,168.0 78.7,169.8 75.2,170.6 72.4,171.9 69.7,173.4 66.1,175.3 62.6,176.8 60.4,177.6 56.4,178.6 52.2,179.8 50.6,180.0 47.7,177.8 44.3,176.3 41.3,174.8 38.4,173.9 37.4,173.3 36.1,173.0 32.9,172.9 30.3,173.0 27.4,173.8 24.6,174.2 20.8,175.2 18.8,175.9 17.8,175.9 17.2,176.1 16.6,174.8 16.6,174.3 15.7,173.2 15.3,172.4 15.0,171.8 15.1,171.1 15.2,170.8 14.3,169.7 13.6,169.0 13.7,168.7 15.3,167.3 16.2,166.8 16.9,166.1 16.6,165.1 15.0,164.1 14.6,163.7 14.1,163.4 12.8,163.2 11.8,163.0 10.6,162.7 10.0,162.4 9.4,161.9 8.5,161.5 7.6,161.2 6.2,160.9 5.5,160.4 5.1,159.8 3.4,156.5 3.3,155.9 3.8,155.6 3.7,155.1 2.2,153.7 0.2,153.1 -0.0,153.0 2.6,150.7 4.9,146.8 6.6,144.7 7.8,142.6 9.3,140.9 10.8,139.5 14.2,136.4 15.6,135.5 26.1,129.8 37.1,125.4 37.4,124.9 42.3,120.9 46.9,117.8 48.5,116.0 50.4,114.5 53.3,112.0 53.9,110.0 55.3,106.7 55.3,103.1 56.5,100.5 59.0,97.2 59.5,95.7 60.3,94.7 64.6,90.3 69.3,87.9 75.6,84.9 80.4,82.3 86.2,79.3 86.5,78.0 86.5,76.7 85.3,75.9 85.3,75.7 84.6,75.2 82.6,74.4 80.0,73.6 75.2,72.9 71.7,72.5 67.4,72.4 65.5,72.4 62.0,72.2 59.3,71.4 56.4,70.2 54.0,68.8 48.8,66.8 46.9,65.9 44.2,64.8 42.6,63.0 44.2,60.8 45.9,58.7 48.8,56.7 53.6,55.1 56.5,53.1 61.1,51.8 63.7,51.2 65.9,50.6 67.1,49.3 69.7,48.9 70.1,47.9 71.0,46.9 72.0,45.5 74.3,44.6 77.1,43.4 81.6,41.9 86.4,40.1 88.1,39.6 89.1,38.3 89.1,37.3 89.5,36.5 89.5,35.8 89.1,35.2 88.2,34.3 91.1,33.3 96.8,31.3 99.5,30.6 104.9,29.4 109.7,28.1 111.9,27.8 112.4,27.3 112.9,27.1 114.2,25.9 115.8,25.5 115.8,25.3 117.9,24.4 117.4,23.6 116.1,22.5 115.1,21.7 116.8,19.7 122.3,18.5 126.8,17.3 127.8,15.9 130.0,14.6 136.5,13.2 141.9,12.0 147.7,10.9 151.4,9.8 151.4,8.9 150.9,8.0 150.7,6.8 150.0,5.5 149.5,4.4 150.1,3.7 150.3,2.4 151.6,1.7 154.9,1.5 158.1,1.4 163.5,1.4 168.4,1.4 172.3,1.5 177.2,1.5 180.3,1.2 183.3,1.0 188.5,1.4 189.7,1.4 193.2,1.4 196.2,1.4 198.1,1.3 198.1,1.2 198.5,1.1 201.6,0.8 205.2,0.6 212.0,0.1 218.4,0.0" fill="#2E7D32" fill-opacity="0.10" stroke="#1B5E20" stroke-width="1.5" stroke-linejoin="round"/>
+              <polygon points="206.9,137.1 203.0,136.8 198.2,136.8 194.6,138.1 193.7,138.5 102.1,129.7 101.4,119.9 98.2,110.5 130.5,107.8 135.4,101.7 143.7,100.7 155.4,94.3 165.0,95.3 166.8,96.0 169.5,100.6 194.7,122.7 195.3,122.9 207.8,137.1 206.9,137.1" fill="#E6F1FB" fill-opacity="0.65" stroke="#0C447C" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="69.3,87.9 75.6,84.9 80.4,82.3 86.2,79.3 86.5,78.0 86.5,76.7 85.3,75.9 85.3,75.7 84.6,75.2 82.6,74.4 80.0,73.6 75.2,72.9 71.7,72.5 67.4,72.4 65.5,72.4 62.0,72.2 59.3,71.4 56.4,70.2 54.0,68.8 48.8,66.8 46.9,65.9 44.9,65.1 93.2,61.1 104.8,58.9 115.4,54.9 132.4,56.5 133.4,56.6 139.8,63.8 144.2,64.4 169.0,72.3 166.6,76.4 167.4,78.2 159.9,81.4 163.4,85.7 161.9,87.9 165.0,95.3 155.4,94.3 143.7,100.7 135.4,101.7 130.5,107.8 98.2,110.5 95.3,109.3 81.9,94.6 77.1,92.3 65.9,89.6 69.3,87.9" fill="#E1F5EE" fill-opacity="0.65" stroke="#085041" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="159.2,75.1 147.6,72.6 150.5,78.0 159.2,75.1" fill="#E1F5EE" fill-opacity="0.65" stroke="#085041" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="166.8,96.0 165.0,95.3 161.9,87.9 163.4,85.7 159.9,81.4 167.4,78.2 166.6,76.4 169.0,72.3 144.2,64.4 139.8,63.8 133.4,56.6 158.6,48.6 170.6,52.1 177.1,61.4 184.3,63.3 178.2,70.4 193.6,74.3 195.9,82.0 195.4,82.8 196.1,84.4 209.7,90.6 214.9,94.6 195.3,122.9 194.7,122.7 169.5,100.6 166.8,96.0" fill="#FAEEDA" fill-opacity="0.65" stroke="#633806" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="150.5,78.0 147.6,72.6 159.2,75.1 150.5,78.0" fill="#FAEEDA" fill-opacity="0.65" stroke="#633806" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="192.9,139.0 191.3,140.7 188.5,142.0 184.8,143.0 180.3,143.5 177.4,143.8 172.6,144.8 168.8,145.3 166.4,145.7 163.9,146.7 160.6,147.7 157.1,148.7 155.5,149.1 154.7,149.7 152.8,150.5 151.7,150.5 151.7,150.5 148.1,151.0 145.8,151.0 142.9,150.8 139.0,150.7 135.1,150.2 132.0,150.0 129.4,149.9 127.8,150.0 127.5,150.1 125.5,150.5 123.2,150.8 117.5,152.2 111.7,153.9 108.2,155.2 106.4,156.4 104.0,157.5 101.1,158.3 99.4,158.7 98.5,158.9 95.9,159.5 94.3,159.7 91.9,161.4 90.4,163.3 87.9,164.5 85.5,165.3 82.2,166.8 79.2,167.7 79.3,168.0 78.7,169.8 75.2,170.6 72.4,171.9 69.7,173.4 66.1,175.3 62.6,176.8 60.4,177.6 56.4,178.6 52.2,179.8 50.6,180.0 47.7,177.8 44.3,176.3 41.3,174.8 38.4,173.9 37.4,173.3 36.1,173.0 32.9,172.9 30.3,173.0 27.4,173.8 24.6,174.2 20.8,175.2 18.8,175.9 17.8,175.9 17.2,176.1 16.6,174.8 16.6,174.3 15.7,173.2 15.3,172.4 15.0,171.8 15.1,171.1 15.2,170.8 14.3,169.7 13.6,169.0 13.7,168.7 15.3,167.3 16.2,166.8 16.9,166.1 16.6,165.1 15.0,164.1 14.6,163.7 14.1,163.4 12.8,163.2 11.8,163.0 10.6,162.7 10.0,162.4 9.4,161.9 8.5,161.5 7.6,161.2 6.2,160.9 5.5,160.4 5.1,159.8 3.4,156.5 3.3,155.9 3.8,155.6 3.7,155.1 2.2,153.7 0.2,153.1 -0.0,153.0 2.6,150.7 4.9,146.8 6.6,144.7 7.8,142.6 9.3,140.9 10.8,139.5 14.2,136.4 15.6,135.5 26.1,129.8 37.1,125.4 37.4,124.9 42.3,120.9 46.9,117.8 48.5,116.0 50.4,114.5 53.3,112.0 53.9,110.0 55.3,106.7 55.3,103.1 56.5,100.5 59.0,97.2 59.5,95.7 60.3,94.7 64.6,90.3 65.9,89.6 77.1,92.3 81.9,94.6 95.3,109.3 98.2,110.5 101.4,119.9 102.1,129.7 193.7,138.5 192.9,139.0" fill="#EEEDFE" fill-opacity="0.65" stroke="#3C3489" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="184.3,63.3 177.1,61.4 170.6,52.1 180.4,52.5 199.1,51.6 199.5,55.7 206.5,61.6 204.4,66.1 202.7,66.5 193.6,74.3 178.2,70.4 184.3,63.3" fill="#FAECE7" fill-opacity="0.65" stroke="#712B13" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="219.3,0.3 223.7,0.3 226.5,0.5 229.5,0.7 233.0,0.8 234.6,0.8 237.7,1.3 238.8,2.0 239.8,2.4 242.6,3.1 246.2,3.5 248.5,4.0 249.3,4.1 250.8,4.1 252.6,4.4 253.9,5.3 256.1,6.7 256.4,7.5 256.1,8.4 255.8,9.1 256.2,10.5 256.6,11.8 256.1,12.9 256.1,14.5 256.1,15.6 256.1,16.9 256.1,18.5 256.1,18.9 256.5,18.8 259.5,22.3 259.2,23.8 259.2,24.7 259.2,26.8 259.2,29.5 259.2,31.5 259.2,33.0 260.5,34.8 260.5,35.0 260.5,36.3 260.5,38.4 259.5,39.7 259.7,39.8 261.9,41.0 274.5,42.6 277.8,43.7 281.7,44.1 283.6,44.8 263.4,60.5 244.7,64.1 227.6,65.4 218.4,68.1 204.4,66.1 206.5,61.6 199.5,55.7 199.1,51.6 180.4,52.5 170.6,52.1 158.6,48.6 184.5,1.1 188.5,1.4 189.7,1.4 193.2,1.4 196.2,1.4 198.1,1.3 198.1,1.2 198.5,1.1 201.6,0.8 205.2,0.6 212.0,0.1 218.4,0.0 219.3,0.3" fill="#EAF3DE" fill-opacity="0.65" stroke="#27500A" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="221.3,74.2 218.4,68.1 227.6,65.4 244.7,64.1 233.8,73.4 221.3,74.2" fill="#FBEAF0" fill-opacity="0.65" stroke="#72243E" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="249.4,86.4 251.1,88.2 250.4,91.7 231.9,92.9 214.9,94.6 209.7,90.6 196.1,84.4 195.4,82.8 195.9,82.0 193.6,74.3 202.7,66.5 204.4,66.1 218.4,68.1 221.3,74.2 233.8,73.4 244.7,64.1 263.4,60.5 262.7,66.3 261.7,67.5 258.8,70.0 251.2,74.0 249.4,86.4" fill="#E6F1FB" fill-opacity="0.65" stroke="#185FA5" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="288.5,46.6 295.2,48.0 295.4,48.0 295.6,47.9 296.6,47.8 299.8,47.5 301.4,48.6 302.4,47.8 303.7,49.1 303.1,49.2 303.6,49.3 303.8,49.4 304.6,49.5 306.2,50.3 312.9,51.5 314.0,53.7 315.2,54.9 316.2,56.0 316.1,57.7 315.9,58.6 318.8,60.7 320.7,61.6 324.0,62.2 328.2,62.8 331.0,63.4 332.3,64.4 334.3,66.3 335.5,67.0 335.9,68.3 340.3,72.8 343.7,76.0 345.5,78.1 346.2,79.4 348.1,82.9 351.7,85.0 353.5,86.7 355.3,88.1 356.1,88.5 350.0,89.4 337.2,91.6 336.6,91.6 335.5,91.9 285.0,100.9 271.0,93.9 253.0,92.6 250.4,91.7 251.1,88.2 249.4,86.4 251.2,74.0 258.8,70.0 261.7,67.5 262.7,66.3 263.4,60.5 283.6,44.8 288.5,46.6" fill="#FAEEDA" fill-opacity="0.65" stroke="#854F0B" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="358.1,89.4 360.4,90.4 362.0,92.1 361.0,92.8 361.0,93.9 358.5,94.7 355.2,93.5 353.6,93.0 351.6,93.0 349.8,92.8 345.3,92.4 343.5,92.2 339.4,91.8 337.2,91.6 350.0,89.4 356.1,88.5 358.1,89.4" fill="#EEEDFE" fill-opacity="0.65" stroke="#534AB7" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="334.9,92.1 332.9,93.9 331.7,94.4 329.3,96.4 327.8,97.9 326.8,99.8 326.4,102.0 325.1,103.6 322.7,105.0 320.4,106.4 317.8,107.4 315.8,107.6 315.6,107.8 314.9,108.1 312.6,108.5 309.8,109.6 308.4,111.3 307.8,112.7 306.6,113.3 304.8,113.3 302.7,113.7 299.1,113.9 294.3,113.9 288.5,115.3 285.1,116.7 281.6,117.7 281.3,117.8 278.4,118.2 273.2,118.9 268.1,119.1 263.5,119.1 260.0,119.1 255.3,119.9 253.0,121.4 252.4,122.2 251.3,122.6 250.1,122.9 247.2,123.1 241.6,123.2 240.1,123.4 237.5,123.5 236.2,123.8 233.5,124.9 232.7,125.8 232.2,127.0 231.9,128.3 232.7,129.0 233.3,130.0 232.6,131.2 232.0,132.1 231.4,132.1 231.6,132.2 227.1,133.3 225.9,134.0 224.3,135.3 223.0,135.9 219.1,136.4 213.5,136.4 208.7,137.1 207.8,137.1 195.3,122.9 214.9,94.6 231.9,92.9 250.4,91.7 253.0,92.6 271.0,93.9 285.0,100.9 335.5,91.9 334.9,92.1" fill="#EEEDFE" fill-opacity="0.65" stroke="#534AB7" stroke-width="0.8" stroke-linejoin="round"/>
+              <polygon points="44.2,64.8 42.6,63.0 44.2,60.8 45.9,58.7 48.8,56.7 53.6,55.1 56.5,53.1 61.1,51.8 63.7,51.2 65.9,50.6 67.1,49.3 69.7,48.9 70.1,47.9 71.0,46.9 72.0,45.5 74.3,44.6 77.1,43.4 81.6,41.9 86.4,40.1 88.1,39.6 89.1,38.3 89.1,37.3 89.5,36.5 89.5,35.8 89.1,35.2 88.2,34.3 91.1,33.3 96.8,31.3 99.5,30.6 104.9,29.4 109.7,28.1 111.9,27.8 112.4,27.3 112.9,27.1 114.2,25.9 115.8,25.5 115.8,25.3 117.9,24.4 117.4,23.6 116.1,22.5 115.1,21.7 116.8,19.7 122.3,18.5 126.8,17.3 127.8,15.9 130.0,14.6 136.5,13.2 141.9,12.0 147.7,10.9 151.4,9.8 151.4,8.9 150.9,8.0 150.7,6.8 150.0,5.5 149.5,4.4 150.1,3.7 150.3,2.4 151.6,1.7 154.9,1.5 158.1,1.4 163.5,1.4 168.4,1.4 172.3,1.5 177.2,1.5 180.3,1.2 183.3,1.0 184.5,1.1 158.6,48.6 133.4,56.6 132.4,56.5 115.4,54.9 104.8,58.9 93.2,61.1 44.9,65.1 44.2,64.8" fill="#FCEBEB" fill-opacity="0.65" stroke="#A32D2D" stroke-width="0.8" stroke-linejoin="round"/>
+              <text x="166.8" y="119.2" fill="#0C447C" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">1</text>
+              <text x="100.5" y="78.6" fill="#085041" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">2</text>
+              <text x="174.5" y="80.9" fill="#633806" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">3</text>
+              <text x="68.5" y="151.1" fill="#3C3489" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">4</text>
+              <text x="190.1" y="61.6" fill="#712B13" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">5</text>
+              <text x="236.4" y="21.1" fill="#27500A" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">6</text>
+              <text x="227.9" y="69.9" fill="#72243E" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">7A</text>
+              <text x="230.0" y="77.5" fill="#185FA5" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">7B</text>
+              <text x="308.7" y="66.8" fill="#854F0B" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">8</text>
+              <text x="353.0" y="91.8" fill="#534AB7" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">9</text>
+              <text x="109.9" y="30.5" fill="#A32D2D" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">10</text>
+              <circle cx="232.7" cy="78.6" r="13" fill="#c62828" opacity="0.82"/>
+              <text x="225.7" y="84.6" fill="#fff" font-size="14" font-family="Arial">🔥</text>
+              <circle cx="284.7" cy="69.8" r="13" fill="#E65100" opacity="0.78"/>
+              <text x="277.7" y="75.8" fill="#fff" font-size="14" font-family="Arial">🔥</text>
+              <ellipse cx="172.7" cy="46.4" rx="22" ry="14" fill="#388E3C" opacity="0.35" stroke="#1B5E20" stroke-width="1" stroke-dasharray="4,2"/>
+              <text x="172.7" y="50.4" fill="#1B5E20" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle">−2.3ha</text>
+              <rect x="0" y="158" width="362" height="22" fill="rgba(0,0,0,0.18)"/>
+              <text x="181" y="173" fill="#fff" font-size="10" font-weight="bold" font-family="Arial" text-anchor="middle">Zone 7B — Managalas Conservation Area</text>
             </svg>
           </div>
 
@@ -2547,6 +2795,7 @@ const ALL_SCREENS = [
   'screen-splash','screen-fingerprint','screen-dashboard',
   'screen-observations','screen-obs-entry',
   'screen-mafia-setup','screen-mafia-matrix',
+  'screen-qabb-setup','screen-qabb-matrix',
   'screen-sdm','screen-facility',
   'screen-alerts',
   'screen-meetings','screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3',
@@ -2579,6 +2828,8 @@ function nav(id) {
   history.push(currentScreen);
   // Side effects on enter
   if (id === 'screen-mafia-setup') initMafia();
+  if (id === 'screen-qabb-setup') initQabb();
+  if (id === 'screen-qabb-matrix') initQabbMatrix();
   if (id === 'screen-performance') renderCalendar();
   showScreen(id);
 }
@@ -2862,6 +3113,81 @@ function toggleActivityLayer(type) {
   document.querySelectorAll('[id^="layer-' + type + '"]').forEach(el => {
     el.style.display = isOn ? 'none' : '';
   });
+}
+
+/* ── QABB Butterfly Survey Setup ── */
+let qabbVerified = false;
+let qabbArrived = false;
+
+function initQabb() {
+  qabbVerified = false;
+  qabbArrived = false;
+  document.getElementById('qabbBeginBtn').disabled = true;
+  document.getElementById('qabbFpBtn').classList.remove('verified');
+  document.getElementById('qabbFpTxt').textContent = 'Tap to Verify Identity';
+  document.getElementById('qabbFpSection').style.display = 'none';
+  document.getElementById('qabbNavGateCard').classList.remove('arrived');
+  document.getElementById('qabbBtnArrive').disabled = false;
+  document.getElementById('qabbBtnArrive').textContent = 'Simulate: I\'ve Reached Start Point \u2713';
+  document.getElementById('qabbNavGateHint').textContent = 'Walk to start point \u2014 fingerprint verify unlocks when within 30 m';
+  document.getElementById('qabbLoading').style.display = 'block';
+  document.getElementById('qabbContent').style.display = 'none';
+  setTimeout(function() {
+    document.getElementById('qabbLoading').style.display = 'none';
+    document.getElementById('qabbContent').style.display = 'block';
+  }, 1200);
+}
+
+function qabbArrive() {
+  qabbArrived = true;
+  document.getElementById('qabbNavGateCard').classList.add('arrived');
+  document.getElementById('qabbNavGateHint').textContent = '\u2713 At start point \u2014 verify identity to begin';
+  document.getElementById('qabbBtnArrive').disabled = true;
+  document.getElementById('qabbBtnArrive').textContent = '\u2713 Arrived at Start Point';
+  document.getElementById('qabbFpSection').style.display = 'block';
+  checkQabbReady();
+}
+
+function qabbVerify() {
+  if (qabbVerified) return;
+  document.getElementById('qabbFpTxt').textContent = 'Verifying\u2026';
+  setTimeout(function() {
+    qabbVerified = true;
+    document.getElementById('qabbFpBtn').classList.add('verified');
+    document.getElementById('qabbFpTxt').textContent = '\u2713 Identity Verified';
+    checkQabbReady();
+  }, 900);
+}
+
+function checkQabbReady() {
+  document.getElementById('qabbBeginBtn').disabled = !(qabbVerified && qabbArrived);
+}
+
+function initQabbMatrix() {
+  var now = new Date();
+  var hh = String(now.getHours()).padStart(2, '0');
+  var mm = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('qabbStartTime').value = hh + ':' + mm;
+  document.getElementById('qabbEndTime').value = '';
+  document.getElementById('qabbEndAuto').textContent = 'set on submit';
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('qabbDate').textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+}
+
+function submitQabb() {
+  var now = new Date();
+  var hh = String(now.getHours()).padStart(2, '0');
+  var mm = String(now.getMinutes()).padStart(2, '0');
+  if (!document.getElementById('qabbEndTime').value) {
+    document.getElementById('qabbEndTime').value = hh + ':' + mm;
+  }
+  document.getElementById('qabbEndAuto').textContent = 'auto';
+  toast('QABB survey data saved ✓');
+}
+
+function wxQ(onId, offId) {
+  document.getElementById('qwx-' + onId).classList.add('active');
+  document.getElementById('qwx-' + offId).classList.remove('active');
 }
 </script>
 </body>

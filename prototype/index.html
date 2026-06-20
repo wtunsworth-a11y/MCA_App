@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MCA Clan Steward App — Prototype</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1B5E20">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MCA App">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='30' fill='%231B5E20'/><text x='90' y='115' text-anchor='middle' font-size='72' font-family='Arial' font-weight='bold' fill='white'>MCA</text></svg>">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1172,6 +1178,29 @@ select.msel {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+/* ── Export & PWA ── */
+.btn-sm-export {
+  background: #1B5E20;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-sm-export:active { background: #0d3d12; }
+.record-badge {
+  background: #1B5E20;
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 18px;
+  text-align: center;
+}
 </style>
 </head>
 <body>
@@ -1276,7 +1305,7 @@ select.msel {
             <span class="module-emoji">🤝</span>
             <span class="module-name">Meetings</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-community-stub')">
+          <div class="module-tile" onclick="nav('screen-community-stub','screen-data-export')">
             <span class="module-emoji">👥</span>
             <span class="module-name">Community Data</span>
           </div>
@@ -1697,7 +1726,7 @@ select.msel {
           <textarea class="form-input" style="min-height:80px;width:100%;" placeholder="Add any additional observations or notes for the whole transect…"></textarea>
         </div>
         <div class="p14" style="padding-top:8px;">
-          <button class="btn-primary" onclick="toast('Survey data saved ✓')">Save &amp; Continue</button>
+          <button class="btn-primary" onclick="saveMafia()">Save &amp; Continue</button>
         </div>
       </div>
     </div>
@@ -3116,6 +3145,82 @@ select.msel {
       </div>
     </div>
 
+
+    <!-- ══════════════════════════════════════
+         SCREEN: DATA EXPORT
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-data-export">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Export Data</div>
+          <div class="bar-subtitle">Download CSV files</div>
+        </div>
+        <div class="logo-ph">MCF<br>Logo</div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14">
+          <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <div style="font-size:0.82rem;font-weight:700;color:#333;margin-bottom:12px;">Saved Records on Device</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
+                <div><span style="font-size:1.1rem;margin-right:6px;">🌿</span><span style="font-size:0.82rem;font-weight:600;">MaFIA Surveys</span></div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span id="badge-mafia" class="record-badge" style="display:none;">0</span>
+                  <button class="btn-sm-export" onclick="exportCSV('mafia')">CSV ↓</button>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
+                <div><span style="font-size:1.1rem;margin-right:6px;">🦋</span><span style="font-size:0.82rem;font-weight:600;">QABB Surveys</span></div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span id="badge-qabb" class="record-badge" style="display:none;">0</span>
+                  <button class="btn-sm-export" onclick="exportCSV('qabb')">CSV ↓</button>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
+                <div><span style="font-size:1.1rem;margin-right:6px;">🌊</span><span style="font-size:0.82rem;font-weight:600;">Water Quality</span></div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span id="badge-water" class="record-badge" style="display:none;">0</span>
+                  <button class="btn-sm-export" onclick="exportCSV('water')">CSV ↓</button>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
+                <div><span style="font-size:1.1rem;margin-right:6px;">🌺</span><span style="font-size:0.82rem;font-weight:600;">Phenology</span></div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span id="badge-phenology" class="record-badge" style="display:none;">0</span>
+                  <button class="btn-sm-export" onclick="exportCSV('phenology')">CSV ↓</button>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
+                <div><span style="font-size:1.1rem;margin-right:6px;">👁️</span><span style="font-size:0.82rem;font-weight:600;">Observations</span></div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span id="badge-observations" class="record-badge" style="display:none;">0</span>
+                  <button class="btn-sm-export" onclick="exportCSV('observations')">CSV ↓</button>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
+                <div><span style="font-size:1.1rem;margin-right:6px;">🚶</span><span style="font-size:0.82rem;font-weight:600;">Patrols</span></div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span id="badge-patrols" class="record-badge" style="display:none;">0</span>
+                  <button class="btn-sm-export" onclick="exportCSV('patrols')">CSV ↓</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="exportAllCSV()" style="margin-bottom:12px;">Export All Records as CSV</button>
+          <div style="background:#fff3e0;border-radius:8px;padding:12px;font-size:0.75rem;color:#e65100;">
+            <strong>Tip:</strong> CSV files are saved to your Downloads folder. Transfer them via USB, Bluetooth, or upload when you have signal.
+          </div>
+          <div style="margin-top:16px;background:#fff;border-radius:8px;padding:12px;font-size:0.75rem;color:#666;">
+            <div style="font-weight:600;margin-bottom:4px;">Install as App</div>
+            <p style="margin-bottom:8px;">Add this to your home screen for offline use — works without internet.</p>
+            <button id="installBtn" class="btn-outline" onclick="installPWA()" style="display:none;">Install on Home Screen</button>
+            <p id="installNote" style="font-size:0.7rem;color:#999;margin-top:4px;">If the install button doesn't appear, use your browser menu → "Add to Home Screen"</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toastEl"></div>
 
@@ -3138,7 +3243,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-map','screen-performance','screen-recent-activity',
   'screen-ack','screen-profile',
-  'screen-patrol-stub','screen-community-stub'
+  'screen-patrol-stub','screen-community-stub','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -3521,7 +3626,7 @@ function submitQabb() {
     document.getElementById('qabbEndTime').value = hh + ':' + mm;
   }
   document.getElementById('qabbEndAuto').textContent = 'auto';
-  toast('QABB survey data saved ✓');
+  saveRecord('qabb', collectQabbData(), function() { toast('QABB survey saved to device ✓'); });
 }
 
 function wxQ(onId, offId) {
@@ -3585,7 +3690,7 @@ function adjSecchi(d) {
   el.value = v;
   document.getElementById('secchiVal').textContent = v;
 }
-function submitWater() { toast('Water quality reading saved ✓'); }
+function submitWater() { saveRecord('water', collectWaterData(), function() { toast('Water quality saved to device ✓'); }); }
 function wxW(on, off) { document.getElementById('wwx-'+on).classList.add('active'); document.getElementById('wwx-'+off).classList.remove('active'); }
 function wxPol(on, off) { document.getElementById('wpol-'+on).classList.add('active'); document.getElementById('wpol-'+off).classList.remove('active'); }
 
@@ -3652,8 +3757,279 @@ function setHealth(species, val) {
     if (el) el.classList.toggle('active', h === val);
   });
 }
-function submitPheno() { toast('Phenology observation saved ✓'); }
+function submitPheno() { saveRecord('phenology', collectPhenoData(), function() { toast('Phenology data saved to device ✓'); }); }
 function wxP(on, off) { document.getElementById('pwx-'+on).classList.add('active'); document.getElementById('pwx-'+off).classList.remove('active'); }
+
+
+/* ══════════════════════════════════════
+   PWA: Service Worker Registration
+══════════════════════════════════════ */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(function(reg) {
+    console.log('SW registered, scope:', reg.scope);
+  }).catch(function(err) {
+    console.log('SW registration failed:', err);
+  });
+}
+
+/* ══════════════════════════════════════
+   LOCAL DATABASE: IndexedDB wrapper
+══════════════════════════════════════ */
+var mcaDB = null;
+var DB_NAME = 'MCA_StewardData';
+var DB_VERSION = 1;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols'];
+
+function openDB(cb) {
+  if (mcaDB) { if (cb) cb(mcaDB); return; }
+  var req = indexedDB.open(DB_NAME, DB_VERSION);
+  req.onupgradeneeded = function(e) {
+    var db = e.target.result;
+    STORES.forEach(function(name) {
+      if (!db.objectStoreNames.contains(name)) {
+        db.createObjectStore(name, { keyPath: 'id', autoIncrement: true });
+      }
+    });
+  };
+  req.onsuccess = function(e) {
+    mcaDB = e.target.result;
+    if (cb) cb(mcaDB);
+    updateRecordCounts();
+  };
+  req.onerror = function(e) {
+    console.error('DB open error:', e);
+    if (cb) cb(null);
+  };
+}
+
+function saveRecord(storeName, data, cb) {
+  openDB(function(db) {
+    if (!db) { toast('Storage error — data not saved'); return; }
+    var tx = db.transaction(storeName, 'readwrite');
+    var store = tx.objectStore(storeName);
+    data.timestamp = new Date().toISOString();
+    data.synced = false;
+    store.add(data);
+    tx.oncomplete = function() {
+      updateRecordCounts();
+      if (cb) cb(true);
+    };
+    tx.onerror = function() {
+      toast('Save error');
+      if (cb) cb(false);
+    };
+  });
+}
+
+function getAllRecords(storeName, cb) {
+  openDB(function(db) {
+    if (!db) { cb([]); return; }
+    var tx = db.transaction(storeName, 'readonly');
+    var store = tx.objectStore(storeName);
+    var req = store.getAll();
+    req.onsuccess = function() { cb(req.result); };
+    req.onerror = function() { cb([]); };
+  });
+}
+
+function countRecords(storeName, cb) {
+  openDB(function(db) {
+    if (!db) { cb(0); return; }
+    var tx = db.transaction(storeName, 'readonly');
+    var req = tx.objectStore(storeName).count();
+    req.onsuccess = function() { cb(req.result); };
+    req.onerror = function() { cb(0); };
+  });
+}
+
+function updateRecordCounts() {
+  STORES.forEach(function(name) {
+    countRecords(name, function(n) {
+      var badge = document.getElementById('badge-' + name);
+      if (badge) {
+        badge.textContent = n;
+        badge.style.display = n > 0 ? 'inline-block' : 'none';
+      }
+    });
+  });
+}
+
+/* ══════════════════════════════════════
+   DATA COLLECTION: Harvest form values
+══════════════════════════════════════ */
+
+function collectMafiaData() {
+  var table = document.querySelector('#screen-mafia-matrix .matrix-table');
+  if (!table) return {};
+  var data = { survey_type: 'mafia', zone: 'Zone 7B', clan: 'ST1' };
+  var rows = table.querySelectorAll('tbody tr');
+  rows.forEach(function(row) {
+    var label = row.querySelector('td:first-child');
+    if (!label || row.classList.contains('mod-header')) return;
+    var qName = label.textContent.trim().replace(/\s+/g, '_');
+    var cells = row.querySelectorAll('td');
+    for (var st = 1; st < cells.length; st++) {
+      var key = qName + '_ST' + st;
+      var sel = cells[st].querySelector('select');
+      if (sel) { data[key] = sel.value; continue; }
+      var tally = cells[st].querySelector('.tally-count');
+      if (tally) { data[key] = parseInt(tally.textContent) || 0; continue; }
+      var ynActive = cells[st].querySelector('.yn-btn.ay, .yn-btn.an');
+      if (ynActive) { data[key] = ynActive.textContent.trim(); }
+    }
+  });
+  var comments = document.querySelector('#screen-mafia-matrix textarea');
+  if (comments) data.comments = comments.value;
+  return data;
+}
+
+function collectQabbData() {
+  var data = {
+    survey_type: 'qabb',
+    transect: 'QABB Transect #14',
+    date: document.getElementById('qabbDate') ? document.getElementById('qabbDate').textContent : '',
+    start_time: document.getElementById('qabbStartTime') ? document.getElementById('qabbStartTime').value : '',
+    end_time: document.getElementById('qabbEndTime') ? document.getElementById('qabbEndTime').value : ''
+  };
+  var table = document.querySelector('#screen-qabb-matrix .matrix-table');
+  if (!table) return data;
+  var rows = table.querySelectorAll('tbody tr');
+  rows.forEach(function(row) {
+    var label = row.querySelector('td:first-child');
+    if (!label) return;
+    var qName = label.textContent.trim().replace(/\s+/g, '_');
+    var cells = row.querySelectorAll('td');
+    for (var st = 1; st < cells.length; st++) {
+      var key = qName + '_ST' + st;
+      var inp = cells[st].querySelector('input[type="text"]');
+      if (inp) { data[key] = inp.value; continue; }
+      var tally = cells[st].querySelector('.tally-count');
+      if (tally) { data[key] = parseInt(tally.textContent) || 0; }
+    }
+  });
+  return data;
+}
+
+function collectWaterData() {
+  var data = {
+    survey_type: 'water',
+    station: 'WQ-7B-03',
+    date: document.getElementById('waterDate') ? document.getElementById('waterDate').textContent : '',
+    time: document.getElementById('waterTime') ? document.getElementById('waterTime').value : '',
+    secchi_depth_cm: parseInt(document.getElementById('secchiInput') ? document.getElementById('secchiInput').value : 0) || 0
+  };
+  var selects = document.querySelectorAll('#screen-water-record select');
+  selects.forEach(function(sel) {
+    var label = sel.previousElementSibling || sel.parentElement.querySelector('label');
+    if (label) {
+      var key = label.textContent.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
+      data[key] = sel.value;
+    }
+  });
+  var pollution = document.querySelector('#screen-water-record .yn-btn.ay, #screen-water-record .yn-btn.an');
+  if (pollution) data.pollution = pollution.textContent.trim();
+  return data;
+}
+
+function collectPhenoData() {
+  var data = {
+    survey_type: 'phenology',
+    plot: 'P-7B-02',
+    date: document.getElementById('phenoDate') ? document.getElementById('phenoDate').textContent : '',
+    time: document.getElementById('phenoTime') ? document.getElementById('phenoTime').value : ''
+  };
+  ['vanilla','cocoa','coffee','okari'].forEach(function(sp) {
+    var phases = ['vegetative','flowering','fruiting','ripe','dormant'];
+    phases.forEach(function(p) {
+      var el = document.getElementById('ph-' + sp + '-' + p);
+      if (el && el.classList.contains('active')) data[sp + '_phase'] = p;
+    });
+    ['good','fair','poor'].forEach(function(h) {
+      var el = document.getElementById('hp-' + sp + '-' + h);
+      if (el && el.classList.contains('active')) data[sp + '_health'] = h;
+    });
+  });
+  return data;
+}
+
+/* ══════════════════════════════════════
+   CSV EXPORT
+══════════════════════════════════════ */
+
+function exportCSV(storeName) {
+  getAllRecords(storeName, function(records) {
+    if (records.length === 0) {
+      toast('No ' + storeName + ' records to export');
+      return;
+    }
+    var allKeys = {};
+    records.forEach(function(r) {
+      Object.keys(r).forEach(function(k) { allKeys[k] = true; });
+    });
+    var keys = Object.keys(allKeys);
+    var csvRows = [keys.join(',')];
+    records.forEach(function(r) {
+      var row = keys.map(function(k) {
+        var val = r[k] !== undefined ? String(r[k]) : '';
+        if (val.indexOf(',') >= 0 || val.indexOf('"') >= 0 || val.indexOf('\n') >= 0) {
+          val = '"' + val.replace(/"/g, '""') + '"';
+        }
+        return val;
+      });
+      csvRows.push(row.join(','));
+    });
+    var csv = csvRows.join('\n');
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'mca_' + storeName + '_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast(records.length + ' ' + storeName + ' records exported');
+  });
+}
+
+function exportAllCSV() {
+  STORES.forEach(function(store) {
+    getAllRecords(store, function(records) {
+      if (records.length > 0) exportCSV(store);
+    });
+  });
+}
+
+/* ══════════════════════════════════════
+   PWA INSTALL PROMPT
+══════════════════════════════════════ */
+var deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  var btn = document.getElementById('installBtn');
+  if (btn) btn.style.display = 'inline-block';
+});
+
+function installPWA() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(function(result) {
+      deferredInstallPrompt = null;
+      var btn = document.getElementById('installBtn');
+      if (btn) btn.style.display = 'none';
+    });
+  }
+}
+
+
+function saveMafia() {
+  saveRecord('mafia', collectMafiaData(), function() {
+    toast('MaFIA survey saved to device ✓');
+  });
+}
+/* Init DB on load */
+openDB();
 </script>
 </body>
 </html>

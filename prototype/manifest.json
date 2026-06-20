@@ -1,0 +1,22 @@
+{
+  "name": "MCA Clan Steward App",
+  "short_name": "MCA App",
+  "description": "Managalas Conservation Area — Clan Steward field data collection",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e8f5e9",
+  "theme_color": "#1B5E20",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%231B5E20'/><text x='96' y='120' text-anchor='middle' font-size='80' font-family='Arial' font-weight='bold' fill='white'>MCA</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='64' fill='%231B5E20'/><text x='256' y='310' text-anchor='middle' font-size='200' font-family='Arial' font-weight='bold' fill='white'>MCA</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

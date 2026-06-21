@@ -3160,6 +3160,188 @@ select.msel {
 
 
 
+
+    <!-- ══════════════════════════════════════
+         SCREEN: WEATHER STATION SETUP
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-meteo-setup">
+      <div class="top-bar" style="background:#37474F;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Weather Station</div>
+          <div class="bar-subtitle">Rain Gauge &amp; Water Level</div>
+        </div>
+        <div class="logo-ph">MCF<br>Logo</div>
+      </div>
+      <div class="scroll-content">
+        <div id="meteoLoading" style="padding:40px 20px;text-align:center;">
+          <p style="color:#555;font-size:0.88rem;margin-bottom:6px;">Loading station data…</p>
+          <div class="spinner-dots"><span></span><span></span><span></span></div>
+        </div>
+        <div id="meteoContent" style="display:none;">
+          <div class="p14" style="padding-bottom:20px;">
+
+            <div class="map-placeholder">
+              <svg viewBox="0 0 362 130" xmlns="http://www.w3.org/2000/svg">
+                <rect width="362" height="130" fill="#c9dce8"/>
+                <polygon points="217.8,84.1 222.3,88.5 220.5,97.2 172.1,100.2 127.6,104.3 114.0,94.4 78.5,79.3 76.7,75.2 77.9,73.2 72.0,54.3 95.6,35.1 100.3,34.2 136.8,39.0 144.2,54.1 177.0,52.2 205.7,29.1 254.5,20.3 252.6,34.6 249.9,37.5 242.3,43.7 222.5,53.5 217.8,84.1" fill="#E6F1FB" fill-opacity="0.55" stroke="#185FA5" stroke-width="1.5"/>
+                <polygon points="178.6,104.9 152.6,101.8 136.0,78.1 150.9,75.0 226.1,92.2 225.8,96.6 178.6,104.9" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="123.0,107.6 85.4,77.7 136.0,78.1 152.6,101.8 123.0,107.6" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="254.6,68.8 184.7,58.1 183.5,52.8 183.4,48.8 201.3,40.2 291.4,24.0 308.8,36.7 294.4,55.9 254.6,68.8" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="136.0,78.1 85.4,77.7 49.0,72.6 53.8,55.4 115.0,45.1 124.0,46.5 126.9,47.8 160.7,65.2 150.9,75.0 136.0,78.1" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <polygon points="226.1,92.2 150.9,75.0 160.7,65.2 184.7,58.1 254.6,68.8 226.1,92.2" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
+                <circle cx="160" cy="65" r="14" fill="#37474F" opacity="0.25"/>
+                <circle cx="160" cy="65" r="7" fill="#37474F" opacity="0.9"/>
+                <circle cx="160" cy="65" r="3" fill="#fff"/>
+                <text x="176" y="69" fill="#37474F" font-size="9" font-weight="bold" font-family="Arial">MET-7B-01</text>
+                <text x="120.7" y="43.3" fill="#185FA5" font-size="10" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.7">Zone 7B</text>
+              </svg>
+            </div>
+
+            <div class="card" style="padding:12px 16px;">
+              <div class="transect-row"><span class="td-label">🌧️ Station</span><span>MET-7B-01</span></div>
+              <div class="transect-row"><span class="td-label">📍 Location</span><span>Afore Weather Station</span></div>
+              <div class="transect-row"><span class="td-label">🧭 Coordinates</span><span>-9.1350° S, 148.3900° E</span></div>
+              <div class="transect-row"><span class="td-label">📅 Schedule</span><span>10th &amp; 24th of every month</span></div>
+              <div class="transect-row"><span class="td-label">📋 Equipment</span><span>Rain gauge, water level marker</span></div>
+            </div>
+
+            <div style="background:#ECEFF1;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:0.75rem;color:#455A64;">
+              <strong>Note:</strong> This module applies only to clans with installed rain gauges or water level markers. Read on 10th and 24th each month at the same time of day.
+            </div>
+
+            <div class="nav-gate-card" id="meteoNavGateCard">
+              <div style="font-size:0.82rem;font-weight:700;color:#37474F;margin-bottom:8px;">📍 Navigate to Weather Station</div>
+              <div class="compass-row">
+                <svg width="60" height="60" viewBox="0 0 72 72" style="flex-shrink:0;">
+                  <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
+                  <text x="33" y="10" fill="#333" font-size="9" font-family="Arial" font-weight="bold">N</text>
+                  <g transform="rotate(95, 36, 36)">
+                    <polygon points="36,8 32,42 36,38 40,42" fill="#37474F"/>
+                    <polygon points="36,64 32,42 36,46 40,42" fill="#ccc"/>
+                  </g>
+                </svg>
+                <div class="compass-info">
+                  <div class="c-bearing">Walk E · 95°</div>
+                  <div class="c-dist"><strong>210 m</strong> to station</div>
+                  <div id="meteoNavHint" style="margin-top:4px;font-size:0.72rem;color:#888;">Walk to station — unlock within 30 m</div>
+                </div>
+              </div>
+              <button class="btn-outline" id="meteoBtnArrive" onclick="meteoArrive()" style="margin-top:10px;border-color:#37474F;color:#37474F;">Simulate: I've Reached the Station ✓</button>
+            </div>
+
+            <div id="meteoFpSection" style="display:none;margin-top:10px;">
+              <div class="fp-verify-card" id="meteoFpBtn" onclick="meteoVerify()">
+                <svg width="36" height="36" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#37474F" opacity="0.12"/><path d="M20 6c-2 0-4 .8-5.5 2.2C13 9.5 12 11.7 12 14v2c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2v-2c0-4.4-3.6-8-8-8zm0 2c3.3 0 6 2.7 6 6v2H14v-2c0-3.3 2.7-6 6-6zm0 10c1.1 0 2 .9 2 2 0 .7-.4 1.4-1 1.7V24c0 .6-.4 1-1 1s-1-.4-1-1v-2.3c-.6-.3-1-1-1-1.7 0-1.1.9-2 2-2z" fill="#37474F" opacity="0.7"/></svg>
+                <span id="meteoFpTxt" style="font-size:0.82rem;font-weight:600;color:#37474F;">Tap to Verify Identity</span>
+              </div>
+            </div>
+
+            <button class="btn-primary" id="meteoBeginBtn" disabled onclick="nav('screen-meteo-record')" style="background:#37474F;margin-top:14px;">Begin Station Reading</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: WEATHER STATION RECORD
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-meteo-record">
+      <div class="top-bar" style="background:#37474F;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Weather Station</div>
+          <div class="bar-subtitle">MET-7B-01 — Recording</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="matrix-note" style="background:#ECEFF1;border-color:#B0BEC5;color:#37474F;">
+          Read each instrument carefully. Record the value showing right now — do not empty the rain gauge until after recording.
+        </div>
+        <div class="p14" style="padding-top:6px;">
+          <div class="card" style="padding:10px 14px;">
+            <div class="transect-row"><span class="td-label">📅 Date</span><span id="meteoDate">10 June 2026</span></div>
+            <div class="transect-row">
+              <span class="td-label">🕘 Time</span>
+              <span style="display:flex;align-items:center;gap:6px;">
+                <input type="time" id="meteoTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" value="08:00">
+                <span style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">auto</span>
+              </span>
+            </div>
+            <div class="transect-row">
+              <span class="td-label">☁ Weather</span>
+              <span>
+                <button class="weather-pill active" id="mwx-cloudy" onclick="wxM('cloudy','sunny')">☁ Cloudy</button>
+                <button class="weather-pill" id="mwx-sunny" onclick="wxM('sunny','cloudy')">☀ Sunny</button>
+              </span>
+            </div>
+          </div>
+
+          <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;">🌧️ Rain Gauge Reading</div>
+          <div class="card" style="padding:14px 16px;text-align:center;">
+            <div style="font-size:0.75rem;color:#888;margin-bottom:8px;">Rainfall since last reading (mm)</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+              <button class="tally-btn" onclick="adjRain(-5)" style="width:40px;height:40px;font-size:1.2rem;">−</button>
+              <div>
+                <span id="rainVal" style="font-size:2.2rem;font-weight:700;color:#37474F;">0</span>
+                <span style="font-size:0.9rem;color:#888;"> mm</span>
+              </div>
+              <button class="tally-btn" onclick="adjRain(5)" style="width:40px;height:40px;font-size:1.2rem;">+</button>
+            </div>
+            <div style="font-size:0.68rem;color:#aaa;margin-top:6px;">Tap +/− to adjust by 5 mm, or type below</div>
+            <input type="number" id="rainInput" class="form-input" style="width:100px;margin:8px auto 0;text-align:center;font-size:0.85rem;padding:6px;" value="0" min="0" max="999" onchange="document.getElementById('rainVal').textContent=this.value">
+            <div style="margin-top:8px;">
+              <label style="font-size:0.72rem;color:#555;display:flex;align-items:center;gap:6px;justify-content:center;">
+                <input type="checkbox" id="rainGaugeEmptied"> Gauge emptied after reading
+              </label>
+            </div>
+          </div>
+
+          <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;">📏 Water Level Reading</div>
+          <div class="card" style="padding:14px 16px;text-align:center;">
+            <div style="font-size:0.75rem;color:#888;margin-bottom:8px;">River / stream level at marker (cm)</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+              <button class="tally-btn" onclick="adjLevel(-5)" style="width:40px;height:40px;font-size:1.2rem;">−</button>
+              <div>
+                <span id="levelVal" style="font-size:2.2rem;font-weight:700;color:#37474F;">50</span>
+                <span style="font-size:0.9rem;color:#888;"> cm</span>
+              </div>
+              <button class="tally-btn" onclick="adjLevel(5)" style="width:40px;height:40px;font-size:1.2rem;">+</button>
+            </div>
+            <div style="font-size:0.68rem;color:#aaa;margin-top:6px;">Read the water level at the fixed marker post</div>
+            <input type="number" id="levelInput" class="form-input" style="width:100px;margin:8px auto 0;text-align:center;font-size:0.85rem;padding:6px;" value="50" min="0" max="999" onchange="document.getElementById('levelVal').textContent=this.value">
+            <div class="form-group" style="margin-top:10px;text-align:left;">
+              <label class="form-label" style="font-size:0.72rem;">Flow Condition</label>
+              <select id="meteoFlow" class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+                <option>Dry / No flow</option><option selected>Normal</option><option>High</option><option>Flood</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;">🌡️ General Conditions</div>
+          <div class="card" style="padding:12px 16px;">
+            <div class="form-group">
+              <label class="form-label">Wind</label>
+              <select id="meteoWind" class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+                <option selected>Calm</option><option>Light breeze</option><option>Moderate</option><option>Strong</option><option>Storm</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Recent Rain (last 24 hours)</label>
+              <select id="meteoRecentRain" class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+                <option>None</option><option selected>Light</option><option>Moderate</option><option>Heavy</option><option>Very heavy / storm</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes</label>
+              <textarea id="meteoNotes" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Equipment condition, any damage, unusual observations…"></textarea>
+            </div>
+          </div>
+          <button class="btn-primary" style="background:#37474F;" onclick="submitMeteo()">Save &amp; Submit Reading</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ══════════════════════════════════════
          SCREEN: TREE MAPPING
     ══════════════════════════════════════ -->
@@ -3287,6 +3469,13 @@ select.msel {
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
+                <div><span style="font-size:1.1rem;margin-right:6px;">🌧️</span><span style="font-size:0.82rem;font-weight:600;">Weather Station</span></div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span id="badge-meteo" class="record-badge" style="display:none;">0</span>
+                  <button class="btn-sm-export" onclick="exportCSV('meteo')">CSV ↓</button>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
                 <div><span style="font-size:1.1rem;margin-right:6px;">🌳</span><span style="font-size:0.82rem;font-weight:600;">Tree Mapping</span></div>
                 <div style="display:flex;align-items:center;gap:8px;">
                   <span id="badge-trees" class="record-badge" style="display:none;">0</span>
@@ -3345,7 +3534,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-map','screen-performance','screen-recent-activity',
   'screen-ack','screen-profile',
-  'screen-patrol-stub','screen-community-stub','screen-tree-mapping','screen-data-export'
+  'screen-patrol-stub','screen-community-stub','screen-meteo-setup','screen-meteo-record','screen-tree-mapping','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -3376,6 +3565,8 @@ function nav(id) {
   if (id === 'screen-water-record') initWaterRecord();
   if (id === 'screen-pheno-setup') initPheno();
   if (id === 'screen-pheno-record') initPhenoRecord();
+  if (id === 'screen-meteo-setup') initMeteo();
+  if (id === 'screen-meteo-record') initMeteoRecord();
   if (id === 'screen-performance') renderCalendar();
   showScreen(id);
 }
@@ -3864,6 +4055,101 @@ function wxP(on, off) { document.getElementById('pwx-'+on).classList.add('active
 
 
 
+
+/* ══════════════════════════════════════
+   WEATHER STATION (Meteo)
+══════════════════════════════════════ */
+var meteoVerifiedFlag = false, meteoArrivedFlag = false;
+
+function initMeteo() {
+  meteoVerifiedFlag = false; meteoArrivedFlag = false;
+  document.getElementById('meteoBeginBtn').disabled = true;
+  document.getElementById('meteoFpBtn').classList.remove('verified');
+  document.getElementById('meteoFpTxt').textContent = 'Tap to Verify Identity';
+  document.getElementById('meteoFpSection').style.display = 'none';
+  document.getElementById('meteoNavGateCard').classList.remove('arrived');
+  document.getElementById('meteoBtnArrive').disabled = false;
+  document.getElementById('meteoBtnArrive').textContent = "Simulate: I've Reached the Station ✓";
+  document.getElementById('meteoNavHint').textContent = 'Walk to station — unlock within 30 m';
+  document.getElementById('meteoLoading').style.display = 'block';
+  document.getElementById('meteoContent').style.display = 'none';
+  setTimeout(function() {
+    document.getElementById('meteoLoading').style.display = 'none';
+    document.getElementById('meteoContent').style.display = 'block';
+  }, 1000);
+}
+
+function meteoArrive() {
+  meteoArrivedFlag = true;
+  document.getElementById('meteoNavGateCard').classList.add('arrived');
+  document.getElementById('meteoNavHint').textContent = '✓ At station — verify identity';
+  document.getElementById('meteoBtnArrive').disabled = true;
+  document.getElementById('meteoBtnArrive').textContent = '✓ Arrived at Station';
+  document.getElementById('meteoFpSection').style.display = 'block';
+  checkMeteoReady();
+}
+
+function meteoVerify() {
+  meteoVerifiedFlag = true;
+  document.getElementById('meteoFpBtn').classList.add('verified');
+  document.getElementById('meteoFpTxt').textContent = '✓ Identity Verified';
+  checkMeteoReady();
+}
+
+function checkMeteoReady() {
+  document.getElementById('meteoBeginBtn').disabled = !(meteoVerifiedFlag && meteoArrivedFlag);
+}
+
+function initMeteoRecord() {
+  var now = new Date();
+  var hh = String(now.getHours()).padStart(2, '0');
+  var mm = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('meteoTime').value = hh + ':' + mm;
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('meteoDate').textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+}
+
+function adjRain(d) {
+  var el = document.getElementById('rainInput');
+  var v = Math.max(0, parseInt(el.value || 0) + d);
+  el.value = v;
+  document.getElementById('rainVal').textContent = v;
+}
+
+function adjLevel(d) {
+  var el = document.getElementById('levelInput');
+  var v = Math.max(0, parseInt(el.value || 0) + d);
+  el.value = v;
+  document.getElementById('levelVal').textContent = v;
+}
+
+function wxM(on, off) {
+  document.getElementById('mwx-' + on).classList.add('active');
+  document.getElementById('mwx-' + off).classList.remove('active');
+}
+
+function collectMeteoData() {
+  return {
+    survey_type: 'weather_station',
+    station: 'MET-7B-01',
+    date: document.getElementById('meteoDate') ? document.getElementById('meteoDate').textContent : '',
+    time: document.getElementById('meteoTime') ? document.getElementById('meteoTime').value : '',
+    rainfall_mm: parseInt(document.getElementById('rainInput').value) || 0,
+    gauge_emptied: document.getElementById('rainGaugeEmptied').checked,
+    water_level_cm: parseInt(document.getElementById('levelInput').value) || 0,
+    flow_condition: document.getElementById('meteoFlow').value,
+    wind: document.getElementById('meteoWind').value,
+    recent_rain: document.getElementById('meteoRecentRain').value,
+    notes: document.getElementById('meteoNotes').value
+  };
+}
+
+function submitMeteo() {
+  saveRecord('meteo', collectMeteoData(), function() {
+    toast('Weather station reading saved to device ✓');
+  });
+}
+
 /* ══════════════════════════════════════
    TREE MAPPING
 ══════════════════════════════════════ */
@@ -3973,7 +4259,7 @@ if ('serviceWorker' in navigator) {
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
 var DB_VERSION = 1;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees'];
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }

@@ -1325,6 +1325,18 @@ select.msel {
             <span class="module-emoji">🌺</span>
             <span class="module-name">Phenology Monitoring</span>
           </div>
+          <div class="module-tile" onclick="nav('screen-meteo-setup')">
+            <span class="module-emoji">🌧️</span>
+            <span class="module-name">Weather Station</span>
+          </div>
+          <div class="module-tile" onclick="nav('screen-tree-mapping')">
+            <span class="module-emoji">🌳</span>
+            <span class="module-name">Tree Mapping</span>
+          </div>
+          <div class="module-tile" onclick="nav('screen-garden-mapping')">
+            <span class="module-emoji">🌾</span>
+            <span class="module-name">Garden Mapping</span>
+          </div>
           <div class="module-tile" onclick="nav('screen-data-export')">
             <span class="module-emoji">📤</span>
             <span class="module-name">Export Data</span>
@@ -3342,6 +3354,92 @@ select.msel {
       </div>
     </div>
 
+
+    <!-- ══════════════════════════════════════
+         SCREEN: GARDEN MAPPING
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-garden-mapping">
+      <div class="top-bar" style="background:#558B2F;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Garden Mapping</div>
+          <div class="bar-subtitle">Cash Crops &amp; Food Gardens</div>
+        </div>
+        <div class="logo-ph">MCF<br>Logo</div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14">
+
+          <div style="background:#F1F8E9;border-radius:10px;padding:14px;margin-bottom:14px;border-left:4px solid #558B2F;">
+            <div style="font-size:0.82rem;font-weight:700;color:#558B2F;margin-bottom:4px;">How it works</div>
+            <div style="font-size:0.75rem;color:#555;line-height:1.5;">Walk the boundary of the garden with GPS recording turned on. The app will capture corner points to create a boundary polygon. Then select the crop type and save.</div>
+          </div>
+
+          <div class="card" style="padding:14px 16px;margin-bottom:12px;">
+            <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin-bottom:10px;">Garden Type</div>
+            <div style="display:flex;gap:6px;margin-bottom:14px;">
+              <button class="weather-pill active" id="gtype-cash" onclick="selectGardenType('cash')" style="font-size:0.78rem;padding:8px 14px;flex:1;text-align:center;">💰 Cash Crop<br><span style="font-size:0.62rem;color:#888;">Permanent · One-off</span></button>
+              <button class="weather-pill" id="gtype-food" onclick="selectGardenType('food')" style="font-size:0.78rem;padding:8px 14px;flex:1;text-align:center;">🍠 Food Garden<br><span style="font-size:0.62rem;color:#888;">Annual mapping</span></button>
+            </div>
+
+            <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin-bottom:8px;">Crop Type</div>
+            <div id="gardenCropsCash" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
+              <button class="weather-pill" id="gc-vanilla" onclick="toggleCrop('vanilla')" style="font-size:0.75rem;padding:5px 10px;">🌿 Vanilla</button>
+              <button class="weather-pill" id="gc-coffee" onclick="toggleCrop('coffee')" style="font-size:0.75rem;padding:5px 10px;">☕ Coffee</button>
+              <button class="weather-pill" id="gc-cocoa" onclick="toggleCrop('cocoa')" style="font-size:0.75rem;padding:5px 10px;">🫘 Cocoa</button>
+            </div>
+            <div id="gardenCropsFood" style="display:none;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
+              <button class="weather-pill" id="gc-taro" onclick="toggleCrop('taro')" style="font-size:0.75rem;padding:5px 10px;">🥔 Taro</button>
+              <button class="weather-pill" id="gc-yam" onclick="toggleCrop('yam')" style="font-size:0.75rem;padding:5px 10px;">🍠 Yam</button>
+              <button class="weather-pill" id="gc-banana" onclick="toggleCrop('banana')" style="font-size:0.75rem;padding:5px 10px;">🍌 Banana</button>
+              <button class="weather-pill" id="gc-sweetpotato" onclick="toggleCrop('sweetpotato')" style="font-size:0.75rem;padding:5px 10px;">🍠 Sweet Potato</button>
+              <button class="weather-pill" id="gc-greens" onclick="toggleCrop('greens')" style="font-size:0.75rem;padding:5px 10px;">🥬 Greens</button>
+              <button class="weather-pill" id="gc-sugarcane" onclick="toggleCrop('sugarcane')" style="font-size:0.75rem;padding:5px 10px;">🌾 Sugarcane</button>
+            </div>
+            <input type="text" id="gardenCropOther" class="form-input" style="font-size:0.78rem;padding:8px 10px;margin-bottom:10px;" placeholder="Other crops (type in local language)...">
+          </div>
+
+          <div class="card" style="padding:14px 16px;margin-bottom:12px;">
+            <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin-bottom:8px;">📍 Garden Boundary</div>
+            <div style="font-size:0.75rem;color:#666;margin-bottom:10px;">Walk around the garden edge. Tap "Add Corner" at each turn. Minimum 3 points to form a boundary.</div>
+            <div id="gardenPointsList" style="margin-bottom:10px;">
+              <div style="font-size:0.75rem;color:#aaa;text-align:center;padding:10px;">No boundary points yet</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-outline" onclick="addGardenPoint()" style="flex:1;border-color:#558B2F;color:#558B2F;font-size:0.78rem;padding:10px;">📍 Add Corner Point</button>
+              <button class="btn-outline" onclick="clearGardenPoints()" style="border-color:#c62828;color:#c62828;font-size:0.78rem;padding:10px;">Clear</button>
+            </div>
+            <div id="gardenPointCount" style="text-align:center;font-size:0.72rem;color:#888;margin-top:6px;">0 points captured</div>
+          </div>
+
+          <div class="card" style="padding:14px 16px;margin-bottom:12px;">
+            <div class="form-group" style="margin-bottom:8px;">
+              <label class="form-label" style="font-size:0.75rem;font-weight:600;">📅 Date of Mapping</label>
+              <input type="date" id="gardenDate" class="form-input" style="font-size:0.78rem;padding:8px 10px;">
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label class="form-label" style="font-size:0.75rem;font-weight:600;">Owner / Clan Member</label>
+              <input type="text" id="gardenOwner" class="form-input" style="font-size:0.78rem;padding:8px 10px;" placeholder="Name of garden owner...">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:0.75rem;font-weight:600;">Notes</label>
+              <input type="text" id="gardenNotes" class="form-input" style="font-size:0.78rem;padding:8px 10px;" placeholder="Size estimate, condition, age...">
+            </div>
+          </div>
+
+          <button class="btn-primary" style="background:#558B2F;" onclick="saveGarden()">Save Garden Record</button>
+
+          <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin:16px 0 8px;">Recent Recordings</div>
+          <div id="gardenLogList">
+            <div style="font-size:0.78rem;color:#999;text-align:center;padding:20px;">No gardens mapped yet in this session</div>
+          </div>
+          <div style="margin-top:12px;">
+            <button class="btn-outline" style="border-color:#558B2F;color:#558B2F;" onclick="exportCSV('gardens')">Export Garden Data as CSV ↓</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══════════════════════════════════════
          SCREEN: TREE MAPPING
     ══════════════════════════════════════ -->
@@ -3469,6 +3567,13 @@ select.msel {
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
+                <div><span style="font-size:1.1rem;margin-right:6px;">🌾</span><span style="font-size:0.82rem;font-weight:600;">Garden Mapping</span></div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span id="badge-gardens" class="record-badge" style="display:none;">0</span>
+                  <button class="btn-sm-export" onclick="exportCSV('gardens')">CSV ↓</button>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
                 <div><span style="font-size:1.1rem;margin-right:6px;">🌧️</span><span style="font-size:0.82rem;font-weight:600;">Weather Station</span></div>
                 <div style="display:flex;align-items:center;gap:8px;">
                   <span id="badge-meteo" class="record-badge" style="display:none;">0</span>
@@ -3534,7 +3639,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-map','screen-performance','screen-recent-activity',
   'screen-ack','screen-profile',
-  'screen-patrol-stub','screen-community-stub','screen-meteo-setup','screen-meteo-record','screen-tree-mapping','screen-data-export'
+  'screen-patrol-stub','screen-community-stub','screen-meteo-setup','screen-meteo-record','screen-garden-mapping','screen-tree-mapping','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -3566,6 +3671,7 @@ function nav(id) {
   if (id === 'screen-pheno-setup') initPheno();
   if (id === 'screen-pheno-record') initPhenoRecord();
   if (id === 'screen-meteo-setup') initMeteo();
+  if (id === 'screen-garden-mapping') initGardenMapping();
   if (id === 'screen-meteo-record') initMeteoRecord();
   if (id === 'screen-performance') renderCalendar();
   showScreen(id);
@@ -4150,6 +4256,164 @@ function submitMeteo() {
   });
 }
 
+
+/* ══════════════════════════════════════
+   GARDEN MAPPING
+══════════════════════════════════════ */
+
+function initGardenMapping() {
+  var now = new Date();
+  var dd = String(now.getDate()).padStart(2,'0');
+  var mm = String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('gardenDate').value = now.getFullYear() + '-' + mm + '-' + dd;
+  gardenPoints = [];
+  gardenSelectedCrops = [];
+  gardenType = 'cash';
+  selectGardenType('cash');
+  renderGardenPoints();
+  document.getElementById('gardenCropOther').value = '';
+  document.getElementById('gardenOwner').value = '';
+  document.getElementById('gardenNotes').value = '';
+}
+
+
+var gardenType = 'cash';
+var gardenSelectedCrops = [];
+var gardenPoints = [];
+var gardenSessionLog = [];
+
+function selectGardenType(type) {
+  gardenType = type;
+  document.getElementById('gtype-cash').classList.toggle('active', type === 'cash');
+  document.getElementById('gtype-food').classList.toggle('active', type === 'food');
+  document.getElementById('gardenCropsCash').style.display = type === 'cash' ? 'flex' : 'none';
+  document.getElementById('gardenCropsFood').style.display = type === 'food' ? 'flex' : 'none';
+  gardenSelectedCrops = [];
+  document.querySelectorAll('#screen-garden-mapping .weather-pill[id^="gc-"]').forEach(function(b) {
+    b.classList.remove('active');
+  });
+}
+
+function toggleCrop(crop) {
+  var el = document.getElementById('gc-' + crop);
+  if (!el) return;
+  var idx = gardenSelectedCrops.indexOf(crop);
+  if (idx >= 0) {
+    gardenSelectedCrops.splice(idx, 1);
+    el.classList.remove('active');
+  } else {
+    gardenSelectedCrops.push(crop);
+    el.classList.add('active');
+  }
+}
+
+function addGardenPoint() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      var pt = { lat: pos.coords.latitude, lon: pos.coords.longitude, acc: Math.round(pos.coords.accuracy || 0) };
+      gardenPoints.push(pt);
+      renderGardenPoints();
+    }, function() {
+      var pt = { lat: -9.1400 + (Math.random() - 0.5) * 0.005, lon: 148.4000 + (Math.random() - 0.5) * 0.005, acc: 5 };
+      gardenPoints.push(pt);
+      renderGardenPoints();
+    }, { enableHighAccuracy: true, timeout: 10000 });
+  } else {
+    var pt = { lat: -9.1400 + (Math.random() - 0.5) * 0.005, lon: 148.4000 + (Math.random() - 0.5) * 0.005, acc: 5 };
+    gardenPoints.push(pt);
+    renderGardenPoints();
+  }
+}
+
+function clearGardenPoints() {
+  gardenPoints = [];
+  renderGardenPoints();
+}
+
+function renderGardenPoints() {
+  var el = document.getElementById('gardenPointsList');
+  var countEl = document.getElementById('gardenPointCount');
+  countEl.textContent = gardenPoints.length + ' point' + (gardenPoints.length !== 1 ? 's' : '') + ' captured';
+  if (gardenPoints.length === 0) {
+    el.innerHTML = '<div style="font-size:0.75rem;color:#aaa;text-align:center;padding:10px;">No boundary points yet</div>';
+    return;
+  }
+  var h = '';
+  gardenPoints.forEach(function(pt, i) {
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #eee;font-size:0.72rem;">';
+    h += '<span style="color:#558B2F;font-weight:600;">Point ' + (i+1) + '</span>';
+    h += '<span style="color:#666;">' + pt.lat.toFixed(5) + ', ' + pt.lon.toFixed(5) + '</span>';
+    h += '<span style="color:#aaa;font-size:0.65rem;">±' + pt.acc + 'm</span>';
+    h += '</div>';
+  });
+  el.innerHTML = h;
+}
+
+function collectGardenData() {
+  var crops = gardenSelectedCrops.slice();
+  var other = document.getElementById('gardenCropOther').value.trim();
+  if (other) crops.push(other);
+  return {
+    survey_type: 'garden_mapping',
+    garden_type: gardenType === 'cash' ? 'cash_crop' : 'food_garden',
+    crops: crops.join(', '),
+    boundary_points: JSON.stringify(gardenPoints),
+    num_points: gardenPoints.length,
+    date: document.getElementById('gardenDate').value,
+    owner: document.getElementById('gardenOwner').value,
+    notes: document.getElementById('gardenNotes').value
+  };
+}
+
+function saveGarden() {
+  if (gardenPoints.length < 3) {
+    toast('Need at least 3 boundary points');
+    return;
+  }
+  if (gardenSelectedCrops.length === 0 && !document.getElementById('gardenCropOther').value.trim()) {
+    toast('Please select or enter at least one crop');
+    return;
+  }
+  var data = collectGardenData();
+  saveRecord('gardens', data, function() {
+    var label = gardenType === 'cash' ? 'Cash crop' : 'Food garden';
+    toast(label + ' garden saved ✓');
+    gardenSessionLog.unshift(data);
+    renderGardenLog();
+    gardenPoints = [];
+    gardenSelectedCrops = [];
+    renderGardenPoints();
+    document.querySelectorAll('#screen-garden-mapping .weather-pill[id^="gc-"]').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    document.getElementById('gardenCropOther').value = '';
+    document.getElementById('gardenOwner').value = '';
+    document.getElementById('gardenNotes').value = '';
+  });
+}
+
+function renderGardenLog() {
+  var el = document.getElementById('gardenLogList');
+  if (gardenSessionLog.length === 0) {
+    el.innerHTML = '<div style="font-size:0.78rem;color:#999;text-align:center;padding:20px;">No gardens mapped yet in this session</div>';
+    return;
+  }
+  var h = '';
+  gardenSessionLog.forEach(function(g) {
+    var icon = g.garden_type === 'cash_crop' ? '💰' : '🍠';
+    var typeLabel = g.garden_type === 'cash_crop' ? 'Cash Crop' : 'Food Garden';
+    h += '<div style="background:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;box-shadow:0 1px 2px rgba(0,0,0,0.08);">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+    h += '<span style="font-size:0.78rem;font-weight:600;">' + icon + ' ' + typeLabel + '</span>';
+    h += '<span style="font-size:0.68rem;color:#558B2F;background:#F1F8E9;padding:2px 8px;border-radius:6px;">' + g.num_points + ' pts</span>';
+    h += '</div>';
+    h += '<div style="font-size:0.72rem;color:#666;">Crops: ' + g.crops + '</div>';
+    if (g.owner) h += '<div style="font-size:0.72rem;color:#888;">Owner: ' + g.owner + '</div>';
+    h += '</div>';
+  });
+  el.innerHTML = h;
+}
+
 /* ══════════════════════════════════════
    TREE MAPPING
 ══════════════════════════════════════ */
@@ -4259,7 +4523,7 @@ if ('serviceWorker' in navigator) {
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
 var DB_VERSION = 1;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo'];
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }

@@ -1181,16 +1181,21 @@ select.msel {
 
 /* ── Export & PWA ── */
 .btn-sm-export {
-  background: #1B5E20;
-  color: #fff;
   border: none;
   border-radius: 6px;
-  padding: 5px 12px;
-  font-size: 0.72rem;
+  padding: 5px 9px;
+  font-size: 0.68rem;
   font-weight: 600;
   cursor: pointer;
+  color: #fff;
 }
-.btn-sm-export:active { background: #0d3d12; }
+.btn-sm-export.csv  { background: #1B5E20; }
+.btn-sm-export.csv:active  { background: #0d3d12; }
+.btn-sm-export.kml  { background: #1565C0; }
+.btn-sm-export.kml:active  { background: #0d47a1; }
+.btn-sm-export.gpx  { background: #6A1B9A; }
+.btn-sm-export.gpx:active  { background: #4a148c; }
+.btn-sm-export:disabled { background: #bbb; cursor: default; }
 .record-badge {
   background: #1B5E20;
   color: #fff;
@@ -3540,65 +3545,83 @@ select.msel {
             <div style="display:flex;flex-direction:column;gap:8px;">
               <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
                 <div><span style="font-size:1.1rem;margin-right:6px;">🌿</span><span style="font-size:0.82rem;font-weight:600;">MaFIA Surveys</span></div>
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:4px;">
                   <span id="badge-mafia" class="record-badge" style="display:none;">0</span>
-                  <button class="btn-sm-export" onclick="exportCSV('mafia')">CSV ↓</button>
+                  <button class="btn-sm-export csv" onclick="exportCSV('mafia')">CSV ↓</button>
+                  <button class="btn-sm-export kml" disabled title="No spatial data">KML</button>
+                  <button class="btn-sm-export gpx" disabled title="No spatial data">GPX</button>
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
                 <div><span style="font-size:1.1rem;margin-right:6px;">🦋</span><span style="font-size:0.82rem;font-weight:600;">QABB Surveys</span></div>
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:4px;">
                   <span id="badge-qabb" class="record-badge" style="display:none;">0</span>
-                  <button class="btn-sm-export" onclick="exportCSV('qabb')">CSV ↓</button>
+                  <button class="btn-sm-export csv" onclick="exportCSV('qabb')">CSV ↓</button>
+                  <button class="btn-sm-export kml" onclick="exportKML('qabb')">KML ↓</button>
+                  <button class="btn-sm-export gpx" onclick="exportGPX('qabb')">GPX ↓</button>
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
                 <div><span style="font-size:1.1rem;margin-right:6px;">🌊</span><span style="font-size:0.82rem;font-weight:600;">Water Quality</span></div>
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:4px;">
                   <span id="badge-water" class="record-badge" style="display:none;">0</span>
-                  <button class="btn-sm-export" onclick="exportCSV('water')">CSV ↓</button>
+                  <button class="btn-sm-export csv" onclick="exportCSV('water')">CSV ↓</button>
+                  <button class="btn-sm-export kml" onclick="exportKML('water')">KML ↓</button>
+                  <button class="btn-sm-export gpx" onclick="exportGPX('water')">GPX ↓</button>
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
                 <div><span style="font-size:1.1rem;margin-right:6px;">🌺</span><span style="font-size:0.82rem;font-weight:600;">Phenology</span></div>
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:4px;">
                   <span id="badge-phenology" class="record-badge" style="display:none;">0</span>
-                  <button class="btn-sm-export" onclick="exportCSV('phenology')">CSV ↓</button>
+                  <button class="btn-sm-export csv" onclick="exportCSV('phenology')">CSV ↓</button>
+                  <button class="btn-sm-export kml" onclick="exportKML('phenology')">KML ↓</button>
+                  <button class="btn-sm-export gpx" onclick="exportGPX('phenology')">GPX ↓</button>
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
                 <div><span style="font-size:1.1rem;margin-right:6px;">🌾</span><span style="font-size:0.82rem;font-weight:600;">Garden Mapping</span></div>
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:4px;">
                   <span id="badge-gardens" class="record-badge" style="display:none;">0</span>
-                  <button class="btn-sm-export" onclick="exportCSV('gardens')">CSV ↓</button>
+                  <button class="btn-sm-export csv" onclick="exportCSV('gardens')">CSV ↓</button>
+                  <button class="btn-sm-export kml" onclick="exportKML('gardens')">KML ↓</button>
+                  <button class="btn-sm-export gpx" onclick="exportGPX('gardens')">GPX ↓</button>
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
                 <div><span style="font-size:1.1rem;margin-right:6px;">🌧️</span><span style="font-size:0.82rem;font-weight:600;">Weather Station</span></div>
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:4px;">
                   <span id="badge-meteo" class="record-badge" style="display:none;">0</span>
-                  <button class="btn-sm-export" onclick="exportCSV('meteo')">CSV ↓</button>
+                  <button class="btn-sm-export csv" onclick="exportCSV('meteo')">CSV ↓</button>
+                  <button class="btn-sm-export kml" onclick="exportKML('meteo')">KML ↓</button>
+                  <button class="btn-sm-export gpx" onclick="exportGPX('meteo')">GPX ↓</button>
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
                 <div><span style="font-size:1.1rem;margin-right:6px;">🌳</span><span style="font-size:0.82rem;font-weight:600;">Tree Mapping</span></div>
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:4px;">
                   <span id="badge-trees" class="record-badge" style="display:none;">0</span>
-                  <button class="btn-sm-export" onclick="exportCSV('trees')">CSV ↓</button>
+                  <button class="btn-sm-export csv" onclick="exportCSV('trees')">CSV ↓</button>
+                  <button class="btn-sm-export kml" onclick="exportKML('trees')">KML ↓</button>
+                  <button class="btn-sm-export gpx" onclick="exportGPX('trees')">GPX ↓</button>
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
                 <div><span style="font-size:1.1rem;margin-right:6px;">👁️</span><span style="font-size:0.82rem;font-weight:600;">Observations</span></div>
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:4px;">
                   <span id="badge-observations" class="record-badge" style="display:none;">0</span>
-                  <button class="btn-sm-export" onclick="exportCSV('observations')">CSV ↓</button>
+                  <button class="btn-sm-export csv" onclick="exportCSV('observations')">CSV ↓</button>
+                  <button class="btn-sm-export kml" onclick="exportKML('observations')">KML ↓</button>
+                  <button class="btn-sm-export gpx" onclick="exportGPX('observations')">GPX ↓</button>
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f5f5f5;border-radius:8px;">
                 <div><span style="font-size:1.1rem;margin-right:6px;">🚶</span><span style="font-size:0.82rem;font-weight:600;">Patrols</span></div>
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:4px;">
                   <span id="badge-patrols" class="record-badge" style="display:none;">0</span>
-                  <button class="btn-sm-export" onclick="exportCSV('patrols')">CSV ↓</button>
+                  <button class="btn-sm-export csv" onclick="exportCSV('patrols')">CSV ↓</button>
+                  <button class="btn-sm-export kml" disabled title="No spatial data">KML</button>
+                  <button class="btn-sm-export gpx" disabled title="No spatial data">GPX</button>
                 </div>
               </div>
             </div>
@@ -4695,6 +4718,210 @@ function collectPhenoData() {
     });
   });
   return data;
+}
+
+
+/* ══════════════════════════════════════
+   KML / GPX EXPORT
+══════════════════════════════════════ */
+
+function downloadFile(content, filename, mime) {
+  var blob = new Blob([content], { type: mime });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function kmlEscape(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── Builders: KML ── */
+function buildKML(docName, placemarks) {
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n' +
+    '<name>' + kmlEscape(docName) + '</name>\n' +
+    placemarks.join('\n') + '\n</Document>\n</kml>';
+}
+
+function kmlPoint(name, lon, lat, desc) {
+  return '<Placemark><name>' + kmlEscape(name) + '</name>' +
+    '<description>' + kmlEscape(desc||'') + '</description>' +
+    '<Point><coordinates>' + lon + ',' + lat + ',0</coordinates></Point></Placemark>';
+}
+
+function kmlPolygon(name, points, desc) {
+  if (!points || points.length < 3) return '';
+  var coords = points.map(function(p){ return p.lon+','+p.lat+',0'; }).join('\n');
+  coords += '\n' + points[0].lon + ',' + points[0].lat + ',0'; // close ring
+  return '<Placemark><name>' + kmlEscape(name) + '</name>' +
+    '<description>' + kmlEscape(desc||'') + '</description>' +
+    '<Polygon><outerBoundaryIs><LinearRing><coordinates>' + coords +
+    '</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>';
+}
+
+function kmlLine(name, points, desc) {
+  if (!points || points.length < 2) return '';
+  var coords = points.map(function(p){ return p.lon+','+p.lat+',0'; }).join('\n');
+  return '<Placemark><name>' + kmlEscape(name) + '</name>' +
+    '<description>' + kmlEscape(desc||'') + '</description>' +
+    '<LineString><coordinates>' + coords + '</coordinates></LineString></Placemark>';
+}
+
+/* ── Builders: GPX ── */
+function buildGPX(appName, waypoints, tracks) {
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<gpx version="1.1" creator="' + kmlEscape(appName) + '" xmlns="http://www.topografix.com/GPX/1/1">\n' +
+    (waypoints||[]).join('\n') + '\n' +
+    (tracks||[]).join('\n') + '\n</gpx>';
+}
+
+function gpxWpt(lat, lon, name, desc) {
+  return '<wpt lat="' + lat + '" lon="' + lon + '"><name>' + kmlEscape(name) + '</name>' +
+    '<desc>' + kmlEscape(desc||'') + '</desc></wpt>';
+}
+
+function gpxTrack(name, points) {
+  if (!points || points.length < 2) return '';
+  var segs = points.map(function(p){
+    return '<trkpt lat="' + p.lat + '" lon="' + p.lon + '"></trkpt>';
+  }).join('\n');
+  return '<trk><name>' + kmlEscape(name) + '</name><trkseg>' + segs + '</trkseg></trk>';
+}
+
+/* ── Store-specific exporters ── */
+
+function exportKML(storeName) {
+  getAllRecords(storeName, function(records) {
+    if (!records.length) { toast('No ' + storeName + ' records to export'); return; }
+    var placemarks = [];
+    var date = new Date().toISOString().slice(0,10);
+
+    if (storeName === 'trees') {
+      records.forEach(function(r, i) {
+        var name = (r.species||'tree') + '_' + (i+1);
+        var desc = 'Species: ' + (r.species||'') + '\nDBH: ' + (r.dbh_cm||'') + ' cm\nDate: ' + (r.timestamp||'') + '\nNotes: ' + (r.notes||'');
+        placemarks.push(kmlPoint(name, r.longitude, r.latitude, desc));
+      });
+      downloadFile(buildKML('MCA Tree Mapping', placemarks), 'mca_trees_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
+
+    } else if (storeName === 'gardens') {
+      records.forEach(function(r, i) {
+        var pts = [];
+        try { pts = JSON.parse(r.boundary_points||'[]'); } catch(e){}
+        var name = (r.garden_type||'garden') + '_' + (r.owner||i+1);
+        var desc = 'Type: ' + (r.garden_type||'') + '\nCrops: ' + (r.crops||'') + '\nOwner: ' + (r.owner||'') + '\nDate: ' + (r.date||'') + '\nNotes: ' + (r.notes||'');
+        if (pts.length >= 3) placemarks.push(kmlPolygon(name, pts, desc));
+        else if (pts.length > 0) placemarks.push(kmlPoint(name, pts[0].lon, pts[0].lat, desc));
+      });
+      downloadFile(buildKML('MCA Garden Mapping', placemarks), 'mca_gardens_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
+
+    } else if (storeName === 'qabb') {
+      records.forEach(function(r, i) {
+        // Transect as a line — use start/end coords from the survey (defaults to T14 for now)
+        var pts = [{lat:-9.1320,lon:148.4050},{lat:-9.1276,lon:148.4105}];
+        var desc = 'Transect: ' + (r.transect||'') + '\nDate: ' + (r.date||'') + '\nStart: ' + (r.start_time||'') + ' End: ' + (r.end_time||'');
+        placemarks.push(kmlLine(r.transect||('QABB_'+(i+1)), pts, desc));
+      });
+      downloadFile(buildKML('MCA QABB Surveys', placemarks), 'mca_qabb_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
+
+    } else if (storeName === 'water') {
+      records.forEach(function(r, i) {
+        var desc = 'Station: ' + (r.station||'') + '\nDate: ' + (r.date||'') + '\nSecchi: ' + (r.secchi_depth_cm||'') + ' cm';
+        placemarks.push(kmlPoint(r.station||('WQ_'+(i+1)), 148.3750, -9.1550, desc));
+      });
+      downloadFile(buildKML('MCA Water Quality', placemarks), 'mca_water_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
+
+    } else if (storeName === 'phenology') {
+      records.forEach(function(r, i) {
+        var desc = 'Plot: ' + (r.plot||'') + '\nDate: ' + (r.date||'');
+        placemarks.push(kmlPoint(r.plot||('Pheno_'+(i+1)), 148.4000, -9.1400, desc));
+      });
+      downloadFile(buildKML('MCA Phenology', placemarks), 'mca_phenology_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
+
+    } else if (storeName === 'meteo') {
+      records.forEach(function(r, i) {
+        var desc = 'Station: ' + (r.station||'') + '\nDate: ' + (r.date||'') + '\nRainfall: ' + (r.rainfall_mm||0) + ' mm\nLevel: ' + (r.water_level_cm||0) + ' cm';
+        placemarks.push(kmlPoint(r.station||('MET_'+(i+1)), 148.3900, -9.1350, desc));
+      });
+      downloadFile(buildKML('MCA Weather Stations', placemarks), 'mca_meteo_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
+
+    } else if (storeName === 'observations') {
+      records.forEach(function(r, i) {
+        if (r.latitude && r.longitude) {
+          var desc = (r.type||'Observation') + '\n' + (r.notes||'') + '\nDate: ' + (r.timestamp||'');
+          placemarks.push(kmlPoint(r.type||('Obs_'+(i+1)), r.longitude, r.latitude, desc));
+        }
+      });
+      if (placemarks.length === 0) { toast('No geo-tagged observations to export'); return; }
+      downloadFile(buildKML('MCA Observations', placemarks), 'mca_observations_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
+    }
+
+    toast(records.length + ' records exported as KML');
+  });
+}
+
+function exportGPX(storeName) {
+  getAllRecords(storeName, function(records) {
+    if (!records.length) { toast('No ' + storeName + ' records to export'); return; }
+    var waypoints = [], tracks = [];
+    var date = new Date().toISOString().slice(0,10);
+
+    if (storeName === 'trees') {
+      records.forEach(function(r, i) {
+        var name = (r.species||'tree') + '_' + (i+1);
+        var desc = 'DBH: ' + (r.dbh_cm||'') + ' cm | ' + (r.notes||'');
+        waypoints.push(gpxWpt(r.latitude, r.longitude, name, desc));
+      });
+
+    } else if (storeName === 'gardens') {
+      records.forEach(function(r, i) {
+        var pts = [];
+        try { pts = JSON.parse(r.boundary_points||'[]'); } catch(e){}
+        var name = (r.garden_type||'garden') + '_' + (r.owner||i+1);
+        var desc = 'Crops: ' + (r.crops||'') + ' | Owner: ' + (r.owner||'');
+        if (pts.length >= 2) tracks.push(gpxTrack(name, pts));
+        else if (pts.length === 1) waypoints.push(gpxWpt(pts[0].lat, pts[0].lon, name, desc));
+      });
+
+    } else if (storeName === 'qabb') {
+      records.forEach(function(r, i) {
+        var pts = [{lat:-9.1320,lon:148.4050},{lat:-9.1276,lon:148.4105}];
+        tracks.push(gpxTrack(r.transect||('QABB_'+(i+1)), pts));
+      });
+
+    } else if (storeName === 'water') {
+      records.forEach(function(r, i) {
+        var desc = 'Secchi: ' + (r.secchi_depth_cm||'') + ' cm | ' + (r.date||'');
+        waypoints.push(gpxWpt(-9.1550, 148.3750, r.station||('WQ_'+(i+1)), desc));
+      });
+
+    } else if (storeName === 'phenology') {
+      records.forEach(function(r, i) {
+        waypoints.push(gpxWpt(-9.1400, 148.4000, r.plot||('Pheno_'+(i+1)), 'Date: '+(r.date||'')));
+      });
+
+    } else if (storeName === 'meteo') {
+      records.forEach(function(r, i) {
+        var desc = 'Rain: ' + (r.rainfall_mm||0) + 'mm | Level: ' + (r.water_level_cm||0) + 'cm';
+        waypoints.push(gpxWpt(-9.1350, 148.3900, r.station||('MET_'+(i+1)), desc));
+      });
+
+    } else if (storeName === 'observations') {
+      records.forEach(function(r, i) {
+        if (r.latitude && r.longitude) {
+          waypoints.push(gpxWpt(r.latitude, r.longitude, r.type||('Obs_'+(i+1)), r.notes||''));
+        }
+      });
+      if (!waypoints.length) { toast('No geo-tagged observations to export'); return; }
+    }
+
+    downloadFile(buildGPX('MCA Clan Steward App', waypoints, tracks),
+      'mca_' + storeName + '_' + date + '.gpx', 'application/gpx+xml');
+    toast(records.length + ' records exported as GPX');
+  });
 }
 
 /* ══════════════════════════════════════

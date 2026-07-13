@@ -3555,6 +3555,7 @@ select.msel {
             <div style="display:flex;gap:6px;margin-bottom:14px;">
               <button class="weather-pill active" id="cmode-new" onclick="setConservMode('new')" style="flex:1;font-size:0.78rem;padding:8px;">🌱 New Activity</button>
               <button class="weather-pill" id="cmode-followup" onclick="setConservMode('followup')" style="flex:1;font-size:0.78rem;padding:8px;">📋 Follow-up Visit</button>
+              <button class="weather-pill" onclick="nav('screen-conserv-schedule')" style="flex:0 0 auto;font-size:0.78rem;padding:8px 10px;background:#E0F2F1;color:#006064;border:1px solid #b2dfdb;">📊 Schedule</button>
             </div>
 
             <!-- Activity Type (new mode) -->
@@ -3805,6 +3806,38 @@ select.msel {
           </div>
 
           <button class="btn-primary" style="background:#006064;" onclick="saveConserv()">Save &amp; Submit Activity Record</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: CONSERVATION SCHEDULE
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-conserv-schedule">
+      <div class="top-bar" style="background:#006064;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Follow-up Schedule</div>
+          <div class="bar-subtitle">Activity monitoring status</div>
+        </div>
+        <div class="logo-ph">MCF<br>Logo</div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:24px;">
+          <div style="background:#E0F2F1;border-radius:8px;padding:10px 14px;margin-bottom:14px;border-left:3px solid #006064;">
+            <div style="font-size:0.78rem;font-weight:700;color:#006064;margin-bottom:6px;">Status Key</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+              <span style="font-size:0.65rem;background:#E8F5E9;color:#2E7D32;padding:2px 7px;border-radius:8px;font-weight:600;">✅ Completed on time</span>
+              <span style="font-size:0.65rem;background:#FFF3E0;color:#E65100;padding:2px 7px;border-radius:8px;font-weight:600;">⚠️ Completed late</span>
+              <span style="font-size:0.65rem;background:#FFEBEE;color:#B71C1C;padding:2px 7px;border-radius:8px;font-weight:600;">🔴 Missed</span>
+              <span style="font-size:0.65rem;background:#FFF3E0;color:#E65100;padding:2px 7px;border-radius:8px;font-weight:600;">❗ Due soon</span>
+              <span style="font-size:0.65rem;background:#FFFDE7;color:#F57F17;padding:2px 7px;border-radius:8px;font-weight:600;">⏰ Upcoming</span>
+              <span style="font-size:0.65rem;background:#E3F2FD;color:#1565C0;padding:2px 7px;border-radius:8px;font-weight:600;">📅 Future</span>
+            </div>
+          </div>
+          <div id="conservSchedList">
+            <div style="text-align:center;padding:40px;color:#888;font-size:0.85rem;">Loading schedule…</div>
+          </div>
         </div>
       </div>
     </div>
@@ -4091,7 +4124,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-map','screen-performance','screen-recent-activity',
   'screen-ack','screen-profile',
-  'screen-patrol-stub','screen-community-stub','screen-meteo-setup','screen-meteo-record','screen-garden-mapping','screen-tree-mapping','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-data-export'
+  'screen-patrol-stub','screen-community-stub','screen-meteo-setup','screen-meteo-record','screen-garden-mapping','screen-tree-mapping','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -4127,6 +4160,7 @@ function nav(id) {
   if (id === 'screen-conserv-setup') initConserv();
   if (id === 'screen-conserv-record') initConservRecord();
   if (id === 'screen-conserv-followup') initFollowup();
+  if (id === 'screen-conserv-schedule') initConservSchedule();
   if (id === 'screen-meteo-record') initMeteoRecord();
   if (id === 'screen-performance') renderCalendar();
   showScreen(id);
@@ -4821,6 +4855,126 @@ function addFollowupDates(savedDate) {
     '\nMonth 9: ' + m9.getDate() + ' ' + months[m9.getMonth()] + ' ' + m9.getFullYear();
 }
 
+
+function scheduleFollowups(activityId, activityDateStr, activityType, activitySite) {
+  if (!activityId) return;
+  var mNames = {
+    'January':0,'February':1,'March':2,'April':3,'May':4,'June':5,
+    'July':6,'August':7,'September':8,'October':9,'November':10,'December':11
+  };
+  var parts = activityDateStr ? activityDateStr.split(' ') : [];
+  var baseDate;
+  if (parts.length === 3 && mNames[parts[1]] !== undefined) {
+    baseDate = new Date(parseInt(parts[2]), mNames[parts[1]], parseInt(parts[0]));
+  } else {
+    baseDate = new Date();
+  }
+  function addMonths(d, n) { var r = new Date(d); r.setMonth(r.getMonth() + n); return r; }
+  function isoDate(d) {
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  }
+  var disp = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function displayDate(d) { return d.getDate() + ' ' + disp[d.getMonth()] + ' ' + d.getFullYear(); }
+  [1, 4, 9].forEach(function(m) {
+    var due = addMonths(baseDate, m);
+    saveRecord('schedule', {
+      survey_type: 'schedule',
+      activity_id: activityId,
+      activity_type: activityType,
+      site: activitySite,
+      visit_month: m,
+      due_iso: isoDate(due),
+      due_display: displayDate(due),
+      completed_date: null,
+      completed_iso: null
+    }, null);
+  });
+}
+
+function getFollowupStatus(dueISO, completedISO) {
+  var today = new Date(); today.setHours(0,0,0,0);
+  var due = new Date(dueISO); due.setHours(0,0,0,0);
+  var dayMs = 86400000;
+  if (completedISO) {
+    var comp = new Date(completedISO); comp.setHours(0,0,0,0);
+    var late = Math.round((comp - due) / dayMs);
+    if (late <= 7)  return { label:'Completed on time', color:'#2E7D32', bg:'#E8F5E9', icon:'✅' };
+    if (late <= 30) return { label:'Completed late', color:'#E65100', bg:'#FFF3E0', icon:'⚠️' };
+    return { label:'Completed very late', color:'#B71C1C', bg:'#FFEBEE', icon:'🔴' };
+  }
+  var daysUntil = Math.round((due - today) / dayMs);
+  if (daysUntil > 30)  return { label:'Upcoming', color:'#1565C0', bg:'#E3F2FD', icon:'📅' };
+  if (daysUntil > 7)   return { label:'Due in ' + daysUntil + 'd', color:'#F57F17', bg:'#FFFDE7', icon:'⏰' };
+  if (daysUntil >= 0)  return { label:'Due soon', color:'#E65100', bg:'#FFF3E0', icon:'❗' };
+  var over = -daysUntil;
+  if (over <= 30) return { label:'Overdue ' + over + 'd', color:'#E65100', bg:'#FFF3E0', icon:'⚠️' };
+  return { label:'Missed (' + over + 'd)', color:'#B71C1C', bg:'#FFEBEE', icon:'🔴' };
+}
+
+function markScheduleComplete(activityId, visitMonth, completedDateStr) {
+  if (!activityId) return;
+  var mNames = {
+    'January':0,'February':1,'March':2,'April':3,'May':4,'June':5,
+    'July':6,'August':7,'September':8,'October':9,'November':10,'December':11
+  };
+  var parts = completedDateStr ? completedDateStr.split(' ') : [];
+  var completedISO = '';
+  if (parts.length === 3 && mNames[parts[1]] !== undefined) {
+    var cd = new Date(parseInt(parts[2]), mNames[parts[1]], parseInt(parts[0]));
+    completedISO = cd.getFullYear() + '-' + String(cd.getMonth()+1).padStart(2,'0') + '-' + String(cd.getDate()).padStart(2,'0');
+  }
+  getAllRecords('schedule', function(records) {
+    var match = null;
+    records.forEach(function(r) {
+      if (r.activity_id === activityId && r.visit_month === visitMonth) match = r;
+    });
+    if (!match) return;
+    match.completed_date = completedDateStr;
+    match.completed_iso = completedISO;
+    updateRecord('schedule', match, null);
+  });
+}
+
+function initConservSchedule() {
+  var el = document.getElementById('conservSchedList');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:30px;color:#888;font-size:0.83rem;">Loading…</div>';
+  getAllRecords('conservation', function(activities) {
+    if (!activities || activities.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:30px;color:#888;font-size:0.85rem;">No conservation activities recorded yet.</div>';
+      return;
+    }
+    getAllRecords('schedule', function(schedules) {
+      var out = '';
+      activities.slice().reverse().forEach(function(act) {
+        var actScheds = schedules.filter(function(s) { return s.activity_id === act.id; });
+        out += '<div style="background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.1);">';
+        out += '<div style="font-size:0.82rem;font-weight:700;color:#006064;margin-bottom:2px;">' + (act.activity_type || 'Activity') + '</div>';
+        out += '<div style="font-size:0.7rem;color:#666;margin-bottom:8px;">📍 ' + (act.site || '') + ' &nbsp;·&nbsp; 📅 ' + (act.date || '') + ' &nbsp;·&nbsp; 👥 ' + (act.num_people || 0) + ' people</div>';
+        [1, 4, 9].forEach(function(m) {
+          var sched = actScheds.find(function(s) { return s.visit_month === m; });
+          out += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid #f0f0f0;">';
+          if (!sched) {
+            out += '<span style="font-size:0.73rem;color:#888;">Month ' + m + ' follow-up</span>';
+            out += '<span style="font-size:0.68rem;background:#f5f5f5;color:#999;padding:2px 8px;border-radius:10px;">Not scheduled</span>';
+          } else {
+            var st = getFollowupStatus(sched.due_iso, sched.completed_iso || null);
+            out += '<div><div style="font-size:0.73rem;font-weight:600;color:#333;">Month ' + m + ' — due ' + sched.due_display + '</div>';
+            if (sched.completed_date) out += '<div style="font-size:0.67rem;color:#666;">Done: ' + sched.completed_date + '</div>';
+            out += '</div>';
+            out += '<span style="font-size:0.67rem;font-weight:700;background:' + st.bg + ';color:' + st.color + ';padding:3px 8px;border-radius:10px;white-space:nowrap;">' + st.icon + ' ' + st.label + '</span>';
+          }
+          out += '</div>';
+        });
+        out += '</div>';
+      });
+      el.innerHTML = out || '<div style="text-align:center;padding:30px;color:#888;font-size:0.85rem;">No activities found.</div>';
+    });
+  });
+}
+
 function loadPastActivities() {
   getAllRecords('conservation', function(records) {
     var el = document.getElementById('conservPastList');
@@ -4877,8 +5031,9 @@ function saveConserv() {
     data.method = document.getElementById('conservMethod').value;
     data.density_before = document.getElementById('conservDensityBefore').value;
   }
-  saveRecord('conservation', data, function() {
-    document.getElementById('conservFollowupDates').textContent = addFollowupDates();
+  saveRecord('conservation', data, function(ok, newId) {
+    scheduleFollowups(newId, data.date, data.activity_type, data.site);
+    document.getElementById('conservFollowupDates').textContent = addFollowupDates(data.date);
     toast('Conservation activity saved ✓');
   });
 }
@@ -4928,6 +5083,7 @@ function saveFollowup() {
     data.site_condition = wc ? wc.id.replace('fuw-','') : '';
   }
   saveRecord('followups', data, function() {
+    markScheduleComplete(conservLinkedActivity, conservFollowupMonth, data.date);
     toast('Month ' + conservFollowupMonth + ' follow-up saved ✓');
   });
 }
@@ -5292,8 +5448,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 1;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups'];
+var DB_VERSION = 2;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -5324,15 +5480,28 @@ function saveRecord(storeName, data, cb) {
     var store = tx.objectStore(storeName);
     data.timestamp = new Date().toISOString();
     data.synced = false;
-    store.add(data);
+    var addReq = store.add(data);
+    var newId = null;
+    addReq.onsuccess = function(e) { newId = e.target.result; };
     tx.oncomplete = function() {
       updateRecordCounts();
-      if (cb) cb(true);
+      if (cb) cb(true, newId);
     };
     tx.onerror = function() {
       toast('Save error');
       if (cb) cb(false);
     };
+  });
+}
+
+function updateRecord(storeName, data, cb) {
+  openDB(function(db) {
+    if (!db) { return; }
+    var tx = db.transaction(storeName, 'readwrite');
+    var store = tx.objectStore(storeName);
+    store.put(data);
+    tx.oncomplete = function() { if (cb) cb(true); };
+    tx.onerror = function() { if (cb) cb(false); };
   });
 }
 

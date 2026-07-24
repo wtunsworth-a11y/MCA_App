@@ -2189,7 +2189,7 @@ select.msel {
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
           <div class="bar-title">Phenology Monitoring</div>
-          <div class="bar-subtitle">Monthly Observation — Fixed Plot</div>
+          <div class="bar-subtitle">Plot Setup &amp; Monthly Observations</div>
         </div>
         <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Fund" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><ellipse cx="13" cy="9.5" rx="6.5" ry="6" fill="rgba(255,255,255,0.9)"/><ellipse cx="13" cy="13.5" rx="8" ry="5" fill="rgba(255,255,255,0.8)"/><rect x="12" y="18" width="2" height="5" rx="1" fill="rgba(255,255,255,0.7)"/></svg></div><div class="logo-ph" title="European Union" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" style="border-radius:5px;" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" fill="#003399"/><polygon points="13.00,1.43 13.42,2.55 14.61,2.60 13.68,3.34 13.99,4.49 13.00,3.83 12.01,4.49 12.32,3.34 11.39,2.60 12.58,2.55" fill="#FFD700"/><polygon points="17.94,2.75 18.36,3.87 19.55,3.92 18.62,4.66 18.93,5.81 17.94,5.15 16.95,5.81 17.26,4.66 16.33,3.92 17.52,3.87" fill="#FFD700"/><polygon points="21.56,6.37 21.97,7.49 23.16,7.54 22.23,8.28 22.55,9.43 21.56,8.77 20.56,9.43 20.88,8.28 19.95,7.54 21.14,7.49" fill="#FFD700"/><polygon points="22.88,11.31 23.30,12.43 24.49,12.48 23.56,13.22 23.87,14.37 22.88,13.71 21.89,14.37 22.20,13.22 21.27,12.48 22.46,12.43" fill="#FFD700"/><polygon points="21.56,16.25 21.97,17.37 23.16,17.42 22.23,18.16 22.55,19.31 21.56,18.65 20.56,19.31 20.88,18.16 19.95,17.42 21.14,17.37" fill="#FFD700"/><polygon points="17.94,19.87 18.36,20.98 19.55,21.03 18.62,21.78 18.93,22.92 17.94,22.27 16.95,22.92 17.26,21.78 16.33,21.03 17.52,20.98" fill="#FFD700"/><polygon points="13.00,21.19 13.42,22.31 14.61,22.36 13.68,23.10 13.99,24.25 13.00,23.59 12.01,24.25 12.32,23.10 11.39,22.36 12.58,22.31" fill="#FFD700"/><polygon points="8.06,19.87 8.48,20.98 9.67,21.03 8.74,21.78 9.05,22.92 8.06,22.27 7.07,22.92 7.38,21.78 6.45,21.03 7.64,20.98" fill="#FFD700"/><polygon points="4.44,16.25 4.86,17.37 6.05,17.42 5.12,18.16 5.44,19.31 4.44,18.65 3.45,19.31 3.77,18.16 2.84,17.42 4.03,17.37" fill="#FFD700"/><polygon points="3.12,11.31 3.54,12.43 4.73,12.48 3.80,13.22 4.11,14.37 3.12,13.71 2.13,14.37 2.44,13.22 1.51,12.48 2.70,12.43" fill="#FFD700"/><polygon points="4.44,6.37 4.86,7.49 6.05,7.54 5.12,8.28 5.44,9.43 4.44,8.77 3.45,9.43 3.77,8.28 2.84,7.54 4.03,7.49" fill="#FFD700"/><polygon points="8.06,2.75 8.48,3.87 9.67,3.92 8.74,4.66 9.05,5.81 8.06,5.15 7.07,5.81 7.38,4.66 6.45,3.92 7.64,3.87" fill="#FFD700"/></svg></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><path d="M13 4 C9 6 7 10 7 13 C7 17 9.5 20 13 21 C16.5 20 19 17 19 13 C19 10 17 6 13 4Z" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/><line x1="13" y1="4" x2="13" y2="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/><line x1="7" y1="13" x2="19" y2="13" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/></svg></div></div>
       </div>
@@ -2199,65 +2199,7 @@ select.msel {
           <div class="spinner-dots"><span></span><span></span><span></span></div>
         </div>
         <div id="phenoContent" style="display:none;">
-          <div class="p14" style="padding-bottom:20px;">
-            <div class="map-placeholder">
-              <svg viewBox="0 0 362 130" xmlns="http://www.w3.org/2000/svg">
-                <rect width="362" height="130" fill="#c9dce8"/>
-                <polygon points="217.8,84.1 222.3,88.5 220.5,97.2 172.1,100.2 127.6,104.3 114.0,94.4 78.5,79.3 76.7,75.2 77.9,73.2 72.0,54.3 95.6,35.1 100.3,34.2 136.8,39.0 144.2,54.1 177.0,52.2 205.7,29.1 254.5,20.3 252.6,34.6 249.9,37.5 242.3,43.7 222.5,53.5 217.8,84.1" fill="#E6F1FB" fill-opacity="0.55" stroke="#185FA5" stroke-width="1.5"/>
-                <polygon points="178.6,104.9 152.6,101.8 136.0,78.1 150.9,75.0 226.1,92.2 225.8,96.6 178.6,104.9" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
-                <polygon points="123.0,107.6 85.4,77.7 136.0,78.1 152.6,101.8 123.0,107.6" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
-                <polygon points="254.6,68.8 184.7,58.1 183.5,52.8 183.4,48.8 201.3,40.2 291.4,24.0 308.8,36.7 294.4,55.9 254.6,68.8" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
-                <polygon points="136.0,78.1 85.4,77.7 49.0,72.6 53.8,55.4 115.0,45.1 124.0,46.5 126.9,47.8 160.7,65.2 150.9,75.0 136.0,78.1" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
-                <polygon points="226.1,92.2 150.9,75.0 160.7,65.2 184.7,58.1 254.6,68.8 226.1,92.2" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
-                <circle cx="189.6" cy="72.2" r="14" fill="#E65100" opacity="0.25"/>
-                <circle cx="189.6" cy="72.2" r="7" fill="#E65100" opacity="0.9"/>
-                <circle cx="189.6" cy="72.2" r="3" fill="#fff"/>
-                <text x="205.6" y="76.2" fill="#E65100" font-size="9" font-weight="bold" font-family="Arial">P-7B-02</text>
-                <text x="120.7" y="43.3" fill="#185FA5" font-size="10" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.7">Zone 7B</text>
-              </svg>
-            </div>
-
-            <div class="card" style="padding:12px 16px;">
-              <div class="transect-row"><span class="td-label">🌺 Plot</span><span>P-7B-02</span></div>
-              <div class="transect-row"><span class="td-label">📍 Location</span><span>Afore Phenology Plot</span></div>
-              <div class="transect-row"><span class="td-label">🧭 Coordinates</span><span>-9.1400° S, 148.4000° E</span></div>
-              <div class="transect-row"><span class="td-label">📅 Schedule</span><span>10th of every month</span></div>
-              <div class="transect-row"><span class="td-label">🌿 Species</span><span>Vanilla, Cocoa, Coffee, Okari, Massoy</span></div>
-            </div>
-
-            <div class="nav-gate-card" id="phenoNavGateCard">
-              <div style="font-size:0.82rem;font-weight:700;color:#E65100;margin-bottom:8px;">📍 Navigate to Phenology Plot</div>
-              <div class="compass-row">
-                <svg width="60" height="60" viewBox="0 0 72 72" style="flex-shrink:0;">
-                  <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
-                  <text x="33" y="10" fill="#333" font-size="9" font-family="Arial" font-weight="bold">N</text>
-                  <g transform="rotate(68, 36, 36)">
-                    <polygon points="36,8 32,42 36,38 40,42" fill="#E65100"/>
-                    <polygon points="36,64 32,42 36,46 40,42" fill="#ccc"/>
-                  </g>
-                </svg>
-                <div class="compass-info">
-                  <div class="c-bearing">Walk ENE · 68°</div>
-                  <div class="c-dist"><strong>290 m</strong> to plot</div>
-                  <div id="phenoNavHint" style="margin-top:4px;font-size:0.72rem;color:#888;">Walk to monitoring plot — unlock within 30 m</div>
-                </div>
-              </div>
-              <button class="btn-outline" id="phenoBtnArrive" onclick="phenoArrive()" style="margin-top:10px;border-color:#E65100;color:#E65100;">Simulate: I've Reached the Plot ✓</button>
-            </div>
-
-            <div id="phenoFpSection" style="display:none;">
-              <div style="font-size:0.82rem;font-weight:700;color:#333;margin:14px 0 8px;">Step 2 — Verify Identity</div>
-              <button class="fp-verify-btn" id="phenoFpBtn" onclick="phenoVerify()" style="border-color:#E65100;">
-                <svg width="28" height="28" viewBox="0 0 120 120" fill="none">
-                  <path d="M60 10C32.4 10 10 32.4 10 60s22.4 50 50 50 50-22.4 50-50S87.6 10 60 10z" stroke="#E65100" stroke-width="7" fill="none"/>
-                  <path d="M60 30c-16.6 0-30 13.4-30 30s13.4 30 30 30 30-13.4 30-30-13.4-30-30-30z" stroke="#E65100" stroke-width="5" fill="none"/>
-                  <circle cx="60" cy="60" r="10" fill="#E65100"/>
-                </svg>
-                <span id="phenoFpTxt" style="font-size:0.8rem;color:#555;">Tap to Verify Identity</span>
-              </button>
-            </div>
-
-            <button class="btn-primary" id="phenoBeginBtn" disabled onclick="nav('screen-pheno-record')" style="background:#E65100;margin-top:14px;">Begin Phenology Observation</button>
+          <div id="phenoSummaryInner" class="p14" style="padding-bottom:20px;">
           </div>
         </div>
       </div>
@@ -2297,58 +2239,123 @@ select.msel {
             </div>
           </div>
 
-            <div class="card" style="padding:10px 14px;margin-bottom:10px;">
-              <div style="font-size:0.85rem;font-weight:700;color:#E65100;margin-bottom:6px;">🌿 Vanilla</div>
-              <div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Phenophase</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill" id="ph-vanilla-vegetative" onclick="setPheno('vanilla','vegetative')" style="font-size:0.68rem;padding:4px 8px;">Vegetative</button><button class="weather-pill active" id="ph-vanilla-flowering" onclick="setPheno('vanilla','flowering')" style="font-size:0.68rem;padding:4px 8px;">Flowering</button><button class="weather-pill" id="ph-vanilla-fruiting" onclick="setPheno('vanilla','fruiting')" style="font-size:0.68rem;padding:4px 8px;">Fruiting</button><button class="weather-pill" id="ph-vanilla-ripe" onclick="setPheno('vanilla','ripe')" style="font-size:0.68rem;padding:4px 8px;">Ripe</button><button class="weather-pill" id="ph-vanilla-dormant" onclick="setPheno('vanilla','dormant')" style="font-size:0.68rem;padding:4px 8px;">Dormant</button></div>
-              <div style="font-size:0.72rem;font-weight:600;color:#555;margin:8px 0 4px;">Health</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill active" id="hp-vanilla-good" onclick="setHealth('vanilla','good')" style="font-size:0.68rem;padding:4px 8px;">Good</button><button class="weather-pill" id="hp-vanilla-fair" onclick="setHealth('vanilla','fair')" style="font-size:0.68rem;padding:4px 8px;">Fair</button><button class="weather-pill" id="hp-vanilla-poor" onclick="setHealth('vanilla','poor')" style="font-size:0.68rem;padding:4px 8px;">Poor</button></div>
-              <input type="text" class="form-input" style="font-size:0.75rem;padding:6px 10px;margin-top:6px;" value="Strong vine growth on host tree" placeholder="Notes...">
-            </div>
-            <div class="card" style="padding:10px 14px;margin-bottom:10px;">
-              <div style="font-size:0.85rem;font-weight:700;color:#E65100;margin-bottom:6px;">🫘 Cocoa</div>
-              <div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Phenophase</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill" id="ph-cocoa-vegetative" onclick="setPheno('cocoa','vegetative')" style="font-size:0.68rem;padding:4px 8px;">Vegetative</button><button class="weather-pill" id="ph-cocoa-flowering" onclick="setPheno('cocoa','flowering')" style="font-size:0.68rem;padding:4px 8px;">Flowering</button><button class="weather-pill active" id="ph-cocoa-fruiting" onclick="setPheno('cocoa','fruiting')" style="font-size:0.68rem;padding:4px 8px;">Fruiting</button><button class="weather-pill" id="ph-cocoa-ripe" onclick="setPheno('cocoa','ripe')" style="font-size:0.68rem;padding:4px 8px;">Ripe</button><button class="weather-pill" id="ph-cocoa-dormant" onclick="setPheno('cocoa','dormant')" style="font-size:0.68rem;padding:4px 8px;">Dormant</button></div>
-              <div style="font-size:0.72rem;font-weight:600;color:#555;margin:8px 0 4px;">Health</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill" id="hp-cocoa-good" onclick="setHealth('cocoa','good')" style="font-size:0.68rem;padding:4px 8px;">Good</button><button class="weather-pill active" id="hp-cocoa-fair" onclick="setHealth('cocoa','fair')" style="font-size:0.68rem;padding:4px 8px;">Fair</button><button class="weather-pill" id="hp-cocoa-poor" onclick="setHealth('cocoa','poor')" style="font-size:0.68rem;padding:4px 8px;">Poor</button></div>
-              <input type="text" class="form-input" style="font-size:0.75rem;padding:6px 10px;margin-top:6px;" placeholder="Notes...">
-            </div>
-            <div class="card" style="padding:10px 14px;margin-bottom:10px;">
-              <div style="font-size:0.85rem;font-weight:700;color:#E65100;margin-bottom:6px;">☕ Coffee</div>
-              <div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Phenophase</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill active" id="ph-coffee-vegetative" onclick="setPheno('coffee','vegetative')" style="font-size:0.68rem;padding:4px 8px;">Vegetative</button><button class="weather-pill" id="ph-coffee-flowering" onclick="setPheno('coffee','flowering')" style="font-size:0.68rem;padding:4px 8px;">Flowering</button><button class="weather-pill" id="ph-coffee-fruiting" onclick="setPheno('coffee','fruiting')" style="font-size:0.68rem;padding:4px 8px;">Fruiting</button><button class="weather-pill" id="ph-coffee-ripe" onclick="setPheno('coffee','ripe')" style="font-size:0.68rem;padding:4px 8px;">Ripe</button><button class="weather-pill" id="ph-coffee-dormant" onclick="setPheno('coffee','dormant')" style="font-size:0.68rem;padding:4px 8px;">Dormant</button></div>
-              <div style="font-size:0.72rem;font-weight:600;color:#555;margin:8px 0 4px;">Health</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill active" id="hp-coffee-good" onclick="setHealth('coffee','good')" style="font-size:0.68rem;padding:4px 8px;">Good</button><button class="weather-pill" id="hp-coffee-fair" onclick="setHealth('coffee','fair')" style="font-size:0.68rem;padding:4px 8px;">Fair</button><button class="weather-pill" id="hp-coffee-poor" onclick="setHealth('coffee','poor')" style="font-size:0.68rem;padding:4px 8px;">Poor</button></div>
-              <input type="text" class="form-input" style="font-size:0.75rem;padding:6px 10px;margin-top:6px;" placeholder="Notes...">
-            </div>
-            <div class="card" style="padding:10px 14px;margin-bottom:10px;">
-              <div style="font-size:0.85rem;font-weight:700;color:#E65100;margin-bottom:6px;">🥜 Okari</div>
-              <div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Phenophase</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill" id="ph-okari-vegetative" onclick="setPheno('okari','vegetative')" style="font-size:0.68rem;padding:4px 8px;">Vegetative</button><button class="weather-pill" id="ph-okari-flowering" onclick="setPheno('okari','flowering')" style="font-size:0.68rem;padding:4px 8px;">Flowering</button><button class="weather-pill" id="ph-okari-fruiting" onclick="setPheno('okari','fruiting')" style="font-size:0.68rem;padding:4px 8px;">Fruiting</button><button class="weather-pill" id="ph-okari-ripe" onclick="setPheno('okari','ripe')" style="font-size:0.68rem;padding:4px 8px;">Ripe</button><button class="weather-pill active" id="ph-okari-dormant" onclick="setPheno('okari','dormant')" style="font-size:0.68rem;padding:4px 8px;">Dormant</button></div>
-              <div style="font-size:0.72rem;font-weight:600;color:#555;margin:8px 0 4px;">Health</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill active" id="hp-okari-good" onclick="setHealth('okari','good')" style="font-size:0.68rem;padding:4px 8px;">Good</button><button class="weather-pill" id="hp-okari-fair" onclick="setHealth('okari','fair')" style="font-size:0.68rem;padding:4px 8px;">Fair</button><button class="weather-pill" id="hp-okari-poor" onclick="setHealth('okari','poor')" style="font-size:0.68rem;padding:4px 8px;">Poor</button></div>
-              <input type="text" class="form-input" style="font-size:0.75rem;padding:6px 10px;margin-top:6px;" value="Large tree, no fruit yet this season" placeholder="Notes...">
-            </div>
-
-            <div class="card" style="padding:10px 14px;margin-bottom:10px;">
-              <div style="font-size:0.85rem;font-weight:700;color:#E65100;margin-bottom:6px;">🌲 Massoy</div>
-              <div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Phenophase</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill active" id="ph-massoy-vegetative" onclick="setPheno('massoy','vegetative')" style="font-size:0.68rem;padding:4px 8px;">Vegetative</button><button class="weather-pill" id="ph-massoy-flowering" onclick="setPheno('massoy','flowering')" style="font-size:0.68rem;padding:4px 8px;">Flowering</button><button class="weather-pill" id="ph-massoy-fruiting" onclick="setPheno('massoy','fruiting')" style="font-size:0.68rem;padding:4px 8px;">Fruiting</button><button class="weather-pill" id="ph-massoy-ripe" onclick="setPheno('massoy','ripe')" style="font-size:0.68rem;padding:4px 8px;">Ripe</button><button class="weather-pill" id="ph-massoy-dormant" onclick="setPheno('massoy','dormant')" style="font-size:0.68rem;padding:4px 8px;">Dormant</button></div>
-              <div style="font-size:0.72rem;font-weight:600;color:#555;margin:8px 0 4px;">Health</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="weather-pill active" id="hp-massoy-good" onclick="setHealth('massoy','good')" style="font-size:0.68rem;padding:4px 8px;">Good</button><button class="weather-pill" id="hp-massoy-fair" onclick="setHealth('massoy','fair')" style="font-size:0.68rem;padding:4px 8px;">Fair</button><button class="weather-pill" id="hp-massoy-poor" onclick="setHealth('massoy','poor')" style="font-size:0.68rem;padding:4px 8px;">Poor</button></div>
-              <input type="text" class="form-input" style="font-size:0.75rem;padding:6px 10px;margin-top:6px;" placeholder="Notes...">
-            </div>
-
+          <div id="phenoPlantCards">
+            <div style="padding:30px 20px;text-align:center;color:#888;font-size:0.82rem;">Loading plant records…</div>
+          </div>
           <div class="form-group" style="margin-top:6px;">
             <label class="form-label">General Notes</label>
-            <textarea class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Overall site conditions, pest activity, recent weather impact…"></textarea>
+            <textarea class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" id="phenoGeneralNotes" placeholder="Overall site conditions, pest activity, recent weather impact…"></textarea>
           </div>
-          <button class="btn-primary" style="background:#E65100;" onclick="submitPheno()">Save &amp; Submit Observation</button>
+          <button class="btn-primary" style="background:#E65100;" onclick="submitAllPhenoObs()">Save All Plant Observations</button>
         </div>
       </div>
     </div>
 
         <!-- ══════════════════════════════════════
+         SCREEN: PHENOLOGY — PLOT MANAGEMENT
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-pheno-plots">
+      <div class="top-bar" style="background:#E65100;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Phenology Plots</div>
+          <div class="bar-subtitle">Establish &amp; Manage Monitoring Plants</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="matrix-note" style="background:#fff3e0;border-color:#ffcc80;color:#E65100;">
+          Register 5 plants of each crop. Each plant may be in a different location. Plants must be approved by Zone Staff before monitoring begins.
+        </div>
+        <div id="phenoPlotsContent" class="p14" style="padding-bottom:20px;">
+          <div style="padding:40px 20px;text-align:center;">
+            <div class="spinner-dots"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: PHENOLOGY — ESTABLISH PLANT
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-pheno-establish">
+      <div class="top-bar" style="background:#E65100;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title" id="phenoEstTitle">Establish Plant</div>
+          <div class="bar-subtitle" id="phenoEstSubtitle">GPS &amp; Photo Required</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div class="card" style="padding:12px 16px;margin-bottom:10px;">
+            <div class="transect-row"><span class="td-label">🌿 Crop</span><span id="estCropLabel" style="font-weight:700;color:#E65100;">—</span></div>
+            <div class="transect-row"><span class="td-label">🔢 Plant #</span><span id="estPlantNum" style="font-weight:700;">—</span></div>
+            <div class="transect-row"><span class="td-label">📍 GPS</span><span id="estGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">📷 Photo <span style="color:#B71C1C;">*</span></label>
+            <div id="estPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="simCapturePhoto()">
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
+            </div>
+            <div id="estPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location Name <span style="color:#999;font-weight:400;">(optional)</span></label>
+            <input type="text" id="estLocationName" class="form-input" placeholder="e.g. Near garden fence, uphill path…">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea id="estNotes" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Height, condition, identifying features…"></textarea>
+          </div>
+          <div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.75rem;margin-bottom:12px;">
+            ℹ️ This plant will be marked <strong>Pending Approval</strong> until a Zone Staff member reviews it. Monthly monitoring can only begin once plants are approved.
+          </div>
+          <button class="btn-primary" style="background:#E65100;" onclick="submitEstablish()">Submit for Approval</button>
+          <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: PHENOLOGY — REPORT INACTIVE
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-pheno-inactive">
+      <div class="top-bar" style="background:#B71C1C;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Report Plant Inactive</div>
+          <div class="bar-subtitle" id="phenoInactiveSubtitle">Plant details</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div class="matrix-note" style="background:#FFEBEE;border-color:#FFCDD2;color:#B71C1C;margin-bottom:12px;">
+            ⚠️ Reporting this plant inactive removes it from your monitoring schedule. You will be prompted to establish a replacement, which requires Zone Staff approval before monitoring resumes.
+          </div>
+          <div class="card" style="padding:12px 16px;margin-bottom:12px;">
+            <div class="transect-row"><span class="td-label">🌿 Crop</span><span id="inactiveCropLabel" style="font-weight:700;color:#E65100;">—</span></div>
+            <div class="transect-row"><span class="td-label">🔢 Plant #</span><span id="inactivePlantNum">—</span></div>
+            <div class="transect-row"><span class="td-label">📍 Location</span><span id="inactiveLocation" style="font-size:0.78rem;">—</span></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reason <span style="color:#B71C1C;">*</span></label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="weather-pill" id="inact-died" onclick="selectInactiveReason('died')">🪦 Plant Died</button>
+              <button class="weather-pill" id="inact-restricted" onclick="selectInactiveReason('restricted')">🚫 Access Restricted</button>
+              <button class="weather-pill" id="inact-other" onclick="selectInactiveReason('other')">Other</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea id="inactiveNotes" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="What happened? When was it last observed healthy?"></textarea>
+          </div>
+          <button class="btn-primary" style="background:#B71C1C;margin-top:4px;" onclick="submitInactive()">Confirm &amp; Establish Replacement</button>
+          <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
          SCREEN: SERVICE DELIVERY MONITORING
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-sdm">
@@ -4145,7 +4152,7 @@ const ALL_SCREENS = [
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-qabb-setup','screen-qabb-matrix',
   'screen-water-setup','screen-water-record',
-  'screen-pheno-setup','screen-pheno-record',
+  'screen-pheno-setup','screen-pheno-plots','screen-pheno-establish','screen-pheno-inactive','screen-pheno-record',
   'screen-sdm','screen-facility',
   'screen-alerts',
   'screen-meetings','screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3',
@@ -4183,6 +4190,8 @@ function nav(id) {
   if (id === 'screen-water-setup') initWater();
   if (id === 'screen-water-record') initWaterRecord();
   if (id === 'screen-pheno-setup') initPheno();
+  if (id === 'screen-pheno-plots') initPhenoPlots();
+  if (id === 'screen-pheno-establish') initPhenoEstablish();
   if (id === 'screen-pheno-record') initPhenoRecord();
   if (id === 'screen-meteo-setup') initMeteo();
   if (id === 'screen-garden-mapping') initGardenMapping();
@@ -4611,70 +4620,302 @@ function submitWater() { saveRecord('water', collectWaterData(), function() { to
 function wxW(on, off) { document.getElementById('wwx-'+on).classList.add('active'); document.getElementById('wwx-'+off).classList.remove('active'); }
 function wxPol(on, off) { document.getElementById('wpol-'+on).classList.add('active'); document.getElementById('wpol-'+off).classList.remove('active'); }
 
-/* ── Phenology Setup ── */
-var phenoVerifiedFlag = false, phenoArrivedFlag = false;
+/* ── Phenology ── */
+var PHENO_CROPS = [
+  {key:'vanilla', label:'Vanilla', emoji:'\U0001f33f'},
+  {key:'cocoa',   label:'Cocoa',   emoji:'\U0001fab2'},
+  {key:'coffee',  label:'Coffee',  emoji:'☕'},
+  {key:'okari',   label:'Okari',   emoji:'\U0001f95c'},
+  {key:'massoy',  label:'Massoy',  emoji:'\U0001f332'}
+];
+var phenoEditCrop='', phenoEditPlantNum=0, phenoEditReplacesId=null;
+var phenoInactiveId=null, phenoInactiveReason='', phenoPhotoTaken=false;
+var PHENO_PHASES=['vegetative','flowering','fruiting','ripe','dormant'];
+var PHENO_HEALTH=['good','fair','poor'];
+
+function simGPS() {
+  /* Deterministic simulated GPS per crop × plant for prototype */
+  var ci = ['vanilla','cocoa','coffee','okari','massoy'].indexOf(phenoEditCrop);
+  var idx = Math.max(ci,0) * 5 + (phenoEditPlantNum - 1);
+  var baseLat = -9.1400, baseLng = 148.4000;
+  var latOff = (((idx * 37) % 41) - 20) * 0.003;
+  var lngOff = (((idx * 53) % 47) - 23) * 0.003;
+  return {lat:(baseLat+latOff).toFixed(4), lng:(baseLng+lngOff).toFixed(4)};
+}
 
 function initPheno() {
-  phenoVerifiedFlag = false; phenoArrivedFlag = false;
-  document.getElementById('phenoBeginBtn').disabled = true;
-  document.getElementById('phenoFpBtn').classList.remove('verified');
-  document.getElementById('phenoFpTxt').textContent = 'Tap to Verify Identity';
-  document.getElementById('phenoFpSection').style.display = 'none';
-  document.getElementById('phenoNavGateCard').classList.remove('arrived');
-  document.getElementById('phenoBtnArrive').disabled = false;
-  document.getElementById('phenoBtnArrive').textContent = "Simulate: I’ve Reached the Plot ✓";
-  document.getElementById('phenoNavHint').textContent = 'Walk to monitoring plot — unlock within 30 m';
   document.getElementById('phenoLoading').style.display = 'block';
   document.getElementById('phenoContent').style.display = 'none';
-  setTimeout(function() {
+  getAllRecords('pheno_plots', function(plots) {
     document.getElementById('phenoLoading').style.display = 'none';
     document.getElementById('phenoContent').style.display = 'block';
-  }, 1000);
+    var approved = plots.filter(function(p){ return p.status==='approved'; });
+    var pending  = plots.filter(function(p){ return p.status==='pending';  });
+    var total = 25;
+    var h = '';
+    h += '<div class="card" style="padding:12px 16px;margin-bottom:10px;">';
+    h += '<div style="font-size:0.85rem;font-weight:700;color:#333;margin-bottom:8px;">Plot Status by Crop</div>';
+    PHENO_CROPS.forEach(function(c) {
+      var ca = approved.filter(function(p){return p.crop_type===c.key;}).length;
+      var cp = pending.filter(function(p){return p.crop_type===c.key;}).length;
+      var col = ca>=5?'#2E7D32':ca>0?'#E65100':'#888';
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0;">';
+      h += '<span style="font-size:0.82rem;">'+c.emoji+' '+c.label+'</span>';
+      h += '<span style="font-size:0.78rem;font-weight:700;color:'+col+';">'+ca+'/5';
+      if(cp>0) h+=' <span style="color:#F57F17;">('+cp+' pending)</span>';
+      h += '</span></div>';
+    });
+    h += '</div>';
+    var bg=approved.length>=total?'#E8F5E9':'#FFF3E0', bc=approved.length>=total?'#A5D6A7':'#FFCC80', fc=approved.length>=total?'#1B5E20':'#E65100';
+    h += '<div class="matrix-note" style="background:'+bg+';border-color:'+bc+';color:'+fc+';margin-bottom:12px;">';
+    h += '<strong>'+approved.length+'/'+total+' plants approved</strong>';
+    if(pending.length>0) h+=' · '+pending.length+' pending approval';
+    var ne=total-plots.filter(function(p){return p.status!=='inactive_replaced';}).length;
+    if(ne>0) h+=' · '+ne+' not established';
+    h += '</div>';
+    h += '<button class="btn-outline" style="width:100%;margin-bottom:8px;" onclick="nav(\'screen-pheno-plots\')">\U0001f5c2 Manage Plots</button>';
+    var canRec=approved.length>0;
+    h += '<button class="btn-primary" style="background:#E65100;width:100%;"'+(canRec?'':' disabled')+' onclick="nav(\'screen-pheno-record\')">'+(canRec?'Begin Monthly Observations':'No approved plants yet')+'</button>';
+    if(!canRec) h+='<p style="font-size:0.72rem;color:#888;margin-top:6px;text-align:center;">Establish and get plants approved first</p>';
+    var inner=document.getElementById('phenoSummaryInner');
+    if(inner) inner.innerHTML=h;
+  });
 }
-function phenoArrive() {
-  phenoArrivedFlag = true;
-  document.getElementById('phenoNavGateCard').classList.add('arrived');
-  document.getElementById('phenoNavHint').textContent = '✓ At monitoring plot — verify identity';
-  document.getElementById('phenoBtnArrive').disabled = true;
-  document.getElementById('phenoBtnArrive').textContent = '✓ Arrived at Plot';
-  document.getElementById('phenoFpSection').style.display = 'block';
-  checkPhenoReady();
+
+function initPhenoPlots() {
+  var c=document.getElementById('phenoPlotsContent');
+  if(!c) return;
+  c.innerHTML='<div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>';
+  getAllRecords('pheno_plots', function(plots) {
+    var h='';
+    PHENO_CROPS.forEach(function(cr) {
+      var cp=plots.filter(function(p){return p.crop_type===cr.key;});
+      var na=cp.filter(function(p){return p.status==='approved';}).length;
+      h+='<div class="card" style="padding:12px 14px;margin-bottom:10px;">';
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
+      h+='<span style="font-size:0.88rem;font-weight:700;">'+cr.emoji+' '+cr.label+'</span>';
+      h+='<span style="font-size:0.75rem;font-weight:700;color:'+(na>=5?'#2E7D32':'#E65100')+';">'+na+'/5 approved</span>';
+      h+='</div>';
+      for(var n=1;n<=5;n++) {
+        var plot=cp.find(function(p){return p.plant_num===n && p.status!=='inactive' && p.status!=='inactive_replaced';});
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid #f0f0f0;gap:6px;">';
+        h+='<span style="font-size:0.78rem;font-weight:700;color:#555;flex-shrink:0;">Plant '+n+'</span>';
+        if(!plot) {
+          h+='<span style="font-size:0.73rem;color:#aaa;flex:1;">Not established</span>';
+          h+='<button class="btn-sm-export" style="background:#E65100;color:#fff;padding:4px 10px;font-size:0.7rem;" onclick="openEstablishPlant(\''+cr.key+'\','+n+',null)">+ Establish</button>';
+        } else if(plot.status==='pending') {
+          h+='<span style="font-size:0.72rem;color:#F57F17;flex:1;">⏳ Pending<br><span style="color:#888;">'+(plot.location_name||plot.lat+'°S')+'</span></span>';
+          h+='<button class="btn-sm-export" style="background:#43A047;color:#fff;padding:4px 8px;font-size:0.7rem;" onclick="approvePlot('+plot.id+')">✓ Approve</button>';
+        } else if(plot.status==='approved') {
+          h+='<span style="font-size:0.72rem;color:#2E7D32;flex:1;">✓ Approved<br><span style="color:#888;">'+(plot.location_name||(plot.lat+'°S, '+plot.lng+'°E'))+'</span></span>';
+          h+='<button class="btn-sm-export" style="background:#fff;color:#B71C1C;border:1px solid #FFCDD2;padding:4px 8px;font-size:0.7rem;" onclick="openInactivePlot('+plot.id+',\''+cr.label+'\','+n+',\''+(plot.location_name||plot.lat+'°S')+'\')">Report Inactive</button>';
+        }
+        h+='</div>';
+      }
+      var inactive=cp.filter(function(p){return p.status==='inactive';});
+      inactive.forEach(function(p){
+        h+='<div style="padding:6px 0;border-top:1px solid #FFCDD2;background:#FFF8F8;border-radius:0 0 8px 8px;">';
+        h+='<span style="font-size:0.73rem;color:#B71C1C;">⚠️ Plant '+p.plant_num+' inactive ('+( p.inactive_reason||'unknown')+')</span> ';
+        h+='<button class="btn-sm-export" style="background:#E65100;color:#fff;padding:3px 8px;font-size:0.7rem;margin-top:4px;" onclick="openEstablishPlant(\''+cr.key+'\','+p.plant_num+','+p.id+')">Establish Replacement</button>';
+        h+='</div>';
+      });
+      h+='</div>';
+    });
+    c.innerHTML=h;
+  });
 }
-function phenoVerify() {
-  if (phenoVerifiedFlag) return;
-  document.getElementById('phenoFpTxt').textContent = 'Verifying…';
-  setTimeout(function() {
-    phenoVerifiedFlag = true;
-    document.getElementById('phenoFpBtn').classList.add('verified');
-    document.getElementById('phenoFpTxt').textContent = '✓ Identity Verified';
-    checkPhenoReady();
-  }, 900);
+
+function openEstablishPlant(crop, plantNum, replacesId) {
+  phenoEditCrop=crop; phenoEditPlantNum=plantNum; phenoEditReplacesId=replacesId;
+  phenoPhotoTaken=false;
+  nav('screen-pheno-establish');
 }
-function checkPhenoReady() {
-  document.getElementById('phenoBeginBtn').disabled = !(phenoVerifiedFlag && phenoArrivedFlag);
+
+function initPhenoEstablish() {
+  var cr=PHENO_CROPS.find(function(c){return c.key===phenoEditCrop;})||{label:'—',emoji:'\U0001f33f'};
+  var titleText=phenoEditReplacesId?'Establish Replacement — '+cr.label:('Establish '+cr.emoji+' '+cr.label);
+  document.getElementById('phenoEstTitle').textContent=titleText;
+  document.getElementById('phenoEstSubtitle').textContent='Plant #'+phenoEditPlantNum+' · GPS & Photo Required';
+  document.getElementById('estCropLabel').textContent=cr.emoji+' '+cr.label;
+  document.getElementById('estPlantNum').textContent='Plant '+phenoEditPlantNum;
+  document.getElementById('estLocationName').value='';
+  document.getElementById('estNotes').value='';
+  document.getElementById('estPhotoStatus').textContent='No photo taken';
+  document.getElementById('estPhotoStatus').style.color='#888';
+  document.getElementById('estPhotoBox').style.borderColor='#ccc';
+  document.getElementById('estPhotoBox').innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">\U0001f4f7</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
+  phenoPhotoTaken=false;
+  var gpsEl=document.getElementById('estGPS');
+  if(gpsEl){gpsEl.textContent='Acquiring…';gpsEl.style.color='#888';}
+  setTimeout(function(){
+    var gps=simGPS();
+    if(gpsEl){gpsEl.textContent=gps.lat+'° S, '+gps.lng+'° E';gpsEl.style.color='#2E6B38';}
+  },1200);
 }
+
+function simCapturePhoto() {
+  phenoPhotoTaken=true;
+  var box=document.getElementById('estPhotoBox');
+  if(box) box.innerHTML='<div style="text-align:center;color:#2E7D32;"><div style="font-size:2rem;">✅</div><div style="font-size:0.73rem;margin-top:2px;">Photo captured</div></div>';
+  var s=document.getElementById('estPhotoStatus');
+  if(s){s.textContent='✓ Photo attached';s.style.color='#2E7D32';}
+}
+
+function submitEstablish() {
+  var gpsEl=document.getElementById('estGPS');
+  if(!gpsEl||gpsEl.textContent==='Acquiring…'){toast('Wait for GPS before submitting.');return;}
+  if(!phenoPhotoTaken){toast('Please capture a photo first.');return;}
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var now=new Date();
+  var gpsText=gpsEl.textContent;
+  var parts=gpsText.replace(/°/g,'').split(',');
+  var lat=parts[0]?parts[0].trim().split(' ')[0]:'';
+  var lng=parts[1]?parts[1].trim().split(' ')[0]:'';
+  var data={
+    survey_type:'pheno_plot', crop_type:phenoEditCrop, plant_num:phenoEditPlantNum,
+    lat:lat, lng:lng,
+    location_name:(document.getElementById('estLocationName')||{}).value||'',
+    notes:(document.getElementById('estNotes')||{}).value||'',
+    established_date:now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear(),
+    status:'pending', inactive_reason:null, inactive_date:null,
+    replaces_id:phenoEditReplacesId
+  };
+  if(phenoEditReplacesId) {
+    getAllRecords('pheno_plots',function(plots){
+      var old=plots.find(function(p){return p.id===phenoEditReplacesId;});
+      if(old){old.status='inactive_replaced';updateRecord('pheno_plots',old,function(){});}
+    });
+  }
+  saveRecord('pheno_plots',data,function(){
+    toast('Plant submitted for approval ✓');
+    nav('screen-pheno-plots');
+  });
+}
+
+function approvePlot(id) {
+  getAllRecords('pheno_plots',function(plots){
+    var plot=plots.find(function(p){return p.id===id;});
+    if(plot){
+      plot.status='approved';
+      plot.approved_date=new Date().toISOString().split('T')[0];
+      updateRecord('pheno_plots',plot,function(){toast('Plant approved ✓');initPhenoPlots();});
+    }
+  });
+}
+
+function openInactivePlot(id, cropLabel, plantNum, location) {
+  phenoInactiveId=id; phenoInactiveReason='';
+  document.getElementById('phenoInactiveSubtitle').textContent=cropLabel+' — Plant #'+plantNum;
+  document.getElementById('inactiveCropLabel').textContent=cropLabel;
+  document.getElementById('inactivePlantNum').textContent='Plant '+plantNum;
+  document.getElementById('inactiveLocation').textContent=location;
+  document.getElementById('inactiveNotes').value='';
+  ['died','restricted','other'].forEach(function(r){var el=document.getElementById('inact-'+r);if(el)el.classList.remove('active');});
+  nav('screen-pheno-inactive');
+}
+
+function selectInactiveReason(reason) {
+  phenoInactiveReason=reason;
+  ['died','restricted','other'].forEach(function(r){var el=document.getElementById('inact-'+r);if(el)el.classList.toggle('active',r===reason);});
+}
+
+function submitInactive() {
+  if(!phenoInactiveReason){toast('Please select a reason.');return;}
+  getAllRecords('pheno_plots',function(plots){
+    var plot=plots.find(function(p){return p.id===phenoInactiveId;});
+    if(!plot){toast('Plot not found.');return;}
+    plot.status='inactive';
+    plot.inactive_reason=phenoInactiveReason;
+    plot.inactive_date=new Date().toISOString().split('T')[0];
+    var n=(document.getElementById('inactiveNotes')||{}).value||'';
+    if(n) plot.notes=(plot.notes?plot.notes+'\n':'')+n;
+    var ck=plot.crop_type, pn=plot.plant_num, pid=plot.id;
+    updateRecord('pheno_plots',plot,function(){
+      toast('Plant reported inactive');
+      openEstablishPlant(ck,pn,pid);
+    });
+  });
+}
+
 function initPhenoRecord() {
-  var now = new Date();
-  var hh = String(now.getHours()).padStart(2,'0');
-  var mm = String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('phenoTime').value = hh + ':' + mm;
-  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('phenoDate').textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
-}
-function setPheno(species, phase) {
-  var phases = ['vegetative','flowering','fruiting','ripe','dormant'];
-  phases.forEach(function(p) {
-    var el = document.getElementById('ph-' + species + '-' + p);
-    if (el) el.classList.toggle('active', p === phase);
+  var now=new Date();
+  var hh=String(now.getHours()).padStart(2,'0');
+  var mm=String(now.getMinutes()).padStart(2,'0');
+  if(document.getElementById('phenoTime')) document.getElementById('phenoTime').value=hh+':'+mm;
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  if(document.getElementById('phenoDate')) document.getElementById('phenoDate').textContent=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+  var container=document.getElementById('phenoPlantCards');
+  if(!container) return;
+  container.innerHTML='<div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>';
+  getAllRecords('pheno_plots',function(plots){
+    var approved=plots.filter(function(p){return p.status==='approved';});
+    if(approved.length===0){
+      container.innerHTML='<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No approved plants yet. Use Manage Plots to establish and get plants approved.</div>';
+      return;
+    }
+    var h='';
+    PHENO_CROPS.forEach(function(cr){
+      var ca=approved.filter(function(p){return p.crop_type===cr.key;});
+      if(ca.length===0) return;
+      h+='<div style="font-size:0.88rem;font-weight:700;color:#E65100;margin:12px 0 6px;">'+cr.emoji+' '+cr.label+'</div>';
+      ca.forEach(function(plot){
+        var pid=plot.id;
+        h+='<div class="card" data-plot-id="'+pid+'" data-crop="'+cr.key+'" data-plant-num="'+plot.plant_num+'" style="padding:10px 14px;margin-bottom:8px;">';
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
+        h+='<span style="font-size:0.82rem;font-weight:700;">Plant '+plot.plant_num+'</span>';
+        h+='<span style="font-size:0.7rem;color:#888;">'+(plot.location_name||(plot.lat+'°S'))+'</span>';
+        h+='</div>';
+        h+='<div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Phenophase</div>';
+        h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">';
+        PHENO_PHASES.forEach(function(p){h+='<button class="weather-pill" id="ph-'+pid+'-'+p+'" onclick="setPhenoPlot('+pid+',\''+p+'\')" style="font-size:0.68rem;padding:4px 8px;">'+p.charAt(0).toUpperCase()+p.slice(1)+'</button>';});
+        h+='</div>';
+        h+='<div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Health</div>';
+        h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">';
+        PHENO_HEALTH.forEach(function(h2,hi){h+='<button class="weather-pill'+(hi===0?' active':'')+'" id="hp-'+pid+'-'+h2+'" onclick="setHealthPlot('+pid+',\''+h2+'\')" style="font-size:0.68rem;padding:4px 8px;">'+h2.charAt(0).toUpperCase()+h2.slice(1)+'</button>';});
+        h+='</div>';
+        h+='<input type="text" id="pnotes-'+pid+'" class="form-input" style="font-size:0.75rem;padding:6px 10px;" placeholder="Notes…">';
+        h+='</div>';
+      });
+    });
+    container.innerHTML=h;
   });
 }
-function setHealth(species, val) {
-  ['good','fair','poor'].forEach(function(h) {
-    var el = document.getElementById('hp-' + species + '-' + h);
-    if (el) el.classList.toggle('active', h === val);
+
+function setPhenoPlot(plotId,phase){
+  PHENO_PHASES.forEach(function(p){var el=document.getElementById('ph-'+plotId+'-'+p);if(el)el.classList.toggle('active',p===phase);});
+}
+function setHealthPlot(plotId,val){
+  PHENO_HEALTH.forEach(function(h){var el=document.getElementById('hp-'+plotId+'-'+h);if(el)el.classList.toggle('active',h===val);});
+}
+
+function submitAllPhenoObs() {
+  var now=new Date();
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var date=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+  var time=(document.getElementById('phenoTime')||{}).value||'';
+  var weather=(document.getElementById('pwx-sunny')&&document.getElementById('pwx-sunny').classList.contains('active'))?'sunny':'cloudy';
+  var genNotes=(document.getElementById('phenoGeneralNotes')||{}).value||'';
+  var cards=document.querySelectorAll('#phenoPlantCards [data-plot-id]');
+  if(cards.length===0){toast('No approved plants to record.');return;}
+  var count=0,total=cards.length;
+  cards.forEach(function(card){
+    var plotId=parseInt(card.getAttribute('data-plot-id'));
+    var crop=card.getAttribute('data-crop');
+    var plantNum=parseInt(card.getAttribute('data-plant-num'));
+    var phase='';
+    PHENO_PHASES.forEach(function(p){var el=document.getElementById('ph-'+plotId+'-'+p);if(el&&el.classList.contains('active'))phase=p;});
+    var health='';
+    PHENO_HEALTH.forEach(function(h){var el=document.getElementById('hp-'+plotId+'-'+h);if(el&&el.classList.contains('active'))health=h;});
+    var notes=(document.getElementById('pnotes-'+plotId)||{}).value||'';
+    saveRecord('phenology',{
+      survey_type:'phenology',date:date,time:time,weather:weather,
+      plot_id:plotId,crop_type:crop,plant_num:plantNum,
+      phase:phase,health:health,notes:notes,general_notes:genNotes
+    },function(){count++;if(count===total)toast('Saved '+count+' plant observation'+(count>1?'s':'')+' ✓');});
   });
 }
-function submitPheno() { saveRecord('phenology', collectPhenoData(), function() { toast('Phenology data saved to device ✓'); }); }
+
+function wxP(on,off){document.getElementById('pwx-'+on).classList.add('active');document.getElementById('pwx-'+off).classList.remove('active');}
 function wxP(on, off) { document.getElementById('pwx-'+on).classList.add('active'); document.getElementById('pwx-'+off).classList.remove('active'); }
 
 
@@ -5477,8 +5718,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 2;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule'];
+var DB_VERSION = 3;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }

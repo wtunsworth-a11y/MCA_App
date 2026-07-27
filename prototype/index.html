@@ -4622,11 +4622,11 @@ function wxPol(on, off) { document.getElementById('wpol-'+on).classList.add('act
 
 /* ── Phenology ── */
 var PHENO_CROPS = [
-  {key:'vanilla', label:'Vanilla', emoji:'\U0001f33f'},
-  {key:'cocoa',   label:'Cocoa',   emoji:'\U0001fab2'},
+  {key:'vanilla', label:'Vanilla', emoji:'🌿'},
+  {key:'cocoa',   label:'Cocoa',   emoji:'🫘'},
   {key:'coffee',  label:'Coffee',  emoji:'☕'},
-  {key:'okari',   label:'Okari',   emoji:'\U0001f95c'},
-  {key:'massoy',  label:'Massoy',  emoji:'\U0001f332'}
+  {key:'okari',   label:'Okari',   emoji:'🥜'},
+  {key:'massoy',  label:'Massoy',  emoji:'🌲'}
 ];
 var phenoEditCrop='', phenoEditPlantNum=0, phenoEditReplacesId=null;
 var phenoInactiveId=null, phenoInactiveReason='', phenoPhotoTaken=false;
@@ -4673,7 +4673,7 @@ function initPheno() {
     var ne=total-plots.filter(function(p){return p.status!=='inactive_replaced';}).length;
     if(ne>0) h+=' · '+ne+' not established';
     h += '</div>';
-    h += '<button class="btn-outline" style="width:100%;margin-bottom:8px;" onclick="nav(\'screen-pheno-plots\')">\U0001f5c2 Manage Plots</button>';
+    h += '<button class="btn-outline" style="width:100%;margin-bottom:8px;" onclick="nav(\'screen-pheno-plots\')">🗂 Manage Plots</button>';
     var canRec=approved.length>0;
     h += '<button class="btn-primary" style="background:#E65100;width:100%;"'+(canRec?'':' disabled')+' onclick="nav(\'screen-pheno-record\')">'+(canRec?'Begin Monthly Observations':'No approved plants yet')+'</button>';
     if(!canRec) h+='<p style="font-size:0.72rem;color:#888;margin-top:6px;text-align:center;">Establish and get plants approved first</p>';
@@ -4732,7 +4732,7 @@ function openEstablishPlant(crop, plantNum, replacesId) {
 }
 
 function initPhenoEstablish() {
-  var cr=PHENO_CROPS.find(function(c){return c.key===phenoEditCrop;})||{label:'—',emoji:'\U0001f33f'};
+  var cr=PHENO_CROPS.find(function(c){return c.key===phenoEditCrop;})||{label:'—',emoji:'🌿'};
   var titleText=phenoEditReplacesId?'Establish Replacement — '+cr.label:('Establish '+cr.emoji+' '+cr.label);
   document.getElementById('phenoEstTitle').textContent=titleText;
   document.getElementById('phenoEstSubtitle').textContent='Plant #'+phenoEditPlantNum+' · GPS & Photo Required';
@@ -4743,7 +4743,7 @@ function initPhenoEstablish() {
   document.getElementById('estPhotoStatus').textContent='No photo taken';
   document.getElementById('estPhotoStatus').style.color='#888';
   document.getElementById('estPhotoBox').style.borderColor='#ccc';
-  document.getElementById('estPhotoBox').innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">\U0001f4f7</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
+  document.getElementById('estPhotoBox').innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
   phenoPhotoTaken=false;
   var gpsEl=document.getElementById('estGPS');
   if(gpsEl){gpsEl.textContent='Acquiring…';gpsEl.style.color='#888';}
@@ -5255,7 +5255,7 @@ function loadPastActivities() {
     var h = '';
     records.slice(-5).reverse().forEach(function(r) {
       h += '<div style="padding:6px 10px;background:#f5f5f5;border-radius:6px;margin-bottom:5px;cursor:pointer;border:2px solid transparent;" ' +
-        'onclick="selectLinkedActivity(' + (r.id||0) + ', this, '' + (r.activity_type||'') + '')" id="cpa-' + (r.id||0) + '">';
+        'onclick="selectLinkedActivity(' + (r.id||0) + ", this, '" + (r.activity_type||'') + "')" + ' id="cpa-' + (r.id||0) + '">';
       h += '<div style="font-size:0.78rem;font-weight:600;">' + (r.activity_type||'Activity') + ' — ' + (r.date||'') + '</div>';
       h += '<div style="font-size:0.7rem;color:#666;">' + (r.num_planted||r.area_cleared||'') + ' · ' + (r.notes||'').slice(0,40) + '</div>';
       h += '</div>';

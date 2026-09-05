@@ -1375,6 +1375,10 @@ select.msel {
             <span class="module-emoji">🌱</span>
             <span class="module-name">Conservation Activities</span>
           </div>
+          <div class="module-tile" onclick="nav('screen-training-setup')">
+            <span class="module-emoji">🎓</span>
+            <span class="module-name">Training Records</span>
+          </div>
           <div class="module-tile" onclick="nav('screen-data-export')">
             <span class="module-emoji">📤</span>
             <span class="module-name">Export Data</span>
@@ -4006,6 +4010,205 @@ select.msel {
       </div>
     </div>
 
+
+    <!-- ══════════════════════════════════════
+         SCREEN: TRAINING RECORDS — LIST
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-training-setup">
+      <div class="top-bar" style="background:#5C3D7A;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Training Records</div>
+          <div class="bar-subtitle" id="trainingSub">All sessions</div>
+        </div>
+        <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Fund" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><ellipse cx="13" cy="9.5" rx="6.5" ry="6" fill="rgba(255,255,255,0.9)"/><ellipse cx="13" cy="13.5" rx="8" ry="5" fill="rgba(255,255,255,0.8)"/><rect x="12" y="18" width="2" height="5" rx="1" fill="rgba(255,255,255,0.7)"/></svg></div><div class="logo-ph" title="European Union" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" style="border-radius:5px;" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" fill="#003399"/><polygon points="13,1.43 13.42,2.55 14.61,2.60 13.68,3.34 13.99,4.49 13,3.83 12.01,4.49 12.32,3.34 11.39,2.60 12.58,2.55" fill="#FFD700"/><polygon points="22.88,11.31 23.30,12.43 24.49,12.48 23.56,13.22 23.87,14.37 22.88,13.71 21.89,14.37 22.20,13.22 21.27,12.48 22.46,12.43" fill="#FFD700"/><polygon points="13,21.19 13.42,22.31 14.61,22.36 13.68,23.10 13.99,24.25 13,23.59 12.01,24.25 12.32,23.10 11.39,22.36 12.58,22.31" fill="#FFD700"/><polygon points="3.12,11.31 3.54,12.43 4.73,12.48 3.80,13.22 4.11,14.37 3.12,13.71 2.13,14.37 2.44,13.22 1.51,12.48 2.70,12.43" fill="#FFD700"/></svg></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><path d="M13 4 C9 6 7 10 7 13 C7 17 9.5 20 13 21 C16.5 20 19 17 19 13 C19 10 17 6 13 4Z" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/><line x1="13" y1="4" x2="13" y2="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/><line x1="7" y1="13" x2="19" y2="13" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/></svg></div></div>
+      </div>
+      <div class="scroll-content">
+        <!-- Summary stats -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 14px 0;">
+          <div style="background:#F3EEF8;border-radius:10px;padding:10px 8px;text-align:center;">
+            <div style="font-size:1.5rem;font-weight:800;color:#5C3D7A;" id="trainStatTotal">0</div>
+            <div style="font-size:0.62rem;color:#888;margin-top:2px;">Sessions</div>
+          </div>
+          <div style="background:#F3EEF8;border-radius:10px;padding:10px 8px;text-align:center;">
+            <div style="font-size:1.5rem;font-weight:800;color:#5C3D7A;" id="trainStatPax">0</div>
+            <div style="font-size:0.62rem;color:#888;margin-top:2px;">Participants</div>
+          </div>
+          <div style="background:#F3EEF8;border-radius:10px;padding:10px 8px;text-align:center;">
+            <div style="font-size:1.5rem;font-weight:800;color:#5C3D7A;" id="trainStatMonth">0</div>
+            <div style="font-size:0.62rem;color:#888;margin-top:2px;">This Month</div>
+          </div>
+        </div>
+
+        <!-- Category filter pills -->
+        <div style="padding:10px 14px 4px;overflow-x:auto;white-space:nowrap;">
+          <button class="weather-pill active" id="tfilter-all" onclick="filterTraining('all',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;background:#5C3D7A;color:#fff;border:none;">All</button>
+          <button class="weather-pill" id="tfilter-governance" onclick="filterTraining('Governance',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🏛 Governance</button>
+          <button class="weather-pill" id="tfilter-finance" onclick="filterTraining('Financial Literacy',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">💰 Finance</button>
+          <button class="weather-pill" id="tfilter-agriculture" onclick="filterTraining('Agriculture',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🌾 Agriculture</button>
+          <button class="weather-pill" id="tfilter-livestock" onclick="filterTraining('Livestock',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🐄 Livestock</button>
+          <button class="weather-pill" id="tfilter-sewing" onclick="filterTraining('Sewing & Textiles',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🧵 Sewing</button>
+          <button class="weather-pill" id="tfilter-processing" onclick="filterTraining('Food Processing',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🫙 Processing</button>
+          <button class="weather-pill" id="tfilter-nursery" onclick="filterTraining('Nursery',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🌱 Nursery</button>
+          <button class="weather-pill" id="tfilter-conservation" onclick="filterTraining('Conservation',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🌿 Conservation</button>
+          <button class="weather-pill" id="tfilter-monitoring" onclick="filterTraining('Monitoring & Data',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">📊 Monitoring</button>
+          <button class="weather-pill" id="tfilter-health" onclick="filterTraining('Health & Nutrition',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🏥 Health</button>
+          <button class="weather-pill" id="tfilter-livelihoods" onclick="filterTraining('Livelihoods',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🛠 Livelihoods</button>
+          <button class="weather-pill" id="tfilter-other" onclick="filterTraining('Other',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">📚 Other</button>
+        </div>
+
+        <!-- Session list -->
+        <div id="trainingList" style="padding:8px 14px 80px;">
+          <div style="text-align:center;padding:40px 20px;color:#aaa;font-size:0.85rem;">No sessions recorded yet.<br>Tap the button below to add one.</div>
+        </div>
+      </div>
+
+      <div style="position:absolute;bottom:20px;left:14px;right:14px;z-index:10;">
+        <button class="btn-primary" style="background:#5C3D7A;width:100%;" onclick="nav('screen-training-record')">+ Record New Training Session</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: TRAINING — RECORD SESSION
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-training-record">
+      <div class="top-bar" style="background:#5C3D7A;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Record Training Session</div>
+          <div class="bar-subtitle">All fields help with reporting</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14">
+
+          <!-- Training type -->
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label">Training Type <span style="color:#e53935;">*</span></label>
+            <div id="trainingTypePills" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
+              <button class="weather-pill" onclick="selectTrainingType('Governance & Leadership',this)" style="font-size:0.75rem;padding:6px 10px;">🏛 Governance &amp; Leadership</button>
+              <button class="weather-pill" onclick="selectTrainingType('Financial Literacy',this)" style="font-size:0.75rem;padding:6px 10px;">💰 Financial Literacy</button>
+              <button class="weather-pill" onclick="selectTrainingType('Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;">🌾 Agriculture</button>
+              <button class="weather-pill" onclick="selectTrainingType('Livestock Management',this)" style="font-size:0.75rem;padding:6px 10px;">🐄 Livestock Management</button>
+              <button class="weather-pill" onclick="selectTrainingType('Sewing & Textiles',this)" style="font-size:0.75rem;padding:6px 10px;">🧵 Sewing &amp; Textiles</button>
+              <button class="weather-pill" onclick="selectTrainingType('Food Processing',this)" style="font-size:0.75rem;padding:6px 10px;">🫙 Food Processing</button>
+              <button class="weather-pill" onclick="selectTrainingType('Nursery Management',this)" style="font-size:0.75rem;padding:6px 10px;">🌱 Nursery Management</button>
+              <button class="weather-pill" onclick="selectTrainingType('Conservation & Environment',this)" style="font-size:0.75rem;padding:6px 10px;">🌿 Conservation &amp; Environment</button>
+              <button class="weather-pill" onclick="selectTrainingType('Monitoring & Data Collection',this)" style="font-size:0.75rem;padding:6px 10px;">📊 Monitoring &amp; Data</button>
+              <button class="weather-pill" onclick="selectTrainingType('Health & Nutrition',this)" style="font-size:0.75rem;padding:6px 10px;">🏥 Health &amp; Nutrition</button>
+              <button class="weather-pill" onclick="selectTrainingType('Livelihoods & Trades',this)" style="font-size:0.75rem;padding:6px 10px;">🛠 Livelihoods &amp; Trades</button>
+              <button class="weather-pill" onclick="selectTrainingType('Other',this)" style="font-size:0.75rem;padding:6px 10px;">📚 Other</button>
+            </div>
+            <input type="hidden" id="trainingType" value="">
+          </div>
+
+          <!-- Topic -->
+          <div class="form-group">
+            <label class="form-label">Session Topic / Title <span style="color:#e53935;">*</span></label>
+            <input type="text" id="trainingTopic" class="form-input" placeholder="e.g. Bookkeeping for village savings groups">
+          </div>
+
+          <!-- Date + Duration row -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="form-group">
+              <label class="form-label">Date <span style="color:#e53935;">*</span></label>
+              <input type="date" id="trainingDate" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Duration (hours)</label>
+              <input type="number" id="trainingDuration" class="form-input" placeholder="e.g. 3" min="0.5" max="40" step="0.5">
+            </div>
+          </div>
+
+          <!-- Trainer -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="form-group">
+              <label class="form-label">Trainer Name</label>
+              <input type="text" id="trainerName" class="form-input" placeholder="Full name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Organisation</label>
+              <input type="text" id="trainerOrg" class="form-input" placeholder="e.g. MCA, NGO, Govt">
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <input type="text" id="trainingLocation" class="form-input" placeholder="Village, community hall, etc.">
+          </div>
+
+          <!-- Participants -->
+          <div class="card" style="padding:12px 14px;margin-bottom:12px;">
+            <div style="font-weight:700;font-size:0.82rem;margin-bottom:10px;color:#5C3D7A;">👥 Participants</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+              <div>
+                <label class="form-label" style="color:#555;">Women</label>
+                <input type="number" id="paxFemale" class="form-input" placeholder="0" min="0" style="text-align:center;">
+              </div>
+              <div>
+                <label class="form-label" style="color:#555;">Men</label>
+                <input type="number" id="paxMale" class="form-input" placeholder="0" min="0" style="text-align:center;">
+              </div>
+              <div>
+                <label class="form-label" style="color:#555;">Youth (&lt;25)</label>
+                <input type="number" id="paxYouth" class="form-input" placeholder="0" min="0" style="text-align:center;">
+              </div>
+            </div>
+            <div style="margin-top:8px;font-size:0.78rem;color:#888;">Total: <strong id="paxTotal" style="color:#5C3D7A;">0</strong> participants</div>
+          </div>
+
+          <!-- Materials provided -->
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label">Materials / Resources Provided</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
+              <button class="weather-pill" onclick="toggleMaterial('Handout',this)" style="font-size:0.73rem;padding:5px 9px;">📄 Handout</button>
+              <button class="weather-pill" onclick="toggleMaterial('Manual',this)" style="font-size:0.73rem;padding:5px 9px;">📖 Manual</button>
+              <button class="weather-pill" onclick="toggleMaterial('Tools/Equipment',this)" style="font-size:0.73rem;padding:5px 9px;">🛠 Tools/Equipment</button>
+              <button class="weather-pill" onclick="toggleMaterial('Seeds/Seedlings',this)" style="font-size:0.73rem;padding:5px 9px;">🌱 Seeds/Seedlings</button>
+              <button class="weather-pill" onclick="toggleMaterial('Food provided',this)" style="font-size:0.73rem;padding:5px 9px;">🍱 Food provided</button>
+              <button class="weather-pill" onclick="toggleMaterial('Transport support',this)" style="font-size:0.73rem;padding:5px 9px;">🚐 Transport support</button>
+              <button class="weather-pill" onclick="toggleMaterial('Certificate',this)" style="font-size:0.73rem;padding:5px 9px;">🏅 Certificate</button>
+              <button class="weather-pill" onclick="toggleMaterial('None',this)" style="font-size:0.73rem;padding:5px 9px;">None</button>
+            </div>
+          </div>
+
+          <!-- Key topics covered -->
+          <div class="form-group">
+            <label class="form-label">Key Topics Covered</label>
+            <textarea id="trainingTopics" class="form-input" rows="3" placeholder="List the main topics discussed or skills demonstrated..."></textarea>
+          </div>
+
+          <!-- Outcomes / key learnings -->
+          <div class="form-group">
+            <label class="form-label">Outcomes &amp; Key Learnings</label>
+            <textarea id="trainingOutcomes" class="form-input" rows="3" placeholder="What did participants learn? What will they do differently?"></textarea>
+          </div>
+
+          <!-- Follow-up actions -->
+          <div class="form-group">
+            <label class="form-label">Follow-up Actions Required</label>
+            <textarea id="trainingFollowup" class="form-input" rows="2" placeholder="e.g. Revisit in 3 months, provide seeds, submit certificate list to project office..."></textarea>
+          </div>
+
+          <!-- Challenges -->
+          <div class="form-group">
+            <label class="form-label">Challenges / Issues</label>
+            <textarea id="trainingChallenges" class="form-input" rows="2" placeholder="Any attendance problems, language barriers, missing materials..."></textarea>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group">
+            <label class="form-label">Additional Notes</label>
+            <textarea id="trainingNotes" class="form-input" rows="2" placeholder="Any other observations about the session..."></textarea>
+          </div>
+
+          <button class="btn-primary" style="width:100%;margin-top:8px;background:#5C3D7A;" onclick="submitTrainingRecord()">Save Training Record</button>
+          <div style="height:24px;"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══════════════════════════════════════
          SCREEN: DATA EXPORT
     ══════════════════════════════════════ -->
@@ -4160,7 +4363,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-map','screen-performance','screen-recent-activity',
   'screen-ack','screen-profile',
-  'screen-patrol-stub','screen-community-stub','screen-meteo-setup','screen-meteo-record','screen-garden-mapping','screen-tree-mapping','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-data-export'
+  'screen-patrol-stub','screen-community-stub','screen-meteo-setup','screen-meteo-record','screen-garden-mapping','screen-tree-mapping','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -4199,6 +4402,8 @@ function nav(id) {
   if (id === 'screen-conserv-record') initConservRecord();
   if (id === 'screen-conserv-followup') initFollowup();
   if (id === 'screen-conserv-schedule') initConservSchedule();
+  if (id === 'screen-training-setup') initTraining();
+  if (id === 'screen-training-record') initTrainingRecord();
   if (id === 'screen-meteo-record') initMeteoRecord();
   if (id === 'screen-performance') renderCalendar();
   showScreen(id);
@@ -5719,7 +5924,7 @@ if ('serviceWorker' in navigator) {
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
 var DB_VERSION = 3;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots'];
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -6214,6 +6419,251 @@ function saveMafia() {
     toast('MaFIA survey saved to device ✓');
   });
 }
+
+/* ── Training Records ── */
+var selectedTrainingType = '';
+var selectedMaterials = [];
+
+var TRAINING_TYPES = {
+  'Governance & Leadership': '🏛',
+  'Financial Literacy': '💰',
+  'Agriculture': '🌾',
+  'Livestock Management': '🐄',
+  'Sewing & Textiles': '🧵',
+  'Food Processing': '🫙',
+  'Nursery Management': '🌱',
+  'Conservation & Environment': '🌿',
+  'Monitoring & Data Collection': '📊',
+  'Health & Nutrition': '🏥',
+  'Livelihoods & Trades': '🛠',
+  'Other': '📚'
+};
+
+/* Map filter keys to type names */
+var TRAIN_FILTER_MAP = {
+  'Governance': 'Governance & Leadership',
+  'Financial Literacy': 'Financial Literacy',
+  'Agriculture': 'Agriculture',
+  'Livestock': 'Livestock Management',
+  'Sewing & Textiles': 'Sewing & Textiles',
+  'Food Processing': 'Food Processing',
+  'Nursery': 'Nursery Management',
+  'Conservation': 'Conservation & Environment',
+  'Monitoring & Data': 'Monitoring & Data Collection',
+  'Health & Nutrition': 'Health & Nutrition',
+  'Livelihoods': 'Livelihoods & Trades',
+  'Other': 'Other'
+};
+
+var currentTrainingFilter = 'all';
+
+function initTraining() {
+  selectedTrainingType = '';
+  selectedMaterials = [];
+  loadTrainingSessions(currentTrainingFilter);
+}
+
+function loadTrainingSessions(filter) {
+  currentTrainingFilter = filter;
+  getAllRecords('training', function(records) {
+    /* Stats */
+    var totalPax = 0;
+    var thisMonth = 0;
+    var now = new Date();
+    var ym = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+    records.forEach(function(r) {
+      totalPax += (parseInt(r.pax_female)||0) + (parseInt(r.pax_male)||0);
+      if ((r.date||'').startsWith(ym)) thisMonth++;
+    });
+    var statTotal = document.getElementById('trainStatTotal');
+    var statPax = document.getElementById('trainStatPax');
+    var statMonth = document.getElementById('trainStatMonth');
+    if (statTotal) statTotal.textContent = records.length;
+    if (statPax) statPax.textContent = totalPax;
+    if (statMonth) statMonth.textContent = thisMonth;
+    var sub = document.getElementById('trainingSub');
+    if (sub) sub.textContent = records.length + ' session' + (records.length === 1 ? '' : 's') + ' recorded';
+
+    /* Filter */
+    var filtered = records;
+    if (filter !== 'all') {
+      var typeName = TRAIN_FILTER_MAP[filter] || filter;
+      filtered = records.filter(function(r) { return (r.type||'') === typeName; });
+    }
+
+    /* Render list */
+    var list = document.getElementById('trainingList');
+    if (!list) return;
+    if (filtered.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#aaa;font-size:0.85rem;">' +
+        (filter === 'all' ? 'No sessions recorded yet.<br>Tap the button below to add one.' : 'No sessions for this category yet.') + '</div>';
+      return;
+    }
+    /* Sort newest first */
+    var sorted = filtered.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    var h = '';
+    sorted.forEach(function(r) {
+      var emoji = TRAINING_TYPES[r.type||'Other'] || '📚';
+      var paxTotal = (parseInt(r.pax_female)||0) + (parseInt(r.pax_male)||0);
+      var youth = parseInt(r.pax_youth)||0;
+      h += '<div style="background:#fff;border:1px solid #eee;border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:4px solid #5C3D7A;">';
+      h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">';
+      h += '<div style="font-size:1.2rem;flex-shrink:0;">' + emoji + '</div>';
+      h += '<div style="flex:1;">';
+      h += '<div style="font-weight:700;font-size:0.88rem;color:#1a1a1a;">' + (r.topic||'Untitled') + '</div>';
+      h += '<div style="font-size:0.75rem;color:#666;margin-top:2px;">' + (r.type||'Training') + '</div>';
+      h += '<div style="font-size:0.72rem;color:#888;margin-top:4px;display:flex;gap:10px;flex-wrap:wrap;">';
+      h += '<span>📅 ' + (r.date||'') + '</span>';
+      if (r.location) h += '<span>📍 ' + r.location + '</span>';
+      if (r.duration) h += '<span>⏱ ' + r.duration + 'h</span>';
+      h += '</div>';
+      h += '</div>';
+      h += '<div style="text-align:right;flex-shrink:0;">';
+      h += '<div style="font-size:1.1rem;font-weight:800;color:#5C3D7A;">' + paxTotal + '</div>';
+      h += '<div style="font-size:0.6rem;color:#aaa;">participants</div>';
+      if (youth > 0) h += '<div style="font-size:0.65rem;color:#888;margin-top:2px;">' + youth + ' youth</div>';
+      h += '</div></div>';
+      if (r.trainer_name) {
+        h += '<div style="font-size:0.72rem;color:#666;margin-top:6px;border-top:1px solid #f0f0f0;padding-top:6px;">';
+        h += '👤 ' + r.trainer_name + (r.trainer_org ? ' · ' + r.trainer_org : '');
+        h += '</div>';
+      }
+      h += '</div>';
+    });
+    list.innerHTML = h;
+  });
+}
+
+function filterTraining(filter, btn) {
+  /* Update active pill */
+  document.querySelectorAll('#screen-training-setup .weather-pill').forEach(function(b) {
+    b.classList.remove('active');
+    b.style.background = '';
+    b.style.color = '';
+    b.style.border = '';
+  });
+  btn.classList.add('active');
+  btn.style.background = '#5C3D7A';
+  btn.style.color = '#fff';
+  btn.style.border = 'none';
+  loadTrainingSessions(filter);
+}
+
+function initTrainingRecord() {
+  /* Set today's date */
+  var dateEl = document.getElementById('trainingDate');
+  if (dateEl && !dateEl.value) {
+    dateEl.value = new Date().toISOString().split('T')[0];
+  }
+  /* Reset type selection */
+  selectedTrainingType = '';
+  selectedMaterials = [];
+  document.querySelectorAll('#trainingTypePills .weather-pill').forEach(function(b) {
+    b.classList.remove('active');
+    b.style.background = '';
+    b.style.color = '';
+  });
+  /* Reset material pills */
+  document.querySelectorAll('#screen-training-record .weather-pill[onclick^="toggleMaterial"]').forEach(function(b) {
+    b.classList.remove('active');
+    b.style.background = '';
+    b.style.color = '';
+  });
+  /* Participant counter */
+  ['paxFemale','paxMale','paxYouth'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { el.value = ''; el.oninput = updatePaxTotal; }
+  });
+  updatePaxTotal();
+}
+
+function updatePaxTotal() {
+  var f = parseInt(document.getElementById('paxFemale').value)||0;
+  var m = parseInt(document.getElementById('paxMale').value)||0;
+  var tot = document.getElementById('paxTotal');
+  if (tot) tot.textContent = f + m;
+}
+
+function selectTrainingType(type, btn) {
+  selectedTrainingType = type;
+  document.querySelectorAll('#trainingTypePills .weather-pill').forEach(function(b) {
+    b.classList.remove('active');
+    b.style.background = '';
+    b.style.color = '';
+  });
+  btn.classList.add('active');
+  btn.style.background = '#5C3D7A';
+  btn.style.color = '#fff';
+  var hidden = document.getElementById('trainingType');
+  if (hidden) hidden.value = type;
+}
+
+function toggleMaterial(mat, btn) {
+  var idx = selectedMaterials.indexOf(mat);
+  if (idx === -1) {
+    selectedMaterials.push(mat);
+    btn.classList.add('active');
+    btn.style.background = '#5C3D7A';
+    btn.style.color = '#fff';
+  } else {
+    selectedMaterials.splice(idx, 1);
+    btn.classList.remove('active');
+    btn.style.background = '';
+    btn.style.color = '';
+  }
+}
+
+function submitTrainingRecord() {
+  var type = selectedTrainingType;
+  var topic = (document.getElementById('trainingTopic').value||'').trim();
+  var date = document.getElementById('trainingDate').value;
+  if (!type) { toast('Please select a training type'); return; }
+  if (!topic) { toast('Please enter the session topic'); return; }
+  if (!date) { toast('Please select a date'); return; }
+
+  var record = {
+    type: type,
+    topic: topic,
+    date: date,
+    duration: document.getElementById('trainingDuration').value || '',
+    trainer_name: (document.getElementById('trainerName').value||'').trim(),
+    trainer_org: (document.getElementById('trainerOrg').value||'').trim(),
+    location: (document.getElementById('trainingLocation').value||'').trim(),
+    pax_female: parseInt(document.getElementById('paxFemale').value)||0,
+    pax_male: parseInt(document.getElementById('paxMale').value)||0,
+    pax_youth: parseInt(document.getElementById('paxYouth').value)||0,
+    materials: selectedMaterials.slice(),
+    topics_covered: (document.getElementById('trainingTopics').value||'').trim(),
+    outcomes: (document.getElementById('trainingOutcomes').value||'').trim(),
+    followup: (document.getElementById('trainingFollowup').value||'').trim(),
+    challenges: (document.getElementById('trainingChallenges').value||'').trim(),
+    notes: (document.getElementById('trainingNotes').value||'').trim(),
+    recorded_at: new Date().toISOString()
+  };
+
+  saveRecord('training', record, function() {
+    toast('Training session saved ✓');
+    /* Clear form */
+    ['trainingTopic','trainingDuration','trainerName','trainerOrg','trainingLocation',
+     'paxFemale','paxMale','paxYouth','trainingTopics','trainingOutcomes',
+     'trainingFollowup','trainingChallenges','trainingNotes'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    selectedTrainingType = '';
+    selectedMaterials = [];
+    document.querySelectorAll('#trainingTypePills .weather-pill').forEach(function(b) {
+      b.classList.remove('active'); b.style.background = ''; b.style.color = '';
+    });
+    document.querySelectorAll('#screen-training-record .weather-pill[onclick^="toggleMaterial"]').forEach(function(b) {
+      b.classList.remove('active'); b.style.background = ''; b.style.color = '';
+    });
+    document.getElementById('paxTotal').textContent = '0';
+    /* Go back to list */
+    setTimeout(function() { nav('screen-training-setup'); }, 800);
+  });
+}
+
 /* Init DB on load */
 openDB();
 </script>

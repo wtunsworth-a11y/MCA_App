@@ -1231,6 +1231,129 @@ select.msel {
   min-width: 18px;
   text-align: center;
 }
+
+/* ── Enrollment screen ── */
+#screen-enroll {
+  background: #F1F8F1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.enroll-header {
+  background: #1B5E20;
+  color: #fff;
+  padding: 32px 20px 20px;
+  text-align: center;
+}
+.enroll-header-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.enroll-header-sub {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.72);
+  margin-top: 2px;
+}
+.enroll-steps-bar {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0 4px;
+}
+.enroll-step-dot {
+  width: 28px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.3);
+  transition: background 0.3s;
+}
+.enroll-step-dot.active {
+  background: #A5D6A7;
+}
+.enroll-step-dot.done {
+  background: rgba(255,255,255,0.65);
+}
+.enroll-body {
+  flex: 1;
+  padding: 20px 16px 32px;
+  overflow-y: auto;
+}
+.enroll-section-title {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #1B5E20;
+  margin-bottom: 4px;
+}
+.enroll-section-sub {
+  font-size: 0.78rem;
+  color: #555;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+.enroll-fp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #1B5E20;
+  border-radius: 12px;
+  background: #fff;
+  color: #1B5E20;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+.enroll-fp-btn.registered {
+  background: #E8F5E9;
+  border-color: #2E7D32;
+  color: #2E7D32;
+}
+.enroll-fp-btn.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.enroll-fp-icon {
+  font-size: 1.6rem;
+}
+.enroll-next-btn {
+  width: 100%;
+  padding: 14px;
+  background: #1B5E20;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.enroll-next-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.enroll-warn {
+  background: #FFF8E1;
+  border: 1px solid #FFE082;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.76rem;
+  color: #5D4037;
+  margin-bottom: 12px;
+  line-height: 1.45;
+}
+.enroll-status {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #555;
+  margin-top: 8px;
+  min-height: 18px;
+}
+
 </style>
 </head>
 <body>
@@ -1258,6 +1381,99 @@ select.msel {
         <div class="splash-subtitle">Clan Steward App</div>
         <div class="loading-dots"><span></span><span></span><span></span></div>
         <div class="splash-partners"><div class="splash-partner-item"><svg width="64" height="52" viewBox="0 0 64 52" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="17" rx="13" ry="12" fill="rgba(255,255,255,0.9)"/><ellipse cx="32" cy="26" rx="18" ry="11" fill="rgba(255,255,255,0.75)"/><rect x="30" y="37" width="4" height="10" rx="2" fill="rgba(255,255,255,0.65)"/><text x="32" y="51" text-anchor="middle" font-size="8" font-weight="800" fill="rgba(255,255,255,0.85)" font-family="Arial,sans-serif">MCF</text></svg><div class="splash-partner-name">Managalas Conservation Fund</div></div><div class="splash-partner-item"><svg width="56" height="37" viewBox="0 0 56 37" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="56" height="37" fill="#003399"/><polygon points="28.00,2.03 28.59,3.62 30.29,3.70 28.96,4.75 29.41,6.39 28.00,5.45 26.59,6.39 27.04,4.75 25.71,3.70 27.41,3.62" fill="#FFD700"/><polygon points="35.03,3.92 35.62,5.51 37.32,5.58 35.99,6.64 36.44,8.27 35.03,7.33 33.62,8.27 34.07,6.64 32.74,5.58 34.44,5.51" fill="#FFD700"/><polygon points="40.18,9.07 40.77,10.65 42.46,10.73 41.14,11.78 41.59,13.42 40.18,12.48 38.76,13.42 39.22,11.78 37.89,10.73 39.58,10.65" fill="#FFD700"/><polygon points="42.06,16.09 42.65,17.68 44.35,17.76 43.02,18.81 43.47,20.45 42.06,19.51 40.65,20.45 41.10,18.81 39.77,17.76 41.47,17.68" fill="#FFD700"/><polygon points="40.18,23.12 40.77,24.71 42.46,24.79 41.14,25.84 41.59,27.48 40.18,26.54 38.76,27.48 39.22,25.84 37.89,24.79 39.58,24.71" fill="#FFD700"/><polygon points="35.03,28.27 35.62,29.86 37.32,29.93 35.99,30.99 36.44,32.62 35.03,31.69 33.62,32.62 34.07,30.99 32.74,29.93 34.44,29.86" fill="#FFD700"/><polygon points="28.00,30.16 28.59,31.74 30.29,31.82 28.96,32.87 29.41,34.51 28.00,33.57 26.59,34.51 27.04,32.87 25.71,31.82 27.41,31.74" fill="#FFD700"/><polygon points="20.97,28.27 21.56,29.86 23.26,29.93 21.93,30.99 22.38,32.62 20.97,31.69 19.56,32.62 20.01,30.99 18.68,29.93 20.38,29.86" fill="#FFD700"/><polygon points="15.82,23.12 16.42,24.71 18.11,24.79 16.78,25.84 17.24,27.48 15.82,26.54 14.41,27.48 14.86,25.84 13.54,24.79 15.23,24.71" fill="#FFD700"/><polygon points="13.94,16.09 14.53,17.68 16.23,17.76 14.90,18.81 15.35,20.45 13.94,19.51 12.53,20.45 12.98,18.81 11.65,17.76 13.35,17.68" fill="#FFD700"/><polygon points="15.82,9.06 16.42,10.65 18.11,10.73 16.78,11.78 17.24,13.42 15.82,12.48 14.41,13.42 14.86,11.78 13.54,10.73 15.23,10.65" fill="#FFD700"/><polygon points="20.97,3.92 21.56,5.51 23.26,5.58 21.93,6.64 22.38,8.27 20.97,7.33 19.56,8.27 20.01,6.64 18.68,5.58 20.38,5.51" fill="#FFD700"/></svg><div class="splash-partner-name">Co-funded by the European Union</div></div><div class="splash-partner-item"><svg width="80" height="44" viewBox="0 0 80 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="17" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.8"/><ellipse cx="22" cy="22" rx="9" ry="17" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.4"/><line x1="5" y1="22" x2="39" y2="22" stroke="rgba(255,255,255,0.8)" stroke-width="1.4"/><line x1="10" y1="10" x2="34" y2="10" stroke="rgba(255,255,255,0.5)" stroke-width="1"/><line x1="10" y1="34" x2="34" y2="34" stroke="rgba(255,255,255,0.5)" stroke-width="1"/><text x="44" y="19" font-size="11" font-weight="800" fill="rgba(255,255,255,0.95)" font-family="Arial,sans-serif">CIFOR</text><text x="44" y="32" font-size="11" font-weight="800" fill="rgba(255,255,255,0.85)" font-family="Arial,sans-serif">ICRAF</text></svg><div class="splash-partner-name">CIFOR-ICRAF</div></div></div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+         SCREEN: COORDINATOR ENROLLMENT
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-enroll">
+      <div class="enroll-header">
+        <div class="enroll-header-title">New Steward Setup</div>
+        <div class="enroll-header-sub">Coordinator use only · Managalas Conservation Area</div>
+        <div class="enroll-steps-bar">
+          <div class="enroll-step-dot active" id="edot1"></div>
+          <div class="enroll-step-dot" id="edot2"></div>
+          <div class="enroll-step-dot" id="edot3"></div>
+          <div class="enroll-step-dot" id="edot4"></div>
+        </div>
+      </div>
+      <div class="enroll-body" id="enrollBody">
+
+        <!-- STEP 1: Passcode -->
+        <div id="enrollStep1">
+          <div class="enroll-section-title">Coordinator Passcode</div>
+          <div class="enroll-section-sub">Enter the MCA coordinator setup passcode to proceed. Contact your project coordinator if you do not have it.</div>
+          <div class="form-group">
+            <label class="form-label">Passcode</label>
+            <input type="password" id="enrollPasscode" class="form-input" placeholder="Enter coordinator passcode" autocomplete="off" style="letter-spacing:0.1em;">
+          </div>
+          <div class="enroll-status" id="enrollPassStatus"></div>
+          <button class="enroll-next-btn" id="enrollPassBtn" onclick="enrollCheckPasscode()">Verify →</button>
+        </div>
+
+        <!-- STEP 2: Profile -->
+        <div id="enrollStep2" style="display:none;">
+          <div class="enroll-section-title">Steward Profile</div>
+          <div class="enroll-section-sub">Fill in the new steward's details. These will appear on their dashboard.</div>
+          <div class="form-group">
+            <label class="form-label">Full Name <span style="color:#B71C1C;">*</span></label>
+            <input type="text" id="enrollName" class="form-input" placeholder="e.g. John Tanko" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Steward ID <span style="color:#B71C1C;">*</span></label>
+            <input type="text" id="enrollStewardId" class="form-input" placeholder="e.g. MCA-007" autocomplete="off" style="text-transform:uppercase;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Clan <span style="color:#B71C1C;">*</span></label>
+            <input type="text" id="enrollClan" class="form-input" placeholder="e.g. Afore Clan" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Zone <span style="color:#B71C1C;">*</span></label>
+            <input type="text" id="enrollZone" class="form-input" placeholder="e.g. Zone 7B" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Village</label>
+            <input type="text" id="enrollVillage" class="form-input" placeholder="e.g. Kokoda" autocomplete="off">
+          </div>
+          <button class="enroll-next-btn" onclick="enrollSaveProfile()">Continue →</button>
+        </div>
+
+        <!-- STEP 3: Thumb 1 -->
+        <div id="enrollStep3" style="display:none;">
+          <div class="enroll-section-title">Register Dominant Thumb</div>
+          <div class="enroll-section-sub">Ask the steward to press their <strong>dominant hand thumb</strong> on the fingerprint sensor when prompted. This is used for daily login and field verification.</div>
+          <div class="enroll-warn">⚠ Make sure you are on the steward's device, not yours. The fingerprint is saved to this phone only.</div>
+          <button class="enroll-fp-btn" id="enrollThumb1Btn" onclick="enrollRegisterThumb(1)">
+            <span class="enroll-fp-icon">👍</span>
+            <span id="enrollThumb1Label">Register Dominant Thumb</span>
+          </button>
+          <div class="enroll-status" id="enrollThumb1Status"></div>
+          <button class="enroll-next-btn" id="enrollThumb1Next" disabled onclick="enrollGoThumb2()">Continue →</button>
+        </div>
+
+        <!-- STEP 4: Thumb 2 -->
+        <div id="enrollStep4" style="display:none;">
+          <div class="enroll-section-title">Register Other Thumb</div>
+          <div class="enroll-section-sub">Now ask the steward to press their <strong>other hand thumb</strong>. This is a backup so dirty or injured hands don't lock them out.</div>
+          <div class="enroll-warn">⚠ Same steward, different thumb. Do not use your own fingerprint.</div>
+          <button class="enroll-fp-btn" id="enrollThumb2Btn" onclick="enrollRegisterThumb(2)">
+            <span class="enroll-fp-icon">👍</span>
+            <span id="enrollThumb2Label">Register Other Thumb</span>
+          </button>
+          <div class="enroll-status" id="enrollThumb2Status"></div>
+          <button class="enroll-next-btn" id="enrollThumb2Next" disabled onclick="enrollFinish()">Finish Setup →</button>
+        </div>
+
+        <!-- DONE -->
+        <div id="enrollDone" style="display:none;text-align:center;padding:24px 0;">
+          <div style="font-size:3rem;margin-bottom:12px;">✅</div>
+          <div style="font-size:1.1rem;font-weight:800;color:#1B5E20;margin-bottom:6px;" id="enrollDoneName"></div>
+          <div style="font-size:0.82rem;color:#555;margin-bottom:20px;">Setup complete. Hand the phone to the steward.</div>
+          <button class="enroll-next-btn" onclick="showScreen('screen-fingerprint')">Open App →</button>
+        </div>
+
       </div>
     </div>
 
@@ -1307,8 +1523,8 @@ select.msel {
       <div class="dash-top">
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <div>
-            <div class="dash-greeting">Good morning, John 👋</div>
-            <div class="dash-clan">Afore Clan | Zone 7B</div>
+            <div class="dash-greeting" id="dashGreeting">Good morning 👋</div>
+            <div class="dash-clan" id="dashClan">Managalas Conservation Area</div>
           </div>
           <div style="display:flex;gap:4px;align-items:center;"><div title="Managalas Conservation Fund" style="width:42px;height:42px;border-radius:8px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;overflow:hidden;"><svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="21" cy="14" rx="10" ry="9" fill="rgba(255,255,255,0.9)"/><ellipse cx="21" cy="20" rx="13" ry="8" fill="rgba(255,255,255,0.78)"/><rect x="19.5" y="28" width="3" height="9" rx="1.5" fill="rgba(255,255,255,0.7)"/><text x="21" y="41" text-anchor="middle" font-size="7" font-weight="800" fill="rgba(255,255,255,0.85)" font-family="Arial,sans-serif">MCF</text></svg></div><div title="European Union" style="width:42px;height:28px;border-radius:5px;overflow:hidden;"><svg width="42" height="28" viewBox="0 0 42 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="42" height="28" fill="#003399"/><polygon points="21.00,1.54 21.45,2.74 22.73,2.80 21.73,3.60 22.07,4.83 21.00,4.12 19.93,4.83 20.27,3.60 19.27,2.80 20.55,2.74" fill="#FFD700"/><polygon points="26.32,2.97 26.77,4.17 28.05,4.22 27.05,5.02 27.39,6.26 26.32,5.55 25.25,6.26 25.59,5.02 24.59,4.22 25.87,4.17" fill="#FFD700"/><polygon points="30.21,6.86 30.66,8.06 31.95,8.12 30.94,8.92 31.28,10.15 30.21,9.44 29.14,10.15 29.49,8.92 28.48,8.12 29.77,8.06" fill="#FFD700"/><polygon points="31.64,12.18 32.09,13.38 33.37,13.44 32.37,14.24 32.71,15.47 31.64,14.76 30.57,15.47 30.91,14.24 29.91,13.44 31.19,13.38" fill="#FFD700"/><polygon points="30.21,17.50 30.66,18.70 31.95,18.76 30.94,19.56 31.28,20.79 30.21,20.08 29.14,20.79 29.49,19.56 28.48,18.76 29.77,18.70" fill="#FFD700"/><polygon points="26.32,21.39 26.77,22.60 28.05,22.65 27.05,23.45 27.39,24.69 26.32,23.98 25.25,24.69 25.59,23.45 24.59,22.65 25.87,22.60" fill="#FFD700"/><polygon points="21.00,22.82 21.45,24.02 22.73,24.08 21.73,24.88 22.07,26.11 21.00,25.40 19.93,26.11 20.27,24.88 19.27,24.08 20.55,24.02" fill="#FFD700"/><polygon points="15.68,21.39 16.13,22.60 17.41,22.65 16.41,23.45 16.75,24.69 15.68,23.98 14.61,24.69 14.95,23.45 13.95,22.65 15.23,22.60" fill="#FFD700"/><polygon points="11.79,17.50 12.23,18.70 13.52,18.76 12.51,19.56 12.86,20.79 11.79,20.08 10.72,20.79 11.06,19.56 10.05,18.76 11.34,18.70" fill="#FFD700"/><polygon points="10.36,12.18 10.81,13.38 12.09,13.44 11.09,14.24 11.43,15.47 10.36,14.76 9.29,15.47 9.63,14.24 8.63,13.44 9.91,13.38" fill="#FFD700"/><polygon points="11.79,6.86 12.23,8.06 13.52,8.12 12.51,8.92 12.86,10.15 11.79,9.44 10.72,10.15 11.06,8.92 10.05,8.12 11.34,8.06" fill="#FFD700"/><polygon points="15.68,2.97 16.13,4.17 17.41,4.22 16.41,5.02 16.75,6.26 15.68,5.55 14.61,6.26 14.95,5.02 13.95,4.22 15.23,4.17" fill="#FFD700"/></svg></div></div>
         </div>
@@ -4351,7 +4567,7 @@ select.msel {
 <script>
 /* ── Screen Registry & Stack ── */
 const ALL_SCREENS = [
-  'screen-splash','screen-fingerprint','screen-dashboard',
+  'screen-splash','screen-enroll','screen-fingerprint','screen-dashboard',
   'screen-observations','screen-obs-entry',
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-qabb-setup','screen-qabb-matrix',
@@ -4427,38 +4643,303 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-/* ── Splash auto-advance ── */
+/* ── Splash auto-advance — routes to enroll or fingerprint ── */
 window.addEventListener('load', () => {
-  setTimeout(() => { showScreen('screen-fingerprint'); }, 2500);
+  setTimeout(() => {
+    getAllRecords('auth', function(records) {
+      if (records && records.length > 0) {
+        showScreen('screen-fingerprint');
+      } else {
+        showScreen('screen-enroll');
+      }
+    });
+  }, 2500);
 });
 
+/* ══════════════════════════════════════
+   WEBAUTHN — helpers, enrollment, login
+══════════════════════════════════════ */
+
+/* Coordinator passcode: SHA-256('T@nkF1y')
+   Change this hash if you change the passcode.
+   Generate a new hash at: https://emn178.github.io/online-tools/sha256.html */
+var ENROLL_PASSCODE_HASH = 'c6947da476b0cc558081178ca6714ca2c8e37687c9656f33a915bf5eaf5e4d6e';
+
+var enrolledProfile = null;    // set during enrollment, used in finish
+var enrollCred1Id   = null;    // base64url credential ID for thumb 1
+var enrollCred2Id   = null;    // base64url credential ID for thumb 2
+
+/* Convert ArrayBuffer to base64url string */
+function bufToB64(buf) {
+  var bytes = new Uint8Array(buf);
+  var bin = '';
+  bytes.forEach(function(b) { bin += String.fromCharCode(b); });
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+/* Convert base64url string to Uint8Array */
+function b64ToBuf(str) {
+  str = str.replace(/-/g,'+').replace(/_/g,'/');
+  while (str.length % 4) str += '=';
+  var bin = atob(str);
+  var buf = new Uint8Array(bin.length);
+  for (var i=0;i<bin.length;i++) buf[i] = bin.charCodeAt(i);
+  return buf;
+}
+
+/* Hash a string with SHA-256, return hex */
+function sha256Hex(str) {
+  var enc = new TextEncoder().encode(str);
+  return crypto.subtle.digest('SHA-256', enc).then(function(buf) {
+    return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  });
+}
+
+/* Greeting based on time */
+function timeGreeting() {
+  var h = new Date().getHours();
+  if (h >= 5  && h < 12) return 'Good morning';
+  if (h >= 12 && h < 17) return 'Good afternoon';
+  if (h >= 17 && h < 21) return 'Good evening';
+  return 'Good night';
+}
+
+/* Update dashboard header from stored profile */
+function updateDashHeader(profile) {
+  var firstName = (profile.name || '').split(' ')[0];
+  var greet = document.getElementById('dashGreeting');
+  var clan  = document.getElementById('dashClan');
+  if (greet) greet.textContent = timeGreeting() + ', ' + firstName + ' 👋';
+  if (clan)  clan.textContent  = (profile.clan || '') + (profile.zone ? ' | ' + profile.zone : '');
+}
+
+/* ── Enrollment: Step 1 — Passcode ── */
+function enrollCheckPasscode() {
+  var val = (document.getElementById('enrollPasscode').value || '').trim();
+  if (!val) { document.getElementById('enrollPassStatus').textContent = 'Please enter the coordinator passcode.'; return; }
+  var btn = document.getElementById('enrollPassBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+  document.getElementById('enrollPassStatus').textContent = '';
+  sha256Hex(val).then(function(hash) {
+    if (hash === ENROLL_PASSCODE_HASH) {
+      document.getElementById('enrollStep1').style.display = 'none';
+      document.getElementById('enrollStep2').style.display = 'block';
+      document.getElementById('edot1').classList.remove('active');
+      document.getElementById('edot1').classList.add('done');
+      document.getElementById('edot2').classList.add('active');
+    } else {
+      document.getElementById('enrollPassStatus').textContent = '✗ Incorrect passcode. Contact your coordinator.';
+      document.getElementById('enrollPassStatus').style.color = '#B71C1C';
+      btn.disabled = false;
+      btn.textContent = 'Verify →';
+    }
+  });
+}
+
+/* ── Enrollment: Step 2 — Profile ── */
+function enrollSaveProfile() {
+  var name = (document.getElementById('enrollName').value || '').trim();
+  var sid  = (document.getElementById('enrollStewardId').value || '').trim().toUpperCase();
+  var clan = (document.getElementById('enrollClan').value || '').trim();
+  var zone = (document.getElementById('enrollZone').value || '').trim();
+  var village = (document.getElementById('enrollVillage').value || '').trim();
+  if (!name || !sid || !clan || !zone) {
+    toast('Please fill all required fields (Name, ID, Clan, Zone).');
+    return;
+  }
+  enrolledProfile = { name: name, stewardId: sid, clan: clan, zone: zone, village: village };
+  document.getElementById('enrollStep2').style.display = 'none';
+  document.getElementById('enrollStep3').style.display = 'block';
+  document.getElementById('edot2').classList.remove('active');
+  document.getElementById('edot2').classList.add('done');
+  document.getElementById('edot3').classList.add('active');
+}
+
+/* ── Enrollment: Step 3/4 — Register thumb ── */
+function enrollRegisterThumb(thumbNum) {
+  if (!navigator.credentials || !window.PublicKeyCredential) {
+    toast('This device does not support fingerprint login. A newer Android or iPhone is required.');
+    return;
+  }
+  var btn    = document.getElementById('enrollThumb' + thumbNum + 'Btn');
+  var label  = document.getElementById('enrollThumb' + thumbNum + 'Label');
+  var status = document.getElementById('enrollThumb' + thumbNum + 'Status');
+  var nextBtn = document.getElementById('enrollThumb' + thumbNum + 'Next');
+  btn.classList.add('disabled');
+  btn.onclick = null;
+  label.textContent = 'Waiting for fingerprint…';
+  status.textContent = 'Ask the steward to press their thumb on the sensor now.';
+  status.style.color = '#F57F17';
+
+  var challenge = crypto.getRandomValues(new Uint8Array(32));
+  var userId    = new TextEncoder().encode(enrolledProfile.stewardId + '_thumb' + thumbNum);
+  var rpId      = location.hostname || 'localhost';
+
+  navigator.credentials.create({
+    publicKey: {
+      challenge: challenge,
+      rp: { id: rpId, name: 'MCA Steward App' },
+      user: { id: userId, name: enrolledProfile.stewardId, displayName: enrolledProfile.name + ' (thumb ' + thumbNum + ')' },
+      pubKeyCredParams: [
+        { type: 'public-key', alg: -7 },
+        { type: 'public-key', alg: -257 }
+      ],
+      authenticatorSelection: {
+        authenticatorAttachment: 'platform',
+        userVerification: 'required',
+        residentKey: 'preferred'
+      },
+      timeout: 60000
+    }
+  }).then(function(cred) {
+    var credId = bufToB64(cred.rawId);
+    if (thumbNum === 1) { enrollCred1Id = credId; }
+    else                { enrollCred2Id = credId; }
+    label.textContent = '✓ Thumb ' + thumbNum + ' registered';
+    btn.classList.remove('disabled');
+    btn.classList.add('registered');
+    status.textContent = 'Fingerprint saved successfully.';
+    status.style.color = '#2E7D32';
+    nextBtn.disabled = false;
+  }).catch(function(err) {
+    label.textContent = 'Register Thumb ' + thumbNum;
+    btn.classList.remove('disabled');
+    btn.onclick = function() { enrollRegisterThumb(thumbNum); };
+    status.textContent = '✗ ' + (err.message || 'Registration failed — try again');
+    status.style.color = '#B71C1C';
+  });
+}
+
+/* ── Enrollment: Step 3 complete → Step 4 ── */
+function enrollGoThumb2() {
+  document.getElementById('enrollStep3').style.display = 'none';
+  document.getElementById('enrollStep4').style.display = 'block';
+  document.getElementById('edot3').classList.remove('active');
+  document.getElementById('edot3').classList.add('done');
+  document.getElementById('edot4').classList.add('active');
+}
+
+/* ── Enrollment: Finish — save to IndexedDB ── */
+function enrollFinish() {
+  var record = {
+    id: 1,
+    name:      enrolledProfile.name,
+    stewardId: enrolledProfile.stewardId,
+    clan:      enrolledProfile.clan,
+    zone:      enrolledProfile.zone,
+    village:   enrolledProfile.village,
+    cred1:     enrollCred1Id,
+    cred2:     enrollCred2Id,
+    enrolled:  new Date().toISOString()
+  };
+  saveRecord('auth', record, function() {
+    document.getElementById('enrollStep4').style.display = 'none';
+    document.getElementById('enrollDone').style.display = 'block';
+    document.getElementById('enrollDoneName').textContent = enrolledProfile.name + ' — ' + enrolledProfile.clan;
+    document.getElementById('edot4').classList.remove('active');
+    document.getElementById('edot4').classList.add('done');
+    updateDashHeader(enrolledProfile);
+  });
+}
+
 /* ── Fingerprint Login ── */
-let fpBusy = false;
+var fpBusy = false;
 function verifyFp() {
   if (fpBusy) return;
+  if (!navigator.credentials || !window.PublicKeyCredential) {
+    document.getElementById('fpStatus').textContent = 'Fingerprint not supported on this device.';
+    return;
+  }
   fpBusy = true;
-  const ring = document.getElementById('fpRing');
-  const status = document.getElementById('fpStatus');
-  const user   = document.getElementById('fpUser');
+  var ring   = document.getElementById('fpRing');
+  var status = document.getElementById('fpStatus');
+  var user   = document.getElementById('fpUser');
   ring.classList.add('scanning');
-  status.textContent = 'Scanning…';
+  status.textContent = 'Touch your thumb…';
   status.style.color = '#F57F17';
-  setTimeout(() => {
-    ring.classList.remove('scanning');
-    status.textContent = 'Verified ✓';
-    status.style.color = '#2E7D32';
-    user.textContent = 'John Kapari | Afore Clan';
-    setTimeout(() => {
-      history = []; // clear history — dashboard is root
-      showScreen('screen-dashboard');
-      // reset fp state for future logout
-      setTimeout(() => {
-        fpBusy = false;
-        status.textContent = '';
-        user.textContent = '';
-      }, 400);
-    }, 1000);
-  }, 1400);
+
+  getAllRecords('auth', function(records) {
+    if (!records || records.length === 0) {
+      ring.classList.remove('scanning');
+      status.textContent = 'No steward registered. Contact coordinator.';
+      status.style.color = '#B71C1C';
+      fpBusy = false;
+      return;
+    }
+    var profile = records[0];
+    var allowList = [];
+    if (profile.cred1) allowList.push({ id: b64ToBuf(profile.cred1), type: 'public-key' });
+    if (profile.cred2) allowList.push({ id: b64ToBuf(profile.cred2), type: 'public-key' });
+
+    navigator.credentials.get({
+      publicKey: {
+        challenge:          crypto.getRandomValues(new Uint8Array(32)),
+        rpId:               location.hostname || 'localhost',
+        allowCredentials:   allowList,
+        userVerification:   'required',
+        timeout:            60000
+      }
+    }).then(function() {
+      ring.classList.remove('scanning');
+      status.textContent = 'Verified ✓';
+      status.style.color = '#2E7D32';
+      user.textContent   = profile.name + ' | ' + profile.clan;
+      updateDashHeader(profile);
+      setTimeout(function() {
+        history = [];
+        showScreen('screen-dashboard');
+        setTimeout(function() {
+          fpBusy = false;
+          status.textContent = '';
+          user.textContent   = '';
+        }, 400);
+      }, 900);
+    }).catch(function(err) {
+      ring.classList.remove('scanning');
+      status.textContent = '✗ Not recognised — try again';
+      status.style.color = '#B71C1C';
+      fpBusy = false;
+    });
+  });
+}
+
+/* ── Shared WebAuthn verify (all field arrive-gates) ── */
+function webAuthnVerify(opts) {
+  /* opts: { btnId, txtId, verifiedFlag, setVerified, onSuccess } */
+  if (!navigator.credentials || !window.PublicKeyCredential) {
+    /* Device doesn't support WebAuthn — fail open with warning */
+    opts.setVerified(true);
+    if (opts.txtId) document.getElementById(opts.txtId).textContent = '⚠ Fingerprint not available — unverified';
+    if (opts.btnId) document.getElementById(opts.btnId).classList.add('verified');
+    opts.onSuccess();
+    return;
+  }
+  if (opts.txtId) document.getElementById(opts.txtId).textContent = 'Touch your thumb…';
+
+  getAllRecords('auth', function(records) {
+    var profile  = (records && records.length > 0) ? records[0] : null;
+    var allowList = [];
+    if (profile && profile.cred1) allowList.push({ id: b64ToBuf(profile.cred1), type: 'public-key' });
+    if (profile && profile.cred2) allowList.push({ id: b64ToBuf(profile.cred2), type: 'public-key' });
+
+    navigator.credentials.get({
+      publicKey: {
+        challenge:         crypto.getRandomValues(new Uint8Array(32)),
+        rpId:              location.hostname || 'localhost',
+        allowCredentials:  allowList,
+        userVerification:  'required',
+        timeout:           45000
+      }
+    }).then(function() {
+      opts.setVerified(true);
+      if (opts.btnId) document.getElementById(opts.btnId).classList.add('verified');
+      if (opts.txtId) document.getElementById(opts.txtId).textContent = '✓ Identity Verified';
+      opts.onSuccess();
+    }).catch(function(err) {
+      if (opts.txtId) document.getElementById(opts.txtId).textContent = '✗ Not recognised — try again';
+    });
+  });
 }
 
 /* ── Bottom Navigation ── */
@@ -4537,13 +5018,11 @@ function mafiaArrive() {
 
 function mafiaVerify() {
   if (mafiaVerified) return;
-  document.getElementById('mafiaFpTxt').textContent = 'Verifying…';
-  setTimeout(() => {
-    mafiaVerified = true;
-    document.getElementById('mafiaFpBtn').classList.add('verified');
-    document.getElementById('mafiaFpTxt').textContent = '✓ Identity Verified';
-    checkMafiaReady();
-  }, 900);
+  webAuthnVerify({
+    btnId: 'mafiaFpBtn', txtId: 'mafiaFpTxt',
+    setVerified: function(v){ mafiaVerified = v; },
+    onSuccess: checkMafiaReady
+  });
 }
 
 function checkMafiaReady() {
@@ -4744,13 +5223,11 @@ function qabbArrive() {
 
 function qabbVerify() {
   if (qabbVerified) return;
-  document.getElementById('qabbFpTxt').textContent = 'Verifying\u2026';
-  setTimeout(function() {
-    qabbVerified = true;
-    document.getElementById('qabbFpBtn').classList.add('verified');
-    document.getElementById('qabbFpTxt').textContent = '\u2713 Identity Verified';
-    checkQabbReady();
-  }, 900);
+  webAuthnVerify({
+    btnId: 'qabbFpBtn', txtId: 'qabbFpTxt',
+    setVerified: function(v){ qabbVerified = v; },
+    onSuccess: checkQabbReady
+  });
 }
 
 function checkQabbReady() {
@@ -4824,13 +5301,11 @@ function waterArrive() {
 }
 function waterVerify() {
   if (waterVerifiedFlag) return;
-  document.getElementById('waterFpTxt').textContent = 'Verifying…';
-  setTimeout(function() {
-    waterVerifiedFlag = true;
-    document.getElementById('waterFpBtn').classList.add('verified');
-    document.getElementById('waterFpTxt').textContent = '✓ Identity Verified';
-    checkWaterReady();
-  }, 900);
+  webAuthnVerify({
+    btnId: 'waterFpBtn', txtId: 'waterFpTxt',
+    setVerified: function(v){ waterVerifiedFlag = v; },
+    onSuccess: checkWaterReady
+  });
 }
 function checkWaterReady() {
   document.getElementById('waterBeginBtn').disabled = !(waterVerifiedFlag && waterArrivedFlag);
@@ -5265,10 +5740,12 @@ function conservArrive() {
 }
 
 function conservVerify() {
-  conservVerifiedFlag = true;
-  document.getElementById('conservFpBtn').classList.add('verified');
-  document.getElementById('conservFpTxt').textContent = '✓ Identity Verified';
-  checkConservReady();
+  if (conservVerifiedFlag) return;
+  webAuthnVerify({
+    btnId: 'conservFpBtn', txtId: 'conservFpTxt',
+    setVerified: function(v){ conservVerifiedFlag = v; },
+    onSuccess: checkConservReady
+  });
 }
 
 function checkConservReady() {
@@ -5670,10 +6147,12 @@ function meteoArrive() {
 }
 
 function meteoVerify() {
-  meteoVerifiedFlag = true;
-  document.getElementById('meteoFpBtn').classList.add('verified');
-  document.getElementById('meteoFpTxt').textContent = '✓ Identity Verified';
-  checkMeteoReady();
+  if (meteoVerifiedFlag) return;
+  webAuthnVerify({
+    btnId: 'meteoFpBtn', txtId: 'meteoFpTxt',
+    setVerified: function(v){ meteoVerifiedFlag = v; },
+    onSuccess: checkMeteoReady
+  });
 }
 
 function checkMeteoReady() {
@@ -5996,8 +6475,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 3;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training'];
+var DB_VERSION = 4;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }

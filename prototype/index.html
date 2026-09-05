@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MCA App">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='30' fill='%231B5E20'/><text x='90' y='115' text-anchor='middle' font-size='72' font-family='Arial' font-weight='bold' fill='white'>MCA</text></svg>">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1594,7 +1594,7 @@ select.msel {
                 </div>
               </div>
               <div class="gate-hint" id="navGateHint">Walk to start point — fingerprint verify unlocks when within 30 m</div>
-              <button class="btn-arrive" id="btnArrive" onclick="mafiaArrive()">Simulate: I've Reached Start Point ✓</button>
+              <button class="btn-arrive" id="btnArrive" onclick="mafiaArrive()">I've Reached Start Point ✓</button>
             </div>
 
             <!-- FP verify — shown after arriving -->
@@ -1886,7 +1886,7 @@ select.msel {
                   <div id="qabbNavGateHint" style="margin-top:4px;font-size:0.72rem;color:#888;">Walk to start point — fingerprint verify unlocks when within 30 m</div>
                 </div>
               </div>
-              <button class="btn-outline" id="qabbBtnArrive" onclick="qabbArrive()" style="margin-top:10px;border-color:#00695C;color:#00695C;">Simulate: I've Reached Start Point ✓</button>
+              <button class="btn-outline" id="qabbBtnArrive" onclick="qabbArrive()" style="margin-top:10px;border-color:#00695C;color:#00695C;">I've Reached Start Point ✓</button>
             </div>
 
             <div id="qabbFpSection" style="display:none;">
@@ -2078,7 +2078,7 @@ select.msel {
                   <div id="waterNavHint" style="margin-top:4px;font-size:0.72rem;color:#888;">Walk to monitoring point — unlock within 30 m</div>
                 </div>
               </div>
-              <button class="btn-outline" id="waterBtnArrive" onclick="waterArrive()" style="margin-top:10px;border-color:#0277BD;color:#0277BD;">Simulate: I've Reached the Creek ✓</button>
+              <button class="btn-outline" id="waterBtnArrive" onclick="waterArrive()" style="margin-top:10px;border-color:#0277BD;color:#0277BD;">I've Reached the Creek ✓</button>
             </div>
 
             <div id="waterFpSection" style="display:none;">
@@ -2298,9 +2298,10 @@ select.msel {
           </div>
           <div class="form-group">
             <label class="form-label">📷 Photo <span style="color:#B71C1C;">*</span></label>
-            <div id="estPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="simCapturePhoto()">
+            <div id="estPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="triggerPhotoCapture()">
               <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
             </div>
+            <input type="file" id="estPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoFile(this)">
             <div id="estPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
           </div>
           <div class="form-group">
@@ -3288,7 +3289,7 @@ select.msel {
                   <div id="meteoNavHint" style="margin-top:4px;font-size:0.72rem;color:#888;">Walk to station — unlock within 30 m</div>
                 </div>
               </div>
-              <button class="btn-outline" id="meteoBtnArrive" onclick="meteoArrive()" style="margin-top:10px;border-color:#37474F;color:#37474F;">Simulate: I've Reached the Station ✓</button>
+              <button class="btn-outline" id="meteoBtnArrive" onclick="meteoArrive()" style="margin-top:10px;border-color:#37474F;color:#37474F;">I've Reached the Station ✓</button>
             </div>
 
             <div id="meteoFpSection" style="display:none;margin-top:10px;">
@@ -3663,7 +3664,7 @@ select.msel {
                   <div id="conservNavHint" style="margin-top:4px;font-size:0.72rem;color:#888;">Walk to site — unlock within 50 m</div>
                 </div>
               </div>
-              <button class="btn-outline" id="conservBtnArrive" onclick="conservArrive()" style="margin-top:10px;border-color:#006064;color:#006064;">Simulate: I've Reached the Site ✓</button>
+              <button class="btn-outline" id="conservBtnArrive" onclick="conservArrive()" style="margin-top:10px;border-color:#006064;color:#006064;">I've Reached the Site ✓</button>
             </div>
 
             <div id="conservFpSection" style="display:none;margin-top:10px;">
@@ -4505,7 +4506,7 @@ function initMafia() {
   document.getElementById('mafiaFpSection').style.display = 'none';
   document.getElementById('navGateCard').classList.remove('arrived');
   document.getElementById('btnArrive').disabled = false;
-  document.getElementById('btnArrive').textContent = 'Simulate: I\'ve Reached Start Point ✓';
+  document.getElementById('btnArrive').textContent = 'I\'ve Reached Start Point ✓';
   document.getElementById('navGateHint').textContent = 'Walk to start point — fingerprint verify unlocks when within 30 m';
   document.getElementById('mafiaLoading').style.display = 'block';
   document.getElementById('mafiaContent').style.display = 'none';
@@ -4516,13 +4517,22 @@ function initMafia() {
 }
 
 function mafiaArrive() {
-  mafiaArrived = true;
-  document.getElementById('navGateCard').classList.add('arrived');
-  document.getElementById('navGateHint').textContent = '✓ At start point — verify identity to begin';
-  document.getElementById('btnArrive').disabled = true;
-  document.getElementById('btnArrive').textContent = '✓ Arrived at Start Point';
-  document.getElementById('mafiaFpSection').style.display = 'block';
-  checkMafiaReady();
+  var btn = document.getElementById('btnArrive');
+  btn.disabled = true;
+  btn.textContent = '📍 Getting GPS…';
+  captureGPS(function(gps, err) {
+    mafiaArrived = true;
+    document.getElementById('navGateCard').classList.add('arrived');
+    if (gps) {
+      document.getElementById('navGateHint').textContent = '✓ At start point ('+gps.lat+', '+gps.lng+' ±'+gps.accuracy+'m) — verify identity';
+      btn.textContent = '✓ Arrived — GPS recorded';
+    } else {
+      document.getElementById('navGateHint').textContent = '✓ At start point (GPS: '+err+') — verify identity';
+      btn.textContent = '✓ Arrived (no GPS)';
+    }
+    document.getElementById('mafiaFpSection').style.display = 'block';
+    checkMafiaReady();
+  });
 }
 
 function mafiaVerify() {
@@ -4703,7 +4713,7 @@ function initQabb() {
   document.getElementById('qabbFpSection').style.display = 'none';
   document.getElementById('qabbNavGateCard').classList.remove('arrived');
   document.getElementById('qabbBtnArrive').disabled = false;
-  document.getElementById('qabbBtnArrive').textContent = 'Simulate: I\'ve Reached Start Point \u2713';
+  document.getElementById('qabbBtnArrive').textContent = 'I\'ve Reached Start Point \u2713';
   document.getElementById('qabbNavGateHint').textContent = 'Walk to start point \u2014 fingerprint verify unlocks when within 30 m';
   document.getElementById('qabbLoading').style.display = 'block';
   document.getElementById('qabbContent').style.display = 'none';
@@ -4714,13 +4724,22 @@ function initQabb() {
 }
 
 function qabbArrive() {
-  qabbArrived = true;
-  document.getElementById('qabbNavGateCard').classList.add('arrived');
-  document.getElementById('qabbNavGateHint').textContent = '\u2713 At start point \u2014 verify identity to begin';
-  document.getElementById('qabbBtnArrive').disabled = true;
-  document.getElementById('qabbBtnArrive').textContent = '\u2713 Arrived at Start Point';
-  document.getElementById('qabbFpSection').style.display = 'block';
-  checkQabbReady();
+  var btn = document.getElementById('qabbBtnArrive');
+  btn.disabled = true;
+  btn.textContent = '📍 Getting GPS…';
+  captureGPS(function(gps, err) {
+    qabbArrived = true;
+    document.getElementById('qabbNavGateCard').classList.add('arrived');
+    if (gps) {
+      document.getElementById('qabbNavGateHint').textContent = '\u2713 At start point ('+gps.lat+', '+gps.lng+' \u00b1'+gps.accuracy+'m) \u2014 verify identity';
+      btn.textContent = '\u2713 Arrived \u2014 GPS recorded';
+    } else {
+      document.getElementById('qabbNavGateHint').textContent = '\u2713 At start point (GPS: '+err+') \u2014 verify identity';
+      btn.textContent = '\u2713 Arrived (no GPS)';
+    }
+    document.getElementById('qabbFpSection').style.display = 'block';
+    checkQabbReady();
+  });
 }
 
 function qabbVerify() {
@@ -4786,13 +4805,22 @@ function initWater() {
   }, 1000);
 }
 function waterArrive() {
-  waterArrivedFlag = true;
-  document.getElementById('waterNavGateCard').classList.add('arrived');
-  document.getElementById('waterNavHint').textContent = '✓ At monitoring point — verify identity';
-  document.getElementById('waterBtnArrive').disabled = true;
-  document.getElementById('waterBtnArrive').textContent = '✓ Arrived at Creek';
-  document.getElementById('waterFpSection').style.display = 'block';
-  checkWaterReady();
+  var btn = document.getElementById('waterBtnArrive');
+  btn.disabled = true;
+  btn.textContent = '📍 Getting GPS…';
+  captureGPS(function(gps, err) {
+    waterArrivedFlag = true;
+    document.getElementById('waterNavGateCard').classList.add('arrived');
+    if (gps) {
+      document.getElementById('waterNavHint').textContent = '✓ At creek ('+gps.lat+', '+gps.lng+' ±'+gps.accuracy+'m) — verify identity';
+      btn.textContent = '✓ Arrived — GPS recorded';
+    } else {
+      document.getElementById('waterNavHint').textContent = '✓ At creek (GPS: '+err+') — verify identity';
+      btn.textContent = '✓ Arrived (no GPS)';
+    }
+    document.getElementById('waterFpSection').style.display = 'block';
+    checkWaterReady();
+  });
 }
 function waterVerify() {
   if (waterVerifiedFlag) return;
@@ -4838,14 +4866,28 @@ var phenoInactiveId=null, phenoInactiveReason='', phenoPhotoTaken=false;
 var PHENO_PHASES=['vegetative','flowering','fruiting','ripe','dormant'];
 var PHENO_HEALTH=['good','fair','poor'];
 
-function simGPS() {
-  /* Deterministic simulated GPS per crop × plant for prototype */
-  var ci = ['vanilla','cocoa','coffee','okari','massoy'].indexOf(phenoEditCrop);
-  var idx = Math.max(ci,0) * 5 + (phenoEditPlantNum - 1);
-  var baseLat = -9.1400, baseLng = 148.4000;
-  var latOff = (((idx * 37) % 41) - 20) * 0.003;
-  var lngOff = (((idx * 53) % 47) - 23) * 0.003;
-  return {lat:(baseLat+latOff).toFixed(4), lng:(baseLng+lngOff).toFixed(4)};
+function captureGPS(callback) {
+  /* Real GPS via navigator.geolocation; callback(gps, err) */
+  if (!navigator.geolocation) {
+    callback(null, 'GPS not supported on this device');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      callback({
+        lat: pos.coords.latitude.toFixed(5),
+        lng: pos.coords.longitude.toFixed(5),
+        accuracy: Math.round(pos.coords.accuracy)
+      }, null);
+    },
+    function(err) {
+      var msgs = {1:'GPS permission denied — check browser settings',
+                  2:'GPS signal unavailable — move outside',
+                  3:'GPS timed out — try again'};
+      callback(null, msgs[err.code] || 'GPS error');
+    },
+    {enableHighAccuracy: true, timeout: 20000, maximumAge: 0}
+  );
 }
 
 function initPheno() {
@@ -4951,19 +4993,32 @@ function initPhenoEstablish() {
   document.getElementById('estPhotoBox').innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
   phenoPhotoTaken=false;
   var gpsEl=document.getElementById('estGPS');
-  if(gpsEl){gpsEl.textContent='Acquiring…';gpsEl.style.color='#888';}
-  setTimeout(function(){
-    var gps=simGPS();
-    if(gpsEl){gpsEl.textContent=gps.lat+'° S, '+gps.lng+'° E';gpsEl.style.color='#2E6B38';}
-  },1200);
+  if(gpsEl){gpsEl.textContent='📍 Acquiring GPS…';gpsEl.style.color='#888';}
+  captureGPS(function(gps, err) {
+    if (gps) {
+      if(gpsEl){gpsEl.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m';gpsEl.style.color='#2E6B38';}
+    } else {
+      if(gpsEl){gpsEl.textContent='⚠ '+err;gpsEl.style.color='#E65100';}
+    }
+  });
 }
 
-function simCapturePhoto() {
-  phenoPhotoTaken=true;
-  var box=document.getElementById('estPhotoBox');
-  if(box) box.innerHTML='<div style="text-align:center;color:#2E7D32;"><div style="font-size:2rem;">✅</div><div style="font-size:0.73rem;margin-top:2px;">Photo captured</div></div>';
-  var s=document.getElementById('estPhotoStatus');
-  if(s){s.textContent='✓ Photo attached';s.style.color='#2E7D32';}
+function triggerPhotoCapture() {
+  var inp = document.getElementById('estPhotoInput');
+  if (inp) inp.click();
+}
+function handlePhotoFile(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    phenoPhotoTaken = true;
+    var box = document.getElementById('estPhotoBox');
+    if (box) box.innerHTML = '<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;" alt="Plot photo">';
+    var s = document.getElementById('estPhotoStatus');
+    if (s) { s.textContent = '✓ Photo attached'; s.style.color = '#2E7D32'; }
+  };
+  reader.readAsDataURL(file);
 }
 
 function submitEstablish() {
@@ -5146,7 +5201,7 @@ function initConserv() {
   document.getElementById('conservFpSection').style.display = 'none';
   document.getElementById('conservNavGateCard').classList.remove('arrived');
   document.getElementById('conservBtnArrive').disabled = false;
-  document.getElementById('conservBtnArrive').textContent = "Simulate: I've Reached the Site ✓";
+  document.getElementById('conservBtnArrive').textContent = "I've Reached the Site ✓";
   document.getElementById('conservNavHint').textContent = 'Walk to site — unlock within 50 m';
   document.getElementById('conservLoading').style.display = 'block';
   document.getElementById('conservContent').style.display = 'none';
@@ -5191,13 +5246,22 @@ function toggleConservWeed(w) {
 }
 
 function conservArrive() {
-  conservArrived = true;
-  document.getElementById('conservNavGateCard').classList.add('arrived');
-  document.getElementById('conservNavHint').textContent = '✓ At site — verify identity';
-  document.getElementById('conservBtnArrive').disabled = true;
-  document.getElementById('conservBtnArrive').textContent = '✓ Arrived at Site';
-  document.getElementById('conservFpSection').style.display = 'block';
-  checkConservReady();
+  var btn = document.getElementById('conservBtnArrive');
+  btn.disabled = true;
+  btn.textContent = '📍 Getting GPS…';
+  captureGPS(function(gps, err) {
+    conservArrived = true;
+    document.getElementById('conservNavGateCard').classList.add('arrived');
+    if (gps) {
+      document.getElementById('conservNavHint').textContent = '✓ At site ('+gps.lat+', '+gps.lng+' ±'+gps.accuracy+'m) — verify identity';
+      btn.textContent = '✓ Arrived — GPS recorded';
+    } else {
+      document.getElementById('conservNavHint').textContent = '✓ At site (GPS: '+err+') — verify identity';
+      btn.textContent = '✓ Arrived (no GPS)';
+    }
+    document.getElementById('conservFpSection').style.display = 'block';
+    checkConservReady();
+  });
 }
 
 function conservVerify() {
@@ -5576,7 +5640,7 @@ function initMeteo() {
   document.getElementById('meteoFpSection').style.display = 'none';
   document.getElementById('meteoNavGateCard').classList.remove('arrived');
   document.getElementById('meteoBtnArrive').disabled = false;
-  document.getElementById('meteoBtnArrive').textContent = "Simulate: I've Reached the Station ✓";
+  document.getElementById('meteoBtnArrive').textContent = "I've Reached the Station ✓";
   document.getElementById('meteoNavHint').textContent = 'Walk to station — unlock within 30 m';
   document.getElementById('meteoLoading').style.display = 'block';
   document.getElementById('meteoContent').style.display = 'none';
@@ -5587,13 +5651,22 @@ function initMeteo() {
 }
 
 function meteoArrive() {
-  meteoArrivedFlag = true;
-  document.getElementById('meteoNavGateCard').classList.add('arrived');
-  document.getElementById('meteoNavHint').textContent = '✓ At station — verify identity';
-  document.getElementById('meteoBtnArrive').disabled = true;
-  document.getElementById('meteoBtnArrive').textContent = '✓ Arrived at Station';
-  document.getElementById('meteoFpSection').style.display = 'block';
-  checkMeteoReady();
+  var btn = document.getElementById('meteoBtnArrive');
+  btn.disabled = true;
+  btn.textContent = '📍 Getting GPS…';
+  captureGPS(function(gps, err) {
+    meteoArrivedFlag = true;
+    document.getElementById('meteoNavGateCard').classList.add('arrived');
+    if (gps) {
+      document.getElementById('meteoNavHint').textContent = '✓ At station ('+gps.lat+', '+gps.lng+' ±'+gps.accuracy+'m) — verify identity';
+      btn.textContent = '✓ Arrived — GPS recorded';
+    } else {
+      document.getElementById('meteoNavHint').textContent = '✓ At station (GPS: '+err+') — verify identity';
+      btn.textContent = '✓ Arrived (no GPS)';
+    }
+    document.getElementById('meteoFpSection').style.display = 'block';
+    checkMeteoReady();
+  });
 }
 
 function meteoVerify() {

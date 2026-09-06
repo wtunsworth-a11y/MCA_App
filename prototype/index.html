@@ -1595,30 +1595,33 @@ select.msel {
           <button class="enroll-next-btn" onclick="enrollSaveProfile()">Continue →</button>
         </div>
 
-        <!-- STEP 3: Thumb 1 -->
+        <!-- STEP 3: Primary biometric -->
         <div id="enrollStep3" style="display:none;">
-          <div class="enroll-section-title">Register Dominant Thumb</div>
-          <div class="enroll-section-sub">Ask the steward to press their <strong>dominant hand thumb</strong> on the fingerprint sensor when prompted. This is used for daily login and field verification.</div>
-          <div class="enroll-warn">⚠ Make sure you are on the steward's device, not yours. The fingerprint is saved to this phone only.</div>
+          <div class="enroll-section-title">Register Primary Biometric</div>
+          <div class="enroll-section-sub">Ask the steward to <strong>press their dominant thumb</strong> on the sensor, or <strong>look at the camera</strong> if this is a Face ID device. This is used for daily login and field verification.</div>
+          <div class="enroll-warn">⚠ Make sure you are on the steward's device, not yours. The credential is saved to this phone only.</div>
           <button class="enroll-fp-btn" id="enrollThumb1Btn" onclick="enrollRegisterThumb(1)">
             <span class="enroll-fp-icon">👍</span>
-            <span id="enrollThumb1Label">Register Dominant Thumb</span>
+            <span id="enrollThumb1Label">Register Fingerprint or Face</span>
           </button>
           <div class="enroll-status" id="enrollThumb1Status"></div>
           <button class="enroll-next-btn" id="enrollThumb1Next" disabled onclick="enrollGoThumb2()">Continue →</button>
         </div>
 
-        <!-- STEP 4: Thumb 2 -->
+        <!-- STEP 4: Second thumb (optional — fingerprint devices only) -->
         <div id="enrollStep4" style="display:none;">
-          <div class="enroll-section-title">Register Other Thumb</div>
-          <div class="enroll-section-sub">Now ask the steward to press their <strong>other hand thumb</strong>. This is a backup so dirty or injured hands don't lock them out.</div>
+          <div class="enroll-section-title">Register Second Thumb <span style="font-weight:400;font-size:0.85rem;">(optional)</span></div>
+          <div class="enroll-section-sub"><strong>Fingerprint phones only</strong> — register the other thumb as a backup so a dirty or injured hand doesn't lock them out.<br><br>If this device uses <strong>Face ID</strong>, tap <em>Skip</em> — one face is enough.</div>
           <div class="enroll-warn">⚠ Same steward, different thumb. Do not use your own fingerprint.</div>
           <button class="enroll-fp-btn" id="enrollThumb2Btn" onclick="enrollRegisterThumb(2)">
             <span class="enroll-fp-icon">👍</span>
             <span id="enrollThumb2Label">Register Other Thumb</span>
           </button>
           <div class="enroll-status" id="enrollThumb2Status"></div>
-          <button class="enroll-next-btn" id="enrollThumb2Next" disabled onclick="enrollFinish()">Finish Setup →</button>
+          <div style="display:flex;gap:10px;margin-top:4px;">
+            <button class="btn-outline" style="flex:1;" onclick="enrollFinish()">Skip →</button>
+            <button class="enroll-next-btn" id="enrollThumb2Next" style="flex:2;margin-top:0;" disabled onclick="enrollFinish()">Finish Setup →</button>
+          </div>
         </div>
 
         <!-- DONE -->
@@ -1775,7 +1778,7 @@ select.msel {
           </svg>
         </div>
 
-        <div class="fp-instruction">Place finger to login</div>
+        <div class="fp-instruction">Touch to log in</div>
         <div class="fp-status" id="fpStatus"></div>
         <div class="fp-user" id="fpUser"></div>
       </div>
@@ -5209,10 +5212,10 @@ function enrollSaveProfile() {
   document.getElementById('edot3').classList.add('active');
 }
 
-/* ── Enrollment: Step 3/4 — Register thumb ── */
+/* ── Enrollment: Step 3/4 — Register biometric ── */
 function enrollRegisterThumb(thumbNum) {
   if (!navigator.credentials || !window.PublicKeyCredential) {
-    toast('This device does not support fingerprint login. A newer Android or iPhone is required.');
+    toast('This device does not support biometric login. A newer Android or iPhone is required.');
     return;
   }
   var btn    = document.getElementById('enrollThumb' + thumbNum + 'Btn');
@@ -5221,19 +5224,21 @@ function enrollRegisterThumb(thumbNum) {
   var nextBtn = document.getElementById('enrollThumb' + thumbNum + 'Next');
   btn.classList.add('disabled');
   btn.onclick = null;
-  label.textContent = 'Waiting for fingerprint…';
-  status.textContent = 'Ask the steward to press their thumb on the sensor now.';
+  label.textContent = 'Waiting for biometric…';
+  status.textContent = thumbNum === 1
+    ? 'Ask the steward to press their thumb on the sensor or look at the camera now.'
+    : 'Ask the steward to press their other thumb on the sensor now.';
   status.style.color = '#F57F17';
 
   var challenge = crypto.getRandomValues(new Uint8Array(32));
-  var userId    = new TextEncoder().encode(enrolledProfile.stewardId + '_thumb' + thumbNum);
+  var userId    = new TextEncoder().encode(enrolledProfile.stewardId + '_bio' + thumbNum);
   var rpId      = location.hostname || 'localhost';
 
   navigator.credentials.create({
     publicKey: {
       challenge: challenge,
       rp: { id: rpId, name: 'MCA Steward App' },
-      user: { id: userId, name: enrolledProfile.stewardId, displayName: enrolledProfile.name + ' (thumb ' + thumbNum + ')' },
+      user: { id: userId, name: enrolledProfile.stewardId, displayName: enrolledProfile.name + ' (biometric ' + thumbNum + ')' },
       pubKeyCredParams: [
         { type: 'public-key', alg: -7 },
         { type: 'public-key', alg: -257 }
@@ -5249,14 +5254,14 @@ function enrollRegisterThumb(thumbNum) {
     var credId = bufToB64(cred.rawId);
     if (thumbNum === 1) { enrollCred1Id = credId; }
     else                { enrollCred2Id = credId; }
-    label.textContent = '✓ Thumb ' + thumbNum + ' registered';
+    label.textContent = thumbNum === 1 ? '✓ Primary biometric registered' : '✓ Second biometric registered';
     btn.classList.remove('disabled');
     btn.classList.add('registered');
-    status.textContent = 'Fingerprint saved successfully.';
+    status.textContent = 'Saved successfully.';
     status.style.color = '#2E7D32';
     nextBtn.disabled = false;
   }).catch(function(err) {
-    label.textContent = 'Register Thumb ' + thumbNum;
+    label.textContent = thumbNum === 1 ? 'Register Fingerprint or Face' : 'Register Other Thumb';
     btn.classList.remove('disabled');
     btn.onclick = function() { enrollRegisterThumb(thumbNum); };
     status.textContent = '✗ ' + (err.message || 'Registration failed — try again');
@@ -5312,7 +5317,7 @@ function verifyFp() {
   var status = document.getElementById('fpStatus');
   var user   = document.getElementById('fpUser');
   ring.classList.add('scanning');
-  status.textContent = 'Touch your thumb…';
+  status.textContent = 'Verifying…';
   status.style.color = '#F57F17';
 
   getAllRecords('auth', function(records) {
@@ -5377,7 +5382,7 @@ function webAuthnVerify(opts) {
     opts.onSuccess();
     return;
   }
-  if (opts.txtId) document.getElementById(opts.txtId).textContent = 'Touch your thumb…';
+  if (opts.txtId) document.getElementById(opts.txtId).textContent = 'Verifying…';
 
   getAllRecords('auth', function(records) {
     var profile  = (records && records.length > 0) ? records[0] : null;

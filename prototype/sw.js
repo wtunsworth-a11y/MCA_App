@@ -1,84 +1,65 @@
-/* MCA App Service Worker — v3 */
-var CACHE_NAME = 'mca-app-v3';
-var CORE_ASSETS = [
+/* MCA Steward App — Service Worker v4
+ *
+ * Strategy: stale-while-revalidate (matches MCA_Hunt pattern).
+ * - Every request is served from cache immediately for speed.
+ * - If online, the network response updates the cache in the background,
+ *   so the next open gets the fresh version.
+ * - Interview data lives in IndexedDB and is NEVER touched here.
+ *
+ * Bump CACHE_NAME on a deploy you want to force a clean re-cache.
+ */
+const CACHE_NAME = 'mca-steward-v4';
+const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
 ];
 
-/* Install: pre-cache core assets */
-self.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(CORE_ASSETS);
-    }).then(function() {
-      return self.skipWaiting();
-    })
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((c) => c.addAll(CORE_ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
-/* Activate: delete all old caches */
-self.addEventListener('activate', function(event) {
-  event.waitUntil(
-    caches.keys().then(function(names) {
-      return Promise.all(
-        names
-          .filter(function(n) { return n !== CACHE_NAME; })
-          .map(function(n) { return caches.delete(n); })
-      );
-    }).then(function() {
-      return self.clients.claim();
-    })
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
-/* Fetch: cache-first for core assets, network-first for everything else */
-self.addEventListener('fetch', function(event) {
-  var url = new URL(event.request.url);
+/* Stale-while-revalidate for same-origin GETs */
+self.addEventListener('fetch', (e) => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  if (new URL(req.url).origin !== self.location.origin) return;
 
-  /* Only handle same-origin GET requests */
-  if (event.request.method !== 'GET') return;
-  if (url.origin !== self.location.origin) return;
+  e.respondWith((async () => {
+    const cache  = await caches.open(CACHE_NAME);
+    const cached = await cache.match(req);
 
-  /* index.html: network-first so updates reach users, fall back to cache */
-  if (url.pathname.endsWith('index.html') || url.pathname.endsWith('/')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(function(response) {
-          var copy = response.clone();
-          caches.open(CACHE_NAME).then(function(c) { c.put(event.request, copy); });
-          return response;
-        })
-        .catch(function() {
-          return caches.match('./index.html');
-        })
-    );
-    return;
-  }
+    /* Revalidate in the background whenever we can */
+    const network = fetch(req).then((res) => {
+      if (res && res.status === 200 && res.type === 'basic') {
+        cache.put(req, res.clone());
+      }
+      return res;
+    }).catch(() => null);
 
-  /* All other assets: cache-first */
-  event.respondWith(
-    caches.match(event.request).then(function(cached) {
-      if (cached) return cached;
-      return fetch(event.request).then(function(response) {
-        if (response && response.status === 200) {
-          var copy = response.clone();
-          caches.open(CACHE_NAME).then(function(c) { c.put(event.request, copy); });
-        }
-        return response;
-      }).catch(function() {
-        /* Offline fallback: serve cached app shell */
-        return caches.match('./index.html');
-      });
-    })
-  );
+    /* Serve cached immediately; wait for network only if nothing cached */
+    return cached || (await network) ||
+      new Response('Offline', { status: 503, statusText: 'Offline' });
+  })());
 });
 
-/* Message: force update from app UI */
-self.addEventListener('message', function(event) {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+/* Force update from app UI */
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
 });

@@ -4670,6 +4670,8 @@ function nav(id) {
   if (id === 'screen-data-export') updateRecordCounts();
   if (id === 'screen-training-record') initTrainingRecord();
   if (id === 'screen-meteo-record') initMeteoRecord();
+  /* Restore autosave draft when entering any form screen */
+  if (DRAFT_SCREENS.indexOf(id) >= 0) restoreDraft(id);
   if (id === 'screen-performance') renderCalendar();
   showScreen(id);
 }
@@ -4690,6 +4692,9 @@ function toast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
 }
+
+/* ── Init autosave listeners ── */
+window.addEventListener('DOMContentLoaded', function() { initAutosave(); });
 
 /* ── Splash auto-advance — routes to enroll or fingerprint ── */
 window.addEventListener('load', () => {
@@ -4935,6 +4940,7 @@ function verifyFp() {
       user.textContent   = profile.name + ' | ' + profile.clan;
       updateDashHeader(profile);
       setTimeout(function() {
+        cacheStewardProfile();
         history = [];
         showScreen('screen-dashboard');
         setTimeout(function() {
@@ -5301,7 +5307,7 @@ function submitQabb() {
     document.getElementById('qabbEndTime').value = hh + ':' + mm;
   }
   document.getElementById('qabbEndAuto').textContent = 'auto';
-  saveRecord('qabb', collectQabbData(), function() { toast('QABB survey saved to device ✓'); });
+  saveRecord('qabb', collectQabbData(), function() { clearDraft('screen-qabb-matrix'); toast('QABB survey saved to device ✓'); });
 }
 
 function wxQ(onId, offId) {
@@ -5372,7 +5378,7 @@ function adjSecchi(d) {
   el.value = v;
   document.getElementById('secchiVal').textContent = v;
 }
-function submitWater() { saveRecord('water', collectWaterData(), function() { toast('Water quality saved to device ✓'); }); }
+function submitWater() { saveRecord('water', collectWaterData(), function() { clearDraft('screen-water-record'); toast('Water quality saved to device ✓'); }); }
 function wxW(on, off) { document.getElementById('wwx-'+on).classList.add('active'); document.getElementById('wwx-'+off).classList.remove('active'); }
 function wxPol(on, off) { document.getElementById('wpol-'+on).classList.add('active'); document.getElementById('wpol-'+off).classList.remove('active'); }
 
@@ -6253,6 +6259,7 @@ function collectMeteoData() {
 
 function submitMeteo() {
   saveRecord('meteo', collectMeteoData(), function() {
+    clearDraft('screen-meteo-record');
     toast('Weather station reading saved to device ✓');
   });
 }
@@ -6377,6 +6384,7 @@ function saveGarden() {
   }
   var data = collectGardenData();
   saveRecord('gardens', data, function() {
+    clearDraft('screen-garden-mapping');
     var label = gardenType === 'cash' ? 'Cash crop' : 'Food garden';
     toast(label + ' garden saved ✓');
     gardenSessionLog.unshift(data);
@@ -6477,6 +6485,7 @@ function saveTree() {
     notes: document.getElementById('treeNotes').value || ''
   };
   saveRecord('trees', data, function() {
+    clearDraft('screen-tree-mapping');
     toast(treeSpecies.charAt(0).toUpperCase() + treeSpecies.slice(1) + ' tree saved ✓');
     treeSessionLog.unshift(data);
     renderTreeLog();
@@ -6523,8 +6532,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 4;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth'];
+var DB_VERSION = 5;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -6548,13 +6557,165 @@ function openDB(cb) {
   };
 }
 
+/* ══════════════════════════════════════
+   AUTOSAVE — every form saves on every change
+══════════════════════════════════════ */
+
+/*
+ * UPLOAD ENDPOINT — Google Apps Script web app URL.
+ * Set this after deploying the Apps Script (see coordinator setup guide).
+ * Leave blank to fall back to native share sheet.
+ *
+ * To deploy:
+ *  1. Go to script.google.com → New Project
+ *  2. Paste the script from CLAUDE.md or coordinator setup doc
+ *  3. Deploy → New deployment → Web App → Execute as: Me, Access: Anyone
+ *  4. Copy the URL and paste it here.
+ */
+var UPLOAD_ENDPOINT = ''; /* e.g. 'https://script.google.com/macros/s/AKfy.../exec' */
+var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
+
+/* Form screens that have autosave drafts */
+var DRAFT_SCREENS = [
+  'screen-mafia-matrix','screen-qabb-matrix','screen-water-record',
+  'screen-pheno-establish','screen-pheno-record',
+  'screen-meteo-record','screen-garden-mapping','screen-tree-mapping',
+  'screen-conserv-record','screen-conserv-followup',
+  'screen-training-record','screen-obs-entry',
+  'screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3'
+];
+
+var _autosaveTimers = {};
+
+/* Generate a unique record ID: {stewardId}-{module}-{yyyymmddTHHMM}-{rand4} */
+function generateRecordId(module) {
+  getAllRecords('auth', function() {}); /* warm cache */
+  var sid = (window._cachedStewardId || 'STE').replace(/[^A-Z0-9]/gi,'').toUpperCase();
+  var now = new Date();
+  var ts  = now.getFullYear().toString()
+    + String(now.getMonth()+1).padStart(2,'0')
+    + String(now.getDate()).padStart(2,'0')
+    + 'T' + String(now.getHours()).padStart(2,'0')
+    + String(now.getMinutes()).padStart(2,'0');
+  var rand = Math.random().toString(36).slice(2,6).toUpperCase();
+  return sid + '-' + module + '-' + ts + '-' + rand;
+}
+
+/* Load and cache the steward ID (called once at login) */
+function cacheStewardProfile() {
+  getAllRecords('auth', function(records) {
+    if (records && records.length > 0) {
+      window._cachedStewardId  = records[0].stewardId || 'STE';
+      window._cachedProfile    = records[0];
+    }
+  });
+}
+
+/* Collect all standard inputs from a screen into a plain object */
+function _collectScreenInputs(screenId) {
+  var screen = document.getElementById(screenId);
+  if (!screen) return null;
+  var data = {};
+  screen.querySelectorAll('input, select, textarea').forEach(function(el) {
+    if (!el.id) return;
+    if (el.type === 'checkbox') data[el.id] = el.checked;
+    else if (el.type === 'radio') { if (el.checked) data[el.id] = el.value; }
+    else data[el.id] = el.value;
+  });
+  /* Capture tally counts (pill-button tallies) */
+  screen.querySelectorAll('[id*="tally"],[class*="tally-count"]').forEach(function(el) {
+    if (el.id) data['_tally_' + el.id] = el.textContent;
+  });
+  /* Capture active pill/toggle buttons */
+  screen.querySelectorAll('[id].active,[class*="pill"].active,[class*="yn-btn"].ay,[class*="yn-btn"].an').forEach(function(el) {
+    if (el.id) data['_active_' + el.id] = true;
+  });
+  return data;
+}
+
+/* Apply a saved draft back to the screen's input fields */
+function _applyDraftInputs(screenId, saved) {
+  var screen = document.getElementById(screenId);
+  if (!screen || !saved) return;
+  Object.keys(saved).forEach(function(key) {
+    if (key.startsWith('_')) return; /* skip tally/pill — read-only restore not practical */
+    var el = document.getElementById(key);
+    if (!el) return;
+    if (el.type === 'checkbox') el.checked = !!saved[key];
+    else if (el.type === 'radio') { if (el.value === saved[key]) el.checked = true; }
+    else el.value = saved[key];
+  });
+}
+
+/* Save current screen state to drafts store (debounced 800ms) */
+function autosave(screenId) {
+  if (!screenId) screenId = window._currentDraftScreen;
+  if (!screenId) return;
+  clearTimeout(_autosaveTimers[screenId]);
+  _autosaveTimers[screenId] = setTimeout(function() {
+    var data = _collectScreenInputs(screenId);
+    if (!data || Object.keys(data).length === 0) return;
+    openDB(function(db) {
+      if (!db) return;
+      var tx = db.transaction('drafts', 'readwrite');
+      tx.objectStore('drafts').put({ id: screenId, data: data, saved_at: new Date().toISOString() });
+    });
+  }, 800);
+}
+
+/* Restore a saved draft to the current screen */
+function restoreDraft(screenId) {
+  window._currentDraftScreen = screenId;
+  openDB(function(db) {
+    if (!db) return;
+    var tx  = db.transaction('drafts', 'readonly');
+    var req = tx.objectStore('drafts').get(screenId);
+    req.onsuccess = function() {
+      if (req.result) {
+        _applyDraftInputs(screenId, req.result.data);
+        toast('Draft restored ↩');
+      }
+    };
+  });
+}
+
+/* Delete draft after a successful submit */
+function clearDraft(screenId) {
+  if (!screenId) screenId = window._currentDraftScreen;
+  if (!screenId) return;
+  clearTimeout(_autosaveTimers[screenId]);
+  openDB(function(db) {
+    if (!db) return;
+    var tx = db.transaction('drafts', 'readwrite');
+    tx.objectStore('drafts').delete(screenId);
+  });
+}
+
+/* Attach autosave listeners to all inputs on a screen */
+function attachAutosave(screenId) {
+  var screen = document.getElementById(screenId);
+  if (!screen) return;
+  ['input','change'].forEach(function(evt) {
+    screen.addEventListener(evt, function() { autosave(screenId); }, { passive: true });
+  });
+}
+
+/* Call on app start to attach autosave to all form screens */
+function initAutosave() {
+  DRAFT_SCREENS.forEach(function(sid) { attachAutosave(sid); });
+}
+
 function saveRecord(storeName, data, cb) {
   openDB(function(db) {
     if (!db) { toast('Storage error — data not saved'); return; }
-    var tx = db.transaction(storeName, 'readwrite');
-    var store = tx.objectStore(storeName);
+    /* Assign a unique steward-prefixed ID for deduplication on Drive */
+    if (!data.record_uid) {
+      data.record_uid = generateRecordId(storeName);
+    }
     data.timestamp = new Date().toISOString();
     data.synced = false;
+    var tx = db.transaction(storeName, 'readwrite');
+    var store = tx.objectStore(storeName);
     var addReq = store.add(data);
     var newId = null;
     addReq.onsuccess = function(e) { newId = e.target.result; };
@@ -6715,39 +6876,67 @@ function sendAllData() {
           var fileName = 'MCA_' + sid + '_' + dateStr + '.json';
           var file     = new File([json], fileName, { type: 'application/json' });
 
-          /* Web Share API — triggers native share sheet (WhatsApp, Drive, email…) */
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            navigator.share({ files: [file], title: 'MCA Steward Data — ' + sid, text: bundle.record_count + ' records from ' + profile.clan })
-              .then(function() {
-                /* Mark all included records as synced */
-                var pending = syncTasks.length || 1;
-                function done() { pending--; if (pending === 0) { updateRecordCounts(); } }
-                if (syncTasks.length === 0) { done(); return; }
-                syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, done); });
-                var lastLine = document.getElementById('lastSentLine');
-                if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
-                toast(bundle.record_count + ' records sent ✓');
-              })
-              .catch(function(err) {
-                if (err.name !== 'AbortError') toast('Share failed — try again');
-              })
-              .finally(function() {
-                if (btn) { btn.disabled = false; btn.textContent = '📤 Send All New Records'; }
+          /* POST directly to Google Apps Script endpoint if configured */
+          if (UPLOAD_ENDPOINT) {
+            fetch(UPLOAD_ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-Upload-Secret': UPLOAD_SECRET },
+              body: json
+            }).then(function(res) { return res.json(); })
+              .then(function(result) {
+                if (result && result.status === 'ok') {
+                  var pending = syncTasks.length || 1;
+                  function doneSync() { pending--; if (pending === 0) updateRecordCounts(); }
+                  if (syncTasks.length === 0) { doneSync(); return; }
+                  syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, doneSync); });
+                  var lastLine = document.getElementById('lastSentLine');
+                  if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
+                  toast(bundle.record_count + ' records uploaded to MCA Drive ✓');
+                  if (btn) { btn.disabled = false; btn.textContent = '📤 Send All New Records'; }
+                } else {
+                  toast('Upload error — falling back to share');
+                  tryShare();
+                }
+              }).catch(function() {
+                toast('No signal — falling back to share sheet');
+                tryShare();
               });
-          } else {
-            /* Fallback: download the file */
-            var url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
-            var a   = document.createElement('a');
-            a.href = url; a.download = fileName;
-            document.body.appendChild(a); a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            /* Mark synced after download */
-            syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, null); });
-            updateRecordCounts();
-            toast(bundle.record_count + ' records saved — transfer the file to your coordinator');
-            if (btn) { btn.disabled = false; btn.textContent = '📤 Send All New Records'; }
+            return;
           }
+
+          function tryShare() {
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              navigator.share({ files: [file], title: 'MCA Steward Data — ' + sid, text: bundle.record_count + ' records from ' + profile.clan })
+                .then(function() {
+                  var pending = syncTasks.length || 1;
+                  function done() { pending--; if (pending === 0) { updateRecordCounts(); } }
+                  if (syncTasks.length === 0) { done(); return; }
+                  syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, done); });
+                  var lastLine = document.getElementById('lastSentLine');
+                  if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
+                  toast(bundle.record_count + ' records sent ✓');
+                })
+                .catch(function(err) {
+                  if (err.name !== 'AbortError') toast('Share failed — try again');
+                })
+                .finally(function() {
+                  if (btn) { btn.disabled = false; btn.textContent = '📤 Send All New Records'; }
+                });
+            } else {
+              /* Fallback: download the file */
+              var url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+              var a   = document.createElement('a');
+              a.href = url; a.download = fileName;
+              document.body.appendChild(a); a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, null); });
+              updateRecordCounts();
+              toast(bundle.record_count + ' records saved — transfer the file to your coordinator');
+              if (btn) { btn.disabled = false; btn.textContent = '📤 Send All New Records'; }
+            }
+          }
+          tryShare();
         }
       });
     });
@@ -7152,6 +7341,7 @@ function installPWA() {
 
 function saveMafia() {
   saveRecord('mafia', collectMafiaData(), function() {
+    clearDraft('screen-mafia-matrix');
     toast('MaFIA survey saved to device ✓');
   });
 }
@@ -7378,6 +7568,7 @@ function submitTrainingRecord() {
   };
 
   saveRecord('training', record, function() {
+    clearDraft('screen-training-record');
     toast('Training session saved ✓');
     /* Clear form */
     ['trainingTopic','trainingDuration','trainerName','trainerOrg','trainingLocation',

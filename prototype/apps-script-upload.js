@@ -1,10 +1,10 @@
 /**
- * MCA Steward App — Google Apps Script upload endpoint
+ * MCA Steward App — Google Apps Script upload + reporting endpoint
  *
  * SETUP (takes ~5 minutes):
  *  1. Go to https://script.google.com → click "New Project"
  *  2. Delete the default code and paste this entire file
- *  3. Change DRIVE_FOLDER_NAME below to your preferred folder name
+ *  3. In Project Settings (gear icon) set Time Zone: Asia/Port_Moresby (UTC+10)
  *  4. Click Deploy → New Deployment → type: Web App
  *     - Execute as: Me (your Google account)
  *     - Who has access: Anyone
@@ -16,60 +16,429 @@
  * SECURITY:
  *  The app sends a shared secret header (X-Upload-Secret).
  *  Change UPLOAD_SECRET below to match the value in index.html.
- *  This prevents random internet traffic from writing to your Drive.
+ *
+ * TRIGGERS (set up in Triggers UI — clock icon):
+ *  - weeklyReport()  → Time-driven → Week timer → Monday → 7am–8am PNG time
+ *  - monthlyReport() → Time-driven → Month timer → Day 1  → 7am–8am PNG time
  *
  * DATA LOCATION:
- *  My Drive → MCA_Steward_Data (or whatever DRIVE_FOLDER_NAME is set to)
- *  Files are named: MCA-[StewardID]_[Date].json
- *  Each upload is a separate file — duplicates are safe (same record_uid).
+ *  My Drive → MCA_Steward_Data/
+ *    _zones.json              ← zone config (managed from app coordinator screen)
+ *    [ZoneID_ZoneName]/
+ *      [StewardID_Name]/
+ *        MCA_[ID]_[Date].json
  *
- * WEEKLY REPORT:
- *  Set up a time-driven trigger to call weeklyReport() every Monday morning.
- *  Go to Triggers (clock icon) → Add Trigger → weeklyReport → Time-driven
- *  → Week timer → Monday → 7am-8am.
+ * REPORTS:
+ *  GET ?action=zones               → zone list
+ *  GET ?action=zone_report&zone=Z07&period=weekly|monthly  → zone report
+ *  GET ?action=mcf_report&period=weekly|monthly            → MCF all-zones summary
  */
 
-/* Target folder ID from your Google Drive share link */
+/* ─── Configuration ────────────────────────────────────────────────── */
 var DRIVE_FOLDER_ID   = '1FQRI9SEKHLk6T83D_iEw2GagMDbKIWx8';
-var DRIVE_FOLDER_NAME = 'MCA_Steward_Data'; /* fallback name if ID lookup fails */
-var UPLOAD_SECRET     = 'MCA_STEWARD_UPLOAD_2026';  /* must match index.html */
-var REPORT_EMAILS     = ['w.unsworth@landscapealliance.org'];  /* add more as needed */
+var DRIVE_FOLDER_NAME = 'MCA_Stewards';
+var UPLOAD_SECRET     = 'MCA_STEWARD_UPLOAD_2026';
+var REPORT_EMAILS     = ['w.unsworth@landscapealliance.org'];
+
+var DEFAULT_ZONES = [
+  {id:'Z01', name:'Zone 1'},  {id:'Z02', name:'Zone 2'},  {id:'Z03', name:'Zone 3'},
+  {id:'Z04', name:'Zone 4'},  {id:'Z05', name:'Zone 5'},  {id:'Z06', name:'Zone 6'},
+  {id:'Z07', name:'Zone 7'},  {id:'Z08', name:'Zone 8'},  {id:'Z09', name:'Zone 9'},
+  {id:'Z10', name:'Zone 10'}, {id:'Z11', name:'Zone 11'}
+];
+
+/* ─── Drive folder helper ───────────────────────────────────────────── */
+function getDataFolder() {
+  try { return DriveApp.getFolderById(DRIVE_FOLDER_ID); }
+  catch(e) { return getOrCreateFolder(DRIVE_FOLDER_NAME); }
+}
+
+function getOrCreateFolder(name, parent) {
+  var root     = parent || DriveApp.getRootFolder();
+  var existing = root.getFoldersByName(name);
+  if (existing.hasNext()) return existing.next();
+  return root.createFolder(name);
+}
+
+/* ─── Zone configuration ────────────────────────────────────────────── */
+function getZoneList() {
+  try {
+    var folder = getDataFolder();
+    var files  = folder.getFilesByName('_zones.json');
+    if (files.hasNext()) {
+      var zones = JSON.parse(files.next().getBlob().getDataAsString());
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', zones: zones }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch(e) { /* fall through to defaults */ }
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', zones: DEFAULT_ZONES }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function saveZoneConfig(zones) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_zones.json');
+  var json   = JSON.stringify(zones, null, 2);
+  if (files.hasNext()) {
+    files.next().setContent(json);
+  } else {
+    folder.createFile('_zones.json', json, MimeType.PLAIN_TEXT);
+  }
+}
+
+/* ─── Date helpers ──────────────────────────────────────────────────── */
+function cutoffDate(days) {
+  var d = new Date();
+  d.setDate(d.getDate() - days);
+  return d;
+}
+
+/* First day of the previous calendar month (for monthly email trigger) */
+function prevMonthStart() {
+  var d = new Date();
+  return new Date(d.getFullYear(), d.getMonth() - 1, 1);
+}
+
+/* Last day of the previous calendar month */
+function prevMonthEnd() {
+  var d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), 0, 23, 59, 59);
+}
+
+/* First day of the current calendar month (for in-app monthly view) */
+function currentMonthStart() {
+  var d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+function isoDate(d) { return d.toISOString().slice(0, 10); }
+
+/* ─── Walk all steward data files within a cutoff ─────────────────── */
+/*
+ * Returns an array of {stewardId, name, zone, clan, village, role,
+ *                       modules, record_count, upload_time, zone_id} objects
+ * one per uploaded file that falls within the cutoff window.
+ */
+function collectFiles(cutoff, zoneIdFilter) {
+  var dataFolder = getDataFolder();
+  var results    = [];
+
+  /* Walk zone sub-folders first (new structure: ZoneID_ZoneName/StewardID_Name/) */
+  var zoneFolders = dataFolder.getFolders();
+  while (zoneFolders.hasNext()) {
+    var zoneFolder = zoneFolders.next();
+    var zoneFolderName = zoneFolder.getName();
+    if (zoneFolderName.startsWith('_')) continue;  /* skip config files */
+
+    /* Extract zone id from folder name (format: Z07_Zone_7 or legacy SID_Name) */
+    var folderZoneId = '';
+    var zMatch = zoneFolderName.match(/^(Z\d{2})/);
+    if (zMatch) { folderZoneId = zMatch[1]; }
+
+    /* If filtering by zone, skip non-matching folders */
+    if (zoneIdFilter && folderZoneId && folderZoneId !== zoneIdFilter) continue;
+
+    /* Walk steward sub-folders within this zone folder */
+    var stewardFolders = zoneFolder.getFolders();
+    while (stewardFolders.hasNext()) {
+      var sub   = stewardFolders.next();
+      var files = sub.getFilesByType(MimeType.PLAIN_TEXT);
+      while (files.hasNext()) {
+        var file = files.next();
+        if (file.getDateCreated() < cutoff) continue;
+        try {
+          var body = JSON.parse(file.getBlob().getDataAsString());
+          results.push({
+            stewardId:    (body.steward && body.steward.stewardId)  || 'UNKNOWN',
+            name:         (body.steward && body.steward.name)        || 'Unknown',
+            zone:         (body.steward && body.steward.zone)        || '',
+            zone_id:      (body.steward && body.steward.zone_id)     || folderZoneId || '',
+            clan:         (body.steward && body.steward.clan)        || '',
+            village:      (body.steward && body.steward.village)     || '',
+            role:         (body.steward && body.steward.role)        || 'clan_steward',
+            modules:      body.modules   || {},
+            record_count: body.record_count || 0,
+            upload_time:  file.getDateCreated().toISOString()
+          });
+        } catch(e) { /* skip malformed files */ }
+      }
+    }
+
+    /* Also check direct files inside the zone folder (legacy: flat structure) */
+    var directFiles = zoneFolder.getFilesByType(MimeType.PLAIN_TEXT);
+    while (directFiles.hasNext()) {
+      var file = directFiles.next();
+      if (file.getDateCreated() < cutoff) continue;
+      try {
+        var body = JSON.parse(file.getBlob().getDataAsString());
+        results.push({
+          stewardId:    (body.steward && body.steward.stewardId)  || 'UNKNOWN',
+          name:         (body.steward && body.steward.name)        || 'Unknown',
+          zone:         (body.steward && body.steward.zone)        || '',
+          zone_id:      (body.steward && body.steward.zone_id)     || folderZoneId || '',
+          clan:         (body.steward && body.steward.clan)        || '',
+          village:      (body.steward && body.steward.village)     || '',
+          role:         (body.steward && body.steward.role)        || 'clan_steward',
+          modules:      body.modules   || {},
+          record_count: body.record_count || 0,
+          upload_time:  file.getDateCreated().toISOString()
+        });
+      } catch(e) { /* skip */ }
+    }
+  }
+
+  /* Legacy flat structure: steward folders directly under data folder */
+  var legacyFolders = dataFolder.getFolders();
+  while (legacyFolders.hasNext()) {
+    var sub  = legacyFolders.next();
+    var sName = sub.getName();
+    /* Skip zone folders (already processed) and config */
+    if (sName.match(/^Z\d{2}/) || sName.startsWith('_')) continue;
+    var files = sub.getFilesByType(MimeType.PLAIN_TEXT);
+    while (files.hasNext()) {
+      var file = files.next();
+      if (file.getDateCreated() < cutoff) continue;
+      try {
+        var body = JSON.parse(file.getBlob().getDataAsString());
+        var fileZoneId = (body.steward && body.steward.zone_id) || '';
+        if (zoneIdFilter && fileZoneId && fileZoneId !== zoneIdFilter) continue;
+        results.push({
+          stewardId:    (body.steward && body.steward.stewardId)  || 'UNKNOWN',
+          name:         (body.steward && body.steward.name)        || 'Unknown',
+          zone:         (body.steward && body.steward.zone)        || '',
+          zone_id:      fileZoneId,
+          clan:         (body.steward && body.steward.clan)        || '',
+          village:      (body.steward && body.steward.village)     || '',
+          role:         (body.steward && body.steward.role)        || 'clan_steward',
+          modules:      body.modules   || {},
+          record_count: body.record_count || 0,
+          upload_time:  file.getDateCreated().toISOString()
+        });
+      } catch(e) { /* skip */ }
+    }
+  }
+  return results;
+}
+
+/* ─── Zone report generator ─────────────────────────────────────────── */
+/*
+ * period values:
+ *   'weekly'   → last 7 rolling days
+ *   'monthly'  → current calendar month 1st to today (in-app view)
+ *   'prevmonth'→ full previous calendar month (used by monthly email trigger)
+ */
+function buildZoneReport(zoneId, period) {
+  var cutoff, periodEnd;
+  if (period === 'prevmonth') {
+    cutoff    = prevMonthStart();
+    periodEnd = prevMonthEnd();
+  } else if (period === 'monthly') {
+    cutoff    = currentMonthStart();
+    periodEnd = new Date();
+  } else {
+    cutoff    = cutoffDate(7);
+    periodEnd = new Date();
+  }
+  var files  = collectFiles(cutoff, zoneId || null);
+  /* Filter: for prevmonth, also drop files created after end of that month */
+  if (period === 'prevmonth') {
+    var endMs = periodEnd.getTime();
+    files = files.filter(function(f) { return new Date(f.upload_time).getTime() <= endMs; });
+  }
+
+  /* Aggregate by steward */
+  var stewardMap = {};
+  files.forEach(function(f) {
+    /* Only include clan stewards (not zone staff / MCF staff) */
+    if (f.role && f.role !== 'clan_steward') return;
+    var key = f.stewardId;
+    if (!stewardMap[key]) {
+      stewardMap[key] = {
+        stewardId:    f.stewardId,
+        name:         f.name,
+        clan:         f.clan,
+        village:      f.village,
+        zone:         f.zone,
+        zone_id:      f.zone_id,
+        upload_count: 0,
+        record_count: 0,
+        modules:      {},
+        active_days:  {},
+        last_upload:  ''
+      };
+    }
+    var s = stewardMap[key];
+    s.upload_count++;
+    s.record_count += f.record_count;
+    s.active_days[f.upload_time.slice(0,10)] = true;
+    if (!s.last_upload || f.upload_time > s.last_upload) s.last_upload = f.upload_time;
+    Object.keys(f.modules).forEach(function(mod) {
+      s.modules[mod] = (s.modules[mod] || 0) + (f.modules[mod] ? f.modules[mod].length || 1 : 0);
+    });
+  });
+
+  var stewards = Object.values(stewardMap).map(function(s) {
+    s.active_days = Object.keys(s.active_days).sort();
+    return s;
+  }).sort(function(a,b) { return a.name.localeCompare(b.name); });
+
+  var totalRecords = stewards.reduce(function(n,s) { return n + s.record_count; }, 0);
+  var activeStewards = stewards.filter(function(s) { return s.upload_count > 0; }).length;
+
+  /* Find zone name from config */
+  var zones = DEFAULT_ZONES;
+  try {
+    var folder = getDataFolder();
+    var zFiles = folder.getFilesByName('_zones.json');
+    if (zFiles.hasNext()) zones = JSON.parse(zFiles.next().getBlob().getDataAsString());
+  } catch(e) { /* use defaults */ }
+  var zoneObj  = zones.filter(function(z) { return z.id === zoneId; })[0] || {id: zoneId, name: zoneId};
+
+  return {
+    zone_id:          zoneObj.id,
+    zone_name:        zoneObj.name,
+    period:           period,
+    from:             isoDate(cutoff),
+    to:               isoDate(periodEnd),
+    stewards:         stewards,
+    total_stewards:   stewards.length,
+    active_stewards:  activeStewards,
+    total_records:    totalRecords,
+    generated_at:     new Date().toISOString()
+  };
+}
+
+/* ─── MCF report generator (all zones) ─────────────────────────────── */
+function buildMCFReport(period) {
+  var cutoff, periodEnd;
+  if (period === 'prevmonth') {
+    cutoff    = prevMonthStart();
+    periodEnd = prevMonthEnd();
+  } else if (period === 'monthly') {
+    cutoff    = currentMonthStart();
+    periodEnd = new Date();
+  } else {
+    cutoff    = cutoffDate(7);
+    periodEnd = new Date();
+  }
+  var files  = collectFiles(cutoff, null);
+  if (period === 'prevmonth') {
+    var endMs = periodEnd.getTime();
+    files = files.filter(function(f) { return new Date(f.upload_time).getTime() <= endMs; });
+  }
+
+  /* Load zone list */
+  var zones = DEFAULT_ZONES;
+  try {
+    var folder = getDataFolder();
+    var zFiles = folder.getFilesByName('_zones.json');
+    if (zFiles.hasNext()) zones = JSON.parse(zFiles.next().getBlob().getDataAsString());
+  } catch(e) { /* use defaults */ }
+
+  /* Aggregate by zone */
+  var zoneMap = {};
+  zones.forEach(function(z) {
+    zoneMap[z.id] = { zone_id: z.id, zone_name: z.name, steward_ids: {}, upload_count: 0, record_count: 0, modules: {}, active_days: {}, last_upload: '' };
+  });
+
+  files.forEach(function(f) {
+    if (f.role && f.role !== 'clan_steward') return;
+    var zid = f.zone_id || 'UNKNOWN';
+    if (!zoneMap[zid]) {
+      zoneMap[zid] = { zone_id: zid, zone_name: f.zone || zid, steward_ids: {}, upload_count: 0, record_count: 0, modules: {}, active_days: {}, last_upload: '' };
+    }
+    var z = zoneMap[zid];
+    z.steward_ids[f.stewardId] = true;
+    z.upload_count++;
+    z.record_count += f.record_count;
+    z.active_days[f.upload_time.slice(0,10)] = true;
+    if (!z.last_upload || f.upload_time > z.last_upload) z.last_upload = f.upload_time;
+    Object.keys(f.modules).forEach(function(mod) {
+      z.modules[mod] = (z.modules[mod] || 0) + (f.modules[mod] ? f.modules[mod].length || 1 : 0);
+    });
+  });
+
+  var zoneRows = Object.values(zoneMap).map(function(z) {
+    return {
+      zone_id:         z.zone_id,
+      zone_name:       z.zone_name,
+      steward_count:   Object.keys(z.steward_ids).length,
+      upload_count:    z.upload_count,
+      record_count:    z.record_count,
+      active_days:     Object.keys(z.active_days).sort().length,
+      modules:         z.modules,
+      last_upload:     z.last_upload
+    };
+  }).sort(function(a,b) { return a.zone_id.localeCompare(b.zone_id); });
+
+  var totalRecords  = zoneRows.reduce(function(n,z) { return n + z.record_count; }, 0);
+  var activeZones   = zoneRows.filter(function(z) { return z.upload_count > 0; }).length;
+  var totalStewards = zoneRows.reduce(function(n,z) { return n + z.steward_count; }, 0);
+
+  return {
+    period:          period,
+    from:            isoDate(cutoff),
+    to:              isoDate(periodEnd),
+    zones:           zoneRows,
+    total_zones:     zones.length,
+    active_zones:    activeZones,
+    total_stewards:  totalStewards,
+    total_records:   totalRecords,
+    generated_at:    new Date().toISOString()
+  };
+}
 
 /* ─── Receive upload from steward phone ─────────────────────────────── */
 function doPost(e) {
   try {
-    /* Validate secret */
-    var secret = e.parameter['X-Upload-Secret'] ||
-                 (e.postData && JSON.parse(e.postData.contents || '{}')['_secret']);
-    /* Apps Script doesn't forward custom headers — check both header and body */
     var body = JSON.parse(e.postData.contents);
-    if (!body || body._secret !== UPLOAD_SECRET && secret !== UPLOAD_SECRET) {
-      /* Accept anyway for now — log only. Tighten once deployed. */
+
+    /* Secret check — reject anything without the correct shared secret */
+    if (!body || body._secret !== UPLOAD_SECRET) {
+      Logger.log('Rejected upload: wrong or missing secret from ' + (e.postData ? e.postData.length : 0) + ' byte payload');
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'error', message: 'Unauthorised' }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
 
-    /* Use the specific Drive folder ID */
-    var folder;
-    try {
-      folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-    } catch(e) {
-      folder = getOrCreateFolder(DRIVE_FOLDER_NAME);
+    /* Handle coordinator zone config update */
+    if (body._action === 'update_zones') {
+      if (body._secret !== UPLOAD_SECRET) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ status: 'error', message: 'Unauthorised' }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+      saveZoneConfig(body.zones);
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', message: 'Zone config saved', count: body.zones.length }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
 
-    /* Sub-folder per steward */
-    var sid        = (body.steward && body.steward.stewardId) || 'UNKNOWN';
-    var stewardName = (body.steward && body.steward.name) || 'Unknown';
-    var subName    = sid + '_' + stewardName.replace(/\s+/g,'_');
-    var subFolder  = getOrCreateFolder(subName, folder);
+    /* Normal steward data upload */
+    var folder = getDataFolder();
 
-    /* File name: MCA-[ID]_[Date].json */
+    /* Determine zone folder name */
+    var zoneId   = (body.steward && body.steward.zone_id)  || '';
+    var zoneName = (body.steward && body.steward.zone)      || '';
+    var zoneDir  = zoneId ? (zoneId + '_' + zoneName.replace(/\s+/g,'_')) : 'Unzoned';
+    var zoneFolder = getOrCreateFolder(zoneDir, folder);
+
+    /* Sub-folder per steward within zone */
+    var sid         = (body.steward && body.steward.stewardId) || 'UNKNOWN';
+    var stewardName = (body.steward && body.steward.name)      || 'Unknown';
+    var subName     = sid + '_' + stewardName.replace(/\s+/g,'_');
+    var subFolder   = getOrCreateFolder(subName, zoneFolder);
+
+    /* File name: MCA-[ID]_[Date].json — deduplicated by timestamp */
     var dateStr  = new Date().toISOString().slice(0, 10);
     var fileName = 'MCA_' + sid + '_' + dateStr + '.json';
     var content  = JSON.stringify(body, null, 2);
 
-    /* Check if a file for today already exists */
+    /* If a file for today exists, add time suffix */
     var existing = subFolder.getFilesByName(fileName);
     if (existing.hasNext()) {
-      /* Append to existing (merge records) — simpler: just create a new timestamped file */
       var ts = new Date().toISOString().slice(0,16).replace(':','h');
       fileName = 'MCA_' + sid + '_' + ts + '.json';
     }
@@ -87,86 +456,113 @@ function doPost(e) {
   }
 }
 
-/* ─── Allow preflight CORS (browsers send OPTIONS before POST) ──────── */
+/* ─── GET endpoint: ping, zones, reports ───────────────────────────── */
 function doGet(e) {
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ready', app: 'MCA Steward Upload' }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+  var action = (e.parameter && e.parameter.action) || 'ping';
 
-/* ─── Get or create a Drive folder ─────────────────────────────────── */
-function getOrCreateFolder(name, parent) {
-  var root     = parent || DriveApp.getRootFolder();
-  var existing = root.getFoldersByName(name);
-  if (existing.hasNext()) return existing.next();
-  return root.createFolder(name);
-}
-
-/* ─── Weekly summary report ─────────────────────────────────────────── */
-function weeklyReport() {
-  var dataFolder;
-  try {
-    dataFolder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-  } catch(e) {
-    var folderIter = DriveApp.getFoldersByName(DRIVE_FOLDER_NAME);
-    if (!folderIter.hasNext()) { Logger.log('No data folder found.'); return; }
-    dataFolder = folderIter.next();
+  if (action === 'zones') {
+    return getZoneList();
   }
-  var counts     = {};   /* stewardId → total records */
-  var moduleSet  = {};   /* module → count */
-  var totalRecs  = 0;
-  var cutoff     = new Date(); cutoff.setDate(cutoff.getDate() - 7);
 
-  /* Walk all steward sub-folders */
-  var subs = dataFolder.getFolders();
-  while (subs.hasNext()) {
-    var sub   = subs.next();
-    var files = sub.getFilesByType(MimeType.PLAIN_TEXT);
-    while (files.hasNext()) {
-      var file = files.next();
-      if (file.getDateCreated() < cutoff) continue;
-      try {
-        var body = JSON.parse(file.getBlob().getDataAsString());
-        var sid  = (body.steward && body.steward.stewardId) || 'UNKNOWN';
-        counts[sid] = (counts[sid] || 0) + (body.record_count || 0);
-        totalRecs  += (body.record_count || 0);
-        Object.keys(body.modules || {}).forEach(function(mod) {
-          moduleSet[mod] = (moduleSet[mod] || 0) + (body.modules[mod] || []).length;
-        });
-      } catch(e) { /* skip malformed */ }
+  if (action === 'zone_report') {
+    var zoneId = e.parameter.zone   || '';
+    var period = e.parameter.period || 'weekly';
+    try {
+      var report = buildZoneReport(zoneId, period);
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', report: report }))
+        .setMimeType(ContentService.MimeType.JSON);
+    } catch(err) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
   }
 
-  /* Build email */
-  var lines = ['MCA Steward App — Weekly Summary', ''];
-  lines.push('Period: last 7 days');
-  lines.push('Total records received: ' + totalRecs);
+  if (action === 'mcf_report') {
+    var period = e.parameter.period || 'weekly';
+    try {
+      var report = buildMCFReport(period);
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', report: report }))
+        .setMimeType(ContentService.MimeType.JSON);
+    } catch(err) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  /* Ping / preflight */
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ready', app: 'MCA Steward Upload v2' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ─── Weekly summary email ──────────────────────────────────────────── */
+function weeklyReport() {
+  var report = buildMCFReport('weekly');
+  var dataFolder = getDataFolder();
+
+  var lines = ['MCA Steward App — Weekly Summary Report', ''];
+  lines.push('Period: ' + report.from + ' to ' + report.to + ' (' + report.days + ' days)');
+  lines.push('Active zones:    ' + report.active_zones + ' of ' + report.total_zones);
+  lines.push('Active stewards: ' + report.total_stewards);
+  lines.push('Total records:   ' + report.total_records);
   lines.push('');
-  lines.push('By steward:');
-  Object.keys(counts).forEach(function(sid) {
-    lines.push('  ' + sid + ': ' + counts[sid] + ' records');
+  lines.push('─────────────────────────────────────────');
+  lines.push('By zone:');
+  report.zones.forEach(function(z) {
+    var status = z.upload_count > 0 ? '✓' : '✗ NO DATA';
+    lines.push('  ' + z.zone_id + ' ' + z.zone_name + ': ' + status);
+    if (z.upload_count > 0) {
+      lines.push('    Stewards: ' + z.steward_count + '  |  Records: ' + z.record_count + '  |  Active days: ' + z.active_days);
+      lines.push('    Last upload: ' + (z.last_upload ? z.last_upload.slice(0,16).replace('T',' ') + ' UTC' : '—'));
+      var mods = Object.keys(z.modules).map(function(m) { return m + ':' + z.modules[m]; }).join(', ');
+      if (mods) lines.push('    Modules: ' + mods);
+    }
   });
   lines.push('');
-  lines.push('By module:');
-  Object.keys(moduleSet).forEach(function(mod) {
-    lines.push('  ' + mod + ': ' + moduleSet[mod] + ' records');
+  lines.push('View data: https://drive.google.com/drive/folders/' + dataFolder.getId());
+  lines.push('');
+  lines.push('Zone reports (live): ' + ScriptApp.getService().getUrl() + '?action=zone_report&zone=Z01&period=weekly');
+
+  var body = lines.join('\n');
+  REPORT_EMAILS.forEach(function(email) {
+    MailApp.sendEmail(email, 'MCA Weekly Data Report — ' + report.to, body);
+  });
+  Logger.log('Weekly report sent to: ' + REPORT_EMAILS.join(', '));
+}
+
+/* ─── Monthly summary email (previous full calendar month) ──────────── */
+/* Set trigger: 1st of each month, 7am–8am PNG time (UTC+10) */
+function monthlyReport() {
+  var report = buildMCFReport('prevmonth');
+  var dataFolder = getDataFolder();
+
+  var lines = ['MCA Steward App — Monthly Summary Report', ''];
+  lines.push('Period: ' + report.from + ' to ' + report.to + ' (previous calendar month)');
+  lines.push('Active zones:    ' + report.active_zones + ' of ' + report.total_zones);
+  lines.push('Active stewards: ' + report.total_stewards);
+  lines.push('Total records:   ' + report.total_records);
+  lines.push('');
+  lines.push('─────────────────────────────────────────');
+  lines.push('By zone:');
+  report.zones.forEach(function(z) {
+    var status = z.upload_count > 0 ? '✓' : '✗ NO DATA';
+    lines.push('  ' + z.zone_id + ' ' + z.zone_name + ': ' + status);
+    if (z.upload_count > 0) {
+      lines.push('    Stewards: ' + z.steward_count + '  |  Records: ' + z.record_count + '  |  Active days: ' + z.active_days);
+      var mods = Object.keys(z.modules).map(function(m) { return m + ':' + z.modules[m]; }).join(', ');
+      if (mods) lines.push('    Modules: ' + mods);
+    }
   });
   lines.push('');
   lines.push('View data: https://drive.google.com/drive/folders/' + dataFolder.getId());
 
   var body = lines.join('\n');
   REPORT_EMAILS.forEach(function(email) {
-    MailApp.sendEmail(email, 'MCA Weekly Data Report', body);
+    MailApp.sendEmail(email, 'MCA Monthly Data Report — ' + report.to, body);
   });
-  Logger.log('Weekly report sent to: ' + REPORT_EMAILS.join(', '));
-}
-
-/* ─── Monthly report (same structure, 30-day window) ───────────────── */
-function monthlyReport() {
-  /* Same as weeklyReport but with a 30-day cutoff */
-  /* Wire this to a monthly time-driven trigger in Apps Script UI */
-  var folder = DriveApp.getFoldersByName(DRIVE_FOLDER_NAME);
-  if (!folder.hasNext()) return;
-  /* [implementation mirrors weeklyReport with cutoff set to -30 days] */
-  Logger.log('Monthly report triggered — extend weeklyReport with 30-day cutoff');
+  Logger.log('Monthly report sent to: ' + REPORT_EMAILS.join(', '));
 }

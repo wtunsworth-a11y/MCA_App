@@ -1377,6 +1377,62 @@ select.msel {
   background: #f0f0f0; border-radius: 10px; padding: 2px 7px;
 }
 
+/* ── Zone config screen ── */
+.zone-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.zone-row input {
+  flex: 1; border: 1px solid #C8E6C9; border-radius: 8px;
+  padding: 8px 10px; font-size: 0.85rem; background: #fff;
+}
+.zone-row .zone-del-btn {
+  background: none; border: none; font-size: 1.1rem; color: #B71C1C;
+  cursor: pointer; padding: 4px 8px; border-radius: 6px;
+}
+.zone-id-badge {
+  font-size: 0.68rem; font-weight: 700; color: #fff;
+  background: #2E7D32; border-radius: 6px; padding: 3px 7px;
+  min-width: 36px; text-align: center; font-family: monospace;
+}
+
+/* ── Report screen ── */
+.tab-btn {
+  flex: 1; padding: 8px 0; font-size: 0.8rem; font-weight: 600;
+  border: 1.5px solid #C8E6C9; border-radius: 8px; background: #fff;
+  color: #388E3C; cursor: pointer; transition: all 0.15s;
+}
+.tab-btn.active {
+  background: #2E7D32; color: #fff; border-color: #2E7D32;
+}
+.report-steward-card {
+  background: #fff; border-radius: 10px; border: 1px solid #E0E0E0;
+  padding: 12px 14px; margin-bottom: 10px;
+}
+.report-steward-name { font-size: 0.9rem; font-weight: 700; color: #1B5E20; }
+.report-steward-meta { font-size: 0.72rem; color: #888; margin-top: 2px; }
+.report-steward-stats {
+  display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap;
+}
+.report-stat {
+  background: #F1F8E9; border-radius: 6px; padding: 4px 8px;
+  font-size: 0.72rem; color: #33691E; font-weight: 600;
+}
+.report-stat.warn { background: #FFF3E0; color: #E65100; }
+.report-zone-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid #F0F0F0;
+}
+.report-zone-name { font-size: 0.85rem; font-weight: 600; color: #1B5E20; }
+.report-zone-stat { font-size: 0.75rem; color: #555; }
+.report-zone-badge {
+  font-size: 0.7rem; font-weight: 700; border-radius: 10px;
+  padding: 3px 8px; background: #E8F5E9; color: #2E7D32;
+}
+.report-zone-badge.inactive { background: #FFEBEE; color: #B71C1C; }
+.report-no-data {
+  text-align: center; padding: 30px 0; color: #999; font-size: 0.82rem;
+}
+
 </style>
 </head>
 <body>
@@ -1434,6 +1490,7 @@ select.msel {
           </div>
           <div class="enroll-status" id="enrollPassStatus"></div>
           <button class="enroll-next-btn" id="enrollPassBtn" onclick="enrollCheckPasscode()">Verify →</button>
+          <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:10px;width:100%;" onclick="showScreen('screen-zone-config')">⚙ Manage Zones</button>
         </div>
 
         <!-- STEP 2: Profile -->
@@ -1453,8 +1510,18 @@ select.msel {
             <input type="text" id="enrollClan" class="form-input" placeholder="e.g. Afore Clan" autocomplete="off">
           </div>
           <div class="form-group">
+            <label class="form-label">Role <span style="color:#B71C1C;">*</span></label>
+            <select id="enrollRole" class="form-input" onchange="enrollRoleChanged()">
+              <option value="clan_steward">Clan Steward</option>
+              <option value="zone_staff">Zone Staff</option>
+              <option value="mcf_staff">MCF Staff</option>
+            </select>
+          </div>
+          <div class="form-group" id="enrollZoneGroup">
             <label class="form-label">Zone <span style="color:#B71C1C;">*</span></label>
-            <input type="text" id="enrollZone" class="form-input" placeholder="e.g. Zone 7B" autocomplete="off">
+            <select id="enrollZoneSelect" class="form-input">
+              <option value="">— loading zones —</option>
+            </select>
           </div>
           <div class="form-group">
             <label class="form-label">Village</label>
@@ -1497,6 +1564,46 @@ select.msel {
           <button class="enroll-next-btn" onclick="showScreen('screen-fingerprint')">Open App →</button>
         </div>
 
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: ZONE CONFIGURATION (coordinator only)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-zone-config">
+      <div class="top-bar">
+        <button class="back-btn" onclick="showScreen('screen-enroll')">←</button>
+        <div><div class="bar-title">Manage Zones</div><div class="bar-sub">Coordinator only</div></div>
+      </div>
+      <div style="padding:16px;">
+        <div style="font-size:0.8rem;color:#555;margin-bottom:14px;">Edit zone names below. Changes are saved to your Google Drive and available to all phones when online. Only you can do this.</div>
+        <div id="zoneConfigList" style="margin-bottom:12px;"></div>
+        <button class="btn-outline" onclick="zoneConfigAdd()" style="width:100%;margin-bottom:16px;">+ Add Zone</button>
+        <button class="enroll-next-btn" onclick="zoneConfigSave()" id="zoneConfigSaveBtn">Save Changes</button>
+        <div id="zoneConfigStatus" style="font-size:0.8rem;color:#2E7D32;margin-top:10px;text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: REPORTS (zone staff + MCF)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-reports">
+      <div class="top-bar">
+        <button class="back-btn" id="reportBackBtn" onclick="showScreen('screen-dashboard')">←</button>
+        <div><div class="bar-title" id="reportTitle">Activity Report</div><div class="bar-sub" id="reportSub">Zone Staff View</div></div>
+      </div>
+      <div style="padding:14px 16px 0;">
+        <!-- Period toggle -->
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <button class="tab-btn active" id="rTabWeekly" onclick="reportSetPeriod('weekly')">This Week</button>
+          <button class="tab-btn" id="rTabMonthly" onclick="reportSetPeriod('monthly')">This Month</button>
+          <button class="tab-btn" style="margin-left:auto;padding:6px 12px;font-size:0.72rem;" onclick="fetchReport()">⟳ Refresh</button>
+        </div>
+        <div id="reportDateRange" style="font-size:0.72rem;color:#888;margin-bottom:12px;"></div>
+        <div id="reportBody" style="min-height:200px;">
+          <div style="text-align:center;padding:40px 0;color:#888;font-size:0.85rem;">Tap Refresh to load latest data</div>
+        </div>
+        <div id="reportCacheNote" style="font-size:0.68rem;color:#999;margin-top:8px;text-align:center;"></div>
       </div>
     </div>
 
@@ -4614,7 +4721,8 @@ select.msel {
 <script>
 /* ── Screen Registry & Stack ── */
 const ALL_SCREENS = [
-  'screen-splash','screen-enroll','screen-fingerprint','screen-dashboard',
+  'screen-splash','screen-enroll','screen-zone-config','screen-fingerprint',
+  'screen-reports','screen-dashboard',
   'screen-observations','screen-obs-entry',
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-qabb-setup','screen-qabb-matrix',
@@ -4645,6 +4753,16 @@ function showScreen(id) {
     if (sc) sc.scrollTop = 0;
   }
   currentScreen = id;
+  /* Screen entry side-effects */
+  if (id === 'screen-zone-config') {
+    getZoneList(function(zones) {
+      _editZones = JSON.parse(JSON.stringify(zones));
+      renderZoneConfigList();
+    });
+  }
+  if (id === 'screen-reports' && _reportProfile) {
+    loadCachedReport(_reportProfile);
+  }
 }
 
 /* Navigate, pushing to history */
@@ -4776,11 +4894,15 @@ function enrollCheckPasscode() {
   document.getElementById('enrollPassStatus').textContent = '';
   sha256Hex(val).then(function(hash) {
     if (hash === ENROLL_PASSCODE_HASH) {
-      document.getElementById('enrollStep1').style.display = 'none';
-      document.getElementById('enrollStep2').style.display = 'block';
-      document.getElementById('edot1').classList.remove('active');
-      document.getElementById('edot1').classList.add('done');
-      document.getElementById('edot2').classList.add('active');
+      /* Show coordinator options: enroll or manage zones */
+      btn.disabled = false;
+      btn.textContent = '➕ Enroll New Person →';
+      btn.onclick = enrollGoToStep2;
+      document.getElementById('enrollManageZonesBtn').style.display = 'block';
+      document.getElementById('enrollPassStatus').textContent = '✓ Coordinator verified. Choose an action.';
+      document.getElementById('enrollPassStatus').style.color = '#2E7D32';
+      /* Also load zone list ready for step 2 */
+      loadZonesForEnrollment();
     } else {
       document.getElementById('enrollPassStatus').textContent = '✗ Incorrect passcode. Contact your coordinator.';
       document.getElementById('enrollPassStatus').style.color = '#B71C1C';
@@ -4790,18 +4912,43 @@ function enrollCheckPasscode() {
   });
 }
 
+/* ── Enrollment: Step 1 verified → Step 2 ── */
+function enrollGoToStep2() {
+  document.getElementById('enrollStep1').style.display = 'none';
+  document.getElementById('enrollStep2').style.display = 'block';
+  document.getElementById('edot1').classList.remove('active');
+  document.getElementById('edot1').classList.add('done');
+  document.getElementById('edot2').classList.add('active');
+}
+
 /* ── Enrollment: Step 2 — Profile ── */
+function enrollRoleChanged() {
+  var role = document.getElementById('enrollRole').value;
+  var zg   = document.getElementById('enrollZoneGroup');
+  zg.style.display = (role === 'mcf_staff') ? 'none' : 'block';
+}
+
 function enrollSaveProfile() {
-  var name = (document.getElementById('enrollName').value || '').trim();
-  var sid  = (document.getElementById('enrollStewardId').value || '').trim().toUpperCase();
-  var clan = (document.getElementById('enrollClan').value || '').trim();
-  var zone = (document.getElementById('enrollZone').value || '').trim();
+  var name    = (document.getElementById('enrollName').value || '').trim();
+  var sid     = (document.getElementById('enrollStewardId').value || '').trim().toUpperCase();
+  var clan    = (document.getElementById('enrollClan').value || '').trim();
+  var role    = document.getElementById('enrollRole').value || 'clan_steward';
   var village = (document.getElementById('enrollVillage').value || '').trim();
-  if (!name || !sid || !clan || !zone) {
-    toast('Please fill all required fields (Name, ID, Clan, Zone).');
+
+  /* Zone — not required for MCF staff */
+  var zoneOpt = document.getElementById('enrollZoneSelect');
+  var zone    = zoneOpt ? (zoneOpt.options[zoneOpt.selectedIndex] ? zoneOpt.options[zoneOpt.selectedIndex].text : '') : '';
+  var zoneId  = zoneOpt ? (zoneOpt.value || '') : '';
+
+  if (!name || !sid || !clan) {
+    toast('Please fill all required fields (Name, ID, Clan).');
     return;
   }
-  enrolledProfile = { name: name, stewardId: sid, clan: clan, zone: zone, village: village };
+  if (role !== 'mcf_staff' && !zoneId) {
+    toast('Please select a Zone.');
+    return;
+  }
+  enrolledProfile = { name: name, stewardId: sid, clan: clan, zone: zone, zone_id: zoneId, village: village, role: role };
   document.getElementById('enrollStep2').style.display = 'none';
   document.getElementById('enrollStep3').style.display = 'block';
   document.getElementById('edot2').classList.remove('active');
@@ -4876,12 +5023,14 @@ function enrollGoThumb2() {
 /* ── Enrollment: Finish — save to IndexedDB ── */
 function enrollFinish() {
   var record = {
-    id: 1,
+    id:        1,
     name:      enrolledProfile.name,
     stewardId: enrolledProfile.stewardId,
     clan:      enrolledProfile.clan,
     zone:      enrolledProfile.zone,
-    village:   enrolledProfile.village,
+    zone_id:   enrolledProfile.zone_id  || '',
+    village:   enrolledProfile.village  || '',
+    role:      enrolledProfile.role     || 'clan_steward',
     cred1:     enrollCred1Id,
     cred2:     enrollCred2Id,
     enrolled:  new Date().toISOString()
@@ -4942,7 +5091,11 @@ function verifyFp() {
       setTimeout(function() {
         cacheStewardProfile();
         history = [];
-        showScreen('screen-dashboard');
+        var role = profile.role || 'clan_steward';
+        var dest = (role === 'zone_staff' || role === 'mcf_staff')
+          ? 'screen-reports' : 'screen-dashboard';
+        if (dest === 'screen-reports') initReportScreen(profile);
+        showScreen(dest);
         setTimeout(function() {
           fpBusy = false;
           status.textContent = '';
@@ -6611,6 +6764,311 @@ function cacheStewardProfile() {
   });
 }
 
+/* ── Zone list management ─────────────────────────────────────────── */
+/* Default zones — coordinator can override via Manage Zones screen */
+var DEFAULT_ZONE_LIST = [
+  {id:'Z01',name:'Zone 1'}, {id:'Z02',name:'Zone 2'}, {id:'Z03',name:'Zone 3'},
+  {id:'Z04',name:'Zone 4'}, {id:'Z05',name:'Zone 5'}, {id:'Z06',name:'Zone 6'},
+  {id:'Z07',name:'Zone 7'}, {id:'Z08',name:'Zone 8'}, {id:'Z09',name:'Zone 9'},
+  {id:'Z10',name:'Zone 10'}, {id:'Z11',name:'Zone 11'}
+];
+
+/* Fetch zone list: try Drive (via Apps Script), fall back to IndexedDB, then defaults */
+function getZoneList(callback) {
+  /* Try IndexedDB cache first */
+  getAllRecords('auth', function(records) {
+    var cached = null;
+    if (records) {
+      records.forEach(function(r) { if (r.id === 'zones') cached = r.zones; });
+    }
+    if (UPLOAD_ENDPOINT && navigator.onLine) {
+      fetch(UPLOAD_ENDPOINT + '?action=zones')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d.status === 'ok' && d.zones) {
+            /* Cache in IndexedDB */
+            saveRecord('auth', {id:'zones', zones: d.zones, fetched: new Date().toISOString()}, function(){});
+            callback(d.zones);
+          } else {
+            callback(cached || DEFAULT_ZONE_LIST);
+          }
+        }).catch(function() { callback(cached || DEFAULT_ZONE_LIST); });
+    } else {
+      callback(cached || DEFAULT_ZONE_LIST);
+    }
+  });
+}
+
+/* Populate the zone select in enrollment step 2 */
+function loadZonesForEnrollment() {
+  getZoneList(function(zones) {
+    var sel = document.getElementById('enrollZoneSelect');
+    if (!sel) return;
+    sel.innerHTML = '';
+    zones.forEach(function(z) {
+      var opt = document.createElement('option');
+      opt.value = z.id;
+      opt.textContent = z.id + ' — ' + z.name;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+/* ── Zone Config Screen ─────────────────────────────────────────── */
+var _editZones = [];  /* working copy while editing */
+
+function showScreen_zoneConfig() {
+  showScreen('screen-zone-config');
+  getZoneList(function(zones) {
+    _editZones = JSON.parse(JSON.stringify(zones));
+    renderZoneConfigList();
+  });
+}
+
+function renderZoneConfigList() {
+  var list = document.getElementById('zoneConfigList');
+  if (!list) return;
+  list.innerHTML = '';
+  _editZones.forEach(function(z, i) {
+    var row = document.createElement('div');
+    row.className = 'zone-row';
+    row.innerHTML =
+      '<span class="zone-id-badge">' + (z.id || 'Z?') + '</span>' +
+      '<input type="text" value="' + z.name.replace(/"/g,'&quot;') + '" ' +
+        'onchange="_editZones[' + i + '].name=this.value" ' +
+        'placeholder="Zone name">' +
+      '<button class="zone-del-btn" onclick="zoneConfigDelete(' + i + ')">🗑</button>';
+    list.appendChild(row);
+  });
+}
+
+function zoneConfigAdd() {
+  var nextNum = _editZones.length + 1;
+  var newId   = 'Z' + String(nextNum).padStart(2,'0');
+  _editZones.push({id: newId, name: 'Zone ' + nextNum});
+  renderZoneConfigList();
+}
+
+function zoneConfigDelete(i) {
+  if (_editZones.length <= 1) { toast('At least one zone is required.'); return; }
+  _editZones.splice(i, 1);
+  renderZoneConfigList();
+}
+
+function zoneConfigSave() {
+  /* Collect current input values (user may have typed without triggering onchange) */
+  var inputs = document.querySelectorAll('#zoneConfigList .zone-row input');
+  inputs.forEach(function(inp, i) {
+    if (_editZones[i]) _editZones[i].name = inp.value.trim() || _editZones[i].name;
+  });
+
+  var status = document.getElementById('zoneConfigStatus');
+  var btn    = document.getElementById('zoneConfigSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  /* Save to IndexedDB immediately */
+  saveRecord('auth', {id:'zones', zones: _editZones, fetched: new Date().toISOString()}, function() {});
+
+  /* Also push to Drive if endpoint is configured */
+  if (UPLOAD_ENDPOINT) {
+    fetch(UPLOAD_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({_action:'update_zones', _secret: UPLOAD_SECRET, zones: _editZones})
+    }).then(function(r) { return r.json(); })
+      .then(function(d) {
+        btn.disabled = false; btn.textContent = 'Save Changes';
+        if (d.status === 'ok') {
+          status.textContent = '✓ Saved to Drive (' + _editZones.length + ' zones)';
+          status.style.color = '#2E7D32';
+        } else {
+          status.textContent = '⚠ Saved locally. Drive sync failed: ' + (d.message || '');
+          status.style.color = '#E65100';
+        }
+      }).catch(function() {
+        btn.disabled = false; btn.textContent = 'Save Changes';
+        status.textContent = '⚠ Saved locally — no network. Drive will update on next upload.';
+        status.style.color = '#E65100';
+      });
+  } else {
+    btn.disabled = false; btn.textContent = 'Save Changes';
+    status.textContent = '✓ Saved locally (configure upload endpoint to sync to Drive)';
+    status.style.color = '#2E7D32';
+  }
+}
+
+/* Override showScreen to initialise zone-config data on entry */
+var _origShowScreen = null; /* patched below after function defs */
+
+/* ── Reports Screen ─────────────────────────────────────────────── */
+var _reportPeriod  = 'weekly';
+var _reportProfile = null;
+
+function initReportScreen(profile) {
+  _reportProfile = profile;
+  var role = profile.role || 'clan_steward';
+  var title = document.getElementById('reportTitle');
+  var sub   = document.getElementById('reportSub');
+  var back  = document.getElementById('reportBackBtn');
+
+  if (role === 'mcf_staff') {
+    if (title) title.textContent = 'MCF Summary';
+    if (sub)   sub.textContent   = 'All Zones';
+    if (back)  back.onclick = function() { showScreen('screen-dashboard'); };
+  } else {
+    var zoneName = profile.zone || profile.zone_id || 'Your Zone';
+    if (title) title.textContent = zoneName + ' Report';
+    if (sub)   sub.textContent   = 'Zone Staff View';
+    if (back)  back.onclick = function() { showScreen('screen-dashboard'); };
+  }
+  /* Restore last cached report immediately */
+  loadCachedReport(profile);
+}
+
+function reportSetPeriod(period) {
+  _reportPeriod = period;
+  document.getElementById('rTabWeekly').classList.toggle('active', period === 'weekly');
+  document.getElementById('rTabMonthly').classList.toggle('active', period === 'monthly');
+  fetchReport();
+}
+
+function fetchReport() {
+  if (!_reportProfile) return;
+  var role = _reportProfile.role || 'clan_steward';
+  var body = document.getElementById('reportBody');
+  if (!UPLOAD_ENDPOINT) {
+    body.innerHTML = '<div class="report-no-data">Upload endpoint not configured. Ask your coordinator to set up the Apps Script URL.</div>';
+    return;
+  }
+  if (!navigator.onLine) {
+    loadCachedReport(_reportProfile);
+    document.getElementById('reportCacheNote').textContent = '⚠ Offline — showing cached data';
+    return;
+  }
+  body.innerHTML = '<div style="text-align:center;padding:40px 0;color:#888;">Loading…</div>';
+
+  var url;
+  if (role === 'mcf_staff') {
+    url = UPLOAD_ENDPOINT + '?action=mcf_report&period=' + _reportPeriod;
+  } else {
+    url = UPLOAD_ENDPOINT + '?action=zone_report&zone=' + encodeURIComponent(_reportProfile.zone_id || '') + '&period=' + _reportPeriod;
+  }
+
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.status === 'ok' && d.report) {
+        /* Cache it */
+        var cacheKey = 'report_' + role + '_' + (_reportProfile.zone_id || 'mcf') + '_' + _reportPeriod;
+        saveRecord('auth', {id: cacheKey, report: d.report, cached_at: new Date().toISOString()}, function(){});
+        renderReport(d.report, role);
+        document.getElementById('reportCacheNote').textContent =
+          'Updated ' + new Date().toLocaleTimeString();
+      } else {
+        body.innerHTML = '<div class="report-no-data">Could not load report: ' + (d.message || 'unknown error') + '</div>';
+      }
+    }).catch(function(err) {
+      loadCachedReport(_reportProfile);
+      document.getElementById('reportCacheNote').textContent = '⚠ Network error — showing cached data';
+    });
+}
+
+function loadCachedReport(profile) {
+  if (!profile) return;
+  var role     = profile.role || 'clan_steward';
+  var cacheKey = 'report_' + role + '_' + (profile.zone_id || 'mcf') + '_' + _reportPeriod;
+  getAllRecords('auth', function(records) {
+    if (!records) return;
+    var cached = null;
+    records.forEach(function(r) { if (r.id === cacheKey) cached = r; });
+    if (cached && cached.report) {
+      renderReport(cached.report, role);
+      document.getElementById('reportCacheNote').textContent =
+        'Cached ' + (cached.cached_at ? new Date(cached.cached_at).toLocaleString() : '');
+    }
+  });
+}
+
+function renderReport(report, role) {
+  var body  = document.getElementById('reportBody');
+  var range = document.getElementById('reportDateRange');
+  if (range) range.textContent = (report.from || '') + ' → ' + (report.to || '');
+  if (!body) return;
+
+  if (role === 'mcf_staff') {
+    renderMCFReport(report, body);
+  } else {
+    renderZoneReport(report, body);
+  }
+}
+
+function renderZoneReport(report, container) {
+  var html = '';
+  /* Summary row */
+  html += '<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">' +
+    '<div class="report-stat">' + (report.active_stewards || 0) + ' active stewards</div>' +
+    '<div class="report-stat">' + (report.total_records || 0) + ' records</div>' +
+    '</div>';
+
+  var stewards = report.stewards || [];
+  if (stewards.length === 0) {
+    html += '<div class="report-no-data">No data submitted this period.</div>';
+  } else {
+    stewards.forEach(function(s) {
+      var dayCount   = (s.active_days || []).length;
+      var lastUpload = s.last_upload ? s.last_upload.slice(0,10) : '—';
+      var modList    = Object.keys(s.modules || {}).map(function(m) {
+        return m + ':' + s.modules[m];
+      }).join(' · ');
+      var inactive   = s.upload_count === 0;
+
+      html += '<div class="report-steward-card">' +
+        '<div class="report-steward-name">' + s.name + '</div>' +
+        '<div class="report-steward-meta">' + s.stewardId + ' · ' + (s.clan || '') + (s.village ? ' · ' + s.village : '') + '</div>' +
+        '<div class="report-steward-stats">' +
+          '<div class="report-stat' + (inactive ? ' warn' : '') + '">' + s.record_count + ' records</div>' +
+          '<div class="report-stat">' + dayCount + ' days active</div>' +
+          '<div class="report-stat">Last: ' + lastUpload + '</div>' +
+        '</div>' +
+        (modList ? '<div style="font-size:0.68rem;color:#888;margin-top:6px;">' + modList + '</div>' : '') +
+        '</div>';
+    });
+  }
+  container.innerHTML = html;
+}
+
+function renderMCFReport(report, container) {
+  var html = '';
+  /* Summary */
+  html += '<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">' +
+    '<div class="report-stat">' + (report.active_zones || 0) + ' / ' + (report.total_zones || 0) + ' zones active</div>' +
+    '<div class="report-stat">' + (report.total_stewards || 0) + ' stewards</div>' +
+    '<div class="report-stat">' + (report.total_records || 0) + ' records</div>' +
+    '</div>';
+
+  var zones = report.zones || [];
+  if (zones.length === 0) {
+    html += '<div class="report-no-data">No zone data found.</div>';
+  } else {
+    zones.forEach(function(z) {
+      var active = z.upload_count > 0;
+      html += '<div class="report-zone-row">' +
+        '<div>' +
+          '<div class="report-zone-name">' + z.zone_id + ' — ' + z.zone_name + '</div>' +
+          '<div class="report-zone-stat">' +
+            (active ? z.steward_count + ' stewards · ' + z.record_count + ' records · ' + z.active_days + ' days' : 'No data submitted') +
+          '</div>' +
+        '</div>' +
+        '<span class="report-zone-badge' + (active ? '' : ' inactive') + '">' +
+          (active ? '✓ Active' : '✗ Inactive') +
+        '</span>' +
+        '</div>';
+    });
+  }
+  container.innerHTML = html;
+}
+
 /* Collect all standard inputs from a screen into a plain object */
 function _collectScreenInputs(screenId) {
   var screen = document.getElementById(screenId);
@@ -6844,7 +7302,9 @@ function sendAllData() {
         stewardId: profile.stewardId || 'UNKNOWN',
         clan:      profile.clan      || '',
         zone:      profile.zone      || '',
-        village:   profile.village   || ''
+        zone_id:   profile.zone_id   || '',
+        village:   profile.village   || '',
+        role:      profile.role      || 'clan_steward'
       },
       modules: {},
       record_count: 0

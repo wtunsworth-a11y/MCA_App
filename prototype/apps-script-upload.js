@@ -33,7 +33,7 @@
 var DRIVE_FOLDER_ID   = '1FQRI9SEKHLk6T83D_iEw2GagMDbKIWx8';
 var DRIVE_FOLDER_NAME = 'MCA_Steward_Data'; /* fallback name if ID lookup fails */
 var UPLOAD_SECRET     = 'MCA_STEWARD_UPLOAD_2026';  /* must match index.html */
-var REPORT_EMAILS     = ['wtunsworth@gmail.com'];    /* add more as needed */
+var REPORT_EMAILS     = ['w.unsworth@landscapealliance.org'];  /* add more as needed */
 
 /* ─── Receive upload from steward phone ─────────────────────────────── */
 function doPost(e) {

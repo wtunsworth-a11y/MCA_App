@@ -1536,6 +1536,10 @@ select.msel {
             <label class="form-label">Passcode</label>
             <input type="password" id="enrollPasscode" class="form-input" placeholder="Enter coordinator passcode" autocomplete="off" style="letter-spacing:0.1em;">
           </div>
+          <div class="form-group">
+            <label class="form-label">Server Key <span style="font-weight:400;font-size:0.78rem;color:#888;">(not shared — yours only)</span></label>
+            <input type="password" id="enrollServerKey" class="form-input" placeholder="Coordinator server key" autocomplete="off" style="letter-spacing:0.1em;">
+          </div>
           <div class="enroll-status" id="enrollPassStatus"></div>
           <button class="enroll-next-btn" id="enrollPassBtn" onclick="enrollCheckPasscode()">Verify →</button>
           <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:10px;width:100%;" onclick="showScreen('screen-zone-config')">⚙ Manage Zones</button>
@@ -5060,6 +5064,11 @@ window.addEventListener('load', () => {
    Generate a new hash at: https://emn178.github.io/online-tools/sha256.html */
 var ENROLL_PASSCODE_HASH = 'c6947da476b0cc558081178ca6714ca2c8e37687c9656f33a915bf5eaf5e4d6e';
 
+/* Coordinator server key — held in memory only for this session.
+   Never written to IndexedDB, localStorage, or any persisted storage.
+   Set by enrollCheckPasscode(), consumed by coordinator write operations. */
+window._coordSecret = null;
+
 var enrolledProfile = null;    // set during enrollment, used in finish
 var enrollCred1Id   = null;    // base64url credential ID for thumb 1
 var enrollCred2Id   = null;    // base64url credential ID for thumb 2
@@ -5111,13 +5120,20 @@ function updateDashHeader(profile) {
 /* ── Enrollment: Step 1 — Passcode ── */
 function enrollCheckPasscode() {
   var val = (document.getElementById('enrollPasscode').value || '').trim();
+  var serverKey = (document.getElementById('enrollServerKey').value || '').trim();
   if (!val) { document.getElementById('enrollPassStatus').textContent = 'Please enter the coordinator passcode.'; return; }
+  if (!serverKey) { document.getElementById('enrollPassStatus').textContent = 'Please enter the coordinator server key.'; return; }
   var btn = document.getElementById('enrollPassBtn');
   btn.disabled = true;
   btn.textContent = 'Checking…';
   document.getElementById('enrollPassStatus').textContent = '';
   sha256Hex(val).then(function(hash) {
     if (hash === ENROLL_PASSCODE_HASH) {
+      /* Capture server key in memory — never persisted anywhere */
+      window._coordSecret = serverKey;
+      /* Clear the input field immediately — no reason to leave it on screen */
+      document.getElementById('enrollPasscode').value = '';
+      document.getElementById('enrollServerKey').value = '';
       /* Show coordinator options: enroll, manage zones, manage topics, update profile */
       btn.disabled = false;
       btn.textContent = '➕ Enroll New Person →';
@@ -7125,7 +7141,7 @@ function zoneConfigSave() {
     fetch(UPLOAD_ENDPOINT, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({_action:'update_zones', _secret: UPLOAD_SECRET, zones: _editZones})
+      body: JSON.stringify({_action:'update_zones', _secret: UPLOAD_SECRET, _coordinator_secret: window._coordSecret, zones: _editZones})
     }).then(function(r) { return r.json(); })
       .then(function(d) {
         btn.disabled = false; btn.textContent = 'Save Changes';
@@ -7261,7 +7277,7 @@ function topicsConfigSave() {
     fetch(UPLOAD_ENDPOINT, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({_action:'update_topics', _secret: UPLOAD_SECRET, topics: _editTopics})
+      body: JSON.stringify({_action:'update_topics', _secret: UPLOAD_SECRET, _coordinator_secret: window._coordSecret, topics: _editTopics})
     }).then(function(r) { return r.json(); })
       .then(function(d) {
         btn.disabled = false; btn.textContent = 'Save Changes';
@@ -7427,7 +7443,7 @@ function submitGrantAuth() {
     fetch(UPLOAD_ENDPOINT, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ _action: 'grant_authorisation', _secret: UPLOAD_SECRET, record: record })
+      body: JSON.stringify({ _action: 'grant_authorisation', _secret: UPLOAD_SECRET, _coordinator_secret: window._coordSecret, record: record })
     }).then(function(r) { return r.json(); })
       .then(function(d) {
         btn.disabled = false; btn.textContent = 'Record Authorisation →';

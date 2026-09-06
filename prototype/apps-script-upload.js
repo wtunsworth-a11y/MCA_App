@@ -40,6 +40,30 @@ var DRIVE_FOLDER_NAME = 'MCA_Stewards';
 var UPLOAD_SECRET     = 'MCA_STEWARD_UPLOAD_2026';
 var REPORT_EMAILS     = ['w.unsworth@landscapealliance.org'];
 
+/*
+ * COORDINATOR SERVER KEY — stored in Script Properties, NOT in this source.
+ *
+ * One-time setup:
+ *   1. In the Apps Script editor, run setCoordinatorSecret() once.
+ *   2. Edit the function body below to set your own secret before running.
+ *   3. After running, remove or blank the value in the function body
+ *      (it is now stored in Script Properties and this code is no longer needed).
+ *
+ * The key protects: update_zones, update_topics, grant_authorisation.
+ * It is NEVER stored in the phone app — only held in memory during a session.
+ */
+function setCoordinatorSecret() {
+  /* CHANGE THIS VALUE, run once, then blank it out */
+  var secret = 'REPLACE_WITH_YOUR_COORDINATOR_KEY';
+  PropertiesService.getScriptProperties().setProperty('COORDINATOR_SECRET', secret);
+  Logger.log('Coordinator secret set successfully.');
+}
+
+/* Internal helper — fetches coordinator secret from Script Properties */
+function getCoordinatorSecret() {
+  return PropertiesService.getScriptProperties().getProperty('COORDINATOR_SECRET') || '';
+}
+
 var DEFAULT_ZONES = [
   {id:'Z01', name:'Zone 1'},  {id:'Z02', name:'Zone 2'},  {id:'Z03', name:'Zone 3'},
   {id:'Z04', name:'Zone 4'},  {id:'Z05', name:'Zone 5'},  {id:'Z06', name:'Zone 6'},
@@ -499,6 +523,19 @@ function doPost(e) {
       return ContentService
         .createTextOutput(JSON.stringify({ status: 'error', message: 'Unauthorised' }))
         .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    /* Coordinator write actions require a second server-side key in addition to the upload secret.
+     * The key is stored in Script Properties (never in the distributed app source). */
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation'];
+    if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
+      var coordSecret = getCoordinatorSecret();
+      if (!coordSecret || body._coordinator_secret !== coordSecret) {
+        Logger.log('Rejected coordinator action "' + body._action + '": wrong or missing coordinator key');
+        return ContentService
+          .createTextOutput(JSON.stringify({ status: 'error', message: 'Coordinator key required' }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
     }
 
     /* Handle coordinator config updates */

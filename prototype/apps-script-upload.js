@@ -29,7 +29,9 @@
  *  → Week timer → Monday → 7am-8am.
  */
 
-var DRIVE_FOLDER_NAME = 'MCA_Steward_Data';
+/* Target folder ID from your Google Drive share link */
+var DRIVE_FOLDER_ID   = '1FQRI9SEKHLk6T83D_iEw2GagMDbKIWx8';
+var DRIVE_FOLDER_NAME = 'MCA_Steward_Data'; /* fallback name if ID lookup fails */
 var UPLOAD_SECRET     = 'MCA_STEWARD_UPLOAD_2026';  /* must match index.html */
 var REPORT_EMAILS     = ['wtunsworth@gmail.com'];    /* add more as needed */
 
@@ -45,7 +47,13 @@ function doPost(e) {
       /* Accept anyway for now — log only. Tighten once deployed. */
     }
 
-    var folder = getOrCreateFolder(DRIVE_FOLDER_NAME);
+    /* Use the specific Drive folder ID */
+    var folder;
+    try {
+      folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+    } catch(e) {
+      folder = getOrCreateFolder(DRIVE_FOLDER_NAME);
+    }
 
     /* Sub-folder per steward */
     var sid        = (body.steward && body.steward.stewardId) || 'UNKNOWN';
@@ -96,12 +104,14 @@ function getOrCreateFolder(name, parent) {
 
 /* ─── Weekly summary report ─────────────────────────────────────────── */
 function weeklyReport() {
-  var folder = DriveApp.getFoldersByName(DRIVE_FOLDER_NAME);
-  if (!folder.hasNext()) {
-    Logger.log('No data folder found — nothing to report.');
-    return;
+  var dataFolder;
+  try {
+    dataFolder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+  } catch(e) {
+    var folderIter = DriveApp.getFoldersByName(DRIVE_FOLDER_NAME);
+    if (!folderIter.hasNext()) { Logger.log('No data folder found.'); return; }
+    dataFolder = folderIter.next();
   }
-  var dataFolder = folder.next();
   var counts     = {};   /* stewardId → total records */
   var moduleSet  = {};   /* module → count */
   var totalRecs  = 0;

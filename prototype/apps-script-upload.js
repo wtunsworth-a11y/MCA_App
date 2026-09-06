@@ -97,7 +97,9 @@ var DEFAULT_TOPICS = [
   {id:'T17', name:'Water Management & Irrigation'}, {id:'T18', name:'Forest Monitoring Techniques'},
   {id:'T19', name:'Beekeeping'}, {id:'T20', name:'Fish Farming (Aquaculture)'},
   {id:'T21', name:'Nursery & Seedling Management'}, {id:'T22', name:'Livestock Health & Husbandry'},
-  {id:'T23', name:'Household Food Security'}
+  {id:'T23', name:'Household Food Security'},
+  /* Specialist field topics */
+  {id:'T24', name:'Clan Boundary Mapping'}, {id:'T25', name:'Bilas Kit'}
 ];
 
 function getTopicList() {

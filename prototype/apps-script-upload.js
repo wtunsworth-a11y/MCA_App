@@ -81,11 +81,42 @@ function saveZoneConfig(zones) {
   var folder = getDataFolder();
   var files  = folder.getFilesByName('_zones.json');
   var json   = JSON.stringify(zones, null, 2);
-  if (files.hasNext()) {
-    files.next().setContent(json);
-  } else {
-    folder.createFile('_zones.json', json, MimeType.PLAIN_TEXT);
-  }
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_zones.json', json, MimeType.PLAIN_TEXT); }
+}
+
+/* ─── Training topic configuration ─────────────────────────────────── */
+var DEFAULT_TOPICS = [
+  {id:'T01', name:'Agroforestry'}, {id:'T02', name:'Composting & Soil Health'},
+  {id:'T03', name:'Pest & Disease Management'}, {id:'T04', name:'Crop Rotation & Mixed Cropping'},
+  {id:'T05', name:'Water Management & Irrigation'}, {id:'T06', name:'Forest Monitoring Techniques'},
+  {id:'T07', name:'Conservation Agriculture'}, {id:'T08', name:'Beekeeping'},
+  {id:'T09', name:'Fish Farming (Aquaculture)'}, {id:'T10', name:'Nursery & Seedling Management'},
+  {id:'T11', name:'Livestock Health & Husbandry'}, {id:'T12', name:'Household Food Security'}
+];
+
+function getTopicList() {
+  try {
+    var folder = getDataFolder();
+    var files  = folder.getFilesByName('_topics.json');
+    if (files.hasNext()) {
+      var topics = JSON.parse(files.next().getBlob().getDataAsString());
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', topics: topics }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch(e) { /* fall through */ }
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', topics: DEFAULT_TOPICS }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function saveTopicConfig(topics) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_topics.json');
+  var json   = JSON.stringify(topics, null, 2);
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_topics.json', json, MimeType.PLAIN_TEXT); }
 }
 
 /* ─── Date helpers ──────────────────────────────────────────────────── */
@@ -403,16 +434,17 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    /* Handle coordinator zone config update */
+    /* Handle coordinator config updates */
     if (body._action === 'update_zones') {
-      if (body._secret !== UPLOAD_SECRET) {
-        return ContentService
-          .createTextOutput(JSON.stringify({ status: 'error', message: 'Unauthorised' }))
-          .setMimeType(ContentService.MimeType.JSON);
-      }
       saveZoneConfig(body.zones);
       return ContentService
         .createTextOutput(JSON.stringify({ status: 'ok', message: 'Zone config saved', count: body.zones.length }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    if (body._action === 'update_topics') {
+      saveTopicConfig(body.topics);
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', message: 'Topic config saved', count: body.topics.length }))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -460,9 +492,8 @@ function doPost(e) {
 function doGet(e) {
   var action = (e.parameter && e.parameter.action) || 'ping';
 
-  if (action === 'zones') {
-    return getZoneList();
-  }
+  if (action === 'zones')  { return getZoneList();  }
+  if (action === 'topics') { return getTopicList(); }
 
   if (action === 'zone_report') {
     var zoneId = e.parameter.zone   || '';

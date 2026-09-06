@@ -1491,12 +1491,14 @@ select.msel {
           <div class="enroll-status" id="enrollPassStatus"></div>
           <button class="enroll-next-btn" id="enrollPassBtn" onclick="enrollCheckPasscode()">Verify →</button>
           <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:10px;width:100%;" onclick="showScreen('screen-zone-config')">⚙ Manage Zones</button>
+          <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')">📋 Manage Training Topics</button>
+          <button class="btn-outline" id="enrollUpdateProfileBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showUpdateProfile()">✏ Update Existing Profile</button>
         </div>
 
         <!-- STEP 2: Profile -->
         <div id="enrollStep2" style="display:none;">
-          <div class="enroll-section-title">Steward Profile</div>
-          <div class="enroll-section-sub">Fill in the new steward's details. These will appear on their dashboard.</div>
+          <div class="enroll-section-title">New User Profile</div>
+          <div class="enroll-section-sub">Fill in the new user's details. Role determines which features they can access.</div>
           <div class="form-group">
             <label class="form-label">Full Name <span style="color:#B71C1C;">*</span></label>
             <input type="text" id="enrollName" class="form-input" placeholder="e.g. John Tanko" autocomplete="off">
@@ -1514,6 +1516,7 @@ select.msel {
             <select id="enrollRole" class="form-input" onchange="enrollRoleChanged()">
               <option value="clan_steward">Clan Steward</option>
               <option value="zone_staff">Zone Staff</option>
+              <option value="field_officer">Field Officer (Agricultural Extension)</option>
               <option value="mcf_staff">MCF Staff</option>
             </select>
           </div>
@@ -1526,6 +1529,15 @@ select.msel {
           <div class="form-group">
             <label class="form-label">Village</label>
             <input type="text" id="enrollVillage" class="form-input" placeholder="e.g. Kokoda" autocomplete="off">
+          </div>
+          <!-- Authorised topics — Field Officer only -->
+          <div id="enrollTopicsGroup" style="display:none;">
+            <div style="background:#EDE7F6;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+              <div style="font-size:0.82rem;font-weight:700;color:#4A148C;margin-bottom:6px;">📋 Authorised Training Topics</div>
+              <div style="font-size:0.75rem;color:#666;margin-bottom:10px;">Select the topics this Field Officer is permitted to deliver. Only these will appear in their training form.</div>
+              <div id="enrollTopicsList" style="display:flex;flex-direction:column;gap:6px;"></div>
+              <div style="margin-top:8px;font-size:0.72rem;color:#888;">Topics not listed? Use <strong>Manage Topics</strong> to add them first.</div>
+            </div>
           </div>
           <button class="enroll-next-btn" onclick="enrollSaveProfile()">Continue →</button>
         </div>
@@ -1581,6 +1593,41 @@ select.msel {
         <button class="btn-outline" onclick="zoneConfigAdd()" style="width:100%;margin-bottom:16px;">+ Add Zone</button>
         <button class="enroll-next-btn" onclick="zoneConfigSave()" id="zoneConfigSaveBtn">Save Changes</button>
         <div id="zoneConfigStatus" style="font-size:0.8rem;color:#2E7D32;margin-top:10px;text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: TRAINING TOPICS CONFIG (coordinator only)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-topics-config">
+      <div class="top-bar" style="background:#4A148C;">
+        <button class="back-btn" onclick="showScreen('screen-enroll')">←</button>
+        <div><div class="bar-title">Manage Training Topics</div><div class="bar-sub">Coordinator only</div></div>
+      </div>
+      <div style="padding:16px;">
+        <div style="font-size:0.8rem;color:#555;margin-bottom:14px;">These are the topics Field Officers can be authorised to deliver. You assign specific topics to each Field Officer at enrollment.</div>
+        <div id="topicsConfigList" style="margin-bottom:12px;"></div>
+        <button class="btn-outline" onclick="topicsConfigAdd()" style="width:100%;margin-bottom:16px;border-color:#7B1FA2;color:#7B1FA2;">+ Add Topic</button>
+        <button class="enroll-next-btn" onclick="topicsConfigSave()" id="topicsConfigSaveBtn" style="background:#5C3D7A;">Save Changes</button>
+        <div id="topicsConfigStatus" style="font-size:0.8rem;color:#2E7D32;margin-top:10px;text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: UPDATE EXISTING PROFILE (coordinator only — zone reassignment)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-update-profile">
+      <div class="top-bar" style="background:#1565C0;">
+        <button class="back-btn" onclick="showScreen('screen-enroll')">←</button>
+        <div><div class="bar-title">Update Profile</div><div class="bar-sub">Zone reassignment · role change</div></div>
+      </div>
+      <div style="padding:16px;">
+        <div style="background:#E3F2FD;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.78rem;color:#1565C0;">
+          ⓘ Use this to reassign a user to a new zone, or change their role. Fingerprints are not changed — the user can still log in. This requires the phone to be physically present.
+        </div>
+        <div id="updateProfileBody">
+          <div style="text-align:center;padding:30px;color:#999;font-size:0.82rem;">Loading current profile…</div>
+        </div>
       </div>
     </div>
 
@@ -1721,7 +1768,7 @@ select.msel {
             <span class="module-emoji">🌱</span>
             <span class="module-name">Conservation Activities</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-training-setup')">
+          <div class="module-tile" id="tile-training" onclick="nav('screen-training-setup')">
             <span class="module-emoji">🎓</span>
             <span class="module-name">Training Records</span>
           </div>
@@ -4429,8 +4476,14 @@ select.msel {
       <div class="scroll-content">
         <div class="p14">
 
+          <!-- Awareness session banner (zone staff mode, shown via JS) -->
+          <div id="trainingAwarenessBanner" style="display:none;background:#7B1FA2;color:#fff;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:0.82rem;">
+            <strong>📢 Awareness Session</strong><br>
+            <span style="font-size:0.75rem;opacity:0.9;">You are recording a community awareness session. Attendance and a photo are required.</span>
+          </div>
+
           <!-- Training type -->
-          <div class="form-group" style="margin-bottom:14px;">
+          <div class="form-group" style="margin-bottom:14px;" id="trainingTypeGroup">
             <label class="form-label">Training Type <span style="color:#e53935;">*</span></label>
             <div id="trainingTypePills" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
               <button class="weather-pill" onclick="selectTrainingType('Governance & Leadership',this)" style="font-size:0.75rem;padding:6px 10px;">🏛 Governance &amp; Leadership</button>
@@ -4505,8 +4558,8 @@ select.msel {
             <div style="margin-top:8px;font-size:0.78rem;color:#888;">Total: <strong id="paxTotal" style="color:#5C3D7A;">0</strong> participants</div>
           </div>
 
-          <!-- Materials provided -->
-          <div class="form-group" style="margin-bottom:14px;">
+          <!-- Materials provided (field officer only) -->
+          <div class="form-group" style="margin-bottom:14px;" id="trainingMaterialsGroup">
             <label class="form-label">Materials / Resources Provided</label>
             <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
               <button class="weather-pill" onclick="toggleMaterial('Handout',this)" style="font-size:0.73rem;padding:5px 9px;">📄 Handout</button>
@@ -4520,26 +4573,37 @@ select.msel {
             </div>
           </div>
 
-          <!-- Key topics covered -->
-          <div class="form-group">
+          <!-- Photo (required for awareness, optional for field officer) -->
+          <div class="form-group" id="trainingPhotoGroup">
+            <label class="form-label">Photo <span id="trainingPhotoRequired" style="color:#e53935;display:none;">*</span></label>
+            <button type="button" class="btn-outline" onclick="trainingTriggerPhoto()" style="width:100%;margin-bottom:8px;">📷 Take Photo</button>
+            <div id="trainingPhotoPreview" style="display:none;">
+              <img id="trainingPhotoImg" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin-bottom:6px;">
+              <button type="button" class="btn-outline" onclick="trainingClearPhoto()" style="font-size:0.75rem;padding:5px 10px;color:#B71C1C;border-color:#B71C1C;">Remove</button>
+            </div>
+            <input type="file" id="trainingPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="handleTrainingPhoto(this)">
+          </div>
+
+          <!-- Key topics covered (field officer only) -->
+          <div class="form-group" id="trainingTopicsGroup">
             <label class="form-label">Key Topics Covered</label>
             <textarea id="trainingTopics" class="form-input" rows="3" placeholder="List the main topics discussed or skills demonstrated..."></textarea>
           </div>
 
-          <!-- Outcomes / key learnings -->
-          <div class="form-group">
+          <!-- Outcomes / key learnings (field officer only) -->
+          <div class="form-group" id="trainingOutcomesGroup">
             <label class="form-label">Outcomes &amp; Key Learnings</label>
             <textarea id="trainingOutcomes" class="form-input" rows="3" placeholder="What did participants learn? What will they do differently?"></textarea>
           </div>
 
-          <!-- Follow-up actions -->
-          <div class="form-group">
+          <!-- Follow-up actions (field officer only) -->
+          <div class="form-group" id="trainingFollowupGroup">
             <label class="form-label">Follow-up Actions Required</label>
             <textarea id="trainingFollowup" class="form-input" rows="2" placeholder="e.g. Revisit in 3 months, provide seeds, submit certificate list to project office..."></textarea>
           </div>
 
-          <!-- Challenges -->
-          <div class="form-group">
+          <!-- Challenges (field officer only) -->
+          <div class="form-group" id="trainingChallengesGroup">
             <label class="form-label">Challenges / Issues</label>
             <textarea id="trainingChallenges" class="form-input" rows="2" placeholder="Any attendance problems, language barriers, missing materials..."></textarea>
           </div>
@@ -4721,8 +4785,8 @@ select.msel {
 <script>
 /* ── Screen Registry & Stack ── */
 const ALL_SCREENS = [
-  'screen-splash','screen-enroll','screen-zone-config','screen-fingerprint',
-  'screen-reports','screen-dashboard',
+  'screen-splash','screen-enroll','screen-zone-config','screen-topics-config',
+  'screen-update-profile','screen-fingerprint','screen-reports','screen-dashboard',
   'screen-observations','screen-obs-entry',
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-qabb-setup','screen-qabb-matrix',
@@ -4759,6 +4823,15 @@ function showScreen(id) {
       _editZones = JSON.parse(JSON.stringify(zones));
       renderZoneConfigList();
     });
+  }
+  if (id === 'screen-topics-config') {
+    getTopicList(function(topics) {
+      _editTopics = JSON.parse(JSON.stringify(topics));
+      renderTopicsConfigList();
+    });
+  }
+  if (id === 'screen-update-profile') {
+    renderUpdateProfileScreen();
   }
   if (id === 'screen-reports' && _reportProfile) {
     loadCachedReport(_reportProfile);
@@ -4894,15 +4967,18 @@ function enrollCheckPasscode() {
   document.getElementById('enrollPassStatus').textContent = '';
   sha256Hex(val).then(function(hash) {
     if (hash === ENROLL_PASSCODE_HASH) {
-      /* Show coordinator options: enroll or manage zones */
+      /* Show coordinator options: enroll, manage zones, manage topics, update profile */
       btn.disabled = false;
       btn.textContent = '➕ Enroll New Person →';
       btn.onclick = enrollGoToStep2;
       document.getElementById('enrollManageZonesBtn').style.display = 'block';
+      document.getElementById('enrollManageTopicsBtn').style.display = 'block';
+      document.getElementById('enrollUpdateProfileBtn').style.display = 'block';
       document.getElementById('enrollPassStatus').textContent = '✓ Coordinator verified. Choose an action.';
       document.getElementById('enrollPassStatus').style.color = '#2E7D32';
-      /* Also load zone list ready for step 2 */
+      /* Pre-load zones and topics ready for step 2 */
       loadZonesForEnrollment();
+      loadTopicsForEnrollment();
     } else {
       document.getElementById('enrollPassStatus').textContent = '✗ Incorrect passcode. Contact your coordinator.';
       document.getElementById('enrollPassStatus').style.color = '#B71C1C';
@@ -4925,7 +5001,9 @@ function enrollGoToStep2() {
 function enrollRoleChanged() {
   var role = document.getElementById('enrollRole').value;
   var zg   = document.getElementById('enrollZoneGroup');
+  var tg   = document.getElementById('enrollTopicsGroup');
   zg.style.display = (role === 'mcf_staff') ? 'none' : 'block';
+  tg.style.display = (role === 'field_officer') ? 'block' : 'none';
 }
 
 function enrollSaveProfile() {
@@ -4948,7 +5026,14 @@ function enrollSaveProfile() {
     toast('Please select a Zone.');
     return;
   }
-  enrolledProfile = { name: name, stewardId: sid, clan: clan, zone: zone, zone_id: zoneId, village: village, role: role };
+  /* Collect authorised topics for field officers */
+  var authorisedTopics = [];
+  if (role === 'field_officer') {
+    document.querySelectorAll('#enrollTopicsList input[type=checkbox]:checked').forEach(function(cb) {
+      authorisedTopics.push(cb.value);
+    });
+  }
+  enrolledProfile = { name: name, stewardId: sid, clan: clan, zone: zone, zone_id: zoneId, village: village, role: role, authorised_topics: authorisedTopics };
   document.getElementById('enrollStep2').style.display = 'none';
   document.getElementById('enrollStep3').style.display = 'block';
   document.getElementById('edot2').classList.remove('active');
@@ -5030,8 +5115,9 @@ function enrollFinish() {
     zone:      enrolledProfile.zone,
     zone_id:   enrolledProfile.zone_id  || '',
     village:   enrolledProfile.village  || '',
-    role:      enrolledProfile.role     || 'clan_steward',
-    cred1:     enrollCred1Id,
+    role:              enrolledProfile.role            || 'clan_steward',
+    authorised_topics: enrolledProfile.authorised_topics || [],
+    cred1:             enrollCred1Id,
     cred2:     enrollCred2Id,
     enrolled:  new Date().toISOString()
   };
@@ -6725,7 +6811,7 @@ function openDB(cb) {
  *  3. Deploy → New deployment → Web App → Execute as: Me, Access: Anyone
  *  4. Copy the URL and paste it here.
  */
-var UPLOAD_ENDPOINT = ''; /* e.g. 'https://script.google.com/macros/s/AKfy.../exec' */
+var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
 
 /* Form screens that have autosave drafts */
@@ -6760,6 +6846,14 @@ function cacheStewardProfile() {
     if (records && records.length > 0) {
       window._cachedStewardId  = records[0].stewardId || 'STE';
       window._cachedProfile    = records[0];
+      /* Role-based dashboard tile visibility */
+      var role = records[0].role || 'clan_steward';
+      var trainingTile = document.getElementById('tile-training');
+      if (trainingTile) {
+        /* Training visible to field officers and zone staff; hidden from clan stewards and MCF */
+        var canTrain = (role === 'field_officer' || role === 'zone_staff');
+        trainingTile.style.display = canTrain ? '' : 'none';
+      }
     }
   });
 }
@@ -6896,6 +6990,204 @@ function zoneConfigSave() {
     status.textContent = '✓ Saved locally (configure upload endpoint to sync to Drive)';
     status.style.color = '#2E7D32';
   }
+}
+
+/* ── Training Topics management ─────────────────────────────────── */
+var DEFAULT_TOPIC_LIST = [
+  {id:'T01', name:'Agroforestry'},
+  {id:'T02', name:'Composting & Soil Health'},
+  {id:'T03', name:'Pest & Disease Management'},
+  {id:'T04', name:'Crop Rotation & Mixed Cropping'},
+  {id:'T05', name:'Water Management & Irrigation'},
+  {id:'T06', name:'Forest Monitoring Techniques'},
+  {id:'T07', name:'Conservation Agriculture'},
+  {id:'T08', name:'Beekeeping'},
+  {id:'T09', name:'Fish Farming (Aquaculture)'},
+  {id:'T10', name:'Nursery & Seedling Management'},
+  {id:'T11', name:'Livestock Health & Husbandry'},
+  {id:'T12', name:'Household Food Security'}
+];
+
+function getTopicList(callback) {
+  getAllRecords('auth', function(records) {
+    var cached = null;
+    if (records) records.forEach(function(r) { if (r.id === 'topics') cached = r.topics; });
+    if (UPLOAD_ENDPOINT && navigator.onLine) {
+      fetch(UPLOAD_ENDPOINT + '?action=topics')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d.status === 'ok' && d.topics) {
+            saveRecord('auth', {id:'topics', topics: d.topics, fetched: new Date().toISOString()}, function(){});
+            callback(d.topics);
+          } else { callback(cached || DEFAULT_TOPIC_LIST); }
+        }).catch(function() { callback(cached || DEFAULT_TOPIC_LIST); });
+    } else { callback(cached || DEFAULT_TOPIC_LIST); }
+  });
+}
+
+function loadTopicsForEnrollment() {
+  getTopicList(function(topics) {
+    var list = document.getElementById('enrollTopicsList');
+    if (!list) return;
+    list.innerHTML = '';
+    topics.forEach(function(t) {
+      var row = document.createElement('label');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.82rem;padding:4px 0;cursor:pointer;';
+      row.innerHTML = '<input type="checkbox" value="' + t.id + '" data-name="' + t.name.replace(/"/g,'&quot;') + '" style="width:16px;height:16px;accent-color:#5C3D7A;"> ' + t.name;
+      list.appendChild(row);
+    });
+  });
+}
+
+/* ── Topics Config Screen ────────────────────────────────────────── */
+var _editTopics = [];
+
+function renderTopicsConfigList() {
+  var list = document.getElementById('topicsConfigList');
+  if (!list) return;
+  list.innerHTML = '';
+  _editTopics.forEach(function(t, i) {
+    var row = document.createElement('div');
+    row.className = 'zone-row'; /* reuse same CSS */
+    row.innerHTML =
+      '<span class="zone-id-badge" style="background:#5C3D7A;">' + (t.id || 'T?') + '</span>' +
+      '<input type="text" value="' + t.name.replace(/"/g,'&quot;') + '" ' +
+        'onchange="_editTopics[' + i + '].name=this.value" placeholder="Topic name">' +
+      '<button class="zone-del-btn" onclick="topicsConfigDelete(' + i + ')">🗑</button>';
+    list.appendChild(row);
+  });
+}
+
+function topicsConfigAdd() {
+  var nextNum = _editTopics.length + 1;
+  var newId   = 'T' + String(nextNum).padStart(2,'0');
+  _editTopics.push({id: newId, name: 'Topic ' + nextNum});
+  renderTopicsConfigList();
+}
+
+function topicsConfigDelete(i) {
+  if (_editTopics.length <= 1) { toast('At least one topic is required.'); return; }
+  _editTopics.splice(i, 1);
+  renderTopicsConfigList();
+}
+
+function topicsConfigSave() {
+  var inputs = document.querySelectorAll('#topicsConfigList .zone-row input');
+  inputs.forEach(function(inp, i) {
+    if (_editTopics[i]) _editTopics[i].name = inp.value.trim() || _editTopics[i].name;
+  });
+  var status = document.getElementById('topicsConfigStatus');
+  var btn    = document.getElementById('topicsConfigSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  saveRecord('auth', {id:'topics', topics: _editTopics, fetched: new Date().toISOString()}, function(){});
+  if (UPLOAD_ENDPOINT) {
+    fetch(UPLOAD_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({_action:'update_topics', _secret: UPLOAD_SECRET, topics: _editTopics})
+    }).then(function(r) { return r.json(); })
+      .then(function(d) {
+        btn.disabled = false; btn.textContent = 'Save Changes';
+        status.textContent = d.status === 'ok'
+          ? '✓ Saved to Drive (' + _editTopics.length + ' topics)'
+          : '⚠ Saved locally. Drive sync failed.';
+        status.style.color = d.status === 'ok' ? '#2E7D32' : '#E65100';
+      }).catch(function() {
+        btn.disabled = false; btn.textContent = 'Save Changes';
+        status.textContent = '⚠ Saved locally — no network.';
+        status.style.color = '#E65100';
+      });
+  } else {
+    btn.disabled = false; btn.textContent = 'Save Changes';
+    status.textContent = '✓ Saved locally'; status.style.color = '#2E7D32';
+  }
+}
+
+/* ── Update Existing Profile (zone reassignment) ─────────────────── */
+function showUpdateProfile() {
+  showScreen('screen-update-profile');
+}
+
+function renderUpdateProfileScreen() {
+  var body = document.getElementById('updateProfileBody');
+  if (!body) return;
+  getAllRecords('auth', function(records) {
+    var profile = records ? records.filter(function(r) { return r.id === 1 || r.id === 'profile'; })[0] : null;
+    if (!profile) {
+      body.innerHTML = '<div style="text-align:center;padding:30px;color:#B71C1C;font-size:0.85rem;">No enrolled profile found on this phone.</div>';
+      return;
+    }
+    /* Build edit form */
+    body.innerHTML =
+      '<div style="background:#fff;border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid #E0E0E0;">' +
+        '<div style="font-size:0.75rem;color:#888;margin-bottom:4px;">Current profile (cannot change name or ID without re-enrolling)</div>' +
+        '<div style="font-size:1rem;font-weight:700;color:#1B5E20;">' + profile.name + '</div>' +
+        '<div style="font-size:0.82rem;color:#555;">' + profile.stewardId + ' · ' + (profile.clan || '') + '</div>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label class="form-label">Role</label>' +
+        '<select id="upRole" class="form-input">' +
+          '<option value="clan_steward"' + (profile.role==='clan_steward'?' selected':'') + '>Clan Steward</option>' +
+          '<option value="zone_staff"'   + (profile.role==='zone_staff'?' selected':'')   + '>Zone Staff</option>' +
+          '<option value="field_officer"'+ (profile.role==='field_officer'?' selected':'')+'>Field Officer (Agri. Extension)</option>' +
+          '<option value="mcf_staff"'    + (profile.role==='mcf_staff'?' selected':'')    + '>MCF Staff</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="form-group" id="upZoneGroup">' +
+        '<label class="form-label">Zone</label>' +
+        '<select id="upZoneSelect" class="form-input"><option value="">Loading…</option></select>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label class="form-label">Clan</label>' +
+        '<input type="text" id="upClan" class="form-input" value="' + (profile.clan||'').replace(/"/g,'&quot;') + '">' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label class="form-label">Village</label>' +
+        '<input type="text" id="upVillage" class="form-input" value="' + (profile.village||'').replace(/"/g,'&quot;') + '">' +
+      '</div>' +
+      '<button class="enroll-next-btn" onclick="saveUpdatedProfile(' + profile.id + ')" style="background:#1565C0;">Save Changes</button>' +
+      '<div id="upStatus" style="font-size:0.8rem;color:#2E7D32;margin-top:10px;text-align:center;"></div>';
+
+    /* Populate zone select */
+    getZoneList(function(zones) {
+      var sel = document.getElementById('upZoneSelect');
+      if (!sel) return;
+      sel.innerHTML = '<option value="">— select zone —</option>';
+      zones.forEach(function(z) {
+        var opt = document.createElement('option');
+        opt.value = z.id;
+        opt.textContent = z.id + ' — ' + z.name;
+        opt.selected = (z.id === profile.zone_id);
+        sel.appendChild(opt);
+      });
+    });
+  });
+}
+
+function saveUpdatedProfile(profileId) {
+  var role     = document.getElementById('upRole').value;
+  var zSel     = document.getElementById('upZoneSelect');
+  var zoneId   = zSel ? zSel.value : '';
+  var zone     = zSel && zSel.selectedIndex > 0 ? zSel.options[zSel.selectedIndex].text.replace(/^Z\d+ — /, '') : '';
+  var clan     = (document.getElementById('upClan').value || '').trim();
+  var village  = (document.getElementById('upVillage').value || '').trim();
+  var status   = document.getElementById('upStatus');
+
+  getAllRecords('auth', function(records) {
+    var profile = records ? records.filter(function(r) { return r.id === profileId; })[0] : null;
+    if (!profile) { status.textContent = '✗ Profile not found'; return; }
+    profile.role    = role;
+    profile.zone_id = zoneId;
+    profile.zone    = zone;
+    profile.clan    = clan;
+    profile.village = village;
+    saveRecord('auth', profile, function() {
+      status.textContent = '✓ Profile updated for ' + profile.name;
+      status.style.color = '#1565C0';
+      /* Refresh cached profile */
+      window._cachedProfile = profile;
+    });
+  });
 }
 
 /* Override showScreen to initialise zone-config data on entry */
@@ -7935,32 +8227,145 @@ function filterTraining(filter, btn) {
   loadTrainingSessions(filter);
 }
 
+var _trainingPhotoData = null; /* base64 data URI */
+var _trainingMode = 'full';    /* 'full' | 'filtered' | 'awareness' | 'blocked' */
+
+function trainingTriggerPhoto() {
+  var inp = document.getElementById('trainingPhotoInput');
+  if (inp) inp.click();
+}
+
+function handleTrainingPhoto(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    _trainingPhotoData = e.target.result;
+    var prev = document.getElementById('trainingPhotoPreview');
+    var img  = document.getElementById('trainingPhotoImg');
+    if (prev) prev.style.display = 'block';
+    if (img)  img.src = _trainingPhotoData;
+  };
+  reader.readAsDataURL(file);
+}
+
+function trainingClearPhoto() {
+  _trainingPhotoData = null;
+  var prev = document.getElementById('trainingPhotoPreview');
+  var inp  = document.getElementById('trainingPhotoInput');
+  if (prev) prev.style.display = 'none';
+  if (inp)  inp.value = '';
+}
+
 function initTrainingRecord() {
+  /* Check role */
+  var profile = window._cachedProfile || {};
+  var role    = profile.role || 'clan_steward';
+
+  if (role === 'clan_steward' || role === 'mcf_staff') {
+    toast('Training delivery is not available for your role.');
+    goBack();
+    return;
+  }
+
+  /* Reset photo */
+  _trainingPhotoData = null;
+  trainingClearPhoto();
+
   /* Set today's date */
   var dateEl = document.getElementById('trainingDate');
-  if (dateEl && !dateEl.value) {
-    dateEl.value = new Date().toISOString().split('T')[0];
-  }
-  /* Reset type selection */
+  if (dateEl && !dateEl.value) dateEl.value = new Date().toISOString().split('T')[0];
+
+  /* Reset selections */
   selectedTrainingType = '';
   selectedMaterials = [];
+
+  if (role === 'zone_staff') {
+    /* ─ Awareness mode ─ */
+    _trainingMode = 'awareness';
+    /* Lock type to Awareness */
+    selectedTrainingType = 'Awareness';
+    var hidden = document.getElementById('trainingType');
+    if (hidden) hidden.value = 'Awareness';
+    /* Show/hide sections */
+    _setVisible('trainingAwarenessBanner', true);
+    _setVisible('trainingTypeGroup', false);
+    _setVisible('trainingMaterialsGroup', false);
+    _setVisible('trainingTopicsGroup', false);
+    _setVisible('trainingOutcomesGroup', false);
+    _setVisible('trainingFollowupGroup', false);
+    _setVisible('trainingChallengesGroup', false);
+    /* Photo required */
+    _setVisible('trainingPhotoGroup', true);
+    var req = document.getElementById('trainingPhotoRequired');
+    if (req) req.style.display = 'inline';
+    /* Update title */
+    var bar = document.querySelector('#screen-training-record .bar-title');
+    if (bar) bar.textContent = 'Record Awareness Session';
+    var sub = document.querySelector('#screen-training-record .bar-subtitle');
+    if (sub) sub.textContent = 'Attendance + photo required';
+  } else if (role === 'field_officer') {
+    /* ─ Field officer mode: filtered type pills ─ */
+    _trainingMode = 'filtered';
+    _setVisible('trainingAwarenessBanner', false);
+    _setVisible('trainingTypeGroup', true);
+    _setVisible('trainingMaterialsGroup', true);
+    _setVisible('trainingTopicsGroup', true);
+    _setVisible('trainingOutcomesGroup', true);
+    _setVisible('trainingFollowupGroup', true);
+    _setVisible('trainingChallengesGroup', true);
+    _setVisible('trainingPhotoGroup', true);
+    var req = document.getElementById('trainingPhotoRequired');
+    if (req) req.style.display = 'none';
+    var bar = document.querySelector('#screen-training-record .bar-title');
+    if (bar) bar.textContent = 'Record Training Session';
+    var sub = document.querySelector('#screen-training-record .bar-subtitle');
+    if (sub) sub.textContent = 'Authorised topics only';
+    /* Rebuild pills from authorised topics */
+    _buildAuthorisedPills(profile.authorised_topics || []);
+  }
+
+  /* Reset all pills */
   document.querySelectorAll('#trainingTypePills .weather-pill').forEach(function(b) {
-    b.classList.remove('active');
-    b.style.background = '';
-    b.style.color = '';
+    b.classList.remove('active'); b.style.background = ''; b.style.color = '';
   });
-  /* Reset material pills */
   document.querySelectorAll('#screen-training-record .weather-pill[onclick^="toggleMaterial"]').forEach(function(b) {
-    b.classList.remove('active');
-    b.style.background = '';
-    b.style.color = '';
+    b.classList.remove('active'); b.style.background = ''; b.style.color = '';
   });
-  /* Participant counter */
   ['paxFemale','paxMale','paxYouth'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) { el.value = ''; el.oninput = updatePaxTotal; }
   });
   updatePaxTotal();
+}
+
+function _setVisible(id, show) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = show ? '' : 'none';
+}
+
+function _buildAuthorisedPills(authorisedIds) {
+  var pills = document.getElementById('trainingTypePills');
+  if (!pills) return;
+  if (!authorisedIds || authorisedIds.length === 0) {
+    pills.innerHTML = '<div style="font-size:0.8rem;color:#B71C1C;padding:8px;">No training topics authorised for this account. Contact your coordinator.</div>';
+    return;
+  }
+  /* Get topic names from cached topic list */
+  getAllRecords('auth', function(records) {
+    var topics = DEFAULT_TOPIC_LIST;
+    if (records) records.forEach(function(r) { if (r.id === 'topics') topics = r.topics; });
+    var authorised = topics.filter(function(t) { return authorisedIds.indexOf(t.id) !== -1; });
+    pills.innerHTML = '';
+    authorised.forEach(function(t) {
+      var btn = document.createElement('button');
+      btn.className = 'weather-pill';
+      btn.style.cssText = 'font-size:0.75rem;padding:6px 10px;';
+      btn.textContent = t.name;
+      btn.onclick = function() { selectTrainingType(t.name, btn); };
+      pills.appendChild(btn);
+    });
+  });
 }
 
 function updatePaxTotal() {
@@ -8000,12 +8405,19 @@ function toggleMaterial(mat, btn) {
 }
 
 function submitTrainingRecord() {
-  var type = selectedTrainingType;
+  var type  = selectedTrainingType;
   var topic = (document.getElementById('trainingTopic').value||'').trim();
-  var date = document.getElementById('trainingDate').value;
-  if (!type) { toast('Please select a training type'); return; }
+  var date  = document.getElementById('trainingDate').value;
+  if (!type)  { toast('Please select a training type'); return; }
   if (!topic) { toast('Please enter the session topic'); return; }
-  if (!date) { toast('Please select a date'); return; }
+  if (!date)  { toast('Please select a date'); return; }
+  /* Awareness mode: require attendance and photo */
+  if (_trainingMode === 'awareness') {
+    var f = parseInt(document.getElementById('paxFemale').value)||0;
+    var m = parseInt(document.getElementById('paxMale').value)||0;
+    if (f + m === 0) { toast('Please record attendance (women + men)'); return; }
+    if (!_trainingPhotoData) { toast('A photo is required for awareness sessions'); return; }
+  }
 
   var record = {
     type: type,
@@ -8024,6 +8436,8 @@ function submitTrainingRecord() {
     followup: (document.getElementById('trainingFollowup').value||'').trim(),
     challenges: (document.getElementById('trainingChallenges').value||'').trim(),
     notes: (document.getElementById('trainingNotes').value||'').trim(),
+    photo: _trainingPhotoData || null,
+    session_mode: _trainingMode,
     recorded_at: new Date().toISOString()
   };
 

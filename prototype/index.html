@@ -1493,6 +1493,7 @@ select.msel {
           <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:10px;width:100%;" onclick="showScreen('screen-zone-config')">⚙ Manage Zones</button>
           <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')">📋 Manage Training Topics</button>
           <button class="btn-outline" id="enrollUpdateProfileBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showUpdateProfile()">✏ Update Existing Profile</button>
+          <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()">🎓 Grant Training Authorisation</button>
         </div>
 
         <!-- STEP 2: Profile -->
@@ -1610,6 +1611,50 @@ select.msel {
         <button class="btn-outline" onclick="topicsConfigAdd()" style="width:100%;margin-bottom:16px;border-color:#7B1FA2;color:#7B1FA2;">+ Add Topic</button>
         <button class="enroll-next-btn" onclick="topicsConfigSave()" id="topicsConfigSaveBtn" style="background:#5C3D7A;">Save Changes</button>
         <div id="topicsConfigStatus" style="font-size:0.8rem;color:#2E7D32;margin-top:10px;text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: GRANT TRAINING AUTHORISATION (coordinator only)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-grant-auth">
+      <div class="top-bar" style="background:#1B5E20;">
+        <button class="back-btn" onclick="showScreen('screen-enroll')">←</button>
+        <div><div class="bar-title">Grant Training Authorisation</div><div class="bar-sub">Coordinator only · certificate required</div></div>
+      </div>
+      <div style="padding:16px;">
+        <div style="background:#E8F5E9;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.78rem;color:#1B5E20;">
+          Use this when a clan steward or field officer has completed a qualifying course and received certification. This creates a permanent record in Drive and unlocks training delivery for that topic on their phone.
+        </div>
+        <div class="form-group">
+          <label class="form-label">Steward / Officer ID <span style="color:#B71C1C;">*</span></label>
+          <input type="text" id="gaStewId" class="form-input" placeholder="e.g. MCA-007" autocomplete="off" style="text-transform:uppercase;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Training Topic Authorised <span style="color:#B71C1C;">*</span></label>
+          <select id="gaTopicSelect" class="form-input"><option value="">— loading topics —</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Certification Date <span style="color:#B71C1C;">*</span></label>
+          <input type="date" id="gaCertDate" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Certifying Organisation <span style="color:#B71C1C;">*</span></label>
+          <input type="text" id="gaCertOrg" class="form-input" placeholder="e.g. PNG Extension Services, MCF">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Certificate Number / Reference</label>
+          <input type="text" id="gaCertNum" class="form-input" placeholder="e.g. CERT-2026-007 (if none, write 'none')">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Authorised By</label>
+          <input type="text" id="gaAuthorisedBy" class="form-input" placeholder="Your name / initials">
+        </div>
+        <button class="enroll-next-btn" onclick="submitGrantAuth()" id="gaSubmitBtn">Record Authorisation →</button>
+        <div id="gaStatus" style="font-size:0.8rem;color:#2E7D32;margin-top:10px;text-align:center;"></div>
+        <div style="margin-top:16px;padding:12px;background:#FFF3E0;border-radius:8px;font-size:0.75rem;color:#E65100;">
+          <strong>⚠ Phone required:</strong> After submitting, this phone needs to be online. Go to <strong>Update Existing Profile</strong> on the steward's own phone and add the topic to their authorised list, OR the steward's app will pick it up automatically on their next login when they have signal.
+        </div>
       </div>
     </div>
 
@@ -4486,18 +4531,29 @@ select.msel {
           <div class="form-group" style="margin-bottom:14px;" id="trainingTypeGroup">
             <label class="form-label">Training Type <span style="color:#e53935;">*</span></label>
             <div id="trainingTypePills" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
-              <button class="weather-pill" onclick="selectTrainingType('Governance & Leadership',this)" style="font-size:0.75rem;padding:6px 10px;">🏛 Governance &amp; Leadership</button>
-              <button class="weather-pill" onclick="selectTrainingType('Financial Literacy',this)" style="font-size:0.75rem;padding:6px 10px;">💰 Financial Literacy</button>
-              <button class="weather-pill" onclick="selectTrainingType('Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;">🌾 Agriculture</button>
-              <button class="weather-pill" onclick="selectTrainingType('Livestock Management',this)" style="font-size:0.75rem;padding:6px 10px;">🐄 Livestock Management</button>
-              <button class="weather-pill" onclick="selectTrainingType('Sewing & Textiles',this)" style="font-size:0.75rem;padding:6px 10px;">🧵 Sewing &amp; Textiles</button>
-              <button class="weather-pill" onclick="selectTrainingType('Food Processing',this)" style="font-size:0.75rem;padding:6px 10px;">🫙 Food Processing</button>
-              <button class="weather-pill" onclick="selectTrainingType('Nursery Management',this)" style="font-size:0.75rem;padding:6px 10px;">🌱 Nursery Management</button>
-              <button class="weather-pill" onclick="selectTrainingType('Conservation & Environment',this)" style="font-size:0.75rem;padding:6px 10px;">🌿 Conservation &amp; Environment</button>
-              <button class="weather-pill" onclick="selectTrainingType('Monitoring & Data Collection',this)" style="font-size:0.75rem;padding:6px 10px;">📊 Monitoring &amp; Data</button>
-              <button class="weather-pill" onclick="selectTrainingType('Health & Nutrition',this)" style="font-size:0.75rem;padding:6px 10px;">🏥 Health &amp; Nutrition</button>
-              <button class="weather-pill" onclick="selectTrainingType('Livelihoods & Trades',this)" style="font-size:0.75rem;padding:6px 10px;">🛠 Livelihoods &amp; Trades</button>
-              <button class="weather-pill" onclick="selectTrainingType('Other',this)" style="font-size:0.75rem;padding:6px 10px;">📚 Other</button>
+              <!-- Rebuilt dynamically for field officers / authorised clan stewards -->
+              <!-- shown as fallback only -->
+              <button class="weather-pill" onclick="selectTrainingType('Awareness',this)" style="font-size:0.75rem;padding:6px 10px;">📢 Awareness</button>
+              <button class="weather-pill" onclick="selectTrainingType('Coffee — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;">☕ Coffee — Agriculture</button>
+              <button class="weather-pill" onclick="selectTrainingType('Coffee — Processing',this)" style="font-size:0.75rem;padding:6px 10px;">☕ Coffee — Processing</button>
+              <button class="weather-pill" onclick="selectTrainingType('Coffee — Sales',this)" style="font-size:0.75rem;padding:6px 10px;">☕ Coffee — Sales</button>
+              <button class="weather-pill" onclick="selectTrainingType('Cocoa — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;">🍫 Cocoa — Agriculture</button>
+              <button class="weather-pill" onclick="selectTrainingType('Cocoa — Processing',this)" style="font-size:0.75rem;padding:6px 10px;">🍫 Cocoa — Processing</button>
+              <button class="weather-pill" onclick="selectTrainingType('Cocoa — Sales',this)" style="font-size:0.75rem;padding:6px 10px;">🍫 Cocoa — Sales</button>
+              <button class="weather-pill" onclick="selectTrainingType('Vanilla — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;">🌿 Vanilla — Agriculture</button>
+              <button class="weather-pill" onclick="selectTrainingType('Vanilla — Processing',this)" style="font-size:0.75rem;padding:6px 10px;">🌿 Vanilla — Processing</button>
+              <button class="weather-pill" onclick="selectTrainingType('Vanilla — Sales',this)" style="font-size:0.75rem;padding:6px 10px;">🌿 Vanilla — Sales</button>
+              <button class="weather-pill" onclick="selectTrainingType('Okari — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;">🌰 Okari — Agriculture</button>
+              <button class="weather-pill" onclick="selectTrainingType('Okari — Processing',this)" style="font-size:0.75rem;padding:6px 10px;">🌰 Okari — Processing</button>
+              <button class="weather-pill" onclick="selectTrainingType('Okari — Sales',this)" style="font-size:0.75rem;padding:6px 10px;">🌰 Okari — Sales</button>
+              <button class="weather-pill" onclick="selectTrainingType('Agroforestry',this)" style="font-size:0.75rem;padding:6px 10px;">🌳 Agroforestry</button>
+              <button class="weather-pill" onclick="selectTrainingType('Composting & Soil Health',this)" style="font-size:0.75rem;padding:6px 10px;">🌱 Composting &amp; Soil Health</button>
+              <button class="weather-pill" onclick="selectTrainingType('Pest & Disease Management',this)" style="font-size:0.75rem;padding:6px 10px;">🐛 Pest &amp; Disease</button>
+              <button class="weather-pill" onclick="selectTrainingType('Beekeeping',this)" style="font-size:0.75rem;padding:6px 10px;">🐝 Beekeeping</button>
+              <button class="weather-pill" onclick="selectTrainingType('Fish Farming (Aquaculture)',this)" style="font-size:0.75rem;padding:6px 10px;">🐟 Fish Farming</button>
+              <button class="weather-pill" onclick="selectTrainingType('Nursery & Seedling Management',this)" style="font-size:0.75rem;padding:6px 10px;">🪴 Nursery Management</button>
+              <button class="weather-pill" onclick="selectTrainingType('Livestock Health & Husbandry',this)" style="font-size:0.75rem;padding:6px 10px;">🐄 Livestock Health</button>
+              <button class="weather-pill" onclick="selectTrainingType('Household Food Security',this)" style="font-size:0.75rem;padding:6px 10px;">🍱 Household Food Security</button>
             </div>
             <input type="hidden" id="trainingType" value="">
           </div>
@@ -4786,7 +4842,8 @@ select.msel {
 /* ── Screen Registry & Stack ── */
 const ALL_SCREENS = [
   'screen-splash','screen-enroll','screen-zone-config','screen-topics-config',
-  'screen-update-profile','screen-fingerprint','screen-reports','screen-dashboard',
+  'screen-grant-auth','screen-update-profile','screen-fingerprint',
+  'screen-reports','screen-dashboard',
   'screen-observations','screen-obs-entry',
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-qabb-setup','screen-qabb-matrix',
@@ -4829,6 +4886,9 @@ function showScreen(id) {
       _editTopics = JSON.parse(JSON.stringify(topics));
       renderTopicsConfigList();
     });
+  }
+  if (id === 'screen-grant-auth') {
+    initGrantAuthScreen();
   }
   if (id === 'screen-update-profile') {
     renderUpdateProfileScreen();
@@ -4974,6 +5034,7 @@ function enrollCheckPasscode() {
       document.getElementById('enrollManageZonesBtn').style.display = 'block';
       document.getElementById('enrollManageTopicsBtn').style.display = 'block';
       document.getElementById('enrollUpdateProfileBtn').style.display = 'block';
+      document.getElementById('enrollGrantAuthBtn').style.display = 'block';
       document.getElementById('enrollPassStatus').textContent = '✓ Coordinator verified. Choose an action.';
       document.getElementById('enrollPassStatus').style.color = '#2E7D32';
       /* Pre-load zones and topics ready for step 2 */
@@ -5176,6 +5237,7 @@ function verifyFp() {
       updateDashHeader(profile);
       setTimeout(function() {
         cacheStewardProfile();
+        syncAuthorisations(profile);  /* fetch any new coordinator-granted authorisations */
         history = [];
         var role = profile.role || 'clan_steward';
         var dest = (role === 'zone_staff' || role === 'mcf_staff')
@@ -6847,11 +6909,14 @@ function cacheStewardProfile() {
       window._cachedStewardId  = records[0].stewardId || 'STE';
       window._cachedProfile    = records[0];
       /* Role-based dashboard tile visibility */
-      var role = records[0].role || 'clan_steward';
-      var trainingTile = document.getElementById('tile-training');
+      var role            = records[0].role || 'clan_steward';
+      var authTopics      = records[0].authorised_topics || [];
+      var trainingTile    = document.getElementById('tile-training');
       if (trainingTile) {
-        /* Training visible to field officers and zone staff; hidden from clan stewards and MCF */
-        var canTrain = (role === 'field_officer' || role === 'zone_staff');
+        /* Training visible to: field officers, zone staff,
+           and clan stewards who have been granted topic authorisations */
+        var canTrain = (role === 'field_officer' || role === 'zone_staff' ||
+                        (role === 'clan_steward' && authTopics.length > 0));
         trainingTile.style.display = canTrain ? '' : 'none';
       }
     }
@@ -6994,18 +7059,36 @@ function zoneConfigSave() {
 
 /* ── Training Topics management ─────────────────────────────────── */
 var DEFAULT_TOPIC_LIST = [
-  {id:'T01', name:'Agroforestry'},
-  {id:'T02', name:'Composting & Soil Health'},
-  {id:'T03', name:'Pest & Disease Management'},
-  {id:'T04', name:'Crop Rotation & Mixed Cropping'},
-  {id:'T05', name:'Water Management & Irrigation'},
-  {id:'T06', name:'Forest Monitoring Techniques'},
-  {id:'T07', name:'Conservation Agriculture'},
-  {id:'T08', name:'Beekeeping'},
-  {id:'T09', name:'Fish Farming (Aquaculture)'},
-  {id:'T10', name:'Nursery & Seedling Management'},
-  {id:'T11', name:'Livestock Health & Husbandry'},
-  {id:'T12', name:'Household Food Security'}
+  /* Awareness — zone staff: automatic; field officers / qualified stewards: assignable */
+  {id:'T00', name:'Awareness'},
+  /* Coffee */
+  {id:'T01', name:'Coffee — Agriculture'},
+  {id:'T02', name:'Coffee — Processing'},
+  {id:'T03', name:'Coffee — Sales'},
+  /* Cocoa */
+  {id:'T04', name:'Cocoa — Agriculture'},
+  {id:'T05', name:'Cocoa — Processing'},
+  {id:'T06', name:'Cocoa — Sales'},
+  /* Vanilla */
+  {id:'T07', name:'Vanilla — Agriculture'},
+  {id:'T08', name:'Vanilla — Processing'},
+  {id:'T09', name:'Vanilla — Sales'},
+  /* Okari */
+  {id:'T10', name:'Okari — Agriculture'},
+  {id:'T11', name:'Okari — Processing'},
+  {id:'T12', name:'Okari — Sales'},
+  /* General agricultural extension */
+  {id:'T13', name:'Agroforestry'},
+  {id:'T14', name:'Composting & Soil Health'},
+  {id:'T15', name:'Pest & Disease Management'},
+  {id:'T16', name:'Crop Rotation & Mixed Cropping'},
+  {id:'T17', name:'Water Management & Irrigation'},
+  {id:'T18', name:'Forest Monitoring Techniques'},
+  {id:'T19', name:'Beekeeping'},
+  {id:'T20', name:'Fish Farming (Aquaculture)'},
+  {id:'T21', name:'Nursery & Seedling Management'},
+  {id:'T22', name:'Livestock Health & Husbandry'},
+  {id:'T23', name:'Household Food Security'}
 ];
 
 function getTopicList(callback) {
@@ -7188,6 +7271,139 @@ function saveUpdatedProfile(profileId) {
       window._cachedProfile = profile;
     });
   });
+}
+
+/* ── Grant Training Authorisation ─────────────────────────────────── */
+function showGrantAuth() { showScreen('screen-grant-auth'); }
+
+function initGrantAuthScreen() {
+  /* Set today as default cert date */
+  var d = document.getElementById('gaCertDate');
+  if (d && !d.value) d.value = new Date().toISOString().split('T')[0];
+  /* Clear status */
+  var s = document.getElementById('gaStatus');
+  if (s) s.textContent = '';
+  /* Populate topic select */
+  getTopicList(function(topics) {
+    var sel = document.getElementById('gaTopicSelect');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— select topic —</option>';
+    topics.forEach(function(t) {
+      var opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.name;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function submitGrantAuth() {
+  var stewId   = (document.getElementById('gaStewId').value  || '').trim().toUpperCase();
+  var topicSel = document.getElementById('gaTopicSelect');
+  var topicId  = topicSel ? topicSel.value : '';
+  var topicName= topicSel && topicSel.selectedIndex > 0
+    ? topicSel.options[topicSel.selectedIndex].text : '';
+  var certDate = document.getElementById('gaCertDate').value;
+  var certOrg  = (document.getElementById('gaCertOrg').value  || '').trim();
+  var certNum  = (document.getElementById('gaCertNum').value  || '').trim();
+  var authBy   = (document.getElementById('gaAuthorisedBy').value || '').trim();
+  var status   = document.getElementById('gaStatus');
+  var btn      = document.getElementById('gaSubmitBtn');
+
+  if (!stewId)   { toast('Please enter the Steward ID'); return; }
+  if (!topicId)  { toast('Please select a training topic'); return; }
+  if (!certDate) { toast('Please enter the certification date'); return; }
+  if (!certOrg)  { toast('Please enter the certifying organisation'); return; }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  var record = {
+    stewardId:       stewId,
+    topic_id:        topicId,
+    topic_name:      topicName,
+    cert_date:       certDate,
+    certifying_body: certOrg,
+    cert_number:     certNum,
+    authorised_by:   authBy,
+    authorised_at:   new Date().toISOString()
+  };
+
+  /* POST to Apps Script */
+  if (UPLOAD_ENDPOINT) {
+    fetch(UPLOAD_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ _action: 'grant_authorisation', _secret: UPLOAD_SECRET, record: record })
+    }).then(function(r) { return r.json(); })
+      .then(function(d) {
+        btn.disabled = false; btn.textContent = 'Record Authorisation →';
+        if (d.status === 'ok') {
+          status.textContent = '✓ Authorisation recorded in Drive for ' + stewId + ' — ' + topicName;
+          status.style.color = '#1B5E20';
+          /* Clear form */
+          ['gaStewId','gaCertDate','gaCertOrg','gaCertNum','gaAuthorisedBy'].forEach(function(id) {
+            var el = document.getElementById(id); if (el) el.value = '';
+          });
+          var sel = document.getElementById('gaTopicSelect');
+          if (sel) sel.selectedIndex = 0;
+        } else {
+          status.textContent = '✗ Drive error: ' + (d.message || 'unknown');
+          status.style.color = '#B71C1C';
+        }
+      }).catch(function() {
+        btn.disabled = false; btn.textContent = 'Record Authorisation →';
+        status.textContent = '✗ No network. Connect to internet and try again.';
+        status.style.color = '#B71C1C';
+      });
+  } else {
+    btn.disabled = false; btn.textContent = 'Record Authorisation →';
+    status.textContent = '✗ Upload endpoint not configured.';
+    status.style.color = '#B71C1C';
+  }
+}
+
+/* ── Fetch authorisations from Drive on login ────────────────────── */
+/* Called after fingerprint verification when online.
+   Checks if this steward has been granted any new topic authorisations
+   by the coordinator since their last login, and updates local profile. */
+function syncAuthorisations(profile) {
+  if (!UPLOAD_ENDPOINT || !navigator.onLine || !profile) return;
+  var stewId = profile.stewardId || '';
+  if (!stewId) return;
+
+  fetch(UPLOAD_ENDPOINT + '?action=authorisations&stewardId=' + encodeURIComponent(stewId))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.status !== 'ok' || !d.authorisations) return;
+      var granted = d.authorisations.map(function(a) { return a.topic_id; });
+      if (granted.length === 0) return;
+
+      /* Merge with existing authorised_topics */
+      var existing = profile.authorised_topics || [];
+      var updated  = existing.slice();
+      var changed  = false;
+      granted.forEach(function(tid) {
+        if (updated.indexOf(tid) === -1) { updated.push(tid); changed = true; }
+      });
+      if (!changed) return;
+
+      /* Save updated profile */
+      profile.authorised_topics = updated;
+      saveRecord('auth', profile, function() {
+        window._cachedProfile = profile;
+        /* Re-run tile visibility */
+        var role   = profile.role || 'clan_steward';
+        var tile   = document.getElementById('tile-training');
+        var canTrain = (role === 'field_officer' || role === 'zone_staff' ||
+                        (role === 'clan_steward' && updated.length > 0));
+        if (tile) tile.style.display = canTrain ? '' : 'none';
+        /* Notify user if they now have new training access */
+        var newTopics = granted.filter(function(tid) { return existing.indexOf(tid) === -1; });
+        if (newTopics.length > 0) {
+          toast('New training topic(s) unlocked — see Training Records');
+        }
+      });
+    }).catch(function() { /* network errors are silent — not critical path */ });
 }
 
 /* Override showScreen to initialise zone-config data on entry */
@@ -8262,8 +8478,13 @@ function initTrainingRecord() {
   var profile = window._cachedProfile || {};
   var role    = profile.role || 'clan_steward';
 
-  if (role === 'clan_steward' || role === 'mcf_staff') {
-    toast('Training delivery is not available for your role.');
+  var authorisedTopics = profile.authorised_topics || [];
+  var isMcf = (role === 'mcf_staff');
+  var isQualifiedSteward = (role === 'clan_steward' && authorisedTopics.length > 0);
+  var canTrain = (role === 'field_officer' || role === 'zone_staff' || isQualifiedSteward);
+
+  if (isMcf || !canTrain) {
+    toast('Training delivery not authorised for this account.');
     goBack();
     return;
   }
@@ -8304,8 +8525,8 @@ function initTrainingRecord() {
     if (bar) bar.textContent = 'Record Awareness Session';
     var sub = document.querySelector('#screen-training-record .bar-subtitle');
     if (sub) sub.textContent = 'Attendance + photo required';
-  } else if (role === 'field_officer') {
-    /* ─ Field officer mode: filtered type pills ─ */
+  } else if (role === 'field_officer' || isQualifiedSteward) {
+    /* ─ Filtered mode: field officer or qualified clan steward ─ */
     _trainingMode = 'filtered';
     _setVisible('trainingAwarenessBanner', false);
     _setVisible('trainingTypeGroup', true);
@@ -8322,7 +8543,7 @@ function initTrainingRecord() {
     var sub = document.querySelector('#screen-training-record .bar-subtitle');
     if (sub) sub.textContent = 'Authorised topics only';
     /* Rebuild pills from authorised topics */
-    _buildAuthorisedPills(profile.authorised_topics || []);
+    _buildAuthorisedPills(authorisedTopics);
   }
 
   /* Reset all pills */

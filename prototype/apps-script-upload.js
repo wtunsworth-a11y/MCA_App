@@ -87,12 +87,17 @@ function saveZoneConfig(zones) {
 
 /* ─── Training topic configuration ─────────────────────────────────── */
 var DEFAULT_TOPICS = [
-  {id:'T01', name:'Agroforestry'}, {id:'T02', name:'Composting & Soil Health'},
-  {id:'T03', name:'Pest & Disease Management'}, {id:'T04', name:'Crop Rotation & Mixed Cropping'},
-  {id:'T05', name:'Water Management & Irrigation'}, {id:'T06', name:'Forest Monitoring Techniques'},
-  {id:'T07', name:'Conservation Agriculture'}, {id:'T08', name:'Beekeeping'},
-  {id:'T09', name:'Fish Farming (Aquaculture)'}, {id:'T10', name:'Nursery & Seedling Management'},
-  {id:'T11', name:'Livestock Health & Husbandry'}, {id:'T12', name:'Household Food Security'}
+  {id:'T00', name:'Awareness'},
+  {id:'T01', name:'Coffee — Agriculture'}, {id:'T02', name:'Coffee — Processing'}, {id:'T03', name:'Coffee — Sales'},
+  {id:'T04', name:'Cocoa — Agriculture'},  {id:'T05', name:'Cocoa — Processing'},  {id:'T06', name:'Cocoa — Sales'},
+  {id:'T07', name:'Vanilla — Agriculture'},{id:'T08', name:'Vanilla — Processing'},{id:'T09', name:'Vanilla — Sales'},
+  {id:'T10', name:'Okari — Agriculture'},  {id:'T11', name:'Okari — Processing'},  {id:'T12', name:'Okari — Sales'},
+  {id:'T13', name:'Agroforestry'}, {id:'T14', name:'Composting & Soil Health'},
+  {id:'T15', name:'Pest & Disease Management'}, {id:'T16', name:'Crop Rotation & Mixed Cropping'},
+  {id:'T17', name:'Water Management & Irrigation'}, {id:'T18', name:'Forest Monitoring Techniques'},
+  {id:'T19', name:'Beekeeping'}, {id:'T20', name:'Fish Farming (Aquaculture)'},
+  {id:'T21', name:'Nursery & Seedling Management'}, {id:'T22', name:'Livestock Health & Husbandry'},
+  {id:'T23', name:'Household Food Security'}
 ];
 
 function getTopicList() {
@@ -117,6 +122,66 @@ function saveTopicConfig(topics) {
   var json   = JSON.stringify(topics, null, 2);
   if (files.hasNext()) { files.next().setContent(json); }
   else { folder.createFile('_topics.json', json, MimeType.PLAIN_TEXT); }
+}
+
+/* ─── Training authorisation records ───────────────────────────────── */
+/*
+ * _authorisations.json in Drive: { "MCA-007": [ {topic_id, topic_name, cert_date, ...}, ... ] }
+ * One file, keyed by stewardId. Coordinator appends records; app reads on login.
+ */
+function loadAuthorisationsFile() {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_authorisations.json');
+  if (files.hasNext()) {
+    try { return JSON.parse(files.next().getBlob().getDataAsString()); } catch(e) { return {}; }
+  }
+  return {};
+}
+
+function saveAuthorisationsFile(data) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_authorisations.json');
+  var json   = JSON.stringify(data, null, 2);
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_authorisations.json', json, MimeType.PLAIN_TEXT); }
+}
+
+function grantAuthorisation(record) {
+  if (!record || !record.stewardId || !record.topic_id) {
+    return { status: 'error', message: 'Missing stewardId or topic_id' };
+  }
+  try {
+    var data  = loadAuthorisationsFile();
+    var sid   = record.stewardId;
+    if (!data[sid]) data[sid] = [];
+    /* Avoid duplicate entries for the same topic */
+    var alreadyGranted = data[sid].some(function(r) { return r.topic_id === record.topic_id; });
+    if (!alreadyGranted) { data[sid].push(record); }
+    saveAuthorisationsFile(data);
+    return { status: 'ok', message: 'Authorisation recorded', stewardId: sid,
+             topic: record.topic_name, duplicate: alreadyGranted };
+  } catch(err) {
+    return { status: 'error', message: err.toString() };
+  }
+}
+
+function getAuthorisations(stewardId) {
+  if (!stewardId) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: 'Missing stewardId' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  try {
+    var data = loadAuthorisationsFile();
+    var recs = data[stewardId] || [];
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok', stewardId: stewardId, authorisations: recs }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 /* ─── Date helpers ──────────────────────────────────────────────────── */
@@ -448,6 +513,13 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    if (body._action === 'grant_authorisation') {
+      var result = grantAuthorisation(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     /* Normal steward data upload */
     var folder = getDataFolder();
 
@@ -494,6 +566,11 @@ function doGet(e) {
 
   if (action === 'zones')  { return getZoneList();  }
   if (action === 'topics') { return getTopicList(); }
+
+  if (action === 'authorisations') {
+    var stewId = (e.parameter && e.parameter.stewardId) || '';
+    return getAuthorisations(stewId);
+  }
 
   if (action === 'zone_report') {
     var zoneId = e.parameter.zone   || '';

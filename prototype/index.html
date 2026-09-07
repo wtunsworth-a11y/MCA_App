@@ -1213,6 +1213,14 @@ select.msel {
 .eu-logo-block .eu-logo-caption {
   font-size: 0.71rem; color: #666; text-align: center; line-height: 1.4;
 }
+/* Trainer certification */
+.cert-badge { display:inline-flex; align-items:center; gap:4px; background:#E8F5E9; border:1px solid #A5D6A7; border-radius:20px; padding:4px 10px; font-size:0.75rem; color:#1B5E20; font-weight:600; margin:3px 2px; }
+.cert-badge.pending { background:#FFF8E1; border-color:#FFE082; color:#F57F17; }
+.cert-topic-row { display:flex; align-items:flex-start; gap:8px; padding:7px 4px; border-bottom:1px solid #f0f0f0; cursor:pointer; }
+.cert-topic-row:last-child { border-bottom:none; }
+.cert-topic-row input[type=checkbox] { width:18px; height:18px; accent-color:#1B5E20; flex-shrink:0; margin-top:1px; }
+.cert-topic-row span { font-size:0.82rem; line-height:1.4; }
+.cert-photo-label { display:block; width:100%; padding:10px 14px; border:2px dashed #A5D6A7; border-radius:8px; background:#F9FBF9; color:#2E7D32; font-size:0.82rem; cursor:pointer; text-align:center; }
 
 /* ── Logo placeholders in top bar ── */
 .top-logos { display:flex; gap:3px; flex-shrink:0; }
@@ -1701,7 +1709,7 @@ select.msel {
         <div><div class="bar-title">Manage Training Topics</div><div class="bar-sub">Coordinator only</div></div>
       </div>
       <div style="padding:16px;">
-        <div style="font-size:0.8rem;color:#555;margin-bottom:14px;">These are the topics Field Officers can be authorised to deliver. You assign specific topics to each Field Officer at enrollment.</div>
+        <div style="font-size:0.8rem;color:#555;margin-bottom:8px;">These are the topics Field Officers can be authorised to deliver. Tick <strong>Cert</strong> on a topic to allow trainers to be certified in it via the Grant Training Authorisation flow.</div>
         <div id="topicsConfigList" style="margin-bottom:12px;"></div>
         <button class="btn-outline" onclick="topicsConfigAdd()" style="width:100%;margin-bottom:16px;border-color:#7B1FA2;color:#7B1FA2;">+ Add Topic</button>
         <button class="enroll-next-btn" onclick="topicsConfigSave()" id="topicsConfigSaveBtn" style="background:#5C3D7A;">Save Changes</button>
@@ -1726,8 +1734,14 @@ select.msel {
           <input type="text" id="gaStewId" class="form-input" placeholder="e.g. MCA-007" autocomplete="off" style="text-transform:uppercase;">
         </div>
         <div class="form-group">
-          <label class="form-label">Training Topic Authorised <span style="color:#B71C1C;">*</span></label>
-          <select id="gaTopicSelect" class="form-input"><option value="">— loading topics —</option></select>
+          <label class="form-label">Topics Certified <span style="color:#B71C1C;">*</span></label>
+          <div id="gaTopicsList" style="background:#f9f9f9;border:1px solid #d0d0d0;border-radius:8px;padding:6px 10px;max-height:180px;overflow-y:auto;">
+            <div style="font-size:0.78rem;color:#888;padding:4px;">Loading topics…</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Propose Additional Topic <span style="font-size:0.72rem;font-weight:400;color:#888;">(not on list — admin review required)</span></label>
+          <input type="text" id="gaNewTopicPropose" class="form-input" placeholder="Describe the topic briefly">
         </div>
         <div class="form-group">
           <label class="form-label">Certification Date <span style="color:#B71C1C;">*</span></label>
@@ -1742,13 +1756,19 @@ select.msel {
           <input type="text" id="gaCertNum" class="form-input" placeholder="e.g. CERT-2026-007 (if none, write 'none')">
         </div>
         <div class="form-group">
+          <label class="form-label">Certificate Photo <span style="font-size:0.72rem;font-weight:400;color:#888;">(optional but recommended)</span></label>
+          <label class="cert-photo-label" for="gaCertPhoto">📷 Tap to capture or upload photo</label>
+          <input type="file" id="gaCertPhoto" accept="image/*" capture="environment" style="display:none;" onchange="gaCertPhotoPreview(this)">
+          <div id="gaCertPhotoPreview" style="margin-top:6px;display:none;font-size:0.78rem;color:#2E7D32;"></div>
+        </div>
+        <div class="form-group">
           <label class="form-label">Authorised By</label>
           <input type="text" id="gaAuthorisedBy" class="form-input" placeholder="Your name / initials">
         </div>
         <button class="enroll-next-btn" onclick="submitGrantAuth()" id="gaSubmitBtn">Record Authorisation →</button>
         <div id="gaStatus" style="font-size:0.8rem;color:#2E7D32;margin-top:10px;text-align:center;"></div>
         <div style="margin-top:16px;padding:12px;background:#FFF3E0;border-radius:8px;font-size:0.75rem;color:#E65100;">
-          <strong>⚠ Phone required:</strong> After submitting, this phone needs to be online. Go to <strong>Update Existing Profile</strong> on the steward's own phone and add the topic to their authorised list, OR the steward's app will pick it up automatically on their next login when they have signal.
+          <strong>⚠ Sync note:</strong> The record is saved locally immediately. The steward's app will show their certification badge on their next login when they have signal, or when you sync from their phone.
         </div>
       </div>
     </div>
@@ -3205,6 +3225,11 @@ select.msel {
             <div class="detail-row"><span class="dl">Steward ID</span><span class="dv">MCA-7B-042</span></div>
           </div>
           <button class="btn-outline" style="width:100%;margin:10px 0 4px;" onclick="nav('screen-timesheet')">🧾 My Timesheet</button>
+          <!-- Trainer certifications — shown only when certs exist for this steward -->
+          <div id="trainerCertSection" style="display:none;margin-bottom:4px;">
+            <div class="section-label" style="padding-left:0;margin-bottom:6px;">Training Certifications</div>
+            <div id="trainerCertBadges" style="margin-bottom:4px;"></div>
+          </div>
           <div class="section-label" style="padding-left:0;">About This App</div>
           <div class="eu-logo-block">
             <img src="logos/Logo_EU_v1.png" alt="Co-funded by the European Union">
@@ -5042,6 +5067,9 @@ function showScreen(id) {
   }
   if (id === 'screen-update-profile') {
     renderUpdateProfileScreen();
+  }
+  if (id === 'screen-profile') {
+    loadProfileScreen();
   }
   if (id === 'screen-reports' && _reportProfile) {
     loadCachedReport(_reportProfile);
@@ -6998,8 +7026,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 5;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings'];
+var DB_VERSION = 6;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -7304,6 +7332,11 @@ function renderTopicsConfigList() {
       '<span class="zone-id-badge" style="background:#5C3D7A;">' + (t.id || 'T?') + '</span>' +
       '<input type="text" value="' + t.name.replace(/"/g,'&quot;') + '" ' +
         'onchange="_editTopics[' + i + '].name=this.value" placeholder="Topic name">' +
+      '<label title="Certifiable — trainers can receive a certification for this topic" ' +
+        'style="display:flex;align-items:center;gap:3px;font-size:0.65rem;color:#1B5E20;flex-shrink:0;cursor:pointer;">' +
+        '<input type="checkbox" ' + (t.certifiable ? 'checked' : '') + ' ' +
+          'onchange="_editTopics[' + i + '].certifiable=this.checked" ' +
+          'style="width:14px;height:14px;accent-color:#1B5E20;"> Cert</label>' +
       '<button class="zone-del-btn" onclick="topicsConfigDelete(' + i + ')">🗑</button>';
     list.appendChild(row);
   });
@@ -7312,7 +7345,7 @@ function renderTopicsConfigList() {
 function topicsConfigAdd() {
   var nextNum = _editTopics.length + 1;
   var newId   = 'T' + String(nextNum).padStart(2,'0');
-  _editTopics.push({id: newId, name: 'Topic ' + nextNum});
+  _editTopics.push({id: newId, name: 'Topic ' + nextNum, certifiable: false});
   renderTopicsConfigList();
 }
 
@@ -7323,7 +7356,7 @@ function topicsConfigDelete(i) {
 }
 
 function topicsConfigSave() {
-  var inputs = document.querySelectorAll('#topicsConfigList .zone-row input');
+  var inputs = document.querySelectorAll('#topicsConfigList .zone-row input[type=text]');
   inputs.forEach(function(inp, i) {
     if (_editTopics[i]) _editTopics[i].name = inp.value.trim() || _editTopics[i].name;
   });
@@ -7451,82 +7484,174 @@ function initGrantAuthScreen() {
   /* Clear status */
   var s = document.getElementById('gaStatus');
   if (s) s.textContent = '';
-  /* Populate topic select */
+  /* Reset photo state */
+  window._gaCertPhotoB64 = null;
+  var photoInput = document.getElementById('gaCertPhoto');
+  if (photoInput) photoInput.value = '';
+  var preview = document.getElementById('gaCertPhotoPreview');
+  if (preview) { preview.style.display = 'none'; preview.textContent = ''; }
+  /* Render certifiable topics as checkboxes */
   getTopicList(function(topics) {
-    var sel = document.getElementById('gaTopicSelect');
-    if (!sel) return;
-    sel.innerHTML = '<option value="">— select topic —</option>';
-    topics.forEach(function(t) {
-      var opt = document.createElement('option');
-      opt.value = t.id;
-      opt.textContent = t.name;
-      sel.appendChild(opt);
+    var container = document.getElementById('gaTopicsList');
+    if (!container) return;
+    var certifiable = topics.filter(function(t) { return t.certifiable; });
+    if (certifiable.length === 0) {
+      container.innerHTML = '<div style="font-size:0.78rem;color:#888;padding:4px 0;">No certifiable topics configured yet. Open Manage Training Topics and tick Cert on the relevant topics first.</div>';
+      return;
+    }
+    container.innerHTML = '';
+    certifiable.forEach(function(t) {
+      var lbl = document.createElement('label');
+      lbl.className = 'cert-topic-row';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = t.id;
+      cb.setAttribute('data-name', t.name);
+      var sp = document.createElement('span');
+      sp.textContent = t.id + ' — ' + t.name;
+      lbl.appendChild(cb);
+      lbl.appendChild(sp);
+      container.appendChild(lbl);
     });
   });
 }
 
+function gaCertPhotoPreview(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var MAX = 1200;
+      var scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      var b64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+      window._gaCertPhotoB64 = b64;
+      var preview = document.getElementById('gaCertPhotoPreview');
+      if (preview) {
+        preview.style.display = 'block';
+        preview.textContent = '📎 ' + file.name + ' (' + Math.round(b64.length * 0.75 / 1024) + ' KB compressed)';
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearGrantAuthForm() {
+  ['gaStewId','gaCertDate','gaCertOrg','gaCertNum','gaAuthorisedBy','gaNewTopicPropose'].forEach(function(fid) {
+    var el = document.getElementById(fid); if (el) el.value = '';
+  });
+  var container = document.getElementById('gaTopicsList');
+  if (container) container.querySelectorAll('input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
+  var photo = document.getElementById('gaCertPhoto');
+  if (photo) photo.value = '';
+  window._gaCertPhotoB64 = null;
+  var preview = document.getElementById('gaCertPhotoPreview');
+  if (preview) { preview.style.display = 'none'; preview.textContent = ''; }
+}
+
 function submitGrantAuth() {
   var stewId   = (document.getElementById('gaStewId').value  || '').trim().toUpperCase();
-  var topicSel = document.getElementById('gaTopicSelect');
-  var topicId  = topicSel ? topicSel.value : '';
-  var topicName= topicSel && topicSel.selectedIndex > 0
-    ? topicSel.options[topicSel.selectedIndex].text : '';
   var certDate = document.getElementById('gaCertDate').value;
   var certOrg  = (document.getElementById('gaCertOrg').value  || '').trim();
   var certNum  = (document.getElementById('gaCertNum').value  || '').trim();
   var authBy   = (document.getElementById('gaAuthorisedBy').value || '').trim();
+  var proposed = (document.getElementById('gaNewTopicPropose').value || '').trim();
   var status   = document.getElementById('gaStatus');
   var btn      = document.getElementById('gaSubmitBtn');
 
-  if (!stewId)   { toast('Please enter the Steward ID'); return; }
-  if (!topicId)  { toast('Please select a training topic'); return; }
+  /* Collect checked certifiable topics */
+  var checkedBoxes = document.querySelectorAll('#gaTopicsList input[type=checkbox]:checked');
+  var selectedTopics = [];
+  checkedBoxes.forEach(function(cb) {
+    selectedTopics.push({ id: cb.value, name: cb.getAttribute('data-name') || cb.value });
+  });
+
+  if (!stewId)   { toast('Please enter the Steward / Officer ID'); return; }
+  if (selectedTopics.length === 0 && !proposed) { toast('Select at least one topic or propose a new one'); return; }
   if (!certDate) { toast('Please enter the certification date'); return; }
   if (!certOrg)  { toast('Please enter the certifying organisation'); return; }
 
   btn.disabled = true; btn.textContent = 'Saving…';
 
-  var record = {
-    stewardId:       stewId,
-    topic_id:        topicId,
-    topic_name:      topicName,
-    cert_date:       certDate,
-    certifying_body: certOrg,
-    cert_number:     certNum,
-    authorised_by:   authBy,
-    authorised_at:   new Date().toISOString()
-  };
+  var now = new Date().toISOString();
+  var records = [];
+
+  selectedTopics.forEach(function(t) {
+    records.push({
+      id:              'cert_' + stewId + '_' + t.id + '_' + now.slice(0,10).replace(/-/g,''),
+      stewardId:       stewId,
+      topic_id:        t.id,
+      topic_name:      t.name,
+      cert_date:       certDate,
+      certifying_body: certOrg,
+      cert_number:     certNum,
+      authorised_by:   authBy,
+      authorised_at:   now,
+      status:          'active',
+      has_photo:       !!window._gaCertPhotoB64
+    });
+  });
+
+  if (proposed) {
+    records.push({
+      id:              'cert_' + stewId + '_PROP_' + now.replace(/[^0-9]/g,'').slice(0,14),
+      stewardId:       stewId,
+      topic_id:        'PROPOSED',
+      topic_name:      proposed,
+      cert_date:       certDate,
+      certifying_body: certOrg,
+      cert_number:     certNum,
+      authorised_by:   authBy,
+      authorised_at:   now,
+      status:          'pending',
+      has_photo:       !!window._gaCertPhotoB64
+    });
+  }
+
+  /* Save every record to local trainerCerts store first */
+  records.forEach(function(rec) { saveRecord('trainerCerts', rec, function(){}); });
 
   /* POST to Apps Script */
+  var payload = {
+    _action:             'certify_trainer',
+    _secret:             UPLOAD_SECRET,
+    _coordinator_secret: window._coordSecret,
+    stewardId:           stewId,
+    records:             records,
+    cert_photo_b64:      window._gaCertPhotoB64 || null
+  };
+
   if (UPLOAD_ENDPOINT) {
     fetch(UPLOAD_ENDPOINT, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ _action: 'grant_authorisation', _secret: UPLOAD_SECRET, _coordinator_secret: window._coordSecret, record: record })
+      body: JSON.stringify(payload)
     }).then(function(r) { return r.json(); })
       .then(function(d) {
         btn.disabled = false; btn.textContent = 'Record Authorisation →';
         if (d.status === 'ok') {
-          status.textContent = '✓ Authorisation recorded in Drive for ' + stewId + ' — ' + topicName;
+          status.textContent = '✓ ' + records.length + ' certification(s) saved for ' + stewId;
           status.style.color = '#1B5E20';
-          /* Clear form */
-          ['gaStewId','gaCertDate','gaCertOrg','gaCertNum','gaAuthorisedBy'].forEach(function(id) {
-            var el = document.getElementById(id); if (el) el.value = '';
-          });
-          var sel = document.getElementById('gaTopicSelect');
-          if (sel) sel.selectedIndex = 0;
+          clearGrantAuthForm();
         } else {
-          status.textContent = '✗ Drive error: ' + (d.message || 'unknown');
-          status.style.color = '#B71C1C';
+          status.textContent = '⚠ Saved locally. Drive sync: ' + (d.message || 'failed');
+          status.style.color = '#E65100';
         }
       }).catch(function() {
         btn.disabled = false; btn.textContent = 'Record Authorisation →';
-        status.textContent = '✗ No network. Connect to internet and try again.';
-        status.style.color = '#B71C1C';
+        status.textContent = '⚠ Saved locally — will sync when online.';
+        status.style.color = '#E65100';
       });
   } else {
     btn.disabled = false; btn.textContent = 'Record Authorisation →';
-    status.textContent = '✗ Upload endpoint not configured.';
-    status.style.color = '#B71C1C';
+    status.textContent = '✓ Saved locally (' + records.length + ' record' + (records.length !== 1 ? 's' : '') + ').';
+    status.style.color = '#2E7D32';
   }
 }
 
@@ -7572,6 +7697,81 @@ function syncAuthorisations(profile) {
         }
       });
     }).catch(function() { /* network errors are silent — not critical path */ });
+
+  /* Also sync trainer certifications granted by coordinator */
+  fetch(UPLOAD_ENDPOINT + '?action=trainer_certs&stewardId=' + encodeURIComponent(stewId))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.status !== 'ok' || !d.certs || d.certs.length === 0) return;
+      /* Merge remote certs into local trainerCerts store */
+      getAllRecords('trainerCerts', function(local) {
+        var localIds = (local || []).map(function(c) { return c.id; });
+        var newCerts = 0;
+        d.certs.forEach(function(cert) {
+          if (localIds.indexOf(cert.id) === -1) {
+            saveRecord('trainerCerts', cert, function(){});
+            newCerts++;
+          }
+        });
+        if (newCerts > 0) {
+          toast('🎓 ' + newCerts + ' trainer certification(s) synced');
+        }
+      });
+    }).catch(function() { /* silent */ });
+}
+
+/* ── Load Profile Screen ────────────────────────────────────────── */
+function loadProfileScreen() {
+  getAllRecords('auth', function(authRecs) {
+    var profile = authRecs ? authRecs.filter(function(r) { return r.id === 1 || r.id === 'profile'; })[0] : null;
+    if (profile) {
+      /* Update header with real name/role */
+      var avatar = document.querySelector('#screen-profile .avatar');
+      if (avatar) {
+        var initials = (profile.name || 'XX').split(' ').map(function(w){ return w[0] || ''; }).join('').slice(0,2).toUpperCase();
+        avatar.textContent = initials;
+      }
+      var nameEl = document.querySelector('#screen-profile .profile-name');
+      if (nameEl) nameEl.textContent = profile.name || '';
+      var roleEl = document.querySelector('#screen-profile .role-badge');
+      if (roleEl) roleEl.textContent = ({
+        'clan_steward': 'Clan Steward',
+        'field_officer': 'Field Officer',
+        'zone_staff': 'Zone Staff',
+        'mcf_staff': 'MCF Staff'
+      })[profile.role] || profile.role || 'Clan Steward';
+      /* Detail rows */
+      var detailDiv = document.querySelector('#screen-profile .card');
+      if (detailDiv) {
+        detailDiv.innerHTML =
+          '<div class="detail-row"><span class="dl">Name</span><span class="dv">' + (profile.name || '—') + '</span></div>' +
+          '<div class="detail-row"><span class="dl">ID</span><span class="dv">' + (profile.stewardId || '—') + '</span></div>' +
+          '<div class="detail-row"><span class="dl">Clan</span><span class="dv">' + (profile.clan || '—') + '</span></div>' +
+          '<div class="detail-row"><span class="dl">Zone</span><span class="dv">' + (profile.zone || '—') + '</span></div>' +
+          '<div class="detail-row"><span class="dl">Enrolled</span><span class="dv">' + (profile.enrolled ? profile.enrolled.slice(0,10) : '—') + '</span></div>';
+      }
+
+      /* Trainer certifications section */
+      getAllRecords('trainerCerts', function(certs) {
+        var section = document.getElementById('trainerCertSection');
+        var badges  = document.getElementById('trainerCertBadges');
+        if (!section || !badges) return;
+        var myId = profile.stewardId || '';
+        var myCerts = (certs || []).filter(function(c) { return c.stewardId === myId; });
+        if (myCerts.length === 0) { section.style.display = 'none'; return; }
+        section.style.display = 'block';
+        badges.innerHTML = '';
+        myCerts.forEach(function(cert) {
+          var isPending = cert.status === 'pending';
+          var span = document.createElement('span');
+          span.className = 'cert-badge' + (isPending ? ' pending' : '');
+          span.innerHTML = (isPending ? '⏳ ' : '🎓 ') + cert.topic_name + (isPending ? ' <em style="font-weight:400;">(pending admin review)</em>' : '');
+          span.title = (cert.certifying_body || '') + (cert.cert_date ? ' · ' + cert.cert_date : '');
+          badges.appendChild(span);
+        });
+      });
+    }
+  });
 }
 
 /* Override showScreen to initialise zone-config data on entry */

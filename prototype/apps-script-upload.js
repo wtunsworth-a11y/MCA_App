@@ -210,6 +210,87 @@ function getAuthorisations(stewardId) {
   }
 }
 
+/* ─── Trainer Certification ─────────────────────────────────────────── */
+/*
+ * Trainer certs are stored in a single JSON file _trainer_certs.json in the
+ * data folder. Structure: { "<stewardId>": [ {cert record}, ... ], ... }
+ *
+ * If a cert_photo_b64 is provided, the image is saved as a JPEG in the
+ * steward's sub-folder so there is a permanent record on Drive.
+ */
+function loadTrainerCertsFile() {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_trainer_certs.json');
+  if (files.hasNext()) {
+    try { return JSON.parse(files.next().getBlob().getDataAsString()); } catch(e) { return {}; }
+  }
+  return {};
+}
+
+function saveTrainerCertsFile(data) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_trainer_certs.json');
+  var json   = JSON.stringify(data, null, 2);
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_trainer_certs.json', json, MimeType.PLAIN_TEXT); }
+}
+
+function certifyTrainer(body) {
+  if (!body || !body.stewardId || !body.records || body.records.length === 0) {
+    return { status: 'error', message: 'Missing stewardId or records' };
+  }
+  try {
+    var data  = loadTrainerCertsFile();
+    var sid   = body.stewardId;
+    if (!data[sid]) data[sid] = [];
+
+    var added = 0;
+    body.records.forEach(function(cert) {
+      var duplicate = data[sid].some(function(r) {
+        return r.topic_id === cert.topic_id && r.cert_date === cert.cert_date;
+      });
+      if (!duplicate) { data[sid].push(cert); added++; }
+    });
+
+    saveTrainerCertsFile(data);
+
+    /* Optionally save certificate photo */
+    if (body.cert_photo_b64) {
+      try {
+        var folder  = getDataFolder();
+        var imgName = sid + '_cert_' + new Date().toISOString().slice(0,10) + '.jpg';
+        var blob    = Utilities.newBlob(Utilities.base64Decode(body.cert_photo_b64), 'image/jpeg', imgName);
+        folder.createFile(blob);
+      } catch(imgErr) {
+        Logger.log('Photo save failed (non-fatal): ' + imgErr);
+      }
+    }
+
+    return { status: 'ok', stewardId: sid, added: added, total: data[sid].length };
+  } catch(err) {
+    return { status: 'error', message: err.toString() };
+  }
+}
+
+function getTrainerCerts(stewardId) {
+  if (!stewardId) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: 'Missing stewardId' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  try {
+    var data  = loadTrainerCertsFile();
+    var certs = data[stewardId] || [];
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok', stewardId: stewardId, certs: certs }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
 /* ─── Date helpers ──────────────────────────────────────────────────── */
 function cutoffDate(days) {
   var d = new Date();
@@ -527,7 +608,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -554,6 +635,13 @@ function doPost(e) {
 
     if (body._action === 'grant_authorisation') {
       var result = grantAuthorisation(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (body._action === 'certify_trainer') {
+      var result = certifyTrainer(body);
       return ContentService
         .createTextOutput(JSON.stringify(result))
         .setMimeType(ContentService.MimeType.JSON);
@@ -611,6 +699,11 @@ function doGet(e) {
     return getAuthorisations(stewId);
   }
 
+  if (action === 'trainer_certs') {
+    var stewId = (e.parameter && e.parameter.stewardId) || '';
+    return getTrainerCerts(stewId);
+  }
+
   if (action === 'zone_report') {
     var zoneId = e.parameter.zone   || '';
     var period = e.parameter.period || 'weekly';
@@ -642,7 +735,7 @@ function doGet(e) {
 
   /* Ping / preflight */
   return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ready', app: 'MCA Steward Upload v2' }))
+    .createTextOutput(JSON.stringify({ status: 'ready', app: 'MCA Steward Upload v3' }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 

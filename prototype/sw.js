@@ -8,13 +8,22 @@
  *
  * Bump CACHE_NAME on a deploy you want to force a clean re-cache.
  */
-const CACHE_NAME = 'mca-steward-v4';
+const CACHE_NAME = 'mca-steward-v5';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  /* Partner logos — cached for offline access */
+  './logos/Logo_Gov_PNG.png',
+  './logos/Logo_MCF.png',
+  './logos/Logo_Oro_Province.png',
+  './logos/Logo_EU_v1.png',
+  './logos/Logo_EU_v2.png',
+  './logos/Logo_EU_FCCB.png',
+  './logos/CIFOR-ICRAF-logo.png',
+  './logos/CIFOR-ICRAF-white-logo.png',
 ];
 
 self.addEventListener('install', (e) => {

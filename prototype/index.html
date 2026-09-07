@@ -1178,6 +1178,42 @@ select.msel {
 .ack-logo-ph { width:52px; height:52px; border-radius:8px; background:#e8f5e9; display:flex; align-items:center; justify-content:center; font-size:0.58rem; font-weight:700; color:#1B5E20; text-align:center; line-height:1.3; margin-bottom:6px; }
 .ack-role { font-size:0.68rem; color:#888; }
 
+/* ── Real partner logo bars ── */
+.partner-logo-bar {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 10px 14px; padding: 10px 8px 6px;
+  border-top: 1px solid rgba(0,0,0,0.09);
+}
+.partner-logo-bar.dark { border-top-color: rgba(255,255,255,0.22); }
+.partner-logo-bar img { height: 36px; width: auto; object-fit: contain; flex-shrink: 0; }
+/* Full-width acknowledgement logo grid (2 col) */
+.ack-logos-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
+}
+.ack-logos-card {
+  background: #fff; border: 1.5px solid #e8e8e8; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px 8px; min-height: 72px;
+}
+.ack-logos-card img { max-height: 48px; max-width: 100%; object-fit: contain; }
+.ack-logos-card.wide { grid-column: span 2; }
+/* Enroll screen partner strip */
+.enroll-logos {
+  display: flex; align-items: center; justify-content: center;
+  gap: 18px; padding: 10px 12px 0;
+}
+.enroll-logos img { height: 48px; width: auto; object-fit: contain; }
+/* Profile EU funding badge */
+.eu-logo-block {
+  background: #fff; border: 1.5px solid #e0e0e0; border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.eu-logo-block img { max-height: 52px; max-width: 260px; object-fit: contain; }
+.eu-logo-block .eu-logo-caption {
+  font-size: 0.71rem; color: #666; text-align: center; line-height: 1.4;
+}
+
 /* ── Logo placeholders in top bar ── */
 .top-logos { display:flex; gap:3px; flex-shrink:0; }
 .logo-ph { width:26px; height:26px; background:rgba(255,255,255,0.22); border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:0.37rem; font-weight:700; color:rgba(255,255,255,0.85); text-align:center; line-height:1.2; flex-shrink:0; }
@@ -1519,6 +1555,10 @@ select.msel {
       <div class="enroll-header">
         <div class="enroll-header-title">New Steward Setup</div>
         <div class="enroll-header-sub">Coordinator use only · Managalas Conservation Area</div>
+        <div class="enroll-logos">
+          <img src="logos/CIFOR-ICRAF-white-logo.png" alt="CIFOR-ICRAF" style="height:34px;width:auto;object-fit:contain;opacity:0.92;">
+          <img src="logos/Logo_Oro_Province.png" alt="Oro Province Government" style="height:40px;width:auto;object-fit:contain;filter:brightness(0) invert(1) opacity(0.82);">
+        </div>
         <div class="enroll-steps-bar">
           <div class="enroll-step-dot active" id="edot1"></div>
           <div class="enroll-step-dot" id="edot2"></div>
@@ -1783,13 +1823,15 @@ select.msel {
         <div class="fp-user" id="fpUser"></div>
       </div>
       <div class="fp-footer">
-        <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:8px;">
-          <div title="Managalas Conservation Fund"><svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="24" cy="16" rx="10" ry="11" fill="#2E7D32"/><ellipse cx="24" cy="22" rx="14" ry="9" fill="#388E3C"/><rect x="22.5" y="30" width="3" height="8" rx="1.5" fill="#5D4037"/><text x="24" y="46" text-anchor="middle" font-size="7" font-weight="800" fill="#1B5E20" font-family="Arial,sans-serif">MCF</text></svg></div>
-          <div title="Co-funded by the European Union"><svg style="border-radius:4px;" width="48" height="32" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="32" fill="#003399"/><polygon points="24.00,1.76 24.51,3.13 25.98,3.20 24.83,4.11 25.22,5.52 24.00,4.71 22.78,5.52 23.17,4.11 22.02,3.20 23.49,3.13" fill="#FFD700"/><polygon points="30.08,3.39 30.59,4.76 32.06,4.83 30.91,5.74 31.30,7.15 30.08,6.34 28.86,7.15 29.25,5.74 28.10,4.83 29.57,4.76" fill="#FFD700"/><polygon points="34.53,7.84 35.04,9.21 36.51,9.28 35.36,10.19 35.75,11.60 34.53,10.79 33.31,11.60 33.70,10.19 32.55,9.28 34.02,9.21" fill="#FFD700"/><polygon points="36.16,13.92 36.67,15.29 38.14,15.36 36.99,16.27 37.38,17.68 36.16,16.87 34.94,17.68 35.33,16.27 34.18,15.36 35.65,15.29" fill="#FFD700"/><polygon points="34.53,20.00 35.04,21.37 36.51,21.44 35.36,22.35 35.75,23.76 34.53,22.95 33.31,23.76 33.70,22.35 32.55,21.44 34.02,21.37" fill="#FFD700"/><polygon points="30.08,24.45 30.59,25.82 32.06,25.89 30.91,26.80 31.30,28.21 30.08,27.40 28.86,28.21 29.25,26.80 28.10,25.89 29.57,25.82" fill="#FFD700"/><polygon points="24.00,26.08 24.51,27.45 25.98,27.52 24.83,28.43 25.22,29.84 24.00,29.03 22.78,29.84 23.17,28.43 22.02,27.52 23.49,27.45" fill="#FFD700"/><polygon points="17.92,24.45 18.43,25.82 19.90,25.89 18.75,26.80 19.14,28.21 17.92,27.40 16.70,28.21 17.09,26.80 15.94,25.89 17.41,25.82" fill="#FFD700"/><polygon points="13.47,20.00 13.98,21.37 15.45,21.44 14.30,22.35 14.69,23.76 13.47,22.95 12.25,23.76 12.64,22.35 11.49,21.44 12.96,21.37" fill="#FFD700"/><polygon points="11.84,13.92 12.35,15.29 13.82,15.36 12.67,16.27 13.06,17.68 11.84,16.87 10.62,17.68 11.01,16.27 9.86,15.36 11.33,15.29" fill="#FFD700"/><polygon points="13.47,7.84 13.98,9.21 15.45,9.28 14.30,10.19 14.69,11.60 13.47,10.79 12.25,11.60 12.64,10.19 11.49,9.28 12.96,9.21" fill="#FFD700"/><polygon points="17.92,3.39 18.43,4.76 19.90,4.83 18.75,5.74 19.14,7.15 17.92,6.34 16.70,7.15 17.09,5.74 15.94,4.83 17.41,4.76" fill="#FFD700"/></svg></div>
-          <div title="CIFOR-ICRAF"><svg width="58" height="32" viewBox="0 0 58 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="12" fill="none" stroke="#003399" stroke-width="1.5"/><ellipse cx="16" cy="16" rx="6" ry="12" fill="none" stroke="#003399" stroke-width="1.2"/><line x1="4" y1="16" x2="28" y2="16" stroke="#003399" stroke-width="1.2"/><text x="32" y="13" font-size="8.5" font-weight="800" fill="#1B5E20" font-family="Arial,sans-serif">CIFOR</text><text x="32" y="24" font-size="8.5" font-weight="800" fill="#00695C" font-family="Arial,sans-serif">ICRAF</text></svg></div>
+        <div class="partner-logo-bar" style="border-top:1px solid #f0f0f0;gap:8px 12px;">
+          <img src="logos/Logo_Gov_PNG.png" alt="Papua New Guinea" style="height:36px;width:auto;object-fit:contain;">
+          <img src="logos/Logo_MCF.png" alt="Managalas Conservation Fund" style="height:36px;width:auto;object-fit:contain;">
+          <img src="logos/Logo_Oro_Province.png" alt="Oro Province Government" style="height:36px;width:auto;object-fit:contain;">
+          <img src="logos/Logo_EU_v1.png" alt="Co-funded by the European Union" style="height:32px;width:auto;object-fit:contain;">
+          <img src="logos/Logo_EU_FCCB.png" alt="EU FCCB" style="height:32px;width:auto;object-fit:contain;">
+          <img src="logos/CIFOR-ICRAF-logo.png" alt="CIFOR-ICRAF" style="height:30px;width:auto;object-fit:contain;">
         </div>
-        <div style="font-size:0.68rem;color:rgba(255,255,255,0.55);margin-bottom:4px;">Co-funded by the European Union · Implemented by CIFOR-ICRAF</div>
-        <button class="ack-link-btn" onclick="nav('screen-ack')">View Acknowledgements</button>
+        <button class="ack-link-btn" style="color:#888;" onclick="nav('screen-ack')">View Acknowledgements</button>
       </div>
     </div>
 
@@ -3164,14 +3206,10 @@ select.msel {
           </div>
           <button class="btn-outline" style="width:100%;margin:10px 0 4px;" onclick="nav('screen-timesheet')">🧾 My Timesheet</button>
           <div class="section-label" style="padding-left:0;">About This App</div>
-          <div class="eu-block">
-            <div class="eu-left">
-              <div class="eu-stars">⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐</div>
-              <div class="eu-label">EUROPEAN UNION</div>
-            </div>
-            <div class="eu-right">This application is supported by the European Union through the Managalas Conservation Fund project.</div>
+          <div class="eu-logo-block">
+            <img src="logos/Logo_EU_v1.png" alt="Co-funded by the European Union">
+            <div class="eu-logo-caption">This application is supported by the European Union through the Managalas Conservation Fund project.</div>
           </div>
-          <div class="mcf-block">MANAGALAS CONSERVATION FUND</div>
           <div class="version">v1.0.0-prototype &nbsp;|&nbsp; MCA Clan Steward App</div>
           <button class="btn-outline-red" onclick="toast('Logging out…');setTimeout(()=>{showScreen('screen-fingerprint')},950)">Logout</button>
         </div>
@@ -3248,20 +3286,35 @@ select.msel {
       </div>
       <div class="scroll-content">
         <div class="p14">
-          <div class="section-label" style="padding-left:0;">Project Funding</div>
-          <div class="eu-block">
-            <div class="eu-left">
-              <div class="eu-stars">⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐</div>
-              <div class="eu-label">EUROPEAN UNION</div>
+          <div class="section-label" style="padding-left:0;">Partner Organisations</div>
+          <div class="ack-logos-grid">
+            <div class="ack-logos-card">
+              <img src="logos/Logo_Gov_PNG.png" alt="Papua New Guinea">
             </div>
-            <div class="eu-right">Version 1 of this application is fully funded by the European Union through the Managalas Conservation Fund project. This acknowledgement is permanent.</div>
+            <div class="ack-logos-card">
+              <img src="logos/Logo_MCF.png" alt="Managalas Conservation Fund">
+            </div>
+            <div class="ack-logos-card">
+              <img src="logos/Logo_Oro_Province.png" alt="Oro Province Government">
+            </div>
+            <div class="ack-logos-card">
+              <img src="logos/Logo_EU_FCCB.png" alt="EU FCCB">
+            </div>
+            <div class="ack-logos-card wide">
+              <img src="logos/Logo_EU_v1.png" alt="Co-funded by the European Union" style="max-height:40px;">
+            </div>
+            <div class="ack-logos-card wide">
+              <img src="logos/CIFOR-ICRAF-logo.png" alt="CIFOR-ICRAF" style="max-height:40px;">
+            </div>
           </div>
-          <div class="card" style="font-size:0.79rem;color:#555;line-height:1.5;padding:12px 16px;">
+          <div class="section-label" style="padding-left:0;">Project Funding</div>
+          <div class="card" style="font-size:0.79rem;color:#555;line-height:1.6;padding:12px 16px;">
+            Version 1 of this application is fully funded by the European Union through the Managalas Conservation Fund project. This acknowledgement is permanent.
+          </div>
+          <div class="card" style="font-size:0.79rem;color:#555;line-height:1.5;padding:12px 16px;margin-top:8px;">
             The contents of this application are the sole responsibility of the Managalas Conservation Fund and do not necessarily reflect the views of the European Union.
           </div>
-          <div class="section-label" style="padding-left:0;margin-top:4px;">Implementing Organisation</div>
-          <div class="mcf-block">MANAGALAS CONSERVATION FUND</div>
-          <div class="version">v1.0.0-prototype &nbsp;|&nbsp; MCA Clan Steward App</div>
+          <div class="version" style="margin-top:12px;">v1.0.0-prototype &nbsp;|&nbsp; MCA Clan Steward App</div>
         </div>
       </div>
     </div>
@@ -9018,6 +9071,10 @@ function printTimesheet() {
 
   var html = '';
   html += '<div class="tsp-header">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6pt;">';
+  html += '<img src="logos/CIFOR-ICRAF-logo.png" alt="CIFOR-ICRAF" style="height:36pt;width:auto;object-fit:contain;">';
+  html += '<img src="logos/Logo_EU_v1.png" alt="Co-funded by the European Union" style="height:30pt;width:auto;object-fit:contain;">';
+  html += '</div>';
   html += '<div class="tsp-title">MCA Clan Steward App — Activity Timesheet</div>';
   html += '<div class="tsp-org">Managalas Conservation Area &nbsp;|&nbsp; Managalas Conservation Fund</div>';
   html += '<div class="tsp-period">Period: <strong>' + label + '</strong></div>';

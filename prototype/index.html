@@ -1869,6 +1869,8 @@ select.msel {
         </div>
       </div>
       <div class="scroll-content" style="padding-bottom:8px;">
+        <!-- Offline / unsynced data warning — updated on every dashboard visit -->
+        <div id="syncWarningBanner" style="display:none;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;font-size:0.79rem;line-height:1.4;cursor:pointer;" onclick="nav('screen-data-export')"></div>
         <div class="module-grid">
           <div class="module-tile" onclick="nav('screen-patrol-stub')">
             <span class="module-emoji">🌿</span>
@@ -4996,10 +4998,28 @@ select.msel {
             </div>
           </div>
 
+          <!-- Local backup -->
+          <div style="background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+            <div style="font-size:0.8rem;font-weight:700;color:#333;margin-bottom:4px;">💾 Local Backup</div>
+            <div style="font-size:0.74rem;color:#666;margin-bottom:10px;line-height:1.4;">Creates a copy of <strong>all</strong> records on this phone — even already-sent ones. Share the file to WhatsApp, email, or save to phone storage as an emergency backup.</div>
+            <button id="backupBtn" onclick="backupAllData()" style="width:100%;background:#37474F;color:#fff;border:none;border-radius:10px;padding:11px 16px;font-size:0.88rem;font-weight:700;cursor:pointer;">💾 Backup All Data</button>
+            <div id="backupStatus" style="font-size:0.72rem;color:#666;margin-top:6px;text-align:center;"></div>
+          </div>
+
+          <!-- Storage health -->
+          <div style="background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+            <div style="font-size:0.8rem;font-weight:700;color:#333;margin-bottom:8px;">📦 Storage Health</div>
+            <div style="height:8px;background:#E8EAE9;border-radius:4px;margin-bottom:6px;overflow:hidden;">
+              <div id="storageBarFill" style="height:100%;background:#1B5E20;border-radius:4px;width:0%;transition:width 0.5s;"></div>
+            </div>
+            <div id="storageText" style="font-size:0.74rem;color:#555;margin-bottom:6px;">Checking…</div>
+            <div id="storagePersistText" style="font-size:0.72rem;"></div>
+          </div>
+
           <!-- PWA install -->
           <div style="background:#fff;border-radius:10px;padding:12px;font-size:0.75rem;color:#666;">
             <div style="font-weight:700;margin-bottom:4px;">Install as App</div>
-            <p style="margin-bottom:8px;">Add to home screen for offline use — works without internet.</p>
+            <p style="margin-bottom:8px;">Add to home screen for offline use — works without internet. Installing also protects your data from being deleted by the OS.</p>
             <button id="installBtn" class="btn-outline" onclick="installPWA()" style="display:none;">Install on Home Screen</button>
             <p id="installNote" style="font-size:0.7rem;color:#999;margin-top:4px;">Use browser menu → "Add to Home Screen" if button doesn't appear.</p>
           </div>
@@ -5096,7 +5116,8 @@ function nav(id) {
   if (id === 'screen-conserv-followup') initFollowup();
   if (id === 'screen-conserv-schedule') initConservSchedule();
   if (id === 'screen-training-setup') initTraining();
-  if (id === 'screen-data-export') updateRecordCounts();
+  if (id === 'screen-data-export') { updateRecordCounts(); updateStorageInfo(); }
+  if (id === 'screen-dashboard')   updateSyncWarning();
   if (id === 'screen-training-record') initTrainingRecord();
   if (id === 'screen-timesheet') loadTimesheetData();
   if (id === 'screen-meteo-record') initMeteoRecord();
@@ -5128,6 +5149,21 @@ window.addEventListener('DOMContentLoaded', function() { initAutosave(); });
 
 /* ── Splash auto-advance — routes to enroll or fingerprint ── */
 window.addEventListener('load', () => {
+  /* ── Storage persistence — the single most important safeguard.
+     Tells Android/Chrome this origin's data must not be auto-cleared
+     when the device runs low on space. Granted automatically for
+     installed PWAs; may silently succeed or prompt on non-installed sites. */
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().then(function(granted) {
+      try {
+        localStorage.setItem('mcaStoragePersisted', granted ? '1' : '0');
+      } catch(e) {}
+      if (!granted) {
+        console.warn('MCA: storage persistence not granted — data may be cleared when device is full');
+      }
+    });
+  }
+
   setTimeout(() => {
     getAllRecords('auth', function(records) {
       if (records && records.length > 0) {
@@ -8129,6 +8165,183 @@ function markStoreSynced(storeName, ids, cb) {
 var DATA_STORES = ['mafia','qabb','water','phenology','pheno_plots','observations',
   'conservation','followups','patrols','gardens','trees','meteo','training','schedule','meetings'];
 
+/* ── Offline / unsynced warning banner on dashboard ──────────────── */
+function updateSyncWarning() {
+  var banner = document.getElementById('syncWarningBanner');
+  if (!banner) return;
+
+  var lastSync = null;
+  try { lastSync = localStorage.getItem('mcaLastSync'); } catch(e) {}
+  var daysSince = lastSync
+    ? Math.floor((Date.now() - new Date(lastSync).getTime()) / 86400000)
+    : null;
+
+  /* Count total unsynced records across all data stores */
+  var totalUnsynced = 0;
+  var checked = 0;
+  DATA_STORES.forEach(function(name) {
+    countUnsyncedRecords(name, function(unsyncedN) {
+      totalUnsynced += unsyncedN;
+      checked++;
+      if (checked < DATA_STORES.length) return;
+
+      /* Nothing unsynced — hide banner */
+      if (totalUnsynced === 0) { banner.style.display = 'none'; return; }
+
+      var daysText = daysSince === null
+        ? 'never synced'
+        : daysSince === 0 ? 'sent today'
+        : daysSince === 1 ? '1 day ago'
+        : daysSince + ' days ago';
+
+      var bg, border, color, icon;
+      if (daysSince === null || daysSince >= 7) {
+        bg = '#FFEBEE'; border = '#FFCDD2'; color = '#B71C1C'; icon = '🔴';
+      } else if (daysSince >= 3) {
+        bg = '#FFF8E1'; border = '#FFE082'; color = '#E65100'; icon = '🟡';
+      } else {
+        bg = '#E8F5E9'; border = '#C8E6C9'; color = '#2E7D32'; icon = '🟢';
+      }
+
+      banner.style.cssText =
+        'display:block;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;' +
+        'font-size:0.79rem;line-height:1.5;cursor:pointer;' +
+        'background:' + bg + ';border:1px solid ' + border + ';color:' + color + ';';
+      banner.innerHTML =
+        icon + ' <strong>' + totalUnsynced + ' record' + (totalUnsynced !== 1 ? 's' : '') + ' not yet sent</strong>' +
+        ' — last sync ' + daysText + '.' +
+        '<span style="float:right;opacity:0.7;">Send →</span>';
+    });
+  });
+}
+
+/* ── Storage health in Data Export screen ────────────────────────── */
+function updateStorageInfo() {
+  /* Quota / usage bar */
+  if (navigator.storage && navigator.storage.estimate) {
+    navigator.storage.estimate().then(function(est) {
+      var usedMB  = (est.usage  / 1048576).toFixed(1);
+      var quotaMB = Math.round(est.quota / 1048576);
+      var pct     = Math.min(100, Math.round(est.usage / est.quota * 100));
+      var bar  = document.getElementById('storageBarFill');
+      var text = document.getElementById('storageText');
+      if (bar) {
+        bar.style.width      = pct + '%';
+        bar.style.background = pct > 80 ? '#B71C1C' : pct > 55 ? '#F57F17' : '#2E7D32';
+      }
+      if (text) {
+        text.textContent = usedMB + ' MB used of ' + quotaMB + ' MB (' + pct + '%)';
+        text.style.color = pct > 80 ? '#B71C1C' : '#555';
+      }
+    });
+  }
+
+  /* Persistence status */
+  var persEl = document.getElementById('storagePersistText');
+  if (persEl) {
+    var storedVal = null;
+    try { storedVal = localStorage.getItem('mcaStoragePersisted'); } catch(e) {}
+    if (storedVal === '1') {
+      persEl.textContent = '✅ Data is protected — OS cannot auto-delete it';
+      persEl.style.color = '#2E7D32';
+    } else if (storedVal === '0') {
+      persEl.textContent = '⚠ Data is NOT protected. Install the app to your home screen to protect it.';
+      persEl.style.color = '#B71C1C';
+    } else {
+      persEl.textContent = 'Checking protection status…';
+      persEl.style.color = '#888';
+      if (navigator.storage && navigator.storage.persisted) {
+        navigator.storage.persisted().then(function(isPersisted) {
+          persEl.textContent = isPersisted
+            ? '✅ Data is protected — OS cannot auto-delete it'
+            : '⚠ Data is NOT protected. Install the app to your home screen to protect it.';
+          persEl.style.color = isPersisted ? '#2E7D32' : '#B71C1C';
+          try { localStorage.setItem('mcaStoragePersisted', isPersisted ? '1' : '0'); } catch(e) {}
+        });
+      }
+    }
+  }
+}
+
+/* ── Full local backup via Web Share API ─────────────────────────── */
+function backupAllData() {
+  var btn    = document.getElementById('backupBtn');
+  var status = document.getElementById('backupStatus');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Preparing…'; }
+  if (status) status.textContent = '';
+
+  getAllRecords('auth', function(authRecs) {
+    var profile = (authRecs && authRecs.length > 0) ? authRecs[0] : {};
+    var bundle = {
+      backup_version: '1',
+      backup_type:    'full',
+      backed_up_at:   new Date().toISOString(),
+      steward: {
+        name:      profile.name      || 'Unknown',
+        stewardId: profile.stewardId || 'UNKNOWN',
+        clan:      profile.clan      || '',
+        zone:      profile.zone      || '',
+        zone_id:   profile.zone_id   || ''
+      },
+      modules:      {},
+      record_count: 0
+    };
+
+    var storesDone = 0;
+    DATA_STORES.forEach(function(name) {
+      getAllRecords(name, function(records) {
+        if (records && records.length > 0) {
+          bundle.modules[name] = records;
+          bundle.record_count += records.length;
+        }
+        storesDone++;
+        if (storesDone < DATA_STORES.length) return;
+
+        /* All stores read */
+        if (btn) { btn.disabled = false; btn.textContent = '💾 Backup All Data'; }
+
+        var json     = JSON.stringify(bundle, null, 2);
+        var sid      = (profile.stewardId || 'STEWARD').replace(/[^A-Z0-9-]/gi, '');
+        var dateStr  = new Date().toISOString().slice(0, 10);
+        var fileName = 'MCA_BACKUP_' + sid + '_' + dateStr + '.json';
+
+        /* Prefer Web Share (hands file to WhatsApp, Files, email, etc.) */
+        var file = new File([json], fileName, { type: 'application/json' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: 'MCA Data Backup — ' + sid })
+            .then(function() {
+              if (status) {
+                status.textContent = '✓ Backup shared — ' + bundle.record_count + ' records';
+                status.style.color = '#1B5E20';
+              }
+            })
+            .catch(function(err) {
+              if (err.name !== 'AbortError') {
+                /* User didn't cancel — try download fallback */
+                _downloadBackupFile(json, fileName, bundle.record_count, status);
+              }
+            });
+        } else {
+          _downloadBackupFile(json, fileName, bundle.record_count, status);
+        }
+      });
+    });
+  });
+}
+
+function _downloadBackupFile(json, fileName, count, statusEl) {
+  var url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+  var a   = document.createElement('a');
+  a.href = url; a.download = fileName;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+  if (statusEl) {
+    statusEl.textContent = '✓ Backup file saved — ' + count + ' records';
+    statusEl.style.color = '#1B5E20';
+  }
+}
+
 function updateRecordCounts() {
   var totalNew = 0;
   var checked  = 0;
@@ -8225,6 +8438,8 @@ function sendAllData() {
                   function doneSync() { pending--; if (pending === 0) updateRecordCounts(); }
                   if (syncTasks.length === 0) { doneSync(); return; }
                   syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, doneSync); });
+                  var nowTs = new Date().toISOString();
+                  try { localStorage.setItem('mcaLastSync', nowTs); } catch(e) {}
                   var lastLine = document.getElementById('lastSentLine');
                   if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
                   toast(bundle.record_count + ' records uploaded to MCA Drive ✓');
@@ -8248,6 +8463,7 @@ function sendAllData() {
                   function done() { pending--; if (pending === 0) { updateRecordCounts(); } }
                   if (syncTasks.length === 0) { done(); return; }
                   syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, done); });
+                  try { localStorage.setItem('mcaLastSync', new Date().toISOString()); } catch(e) {}
                   var lastLine = document.getElementById('lastSentLine');
                   if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
                   toast(bundle.record_count + ' records sent ✓');
@@ -8266,6 +8482,7 @@ function sendAllData() {
               document.body.appendChild(a); a.click();
               document.body.removeChild(a);
               URL.revokeObjectURL(url);
+              try { localStorage.setItem('mcaLastSync', new Date().toISOString()); } catch(e) {}
               syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, null); });
               updateRecordCounts();
               toast(bundle.record_count + ' records saved — transfer the file to your coordinator');

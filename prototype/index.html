@@ -1596,6 +1596,7 @@ select.msel {
           <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()">🎓 Grant Training Authorisation</button>
           <button class="btn-outline" id="enrollApproveWaterBtn" style="display:none;margin-top:8px;width:100%;border-color:#0277BD;color:#0277BD;" onclick="showScreen('screen-water-approve')">💧 Approve Water Sources</button>
           <button class="btn-outline" id="enrollApproveFacBtn" style="display:none;margin-top:8px;width:100%;border-color:#283593;color:#283593;" onclick="showScreen('screen-facility-approve')">🏫 Approve Facilities</button>
+          <button class="btn-outline" id="enrollApproveMetBtn" style="display:none;margin-top:8px;width:100%;border-color:#37474F;color:#37474F;" onclick="showScreen('screen-met-approve')">🌧 Approve Met Stations</button>
         </div>
 
         <!-- STEP 2: Profile -->
@@ -4121,6 +4122,15 @@ select.msel {
         <div id="meteoContent" style="display:none;">
           <div class="p14" style="padding-bottom:20px;">
 
+            <div class="matrix-note" style="background:#ECEFF1;border-color:#B0BEC5;color:#37474F;margin-bottom:12px;">
+              Register each instrument once (rain gauge, weather station, or water level meter). The coordinator approves it and assigns the owning clan. Only the owning clan sees it as a monitoring task.
+            </div>
+            <button class="btn-outline" style="width:100%;margin-bottom:12px;border-color:#37474F;color:#37474F;" onclick="nav('screen-met-stations')"><span data-icon="folder" data-size="16"></span> Manage Met Stations</button>
+            <div id="metTasks">
+              <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
+            </div>
+
+            <div id="metLegacyStation" style="display:none;">
             <div class="map-placeholder">
               <svg viewBox="0 0 362 130" xmlns="http://www.w3.org/2000/svg">
                 <rect width="362" height="130" fill="#c9dce8"/>
@@ -4178,7 +4188,161 @@ select.msel {
             </div>
 
             <button class="btn-primary" id="meteoBeginBtn" disabled onclick="nav('screen-meteo-record')" style="background:#37474F;margin-top:14px;">Begin Station Reading</button>
+            </div><!-- /metLegacyStation -->
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: MET STATIONS REGISTRY + REGISTER + APPROVE + RECORD
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-met-stations">
+      <div class="top-bar" style="background:#37474F;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Met Stations</div><div class="bar-subtitle">Register &amp; Manage Instruments</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="matrix-note" style="background:#ECEFF1;border-color:#B0BEC5;color:#37474F;">
+          Register each instrument once. The coordinator approves it and assigns the owning clan before monitoring begins.
+        </div>
+        <div class="p14" style="padding-bottom:20px;">
+          <button class="btn-primary" style="background:#37474F;width:100%;margin-bottom:12px;" onclick="openRegisterMet()">+ Register New Instrument</button>
+          <div id="metStationsContent"><div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-met-register">
+      <div class="top-bar" style="background:#37474F;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Register Instrument</div><div class="bar-subtitle">GPS &amp; Photo Required</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div class="form-group">
+            <label class="form-label">Name / Location <span style="color:#B71C1C;">*</span></label>
+            <input type="text" id="metName" class="form-input" placeholder="e.g. Afore Rain Gauge, Koromba Weir Marker">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Instrument Type <span style="color:#B71C1C;">*</span></label>
+            <div id="metTypePills" style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="weather-pill" id="mettype-raingauge"  onclick="metSelectType('raingauge')"><span data-icon="raingauge" data-size="16"></span> Rain gauge</button>
+              <button class="weather-pill" id="mettype-metstation" onclick="metSelectType('metstation')"><span data-icon="metstation" data-size="16"></span> Weather station</button>
+              <button class="weather-pill" id="mettype-waterlevel" onclick="metSelectType('waterlevel')"><span data-icon="waterlevel" data-size="16"></span> Water level meter</button>
+            </div>
+          </div>
+          <div class="card" style="padding:12px 16px;margin-bottom:10px;">
+            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> GPS</span><span id="metGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span data-icon="camera" data-size="14"></span> Reference Photo <span style="color:#B71C1C;">*</span></label>
+            <div id="metPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="metTriggerPhoto()">
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
+            </div>
+            <input type="file" id="metPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="metHandlePhoto(this)">
+            <div id="metPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description <span style="color:#999;font-weight:400;">(install details, schedule, access)</span></label>
+            <textarea id="metDesc" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="When installed, read schedule, who maintains it…"></textarea>
+          </div>
+          <div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.75rem;margin-bottom:12px;">
+            ℹ️ This instrument will be marked <strong>Pending Approval</strong>. The coordinator assigns the owning clan before monitoring begins.
+          </div>
+          <button class="btn-primary" style="background:#37474F;" onclick="submitMetStation()">Submit for Approval</button>
+          <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-met-approve">
+      <div class="top-bar" style="background:#37474F;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Approve Instruments</div><div class="bar-subtitle">Coordinator — assign owning clan</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div id="metApproveContent"><div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-met-record">
+      <div class="top-bar" style="background:#37474F;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title" id="metRecordTitle">Instrument Reading</div><div class="bar-subtitle" id="metRecordSubtitle">Function &amp; reading</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div class="card" style="padding:12px 16px;">
+            <div class="transect-row"><span class="td-label">Type</span><span id="metRecType">—</span></div>
+            <div class="transect-row"><span class="td-label">Owner</span><span id="metRecOwner">—</span></div>
+            <div class="transect-row"><span class="td-label">Date</span><span id="metRecDate">—</span></div>
+          </div>
+
+          <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="wrench" data-size="16"></span> Equipment Function</div>
+          <div class="card" style="padding:12px 16px;">
+            <div class="form-group">
+              <label class="form-label">Is the instrument working?</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="weather-pill active" id="mfn-working" onclick="metFn('working')">Working</button>
+                <button class="weather-pill" id="mfn-faulty" onclick="metFn('faulty')">Faulty</button>
+                <button class="weather-pill" id="mfn-down" onclick="metFn('down')">Not working</button>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Damage?</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="weather-pill active" id="mdmg-none" onclick="metDmg('none')">None</button>
+                <button class="weather-pill" id="mdmg-minor" onclick="metDmg('minor')">Minor</button>
+                <button class="weather-pill" id="mdmg-major" onclick="metDmg('major')">Major</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="metRainSection" style="display:none;">
+            <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="raingauge" data-size="16"></span> Rainfall Reading</div>
+            <div class="card" style="padding:12px 16px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Rainfall since last reading (mm)</label>
+                <input type="number" id="metRain" class="form-input" value="0" min="0" max="999" style="font-size:0.85rem;padding:7px 10px;">
+                <label style="font-size:0.72rem;color:#555;display:flex;align-items:center;gap:6px;margin-top:8px;"><input type="checkbox" id="metGaugeEmptied"> Gauge emptied after reading</label>
+              </div>
+            </div>
+          </div>
+
+          <div id="metLevelSection" style="display:none;">
+            <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="waterlevel" data-size="16"></span> Water Level Reading</div>
+            <div class="card" style="padding:12px 16px;">
+              <div class="form-group">
+                <label class="form-label">Level at marker (cm)</label>
+                <input type="number" id="metLevel" class="form-input" value="50" min="0" max="999" style="font-size:0.85rem;padding:7px 10px;">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Flow condition</label>
+                <select id="metLevelFlow" class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+                  <option>Dry / No flow</option><option selected>Normal</option><option>High</option><option>Flood</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:14px;">
+            <label class="form-label">Notes</label>
+            <textarea id="metNotes" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Equipment condition, repairs needed, unusual observations…"></textarea>
+          </div>
+
+          <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:8px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="camera" data-size="16"></span> Photo <span style="color:#B71C1C;">*</span></div>
+          <div class="card" style="padding:12px 16px;">
+            <div id="mrPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="mrTriggerPhoto()">
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the instrument today</div></div>
+            </div>
+            <input type="file" id="mrPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="mrHandlePhoto(this)">
+            <div id="mrPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
+          </div>
+
+          <button class="btn-primary" style="background:#37474F;margin-top:14px;" onclick="submitMetReading()">Save &amp; Submit Reading</button>
         </div>
       </div>
     </div>
@@ -5308,6 +5472,7 @@ const ALL_SCREENS = [
   'screen-water-setup','screen-water-record','screen-water-sources','screen-water-source-register','screen-water-approve',
   'screen-pheno-setup','screen-pheno-plots','screen-pheno-establish','screen-pheno-inactive','screen-pheno-record',
   'screen-sdm','screen-facility','screen-facilities','screen-facility-register','screen-facility-approve',
+  'screen-met-stations','screen-met-register','screen-met-approve','screen-met-record',
   'screen-alerts',
   'screen-meetings','screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3',
   'screen-meeting-detail','screen-meeting-active',
@@ -5359,6 +5524,7 @@ function showScreen(id) {
   }
   if (id === 'screen-water-approve') initWaterApprove();
   if (id === 'screen-facility-approve') initFacilityApprove();
+  if (id === 'screen-met-approve') initMetApprove();
 }
 
 /* Navigate, pushing to history */
@@ -5377,6 +5543,9 @@ function nav(id) {
   if (id === 'screen-facilities') initFacilities();
   if (id === 'screen-facility-register') initRegisterFacility();
   if (id === 'screen-facility-approve') initFacilityApprove();
+  if (id === 'screen-met-stations') initMetStations();
+  if (id === 'screen-met-register') initRegisterMet();
+  if (id === 'screen-met-approve') initMetApprove();
   if (id === 'screen-pheno-setup') initPheno();
   if (id === 'screen-pheno-plots') initPhenoPlots();
   if (id === 'screen-pheno-establish') initPhenoEstablish();
@@ -5614,6 +5783,7 @@ function enrollCheckPasscode() {
       document.getElementById('enrollGrantAuthBtn').style.display = 'block';
       document.getElementById('enrollApproveWaterBtn').style.display = 'block';
       document.getElementById('enrollApproveFacBtn').style.display = 'block';
+      document.getElementById('enrollApproveMetBtn').style.display = 'block';
       document.getElementById('enrollPassStatus').textContent = '✓ Coordinator verified. Choose an action.';
       document.getElementById('enrollPassStatus').style.color = '#2E7D32';
       /* Pre-load zones and topics ready for step 2 */
@@ -6349,6 +6519,177 @@ function syncFacilitiesFromServer(cb) {
       });
     }).catch(function(){ if (cb) cb(false); });
 }
+
+/* ══════════════════════════════════════
+   MET STATIONS — instrument registry, approval, ownership, function checks
+   (mirrors the facilities module)
+══════════════════════════════════════ */
+var MET_TYPES = [
+  {key:'raingauge',  label:'Rain gauge'},
+  {key:'metstation', label:'Weather station'},
+  {key:'waterlevel', label:'Water level meter'}
+];
+function metTypeMeta(key){ return MET_TYPES.find(function(t){return t.key===key;}) || {key:key, label:key||'—'}; }
+var metSelectedType='', metPhotoData=null, metGPSFix=null, _activeMet=null;
+var mrPhotoData=null, _metFn='working', _metDmg='none';
+
+/* registry list */
+function initMetStations(){ renderMetStationsList(); syncMetFromServer(function(ok){ if(ok) renderMetStationsList(); }); }
+function renderMetStationsList(){
+  var c=document.getElementById('metStationsContent'); if(!c) return;
+  getAllRecords('met_stations', function(rows){
+    var mine=rows.filter(function(r){ return r.proposed_clan===myClan()||r.owner_clan===myClan()||r.owner_clan_2===myClan(); });
+    if(mine.length===0){ c.innerHTML='<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No instruments registered yet for '+(myClan()||'your clan')+'. Tap “Register New Instrument” to add the first one.</div>'; return; }
+    var order={pending:0,approved:1,rejected:2}; mine.sort(function(a,b){return (order[a.status]||9)-(order[b.status]||9);});
+    var h='';
+    mine.forEach(function(r){
+      var tm=metTypeMeta(r.met_type); var badge,bcol,bbg,bbd;
+      if(r.status==='approved'){badge='✓ Approved';bcol='#2E7D32';bbg='#E8F5E9';bbd='#A5D6A7';}
+      else if(r.status==='rejected'){badge='✕ Rejected';bcol='#B71C1C';bbg='#FFEBEE';bbd='#FFCDD2';}
+      else {badge='⏳ Pending Approval';bcol='#F57F17';bbg='#FFF8E1';bbd='#FFE082';}
+      h+='<div class="card" style="padding:12px 14px;margin-bottom:10px;">';
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
+      h+='<span style="font-size:0.9rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span>';
+      h+='<span style="font-size:0.68rem;font-weight:700;color:'+bcol+';background:'+bbg+';border:1px solid '+bbd+';padding:2px 8px;border-radius:10px;white-space:nowrap;">'+badge+'</span></div>';
+      h+='<div style="font-size:0.74rem;color:#666;">'+tm.label+' · 📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      if(r.description) h+='<div style="font-size:0.73rem;color:#888;margin-top:4px;">'+r.description+'</div>';
+      if(r.status==='approved'){ var own=r.owner_clan||'—'; if(r.owner_clan_2) own+=' + '+r.owner_clan_2+' (split)'; h+='<div style="font-size:0.72rem;color:#2E7D32;margin-top:6px;">Owner clan: <strong>'+own+'</strong></div>'; }
+      h+='</div>';
+    });
+    c.innerHTML=h;
+  });
+}
+
+/* registration */
+function openRegisterMet(){ nav('screen-met-register'); }
+function initRegisterMet(){
+  metSelectedType=''; metPhotoData=null; metGPSFix=null;
+  var nm=document.getElementById('metName'); if(nm) nm.value='';
+  var ds=document.getElementById('metDesc'); if(ds) ds.value='';
+  MET_TYPES.forEach(function(t){ var el=document.getElementById('mettype-'+t.key); if(el) el.classList.remove('active'); });
+  var ps=document.getElementById('metPhotoStatus'); if(ps){ps.textContent='No photo taken';ps.style.color='#888';}
+  var pb=document.getElementById('metPhotoBox'); if(pb) pb.innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
+  var g=document.getElementById('metGPS'); if(g){g.textContent='📍 Acquiring GPS…';g.style.color='#888';}
+  captureGPS(function(gps,err){ if(gps){metGPSFix=gps; if(g){g.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m';g.style.color='#2E6B38';}} else {if(g){g.textContent='⚠ '+err;g.style.color='#E65100';}} });
+}
+function metSelectType(key){ metSelectedType=key; MET_TYPES.forEach(function(t){ var el=document.getElementById('mettype-'+t.key); if(el) el.classList.toggle('active', t.key===key); }); }
+function metTriggerPhoto(){ var inp=document.getElementById('metPhotoInput'); if(inp) inp.click(); }
+function metHandlePhoto(input){ var file=input.files&&input.files[0]; if(!file) return; var r=new FileReader(); r.onload=function(e){ metPhotoData=e.target.result; var b=document.getElementById('metPhotoBox'); if(b) b.innerHTML='<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;">'; var s=document.getElementById('metPhotoStatus'); if(s){s.textContent='✓ Photo attached';s.style.color='#2E7D32';} }; r.readAsDataURL(file); }
+function submitMetStation(){
+  var name=((document.getElementById('metName')||{}).value||'').trim();
+  if(!name){toast('Enter a name / location.');return;}
+  if(!metSelectedType){toast('Select the instrument type.');return;}
+  if(!metGPSFix){toast('Wait for GPS before submitting.');return;}
+  if(!metPhotoData){toast('Capture a reference photo first.');return;}
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December']; var now=new Date();
+  var data={ survey_type:'met_station', uid:generateRecordId('MET'), name:name, met_type:metSelectedType, lat:metGPSFix.lat, lng:metGPSFix.lng, gps_accuracy:metGPSFix.accuracy, description:((document.getElementById('metDesc')||{}).value||'').trim(), photo:metPhotoData, status:'pending', proposed_by:(window._cachedProfile&&window._cachedProfile.stewardId)||'', proposed_clan:myClan(), owner_clan:null, owner_clan_2:null, registered_date:now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear() };
+  saveRecord('met_stations', data, function(){ postRegisterMet(data); toast('Instrument submitted for approval ✓'); nav('screen-met-stations'); });
+}
+
+/* approval */
+function metClanCandidates(rows){ var set={}; rows.forEach(function(r){ [r.proposed_clan,r.owner_clan,r.owner_clan_2].forEach(function(cl){ if(cl) set[cl]=true; }); }); var list=Object.keys(set); ['Afore','Itokama','Jegarata'].forEach(function(cl){ if(list.indexOf(cl)<0) list.push(cl); }); list.sort(); return list; }
+function initMetApprove(){ renderMetApprove(); syncMetFromServer(function(ok){ if(ok) renderMetApprove(); }); }
+function renderMetApprove(){
+  var c=document.getElementById('metApproveContent'); if(!c) return;
+  getAllRecords('met_stations', function(rows){
+    var pending=rows.filter(function(r){return r.status==='pending';}); var clans=metClanCandidates(rows);
+    if(pending.length===0){ c.innerHTML='<div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;">No instruments awaiting approval.</div>'; return; }
+    var h='<div class="matrix-note" style="background:#FFF8E1;border-color:#FFE082;color:#F57F17;">'+pending.length+' instrument'+(pending.length>1?'s':'')+' awaiting approval. Assign the owning clan — only that clan will see the monitoring task.</div>';
+    pending.forEach(function(r){
+      var tm=metTypeMeta(r.met_type);
+      var ownOpts=clans.map(function(cl){return '<option value="'+cl+'"'+(cl===r.proposed_clan?' selected':'')+'>'+cl+'</option>';}).join('');
+      var own2Opts='<option value="">None (single clan)</option>'+clans.map(function(cl){return '<option value="'+cl+'">'+cl+'</option>';}).join('');
+      h+='<div class="card" style="padding:12px 14px;margin-bottom:12px;">';
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;"><span style="font-size:0.92rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span><span style="font-size:0.68rem;font-weight:700;color:#37474F;background:#ECEFF1;border:1px solid #B0BEC5;padding:2px 8px;border-radius:10px;">'+tm.label+'</span></div>';
+      if(r.photo) h+='<img src="'+r.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;">';
+      h+='<div style="font-size:0.74rem;color:#666;">📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      h+='<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Proposed by '+(r.proposed_by||'—')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
+      if(r.description) h+='<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
+      h+='<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label><select id="ma-owner-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+ownOpts+'</select></div>';
+      h+='<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span></label><select id="ma-owner2-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+own2Opts+'</select></div>';
+      h+='<div style="display:flex;gap:8px;"><button class="btn-primary" style="background:#2E7D32;flex:2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="approveMet('+r.id+')">✓ Approve</button><button class="btn-outline" style="flex:1;color:#B71C1C;border-color:#FFCDD2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="rejectMet('+r.id+')">Reject</button></div></div>';
+    });
+    c.innerHTML=h;
+  });
+}
+function approveMet(id){
+  var owner=(document.getElementById('ma-owner-'+id)||{}).value||''; var owner2=(document.getElementById('ma-owner2-'+id)||{}).value||'';
+  if(!owner){toast('Select an owner clan.');return;} if(owner2&&owner2===owner){toast('Second clan must differ.');return;}
+  getAllRecords('met_stations', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r){toast('Not found.');return;}
+    r.status='approved'; r.owner_clan=owner; r.owner_clan_2=owner2||null; r.approved_date=new Date().toISOString().split('T')[0]; r.approved_by=(window._cachedProfile&&window._cachedProfile.stewardId)||'coordinator'; r.synced=false;
+    updateRecord('met_stations', r, function(){ pushMetRegistry(function(ok){ toast('Approved — '+owner+(owner2?' + '+owner2:'')+(ok?' · synced ✓':' ✓')); }); initMetApprove(); });
+  });
+}
+function rejectMet(id){ getAllRecords('met_stations', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r) return; r.status='rejected'; r.synced=false; updateRecord('met_stations', r, function(){ pushMetRegistry(function(){}); toast('Instrument rejected'); initMetApprove(); }); }); }
+
+/* ownership-gated task list (rendered into the Weather Station setup screen) */
+function initMeteo(){
+  document.getElementById('meteoLoading').style.display='none';
+  document.getElementById('meteoContent').style.display='block';
+  var legacy=document.getElementById('metLegacyStation'); if(legacy) legacy.style.display='none';
+  renderMetTasks();
+  syncMetFromServer(function(ok){ if(ok) renderMetTasks(); });
+}
+function metVisitsThisMonth(records, metId, clan){ var mk=monthKey(); return records.filter(function(r){ if(r.met_station_id!==metId) return false; if(clan&&r.clan&&r.clan!==clan) return false; var t=r.timestamp?new Date(r.timestamp):null; return t&&monthKey(t)===mk; }).length; }
+function renderMetTasks(){
+  var tasks=document.getElementById('metTasks'); if(!tasks) return; var clan=myClan();
+  getAllRecords('met_stations', function(stations){ getAllRecords('met_readings', function(readings){
+    var owned=stations.filter(function(s){ return s.status==='approved'&&(s.owner_clan===clan||s.owner_clan_2===clan); });
+    var h='<div style="font-size:0.82rem;font-weight:700;color:#37474F;margin:4px 2px 8px;">Your clan’s instruments — '+(clan||'your clan')+'</div>';
+    if(owned.length===0){ h+='<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No instruments assigned to your clan yet. Register one and the coordinator will assign ownership before it appears here.</div>'; tasks.innerHTML=h; return; }
+    owned.forEach(function(s){
+      var tm=metTypeMeta(s.met_type); var done=metVisitsThisMonth(readings,s.id,clan)>0; var split=s.owner_clan_2?true:false; var border=done?'#A5D6A7':'#B0BEC5';
+      h+='<div class="card" style="padding:12px 14px;margin-bottom:10px;border:1px solid '+border+';cursor:'+(done?'default':'pointer')+';" onclick="'+(done?'':'selectMetTask('+s.id+')')+'">';
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;"><span style="font-size:0.9rem;font-weight:700;">'+icon(tm.key,18)+' '+(s.name||'(unnamed)')+'</span>';
+      if(done) h+='<span style="font-size:0.68rem;font-weight:700;color:#2E7D32;background:#E8F5E9;border:1px solid #A5D6A7;padding:2px 8px;border-radius:10px;white-space:nowrap;">✓ Done this month</span>';
+      else h+='<span style="font-size:0.68rem;font-weight:700;color:#37474F;background:#ECEFF1;border:1px solid #B0BEC5;padding:2px 8px;border-radius:10px;white-space:nowrap;">Due — tap to read</span>';
+      h+='</div><div style="font-size:0.73rem;color:#666;">'+tm.label+' · 📍 '+(s.lat||'?')+', '+(s.lng||'?')+'</div>';
+      if(split){ var other=(s.owner_clan===clan)?s.owner_clan_2:s.owner_clan; h+='<div style="font-size:0.7rem;color:#8a6d00;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:4px 8px;margin-top:6px;">⚖ Shared with '+other+' — 2 readings/month, one per clan</div>'; }
+      h+='</div>';
+    });
+    tasks.innerHTML=h;
+  }); });
+}
+function selectMetTask(id){ getAllRecords('met_stations', function(stations){ var s=stations.find(function(x){return x.id===id;}); if(!s){toast('Not found.');return;} _activeMet=s; openMetRecord(); }); }
+
+/* reading / function form */
+function openMetRecord(){
+  var s=_activeMet; if(!s) return; var tm=metTypeMeta(s.met_type);
+  document.getElementById('metRecordTitle').textContent=s.name||'Instrument Reading';
+  document.getElementById('metRecordSubtitle').textContent=tm.label;
+  document.getElementById('metRecType').innerHTML=icon(tm.key,16)+' '+tm.label;
+  var owner=s.owner_clan||'—'; if(s.owner_clan_2) owner+=' + '+s.owner_clan_2+' (split)'; document.getElementById('metRecOwner').textContent=owner;
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December']; var now=new Date();
+  document.getElementById('metRecDate').textContent=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+  var t=s.met_type;
+  document.getElementById('metRainSection').style.display=(t==='raingauge'||t==='metstation')?'block':'none';
+  document.getElementById('metLevelSection').style.display=(t==='waterlevel'||t==='metstation')?'block':'none';
+  _metFn='working'; _metDmg='none';
+  ['working','faulty','down'].forEach(function(k){ var el=document.getElementById('mfn-'+k); if(el) el.classList.toggle('active',k==='working'); });
+  ['none','minor','major'].forEach(function(k){ var el=document.getElementById('mdmg-'+k); if(el) el.classList.toggle('active',k==='none'); });
+  var rn=document.getElementById('metRain'); if(rn) rn.value='0'; var lv=document.getElementById('metLevel'); if(lv) lv.value='50'; var nt=document.getElementById('metNotes'); if(nt) nt.value='';
+  var ge=document.getElementById('metGaugeEmptied'); if(ge) ge.checked=false;
+  mrPhotoData=null; var pb=document.getElementById('mrPhotoBox'); if(pb) pb.innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the instrument today</div></div>'; var ps=document.getElementById('mrPhotoStatus'); if(ps){ps.textContent='No photo taken';ps.style.color='#888';}
+  nav('screen-met-record');
+}
+function metFn(v){ _metFn=v; ['working','faulty','down'].forEach(function(k){var el=document.getElementById('mfn-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function metDmg(v){ _metDmg=v; ['none','minor','major'].forEach(function(k){var el=document.getElementById('mdmg-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function mrTriggerPhoto(){ var inp=document.getElementById('mrPhotoInput'); if(inp) inp.click(); }
+function mrHandlePhoto(input){ var file=input.files&&input.files[0]; if(!file) return; var r=new FileReader(); r.onload=function(e){ mrPhotoData=e.target.result; var b=document.getElementById('mrPhotoBox'); if(b) b.innerHTML='<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;">'; var s=document.getElementById('mrPhotoStatus'); if(s){s.textContent='✓ Photo attached';s.style.color='#2E7D32';} }; r.readAsDataURL(file); }
+function submitMetReading(){
+  var s=_activeMet||{}; if(!mrPhotoData){toast('Capture a photo of the instrument before submitting.');return;}
+  var val=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  var data={ survey_type:'met_reading', met_station_id:(typeof s.id!=='undefined')?s.id:null, met_station_name:s.name||'', met_type:s.met_type||'', clan:myClan(), date:document.getElementById('metRecDate')?document.getElementById('metRecDate').textContent:'', function_status:_metFn, damage:_metDmg, notes:val('metNotes'), photo:mrPhotoData };
+  if(s.met_type==='raingauge'||s.met_type==='metstation'){ data.rainfall_mm=parseInt(val('metRain')||0)||0; data.gauge_emptied=(document.getElementById('metGaugeEmptied')||{}).checked||false; }
+  if(s.met_type==='waterlevel'||s.met_type==='metstation'){ data.water_level_cm=parseInt(val('metLevel')||0)||0; data.flow=val('metLevelFlow'); }
+  saveRecord('met_readings', data, function(){ toast('Instrument reading saved ✓'); _activeMet=null; nav('screen-meteo-setup'); });
+}
+
+/* central sync */
+function metRegistryRecord(r){ return { uid:r.uid, name:r.name, met_type:r.met_type, lat:r.lat, lng:r.lng, gps_accuracy:r.gps_accuracy, description:r.description, photo:r.photo||null, status:r.status, proposed_by:r.proposed_by, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, registered_date:r.registered_date, approved_date:r.approved_date||null, approved_by:r.approved_by||null }; }
+function postRegisterMet(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'register_met_station',_secret:UPLOAD_SECRET,record:metRegistryRecord(rec)})}).catch(function(){}); }
+function pushMetRegistry(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('met_stations', function(rows){ var list=rows.map(metRegistryRecord).filter(function(r){return r.uid;}); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'update_met_stations',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,met_stations:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
+function syncMetFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=met_stations').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.met_stations){if(cb)cb(false);return;} getAllRecords('met_stations', function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pending=d.met_stations.slice(); var next=function(){ if(pending.length===0){if(cb)cb(true);return;} var sr=pending.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['name','met_type','lat','lng','gps_accuracy','description','photo','status','owner_clan','owner_clan_2','approved_date','approved_by','proposed_by','proposed_clan','registered_date'].forEach(function(k){local[k]=sr[k];}); updateRecord('met_stations', local, function(){next();}); } else { sr.survey_type='met_station'; sr.synced=true; saveRecord('met_stations', sr, function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
 
 /* ── Map Layer Toggles ── */
 function toggleLayer(id) {
@@ -7831,7 +8172,7 @@ function saveFollowup() {
 ══════════════════════════════════════ */
 var meteoVerifiedFlag = false, meteoArrivedFlag = false;
 
-function initMeteo() {
+function initMeteoLegacy() {
   meteoVerifiedFlag = false; meteoArrivedFlag = false;
   document.getElementById('meteoBeginBtn').disabled = true;
   document.getElementById('meteoFpBtn').classList.remove('verified');
@@ -8200,8 +8541,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 8;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits'];
+var DB_VERSION = 9;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }

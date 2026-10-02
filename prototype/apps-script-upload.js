@@ -50,7 +50,7 @@ var REPORT_EMAILS     = ['w.unsworth@landscapealliance.org'];
  *      (it is now stored in Script Properties and this code is no longer needed).
  *
  * The key protects: update_zones, update_topics, grant_authorisation,
- * certify_trainer, update_water_sources, update_facilities.
+ * certify_trainer, update_water_sources, update_facilities, update_met_stations.
  * It is NEVER stored in the phone app — only held in memory during a session.
  */
 function setCoordinatorSecret() {
@@ -237,6 +237,43 @@ function registerFacility(record) {
 function updateFacilities(list) {
   saveFacilitiesList(list || []);
   return { status: 'ok', message: 'Facility registry saved', count: (list || []).length };
+}
+
+/* ─── Met station registry (rain gauge, weather station, water level) ───
+ * _met_stations.json in Drive, same model as the facility registry. */
+function loadMetStationsList() {
+  try {
+    var folder = getDataFolder();
+    var files  = folder.getFilesByName('_met_stations.json');
+    if (files.hasNext()) { return JSON.parse(files.next().getBlob().getDataAsString()) || []; }
+  } catch(e) { /* fall through */ }
+  return [];
+}
+function saveMetStationsList(list) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_met_stations.json');
+  var json   = JSON.stringify(list || [], null, 2);
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_met_stations.json', json, MimeType.PLAIN_TEXT); }
+}
+function getMetStations() {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', met_stations: loadMetStationsList() }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function registerMetStation(record) {
+  if (!record || !record.uid) { return { status: 'error', message: 'Missing met station uid' }; }
+  var list = loadMetStationsList();
+  var idx = -1;
+  for (var i = 0; i < list.length; i++) { if (list[i].uid === record.uid) { idx = i; break; } }
+  if (idx === -1) { list.push(record); }
+  else if (list[idx].status === 'pending') { list[idx] = record; }
+  saveMetStationsList(list);
+  return { status: 'ok', uid: record.uid, count: list.length };
+}
+function updateMetStations(list) {
+  saveMetStationsList(list || []);
+  return { status: 'ok', message: 'Met station registry saved', count: (list || []).length };
 }
 
 /* ─── Training authorisation records ───────────────────────────────── */
@@ -697,7 +734,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -768,6 +805,22 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    /* Met station registry — steward registration (upload secret only) */
+    if (body._action === 'register_met_station') {
+      var metRegResult = registerMetStation(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(metRegResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    /* Met station registry — coordinator approval/ownership (coordinator key required) */
+    if (body._action === 'update_met_stations') {
+      var metUpResult = updateMetStations(body.met_stations);
+      return ContentService
+        .createTextOutput(JSON.stringify(metUpResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     /* Normal steward data upload */
     var folder = getDataFolder();
 
@@ -816,6 +869,7 @@ function doGet(e) {
   if (action === 'topics') { return getTopicList(); }
   if (action === 'water_sources') { return getWaterSources(); }
   if (action === 'facilities') { return getFacilities(); }
+  if (action === 'met_stations') { return getMetStations(); }
 
   if (action === 'authorisations') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';

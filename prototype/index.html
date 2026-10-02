@@ -1594,6 +1594,7 @@ select.msel {
           <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')">📋 Manage Training Topics</button>
           <button class="btn-outline" id="enrollUpdateProfileBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showUpdateProfile()">✏ Update Existing Profile</button>
           <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()">🎓 Grant Training Authorisation</button>
+          <button class="btn-outline" id="enrollApproveWaterBtn" style="display:none;margin-top:8px;width:100%;border-color:#0277BD;color:#0277BD;" onclick="showScreen('screen-water-approve')">💧 Approve Water Sources</button>
         </div>
 
         <!-- STEP 2: Profile -->
@@ -2594,29 +2595,21 @@ select.msel {
         </div>
         <div id="waterContent" style="display:none;">
           <div class="p14" style="padding-bottom:20px;">
-            <div class="map-placeholder">
-              <svg viewBox="0 0 362 130" xmlns="http://www.w3.org/2000/svg">
-                <rect width="362" height="130" fill="#c9dce8"/>
-                <polygon points="217.8,84.1 222.3,88.5 220.5,97.2 172.1,100.2 127.6,104.3 114.0,94.4 78.5,79.3 76.7,75.2 77.9,73.2 72.0,54.3 95.6,35.1 100.3,34.2 136.8,39.0 144.2,54.1 177.0,52.2 205.7,29.1 254.5,20.3 252.6,34.6 249.9,37.5 242.3,43.7 222.5,53.5 217.8,84.1" fill="#E6F1FB" fill-opacity="0.55" stroke="#185FA5" stroke-width="1.5"/>
-                <polygon points="178.6,104.9 152.6,101.8 136.0,78.1 150.9,75.0 226.1,92.2 225.8,96.6 178.6,104.9" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
-                <polygon points="123.0,107.6 85.4,77.7 136.0,78.1 152.6,101.8 123.0,107.6" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
-                <polygon points="254.6,68.8 184.7,58.1 183.5,52.8 183.4,48.8 201.3,40.2 291.4,24.0 308.8,36.7 294.4,55.9 254.6,68.8" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
-                <polygon points="136.0,78.1 85.4,77.7 49.0,72.6 53.8,55.4 115.0,45.1 124.0,46.5 126.9,47.8 160.7,65.2 150.9,75.0 136.0,78.1" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
-                <polygon points="226.1,92.2 150.9,75.0 160.7,65.2 184.7,58.1 254.6,68.8 226.1,92.2" fill="#85B7EB" fill-opacity="0.5" stroke="#185FA5" stroke-width="0.7"/>
-                <circle cx="146.5" cy="83.1" r="14" fill="#0277BD" opacity="0.25"/>
-                <circle cx="146.5" cy="83.1" r="7" fill="#0277BD" opacity="0.9"/>
-                <circle cx="146.5" cy="83.1" r="3" fill="#fff"/>
-                <text x="162.5" y="87.1" fill="#0277BD" font-size="9" font-weight="bold" font-family="Arial">WQ-7B-03</text>
-                <text x="120.7" y="43.3" fill="#185FA5" font-size="10" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.7">Zone 7B</text>
-              </svg>
+            <button class="btn-outline" style="width:100%;margin-bottom:12px;border-color:#0277BD;color:#0277BD;" onclick="nav('screen-water-sources')">🗂 Manage Water Sources</button>
+
+            <div id="waterSourceTasks">
+              <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
             </div>
 
-            <div class="card" style="padding:12px 16px;">
-              <div class="transect-row"><span class="td-label">🌊 Station</span><span>WQ-7B-03</span></div>
-              <div class="transect-row"><span class="td-label">📍 Location</span><span>Koromba Creek</span></div>
-              <div class="transect-row"><span class="td-label">🧭 Coordinates</span><span>-9.1550° S, 148.3750° E</span></div>
-              <div class="transect-row"><span class="td-label">📅 Schedule</span><span>10th of every month</span></div>
-            </div>
+            <div id="waterMonitorArea" style="display:none;">
+              <button class="btn-outline" style="width:100%;margin-bottom:10px;color:#888;border-color:#ccc;font-size:0.8rem;padding:7px;" onclick="waterBackToTasks()">← Choose a different source</button>
+
+              <div class="card" style="padding:12px 16px;">
+                <div class="transect-row"><span class="td-label">🌊 Source</span><span id="waterActiveName">—</span></div>
+                <div class="transect-row"><span class="td-label">🏷 Type</span><span id="waterActiveType">—</span></div>
+                <div class="transect-row"><span class="td-label">🧭 Coordinates</span><span id="waterActiveCoords">—</span></div>
+                <div class="transect-row"><span class="td-label">👪 Owner</span><span id="waterActiveOwner">—</span></div>
+              </div>
 
             <div class="nav-gate-card" id="waterNavGateCard">
               <div style="font-size:0.82rem;font-weight:700;color:#0277BD;margin-bottom:8px;">📍 Navigate to Monitoring Point</div>
@@ -2631,7 +2624,7 @@ select.msel {
                 </svg>
                 <div class="compass-info">
                   <div class="c-bearing">Walk SW · 215°</div>
-                  <div class="c-dist"><strong>520 m</strong> to creek</div>
+                  <div class="c-dist"><strong>520 m</strong> to source</div>
                   <div id="waterNavHint" style="margin-top:4px;font-size:0.72rem;color:#888;">Walk to monitoring point — unlock within 30 m</div>
                 </div>
               </div>
@@ -2651,6 +2644,7 @@ select.msel {
             </div>
 
             <button class="btn-primary" id="waterBeginBtn" disabled onclick="nav('screen-water-record')" style="background:#0277BD;margin-top:14px;">Begin Water Quality Reading</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2664,11 +2658,11 @@ select.msel {
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
           <div class="bar-title">Water Quality</div>
-          <div class="bar-subtitle">WQ-7B-03 — Koromba Creek</div>
+          <div class="bar-subtitle" id="waterRecordSubtitle">Monthly reading</div>
         </div>
       </div>
       <div class="scroll-content">
-        <div class="matrix-note" style="background:#e1f5fe;border-color:#81d4fa;color:#0277BD;">
+        <div class="matrix-note" id="waterSecchiNote" style="background:#e1f5fe;border-color:#81d4fa;color:#0277BD;">
           Lower the Secchi disc until it disappears, then record the depth. Take the reading from the shaded side of the canoe/bank.
         </div>
         <div class="p14" style="padding-top:6px;">
@@ -2690,39 +2684,41 @@ select.msel {
             </div>
           </div>
 
-          <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;">🔍 Secchi Disc Reading</div>
-          <div class="card" style="padding:14px 16px;text-align:center;">
-            <div style="font-size:0.75rem;color:#888;margin-bottom:8px;">Depth where disc disappears (cm)</div>
-            <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
-              <button class="tally-btn" onclick="adjSecchi(-5)" style="width:40px;height:40px;font-size:1.2rem;">−</button>
-              <div>
-                <span id="secchiVal" style="font-size:2.2rem;font-weight:700;color:#0277BD;">45</span>
-                <span style="font-size:0.9rem;color:#888;"> cm</span>
+          <div id="waterSecchiSection">
+            <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;">🔍 Secchi Disc Reading <span style="font-size:0.7rem;font-weight:400;color:#888;">(rivers)</span></div>
+            <div class="card" style="padding:14px 16px;text-align:center;">
+              <div style="font-size:0.75rem;color:#888;margin-bottom:8px;">Depth where disc disappears (cm)</div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+                <button class="tally-btn" onclick="adjSecchi(-5)" style="width:40px;height:40px;font-size:1.2rem;">−</button>
+                <div>
+                  <span id="secchiVal" style="font-size:2.2rem;font-weight:700;color:#0277BD;">45</span>
+                  <span style="font-size:0.9rem;color:#888;"> cm</span>
+                </div>
+                <button class="tally-btn" onclick="adjSecchi(5)" style="width:40px;height:40px;font-size:1.2rem;">+</button>
               </div>
-              <button class="tally-btn" onclick="adjSecchi(5)" style="width:40px;height:40px;font-size:1.2rem;">+</button>
+              <div style="font-size:0.68rem;color:#aaa;margin-top:6px;">Tap +/− to adjust by 5 cm, or type below</div>
+              <input type="number" id="secchiInput" class="form-input" style="width:100px;margin:8px auto 0;text-align:center;font-size:0.85rem;padding:6px;" value="45" min="0" max="500" onchange="document.getElementById('secchiVal').textContent=this.value">
             </div>
-            <div style="font-size:0.68rem;color:#aaa;margin-top:6px;">Tap +/− to adjust by 5 cm, or type below</div>
-            <input type="number" id="secchiInput" class="form-input" style="width:100px;margin:8px auto 0;text-align:center;font-size:0.85rem;padding:6px;" value="45" min="0" max="500" onchange="document.getElementById('secchiVal').textContent=this.value">
           </div>
 
           <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;">🌊 Water Observations</div>
           <div class="card" style="padding:12px 16px;">
             <div class="form-group">
               <label class="form-label">Water Colour</label>
-              <select class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+              <select id="waterColour" class="form-input" style="padding:8px 11px;font-size:0.8rem;">
                 <option selected>Clear</option><option>Green</option><option>Brown</option><option>Milky/White</option><option>Dark</option>
               </select>
             </div>
             <div class="form-group">
               <label class="form-label">Odour</label>
-              <select class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+              <select id="waterOdour" class="form-input" style="padding:8px 11px;font-size:0.8rem;">
                 <option selected>None</option><option>Earthy</option><option>Chemical</option><option>Rotten</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Flow</label>
-              <select class="form-input" style="padding:8px 11px;font-size:0.8rem;">
-                <option>Still</option><option selected>Slow</option><option>Moderate</option><option>Fast/Flood</option>
+              <label class="form-label">Flow — is it flowing?</label>
+              <select id="waterFlow" class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+                <option>Still / Not flowing</option><option selected>Slow</option><option>Moderate</option><option>Fast/Flood</option>
               </select>
             </div>
             <div class="form-group">
@@ -2734,10 +2730,137 @@ select.msel {
             </div>
             <div class="form-group">
               <label class="form-label">Notes</label>
-              <textarea class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Any other observations about water conditions, upstream activity, recent rain…"></textarea>
+              <textarea id="waterNotes" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Any other observations about water conditions, upstream activity, recent rain…"></textarea>
             </div>
           </div>
-          <button class="btn-primary" style="background:#0277BD;" onclick="submitWater()">Save &amp; Submit Reading</button>
+
+          <div id="waterCreekSection" style="display:none;">
+            <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;">🐛 Creek Health <span style="font-size:0.7rem;font-weight:400;color:#888;">(small creeks)</span></div>
+            <div class="card" style="padding:12px 16px;">
+              <div class="form-group">
+                <label class="form-label">Pond skaters / surface insects</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button class="weather-pill active" id="wsk-many" onclick="wxSkaters('many')">Many</button>
+                  <button class="weather-pill" id="wsk-few" onclick="wxSkaters('few')">Few</button>
+                  <button class="weather-pill" id="wsk-none" onclick="wxSkaters('none')">None</button>
+                </div>
+                <div style="font-size:0.68rem;color:#888;margin-top:4px;">More surface insects usually means healthier water.</div>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Shading over the water</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button class="weather-pill" id="wsh-open" onclick="wxShade('open')">Open / No shade</button>
+                  <button class="weather-pill active" id="wsh-partial" onclick="wxShade('partial')">Partial</button>
+                  <button class="weather-pill" id="wsh-shaded" onclick="wxShade('shaded')">Shaded</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;">📷 Photo <span style="color:#B71C1C;">*</span></div>
+          <div class="card" style="padding:12px 16px;">
+            <div id="wrPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="wrTriggerPhoto()">
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the source today</div></div>
+            </div>
+            <input type="file" id="wrPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="wrHandlePhoto(this)">
+            <div id="wrPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
+          </div>
+
+          <button class="btn-primary" style="background:#0277BD;margin-top:14px;" onclick="submitWater()">Save &amp; Submit Reading</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: MANAGE WATER SOURCES (registry)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-water-sources">
+      <div class="top-bar" style="background:#0277BD;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Water Sources</div>
+          <div class="bar-subtitle">Register &amp; Manage Monitoring Points</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="matrix-note" style="background:#e1f5fe;border-color:#81d4fa;color:#0277BD;">
+          Register each water source once. The coordinator approves it and assigns the owning clan. Only then does it appear as a monthly monitoring task.
+        </div>
+        <div class="p14" style="padding-bottom:20px;">
+          <button class="btn-primary" style="background:#0277BD;width:100%;margin-bottom:12px;" onclick="openRegisterSource()">+ Register New Water Source</button>
+          <div id="waterSourcesContent">
+            <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: REGISTER WATER SOURCE
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-water-source-register">
+      <div class="top-bar" style="background:#0277BD;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Register Water Source</div>
+          <div class="bar-subtitle">GPS &amp; Photo Required</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div class="form-group">
+            <label class="form-label">Source Name <span style="color:#B71C1C;">*</span></label>
+            <input type="text" id="wsName" class="form-input" placeholder="e.g. Koromba Creek, Ovi Spring…">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Water Source Type <span style="color:#B71C1C;">*</span></label>
+            <div id="wsTypePills" style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="weather-pill" id="wstype-river"  onclick="wsSelectType('river')">🏞 River</button>
+              <button class="weather-pill" id="wstype-creek"  onclick="wsSelectType('creek')">💧 Creek</button>
+              <button class="weather-pill" id="wstype-spring" onclick="wsSelectType('spring')">⛲ Spring</button>
+            </div>
+            <div id="wsTypeHint" style="font-size:0.72rem;color:#888;margin-top:6px;">River readings include a Secchi disc; creeks add pond skaters &amp; shading; springs use the core checks.</div>
+          </div>
+          <div class="card" style="padding:12px 16px;margin-bottom:10px;">
+            <div class="transect-row"><span class="td-label">📍 GPS</span><span id="wsGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">📷 Reference Photo <span style="color:#B71C1C;">*</span></label>
+            <div id="wsPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="wsTriggerPhoto()">
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
+            </div>
+            <input type="file" id="wsPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="wsHandlePhoto(this)">
+            <div id="wsPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description <span style="color:#999;font-weight:400;">(how it is known locally, access notes)</span></label>
+            <textarea id="wsDesc" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Landmarks, who uses it, access path, upstream activity…"></textarea>
+          </div>
+          <div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.75rem;margin-bottom:12px;">
+            ℹ️ This source will be marked <strong>Pending Approval</strong>. The coordinator reviews it and assigns the owning clan before monitoring begins.
+          </div>
+          <button class="btn-primary" style="background:#0277BD;" onclick="submitWaterSource()">Submit for Approval</button>
+          <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: APPROVE WATER SOURCES (coordinator)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-water-approve">
+      <div class="top-bar" style="background:#0277BD;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Approve Water Sources</div>
+          <div class="bar-subtitle">Coordinator — assign owning clan</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div id="waterApproveContent">
+            <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -5042,7 +5165,7 @@ const ALL_SCREENS = [
   'screen-observations','screen-obs-entry',
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-qabb-setup','screen-qabb-matrix',
-  'screen-water-setup','screen-water-record',
+  'screen-water-setup','screen-water-record','screen-water-sources','screen-water-source-register','screen-water-approve',
   'screen-pheno-setup','screen-pheno-plots','screen-pheno-establish','screen-pheno-inactive','screen-pheno-record',
   'screen-sdm','screen-facility',
   'screen-alerts',
@@ -5094,6 +5217,7 @@ function showScreen(id) {
   if (id === 'screen-reports' && _reportProfile) {
     loadCachedReport(_reportProfile);
   }
+  if (id === 'screen-water-approve') initWaterApprove();
 }
 
 /* Navigate, pushing to history */
@@ -5105,6 +5229,9 @@ function nav(id) {
   if (id === 'screen-qabb-matrix') initQabbMatrix();
   if (id === 'screen-water-setup') initWater();
   if (id === 'screen-water-record') initWaterRecord();
+  if (id === 'screen-water-sources') initWaterSources();
+  if (id === 'screen-water-source-register') initRegisterSource();
+  if (id === 'screen-water-approve') initWaterApprove();
   if (id === 'screen-pheno-setup') initPheno();
   if (id === 'screen-pheno-plots') initPhenoPlots();
   if (id === 'screen-pheno-establish') initPhenoEstablish();
@@ -5262,6 +5389,7 @@ function enrollCheckPasscode() {
       document.getElementById('enrollManageTopicsBtn').style.display = 'block';
       document.getElementById('enrollUpdateProfileBtn').style.display = 'block';
       document.getElementById('enrollGrantAuthBtn').style.display = 'block';
+      document.getElementById('enrollApproveWaterBtn').style.display = 'block';
       document.getElementById('enrollPassStatus').textContent = '✓ Coordinator verified. Choose an action.';
       document.getElementById('enrollPassStatus').style.color = '#2E7D32';
       /* Pre-load zones and topics ready for step 2 */
@@ -5847,23 +5975,107 @@ function wxQ(onId, offId) {
 
 /* ── Water Quality Setup ── */
 var waterVerifiedFlag = false, waterArrivedFlag = false;
+var _activeWaterSource = null;
+
+function monthKey(d) { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+
+/* Count this clan's water readings for a given source in the current month */
+function waterReadingsThisMonth(records, sourceId, clan) {
+  var mk = monthKey();
+  return records.filter(function(r){
+    if (r.water_source_id !== sourceId) return false;
+    if (clan && r.clan && r.clan !== clan) return false;
+    var t = r.timestamp ? new Date(r.timestamp) : null;
+    return t && monthKey(t) === mk;
+  }).length;
+}
 
 function initWater() {
-  waterVerifiedFlag = false; waterArrivedFlag = false;
-  document.getElementById('waterBeginBtn').disabled = true;
-  document.getElementById('waterFpBtn').classList.remove('verified');
-  document.getElementById('waterFpTxt').textContent = 'Tap to Verify Identity';
-  document.getElementById('waterFpSection').style.display = 'none';
-  document.getElementById('waterNavGateCard').classList.remove('arrived');
-  document.getElementById('waterBtnArrive').disabled = false;
-  document.getElementById('waterBtnArrive').textContent = "Simulate: I’ve Reached the Creek ✓";
-  document.getElementById('waterNavHint').textContent = 'Walk to monitoring point — unlock within 30 m';
+  /* Show the ownership-gated task list; monitoring area stays hidden until a source is chosen */
+  document.getElementById('waterMonitorArea').style.display = 'none';
   document.getElementById('waterLoading').style.display = 'block';
   document.getElementById('waterContent').style.display = 'none';
+  var tasks = document.getElementById('waterSourceTasks');
+  tasks.style.display = 'block';
+  tasks.innerHTML = '<div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>';
   setTimeout(function() {
     document.getElementById('waterLoading').style.display = 'none';
     document.getElementById('waterContent').style.display = 'block';
-  }, 1000);
+    renderWaterTasks();
+    syncWaterSourcesFromServer(function(ok){ if (ok) renderWaterTasks(); });
+  }, 600);
+}
+
+function renderWaterTasks() {
+  var tasks = document.getElementById('waterSourceTasks');
+  var clan = myClan();
+  getAllRecords('water_sources', function(sources) {
+    getAllRecords('water', function(readings) {
+      var owned = sources.filter(function(s){
+        return s.status === 'approved' && (s.owner_clan === clan || s.owner_clan_2 === clan);
+      });
+      var h = '<div style="font-size:0.82rem;font-weight:700;color:#0277BD;margin:4px 2px 8px;">Your clan’s water sources — '+(clan||'your clan')+'</div>';
+      if (owned.length === 0) {
+        h += '<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No water sources are assigned to your clan yet. Register a source and the coordinator will assign ownership before it appears here.</div>';
+        tasks.innerHTML = h;
+        return;
+      }
+      owned.forEach(function(s){
+        var tm = wsTypeMeta(s.source_type);
+        var done = waterReadingsThisMonth(readings, s.id, clan) > 0;
+        var split = s.owner_clan_2 ? true : false;
+        var border = done ? '#A5D6A7' : '#81d4fa';
+        h += '<div class="card" style="padding:12px 14px;margin-bottom:10px;border:1px solid '+border+';cursor:'+(done?'default':'pointer')+';" onclick="'+(done?'':'selectWaterTask('+s.id+')')+'">';
+        h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">';
+        h += '<span style="font-size:0.9rem;font-weight:700;">'+tm.emoji+' '+(s.name||'(unnamed)')+'</span>';
+        if (done) h += '<span style="font-size:0.68rem;font-weight:700;color:#2E7D32;background:#E8F5E9;border:1px solid #A5D6A7;padding:2px 8px;border-radius:10px;white-space:nowrap;">✓ Done this month</span>';
+        else h += '<span style="font-size:0.68rem;font-weight:700;color:#0277BD;background:#E1F5FE;border:1px solid #81d4fa;padding:2px 8px;border-radius:10px;white-space:nowrap;">Due — tap to monitor</span>';
+        h += '</div>';
+        h += '<div style="font-size:0.73rem;color:#666;">'+tm.label+' · 📍 '+(s.lat||'?')+', '+(s.lng||'?')+'</div>';
+        if (split) {
+          var other = (s.owner_clan === clan) ? s.owner_clan_2 : s.owner_clan;
+          h += '<div style="font-size:0.7rem;color:#8a6d00;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:4px 8px;margin-top:6px;">⚖ Shared with '+other+' — 2 readings/month, one per clan</div>';
+        }
+        h += '</div>';
+      });
+      tasks.innerHTML = h;
+    });
+  });
+}
+
+function waterBackToTasks() {
+  _activeWaterSource = null;
+  document.getElementById('waterMonitorArea').style.display = 'none';
+  var tasks = document.getElementById('waterSourceTasks');
+  tasks.style.display = 'block';
+  renderWaterTasks();
+}
+
+function selectWaterTask(id) {
+  getAllRecords('water_sources', function(sources) {
+    var s = sources.find(function(x){ return x.id === id; });
+    if (!s) { toast('Source not found.'); return; }
+    _activeWaterSource = s;
+    var tm = wsTypeMeta(s.source_type);
+    document.getElementById('waterActiveName').textContent = tm.emoji + ' ' + (s.name||'');
+    document.getElementById('waterActiveType').textContent = tm.label;
+    document.getElementById('waterActiveCoords').textContent = (s.lat||'?') + ', ' + (s.lng||'?');
+    var owner = s.owner_clan || '—';
+    if (s.owner_clan_2) owner += ' + ' + s.owner_clan_2 + ' (split)';
+    document.getElementById('waterActiveOwner').textContent = owner;
+    /* reset the arrive/verify gate for this source */
+    waterVerifiedFlag = false; waterArrivedFlag = false;
+    document.getElementById('waterBeginBtn').disabled = true;
+    document.getElementById('waterFpBtn').classList.remove('verified');
+    document.getElementById('waterFpTxt').textContent = 'Tap to Verify Identity';
+    document.getElementById('waterFpSection').style.display = 'none';
+    document.getElementById('waterNavGateCard').classList.remove('arrived');
+    document.getElementById('waterBtnArrive').disabled = false;
+    document.getElementById('waterBtnArrive').textContent = 'Simulate: I’ve Reached the Source ✓';
+    document.getElementById('waterNavHint').textContent = 'Walk to the monitoring point — unlock within 30 m';
+    document.getElementById('waterSourceTasks').style.display = 'none';
+    document.getElementById('waterMonitorArea').style.display = 'block';
+  });
 }
 function waterArrive() {
   var btn = document.getElementById('waterBtnArrive');
@@ -5894,6 +6106,8 @@ function waterVerify() {
 function checkWaterReady() {
   document.getElementById('waterBeginBtn').disabled = !(waterVerifiedFlag && waterArrivedFlag);
 }
+var _wSkaters = 'many', _wShade = 'partial', wrPhotoData = null;
+
 function initWaterRecord() {
   var now = new Date();
   var hh = String(now.getHours()).padStart(2,'0');
@@ -5901,6 +6115,31 @@ function initWaterRecord() {
   document.getElementById('waterTime').value = hh + ':' + mm;
   var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('waterDate').textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+
+  var src = _activeWaterSource;
+  var type = src ? src.source_type : 'river';
+  var tm = wsTypeMeta(type);
+  var sub = document.getElementById('waterRecordSubtitle');
+  if (sub) sub.textContent = src ? (tm.emoji + ' ' + src.name + ' · ' + tm.label) : 'Monthly reading';
+
+  /* type-driven sections */
+  var isRiver = (type === 'river');
+  var isCreek = (type === 'creek');
+  document.getElementById('waterSecchiSection').style.display = isRiver ? 'block' : 'none';
+  document.getElementById('waterSecchiNote').style.display   = isRiver ? 'block' : 'none';
+  document.getElementById('waterCreekSection').style.display = isCreek ? 'block' : 'none';
+
+  /* reset creek pills to defaults */
+  _wSkaters = 'many'; _wShade = 'partial';
+  ['many','few','none'].forEach(function(k){ var el=document.getElementById('wsk-'+k); if(el) el.classList.toggle('active', k==='many'); });
+  ['open','partial','shaded'].forEach(function(k){ var el=document.getElementById('wsh-'+k); if(el) el.classList.toggle('active', k==='partial'); });
+
+  /* reset photo */
+  wrPhotoData = null;
+  var pb = document.getElementById('wrPhotoBox');
+  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the source today</div></div>';
+  var ps = document.getElementById('wrPhotoStatus');
+  if (ps){ ps.textContent='No photo taken'; ps.style.color='#888'; }
 }
 function adjSecchi(d) {
   var el = document.getElementById('secchiInput');
@@ -5908,9 +6147,314 @@ function adjSecchi(d) {
   el.value = v;
   document.getElementById('secchiVal').textContent = v;
 }
-function submitWater() { saveRecord('water', collectWaterData(), function() { clearDraft('screen-water-record'); toast('Water quality saved to device ✓'); }); }
+function wxSkaters(v){ _wSkaters=v; ['many','few','none'].forEach(function(k){var el=document.getElementById('wsk-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function wxShade(v){ _wShade=v; ['open','partial','shaded'].forEach(function(k){var el=document.getElementById('wsh-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function wrTriggerPhoto(){ var inp=document.getElementById('wrPhotoInput'); if(inp) inp.click(); }
+function wrHandlePhoto(input){
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    wrPhotoData = e.target.result;
+    var box=document.getElementById('wrPhotoBox');
+    if (box) box.innerHTML = '<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;" alt="Reading photo">';
+    var s=document.getElementById('wrPhotoStatus');
+    if (s){ s.textContent='✓ Photo attached'; s.style.color='#2E7D32'; }
+  };
+  reader.readAsDataURL(file);
+}
+function submitWater() {
+  if (!wrPhotoData) { toast('Capture a photo of the source before submitting.'); return; }
+  saveRecord('water', collectWaterData(), function() {
+    clearDraft('screen-water-record');
+    toast('Water quality saved to device ✓');
+    _activeWaterSource = null;
+    nav('screen-water-setup');
+  });
+}
 function wxW(on, off) { document.getElementById('wwx-'+on).classList.add('active'); document.getElementById('wwx-'+off).classList.remove('active'); }
 function wxPol(on, off) { document.getElementById('wpol-'+on).classList.add('active'); document.getElementById('wpol-'+off).classList.remove('active'); }
+
+/* ══════════════════════════════════════
+   WATER SOURCES — registry, registration, approval, ownership
+══════════════════════════════════════ */
+var WS_TYPES = [
+  {key:'river',  label:'River',  emoji:'🌊'},
+  {key:'creek',  label:'Creek',  emoji:'💧'},
+  {key:'spring', label:'Spring', emoji:'⛲'}
+];
+var wsSelectedType = '', wsPhotoData = null, wsGPSFix = null;
+
+function wsTypeMeta(key){ return WS_TYPES.find(function(t){return t.key===key;}) || {label:key||'—', emoji:'🌊'}; }
+function myClan(){ return (window._cachedProfile && window._cachedProfile.clan) || ''; }
+
+/* ── Registry list (steward view) ── */
+function initWaterSources() {
+  renderWaterSourcesList();
+  syncWaterSourcesFromServer(function(ok){ if (ok) renderWaterSourcesList(); });
+}
+function renderWaterSourcesList() {
+  var c = document.getElementById('waterSourcesContent');
+  if (!c) return;
+  getAllRecords('water_sources', function(rows) {
+    var mine = rows.filter(function(r){
+      return r.proposed_clan === myClan() || r.owner_clan === myClan() || r.owner_clan_2 === myClan();
+    });
+    if (mine.length === 0) {
+      c.innerHTML = '<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No water sources registered yet for '+(myClan()||'your clan')+'. Tap “Register New Water Source” to add the first one.</div>';
+      return;
+    }
+    var order = {pending:0, approved:1, rejected:2};
+    mine.sort(function(a,b){ return (order[a.status]||9)-(order[b.status]||9); });
+    var h = '';
+    mine.forEach(function(r){
+      var tm = wsTypeMeta(r.source_type);
+      var badge, bcol, bbg, bbd;
+      if (r.status==='approved'){ badge='✓ Approved'; bcol='#2E7D32'; bbg='#E8F5E9'; bbd='#A5D6A7'; }
+      else if (r.status==='rejected'){ badge='✕ Rejected'; bcol='#B71C1C'; bbg='#FFEBEE'; bbd='#FFCDD2'; }
+      else { badge='⏳ Pending Approval'; bcol='#F57F17'; bbg='#FFF8E1'; bbd='#FFE082'; }
+      h += '<div class="card" style="padding:12px 14px;margin-bottom:10px;">';
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
+      h += '<span style="font-size:0.9rem;font-weight:700;">'+tm.emoji+' '+(r.name||'(unnamed)')+'</span>';
+      h += '<span style="font-size:0.68rem;font-weight:700;color:'+bcol+';background:'+bbg+';border:1px solid '+bbd+';padding:2px 8px;border-radius:10px;white-space:nowrap;">'+badge+'</span>';
+      h += '</div>';
+      h += '<div style="font-size:0.74rem;color:#666;">'+tm.label+' · 📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-top:4px;">'+r.description+'</div>';
+      if (r.status==='approved') {
+        var own = r.owner_clan || '—';
+        if (r.owner_clan_2) own += ' + ' + r.owner_clan_2 + ' (split)';
+        h += '<div style="font-size:0.72rem;color:#2E7D32;margin-top:6px;">Owner clan: <strong>'+own+'</strong></div>';
+      }
+      h += '</div>';
+    });
+    c.innerHTML = h;
+  });
+}
+
+/* ── Registration form ── */
+function openRegisterSource() { nav('screen-water-source-register'); }
+
+function initRegisterSource() {
+  wsSelectedType = ''; wsPhotoData = null; wsGPSFix = null;
+  var nm = document.getElementById('wsName'); if (nm) nm.value = '';
+  var ds = document.getElementById('wsDesc'); if (ds) ds.value = '';
+  WS_TYPES.forEach(function(t){ var el=document.getElementById('wstype-'+t.key); if(el) el.classList.remove('active'); });
+  var ps = document.getElementById('wsPhotoStatus'); if (ps){ ps.textContent='No photo taken'; ps.style.color='#888'; }
+  var pb = document.getElementById('wsPhotoBox');
+  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
+  var g = document.getElementById('wsGPS');
+  if (g){ g.textContent='📍 Acquiring GPS…'; g.style.color='#888'; }
+  captureGPS(function(gps, err){
+    if (gps){ wsGPSFix=gps; if(g){ g.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'; g.style.color='#2E6B38'; } }
+    else { if(g){ g.textContent='⚠ '+err; g.style.color='#E65100'; } }
+  });
+}
+
+function wsSelectType(key) {
+  wsSelectedType = key;
+  WS_TYPES.forEach(function(t){ var el=document.getElementById('wstype-'+t.key); if(el) el.classList.toggle('active', t.key===key); });
+}
+
+function wsTriggerPhoto() { var inp=document.getElementById('wsPhotoInput'); if(inp) inp.click(); }
+function wsHandlePhoto(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    wsPhotoData = e.target.result;
+    var box=document.getElementById('wsPhotoBox');
+    if (box) box.innerHTML = '<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;" alt="Source photo">';
+    var s=document.getElementById('wsPhotoStatus');
+    if (s){ s.textContent='✓ Photo attached'; s.style.color='#2E7D32'; }
+  };
+  reader.readAsDataURL(file);
+}
+
+function submitWaterSource() {
+  var name = (document.getElementById('wsName')||{}).value || '';
+  name = name.trim();
+  if (!name) { toast('Enter a source name.'); return; }
+  if (!wsSelectedType) { toast('Select the water source type.'); return; }
+  if (!wsGPSFix) { toast('Wait for GPS before submitting.'); return; }
+  if (!wsPhotoData) { toast('Capture a reference photo first.'); return; }
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var now=new Date();
+  var data = {
+    survey_type:'water_source',
+    uid: generateRecordId('WSRC'),
+    name: name,
+    source_type: wsSelectedType,
+    lat: wsGPSFix.lat, lng: wsGPSFix.lng, gps_accuracy: wsGPSFix.accuracy,
+    description: ((document.getElementById('wsDesc')||{}).value||'').trim(),
+    photo: wsPhotoData,
+    status: 'pending',
+    proposed_by: (window._cachedProfile && window._cachedProfile.stewardId) || '',
+    proposed_clan: myClan(),
+    owner_clan: null, owner_clan_2: null,
+    registered_date: now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear()
+  };
+  saveRecord('water_sources', data, function(){
+    postRegisterWaterSource(data);
+    toast('Water source submitted for approval ✓');
+    nav('screen-water-sources');
+  });
+}
+
+/* ── Central sync (mirrors zones/topics) ── */
+function wsRegistryRecord(r) {
+  /* strip the local autoincrement id; uid is the shared identity */
+  return {
+    uid: r.uid, name: r.name, source_type: r.source_type,
+    lat: r.lat, lng: r.lng, gps_accuracy: r.gps_accuracy,
+    description: r.description, photo: r.photo || null,
+    status: r.status, proposed_by: r.proposed_by, proposed_clan: r.proposed_clan,
+    owner_clan: r.owner_clan || null, owner_clan_2: r.owner_clan_2 || null,
+    registered_date: r.registered_date, approved_date: r.approved_date || null,
+    approved_by: r.approved_by || null
+  };
+}
+
+function postRegisterWaterSource(rec) {
+  if (!UPLOAD_ENDPOINT || !navigator.onLine || !rec || !rec.uid) return;
+  fetch(UPLOAD_ENDPOINT, {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ _action:'register_water_source', _secret: UPLOAD_SECRET, record: wsRegistryRecord(rec) })
+  }).catch(function(){ /* stays local; re-syncs later */ });
+}
+
+function pushWaterRegistry(cb) {
+  if (!UPLOAD_ENDPOINT || !navigator.onLine) { if (cb) cb(false); return; }
+  getAllRecords('water_sources', function(rows) {
+    var list = rows.map(wsRegistryRecord).filter(function(r){ return r.uid; });
+    fetch(UPLOAD_ENDPOINT, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ _action:'update_water_sources', _secret: UPLOAD_SECRET, _coordinator_secret: window._coordSecret, water_sources: list })
+    }).then(function(r){ return r.json(); })
+      .then(function(d){ if (cb) cb(d && d.status === 'ok'); })
+      .catch(function(){ if (cb) cb(false); });
+  });
+}
+
+/* Pull the registry and merge into the local store by uid. */
+function syncWaterSourcesFromServer(cb) {
+  if (!UPLOAD_ENDPOINT || !navigator.onLine) { if (cb) cb(false); return; }
+  fetch(UPLOAD_ENDPOINT + '?action=water_sources')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d || d.status !== 'ok' || !d.water_sources) { if (cb) cb(false); return; }
+      getAllRecords('water_sources', function(localRows) {
+        var byUid = {};
+        localRows.forEach(function(r){ if (r.uid) byUid[r.uid] = r; });
+        var pending = d.water_sources.slice();
+        var next = function() {
+          if (pending.length === 0) { if (cb) cb(true); return; }
+          var sr = pending.shift();
+          if (!sr.uid) { next(); return; }
+          var local = byUid[sr.uid];
+          if (local) {
+            ['name','source_type','lat','lng','gps_accuracy','description','photo','status','owner_clan','owner_clan_2','approved_date','approved_by','proposed_by','proposed_clan','registered_date'].forEach(function(k){ local[k] = sr[k]; });
+            updateRecord('water_sources', local, function(){ next(); });
+          } else {
+            sr.survey_type = 'water_source'; sr.synced = true;
+            saveRecord('water_sources', sr, function(){ next(); });
+          }
+        };
+        next();
+      });
+    })
+    .catch(function(){ if (cb) cb(false); });
+}
+
+/* ── Approval (coordinator): assign owning clan, optional split ── */
+function wsClanCandidates(rows) {
+  var set = {};
+  rows.forEach(function(r){
+    [r.proposed_clan, r.owner_clan, r.owner_clan_2].forEach(function(cl){ if (cl) set[cl] = true; });
+  });
+  var list = Object.keys(set);
+  /* ensure a couple of neighbours exist so a split can be demonstrated */
+  ['Afore','Itokama','Jegarata'].forEach(function(cl){ if (list.indexOf(cl)<0) list.push(cl); });
+  list.sort();
+  return list;
+}
+
+function initWaterApprove() {
+  renderWaterApprove();
+  syncWaterSourcesFromServer(function(ok){ if (ok) renderWaterApprove(); });
+}
+function renderWaterApprove() {
+  var c = document.getElementById('waterApproveContent');
+  if (!c) return;
+  getAllRecords('water_sources', function(rows) {
+    var pending = rows.filter(function(r){ return r.status==='pending'; });
+    var clans = wsClanCandidates(rows);
+    if (pending.length === 0) {
+      c.innerHTML = '<div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;">No water sources awaiting approval. New registrations from stewards will appear here.</div>';
+      return;
+    }
+    var h = '<div class="matrix-note" style="background:#FFF8E1;border-color:#FFE082;color:#F57F17;">'+pending.length+' source'+(pending.length>1?'s':'')+' awaiting approval. Assign the owning clan — only that clan will see the monitoring task. Add a second clan only when a controlled split is justified.</div>';
+    pending.forEach(function(r){
+      var tm = wsTypeMeta(r.source_type);
+      var ownOpts = clans.map(function(cl){ return '<option value="'+cl+'"'+(cl===r.proposed_clan?' selected':'')+'>'+cl+'</option>'; }).join('');
+      var own2Opts = '<option value="">None (single clan)</option>' + clans.map(function(cl){ return '<option value="'+cl+'">'+cl+'</option>'; }).join('');
+      h += '<div class="card" style="padding:12px 14px;margin-bottom:12px;">';
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
+      h += '<span style="font-size:0.92rem;font-weight:700;">'+tm.emoji+' '+(r.name||'(unnamed)')+'</span>';
+      h += '<span style="font-size:0.68rem;font-weight:700;color:#F57F17;background:#FFF8E1;border:1px solid #FFE082;padding:2px 8px;border-radius:10px;">'+tm.label+'</span>';
+      h += '</div>';
+      if (r.photo) h += '<img src="'+r.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" alt="Source photo">';
+      h += '<div style="font-size:0.74rem;color:#666;">📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      h += '<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Proposed by '+(r.proposed_by||'—')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
+      if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
+      h += '<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label>';
+      h += '<select id="wa-owner-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+ownOpts+'</select></div>';
+      h += '<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span></label>';
+      h += '<select id="wa-owner2-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+own2Opts+'</select>';
+      h += '<div style="font-size:0.68rem;color:#888;margin-top:4px;">A split allows 2 readings/month — one per clan. Leave as None for single ownership.</div></div>';
+      h += '<div style="display:flex;gap:8px;">';
+      h += '<button class="btn-primary" style="background:#2E7D32;flex:2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="approveWaterSource('+r.id+')">✓ Approve</button>';
+      h += '<button class="btn-outline" style="flex:1;color:#B71C1C;border-color:#FFCDD2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="rejectWaterSource('+r.id+')">Reject</button>';
+      h += '</div>';
+      h += '</div>';
+    });
+    c.innerHTML = h;
+  });
+}
+
+function approveWaterSource(id) {
+  var ownerEl = document.getElementById('wa-owner-'+id);
+  var owner2El = document.getElementById('wa-owner2-'+id);
+  var owner = ownerEl ? ownerEl.value : '';
+  var owner2 = owner2El ? owner2El.value : '';
+  if (!owner) { toast('Select an owner clan.'); return; }
+  if (owner2 && owner2 === owner) { toast('Second clan must differ from the owner clan.'); return; }
+  getAllRecords('water_sources', function(rows) {
+    var r = rows.find(function(x){ return x.id === id; });
+    if (!r) { toast('Source not found.'); return; }
+    r.status = 'approved';
+    r.owner_clan = owner;
+    r.owner_clan_2 = owner2 || null;
+    r.approved_date = new Date().toISOString().split('T')[0];
+    r.approved_by = (window._cachedProfile && window._cachedProfile.stewardId) || 'coordinator';
+    r.synced = false;
+    updateRecord('water_sources', r, function(){
+      pushWaterRegistry(function(ok){
+        toast('Approved — ' + owner + (owner2 ? ' + ' + owner2 : '') + (ok ? ' · synced ✓' : ' ✓'));
+      });
+      initWaterApprove();
+    });
+  });
+}
+
+function rejectWaterSource(id) {
+  getAllRecords('water_sources', function(rows) {
+    var r = rows.find(function(x){ return x.id === id; });
+    if (!r) return;
+    r.status = 'rejected';
+    r.synced = false;
+    updateRecord('water_sources', r, function(){ pushWaterRegistry(function(){}); toast('Source rejected'); initWaterApprove(); });
+  });
+}
 
 /* ── Phenology ── */
 var PHENO_CROPS = [
@@ -7062,8 +7606,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 6;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts'];
+var DB_VERSION = 7;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -8553,23 +9097,32 @@ function collectQabbData() {
 }
 
 function collectWaterData() {
+  var src = _activeWaterSource || {};
+  var type = src.source_type || 'river';
+  var val = function(id){ var e=document.getElementById(id); return e ? e.value : ''; };
   var data = {
     survey_type: 'water',
-    station: 'WQ-7B-03',
+    water_source_id: (typeof src.id !== 'undefined') ? src.id : null,
+    water_source_name: src.name || '',
+    source_type: type,
+    clan: myClan(),
     date: document.getElementById('waterDate') ? document.getElementById('waterDate').textContent : '',
-    time: document.getElementById('waterTime') ? document.getElementById('waterTime').value : '',
-    secchi_depth_cm: parseInt(document.getElementById('secchiInput') ? document.getElementById('secchiInput').value : 0) || 0
+    time: val('waterTime'),
+    weather: (document.getElementById('wwx-sunny') && document.getElementById('wwx-sunny').classList.contains('active')) ? 'Sunny' : 'Cloudy',
+    water_colour: val('waterColour'),
+    odour: val('waterOdour'),
+    flow: val('waterFlow'),
+    pollution: document.getElementById('wpol-y') && document.getElementById('wpol-y').classList.contains('active') ? 'Yes' : 'No',
+    notes: val('waterNotes'),
+    photo: wrPhotoData || null
   };
-  var selects = document.querySelectorAll('#screen-water-record select');
-  selects.forEach(function(sel) {
-    var label = sel.previousElementSibling || sel.parentElement.querySelector('label');
-    if (label) {
-      var key = label.textContent.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
-      data[key] = sel.value;
-    }
-  });
-  var pollution = document.querySelector('#screen-water-record .yn-btn.ay, #screen-water-record .yn-btn.an');
-  if (pollution) data.pollution = pollution.textContent.trim();
+  if (type === 'river') {
+    data.secchi_depth_cm = parseInt(val('secchiInput') || 0) || 0;
+  }
+  if (type === 'creek') {
+    data.pond_skaters = _wSkaters;
+    data.shading = _wShade;
+  }
   return data;
 }
 

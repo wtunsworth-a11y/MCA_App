@@ -49,7 +49,8 @@ var REPORT_EMAILS     = ['w.unsworth@landscapealliance.org'];
  *   3. After running, remove or blank the value in the function body
  *      (it is now stored in Script Properties and this code is no longer needed).
  *
- * The key protects: update_zones, update_topics, grant_authorisation.
+ * The key protects: update_zones, update_topics, grant_authorisation,
+ * certify_trainer, update_water_sources.
  * It is NEVER stored in the phone app — only held in memory during a session.
  */
 function setCoordinatorSecret() {
@@ -148,6 +149,57 @@ function saveTopicConfig(topics) {
   var json   = JSON.stringify(topics, null, 2);
   if (files.hasNext()) { files.next().setContent(json); }
   else { folder.createFile('_topics.json', json, MimeType.PLAIN_TEXT); }
+}
+
+/* ─── Water source registry ────────────────────────────────────────────
+ * _water_sources.json in Drive: the authoritative list of monitorable water
+ * sources, keyed by a client-generated uid. Stewards append pending entries
+ * (register_water_source — upload secret only). The coordinator sets status
+ * and owning clan(s) (update_water_sources — coordinator key required).
+ * All phones GET ?action=water_sources to pull the list and filter by clan. */
+function loadWaterSourcesList() {
+  try {
+    var folder = getDataFolder();
+    var files  = folder.getFilesByName('_water_sources.json');
+    if (files.hasNext()) {
+      return JSON.parse(files.next().getBlob().getDataAsString()) || [];
+    }
+  } catch(e) { /* fall through */ }
+  return [];
+}
+
+function saveWaterSourcesList(list) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_water_sources.json');
+  var json   = JSON.stringify(list || [], null, 2);
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_water_sources.json', json, MimeType.PLAIN_TEXT); }
+}
+
+function getWaterSources() {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', water_sources: loadWaterSourcesList() }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* Steward appends/updates a pending registration (identified by uid). */
+function registerWaterSource(record) {
+  if (!record || !record.uid) {
+    return { status: 'error', message: 'Missing water source uid' };
+  }
+  var list = loadWaterSourcesList();
+  var idx = -1;
+  for (var i = 0; i < list.length; i++) { if (list[i].uid === record.uid) { idx = i; break; } }
+  if (idx === -1) { list.push(record); }
+  else if (list[idx].status === 'pending') { list[idx] = record; } /* allow edits only while pending */
+  saveWaterSourcesList(list);
+  return { status: 'ok', uid: record.uid, count: list.length };
+}
+
+/* Coordinator overwrites the registry (approvals, ownership, rejections). */
+function updateWaterSources(list) {
+  saveWaterSourcesList(list || []);
+  return { status: 'ok', message: 'Water source registry saved', count: (list || []).length };
 }
 
 /* ─── Training authorisation records ───────────────────────────────── */
@@ -608,7 +660,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -644,6 +696,22 @@ function doPost(e) {
       var result = certifyTrainer(body);
       return ContentService
         .createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    /* Water source registry — steward registration (upload secret only) */
+    if (body._action === 'register_water_source') {
+      var regResult = registerWaterSource(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(regResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    /* Water source registry — coordinator approval/ownership (coordinator key required) */
+    if (body._action === 'update_water_sources') {
+      var upResult = updateWaterSources(body.water_sources);
+      return ContentService
+        .createTextOutput(JSON.stringify(upResult))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -693,6 +761,7 @@ function doGet(e) {
 
   if (action === 'zones')  { return getZoneList();  }
   if (action === 'topics') { return getTopicList(); }
+  if (action === 'water_sources') { return getWaterSources(); }
 
   if (action === 'authorisations') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';

@@ -1595,6 +1595,7 @@ select.msel {
           <button class="btn-outline" id="enrollUpdateProfileBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showUpdateProfile()">✏ Update Existing Profile</button>
           <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()">🎓 Grant Training Authorisation</button>
           <button class="btn-outline" id="enrollApproveWaterBtn" style="display:none;margin-top:8px;width:100%;border-color:#0277BD;color:#0277BD;" onclick="showScreen('screen-water-approve')">💧 Approve Water Sources</button>
+          <button class="btn-outline" id="enrollApproveFacBtn" style="display:none;margin-top:8px;width:100%;border-color:#283593;color:#283593;" onclick="showScreen('screen-facility-approve')">🏫 Approve Facilities</button>
         </div>
 
         <!-- STEP 2: Profile -->
@@ -3046,31 +3047,100 @@ select.msel {
     <div class="screen" id="screen-sdm">
       <div class="top-bar">
         <button class="back-btn" onclick="goBack()">←</button>
-        <div><div class="bar-title">Service Delivery Monitoring</div></div>
+        <div><div class="bar-title">Service Delivery Monitoring</div><div class="bar-subtitle">Schools &amp; health facilities</div></div>
       </div>
       <div class="scroll-content">
-        <div class="p14">
-          <div class="card">
-            <div style="font-size:0.85rem;font-weight:600;color:#333;margin-bottom:8px;">Your monitoring days this month:</div>
-            <span class="chip">8 June 2026</span>
-            <span class="chip">19 June 2026</span>
+        <div class="matrix-note" style="background:#e8eaf6;border-color:#9fa8da;color:#283593;">
+          Register each facility once. The coordinator approves it and assigns the owning clan. Only the owning clan sees it as a monitoring task.
+        </div>
+        <div class="p14" style="padding-bottom:20px;">
+          <button class="btn-outline" style="width:100%;margin-bottom:12px;border-color:#283593;color:#283593;" onclick="nav('screen-facilities')">🗂 Manage Facilities</button>
+          <div id="facilityTasks">
+            <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
           </div>
-          <div class="section-label">Assigned Facilities</div>
-          <div class="facility-card" onclick="openFacility('Afore Health Centre','health')">
-            <div class="fac-header">
-              <span class="fac-icon">🏥</span>
-              <div><div class="fac-name">Afore Health Centre</div><div class="fac-type">Health Facility</div></div>
-            </div>
-            <div class="fac-meta">📅 Due: 8 June 2026</div>
-            <span class="badge-pending">⏳ Pending</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: MANAGE FACILITIES (registry)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-facilities">
+      <div class="top-bar" style="background:#283593;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Facilities</div><div class="bar-subtitle">Register &amp; Manage</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="matrix-note" style="background:#e8eaf6;border-color:#9fa8da;color:#283593;">
+          Register each school or health facility once. The coordinator approves it and assigns the owning clan before monitoring begins.
+        </div>
+        <div class="p14" style="padding-bottom:20px;">
+          <button class="btn-primary" style="background:#283593;width:100%;margin-bottom:12px;" onclick="openRegisterFacility()">+ Register New Facility</button>
+          <div id="facilitiesContent">
+            <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
           </div>
-          <div class="facility-card" onclick="openFacility('Niniuri Primary School','school')">
-            <div class="fac-header">
-              <span class="fac-icon">🏫</span>
-              <div><div class="fac-name">Niniuri Primary School</div><div class="fac-type">Primary Education</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: REGISTER FACILITY
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-facility-register">
+      <div class="top-bar" style="background:#283593;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Register Facility</div><div class="bar-subtitle">GPS &amp; Photo Required</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div class="form-group">
+            <label class="form-label">Facility Name <span style="color:#B71C1C;">*</span></label>
+            <input type="text" id="facName" class="form-input" placeholder="e.g. Niniuri Primary School">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Facility Type <span style="color:#B71C1C;">*</span></label>
+            <div id="facTypePills" style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="weather-pill" id="factype-school" onclick="facSelectType('school')">🏫 School</button>
+              <button class="weather-pill" id="factype-health" onclick="facSelectType('health')">🏥 Health Centre</button>
+              <button class="weather-pill" id="factype-aidpost" onclick="facSelectType('aidpost')">⛑ Aid Post</button>
             </div>
-            <div class="fac-meta">📅 Due: 8 June 2026</div>
-            <span class="badge-pending">⏳ Pending</span>
+          </div>
+          <div class="card" style="padding:12px 16px;margin-bottom:10px;">
+            <div class="transect-row"><span class="td-label">📍 GPS</span><span id="facGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">📷 Reference Photo <span style="color:#B71C1C;">*</span></label>
+            <div id="facPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="facTriggerPhoto()">
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
+            </div>
+            <input type="file" id="facPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="facHandlePhoto(this)">
+            <div id="facPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description <span style="color:#999;font-weight:400;">(who runs it, catchment, access notes)</span></label>
+            <textarea id="facDesc" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Operating authority, villages served, access path…"></textarea>
+          </div>
+          <div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.75rem;margin-bottom:12px;">
+            ℹ️ This facility will be marked <strong>Pending Approval</strong>. The coordinator assigns the owning clan before monitoring begins.
+          </div>
+          <button class="btn-primary" style="background:#283593;" onclick="submitFacility()">Submit for Approval</button>
+          <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: APPROVE FACILITIES (coordinator)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-facility-approve">
+      <div class="top-bar" style="background:#283593;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Approve Facilities</div><div class="bar-subtitle">Coordinator — assign owning clan</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div id="facilityApproveContent">
+            <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
           </div>
         </div>
       </div>
@@ -3088,54 +3158,55 @@ select.msel {
         </div>
       </div>
       <div class="scroll-content">
-        <div class="p14">
-          <div class="time-card">
-            <strong>⏰ Valid Visit Windows</strong>
-            9:00 am – 11:00 am &nbsp;|&nbsp; 2:00 pm – 3:00 pm
-          </div>
-          <div style="font-size:0.83rem;color:#2E7D32;font-weight:500;margin-bottom:10px;">
-            🕙 Current time: 10:23 AM &nbsp;<strong style="color:#388E3C;">✓ Within window</strong>
-          </div>
-          <div class="gps-row">
-            <span>📍 GPS: Verified</span>
-            <span style="opacity:0.72;font-size:0.79rem;">Within 50 m of facility</span>
+        <div class="p14" style="padding-bottom:20px;">
+          <div class="card" style="padding:12px 16px;">
+            <div class="transect-row"><span class="td-label">🏷 Type</span><span id="facVisitType">—</span></div>
+            <div class="transect-row"><span class="td-label">👪 Owner</span><span id="facVisitOwner">—</span></div>
+            <div class="transect-row"><span class="td-label">📅 Date</span><span id="facVisitDate">—</span></div>
           </div>
 
-          <div class="section-label" style="padding-left:0;">Staff Attendance</div>
-          <div class="card" style="padding:4px 14px;">
-            <div class="staff-row">
-              <div><div class="staff-name">Dr. Sarah Momo</div><div class="staff-role">Head of Facility</div></div>
-              <div class="attend-toggle">
-                <button class="attend-btn present" onclick="atnd(this,'present')">Present</button>
-                <button class="attend-btn" onclick="atnd(this,'absent')">Absent</button>
+          <div style="font-size:0.9rem;font-weight:700;color:#283593;margin:14px 0 8px;">Service Delivery Today</div>
+          <div class="card" style="padding:12px 16px;">
+            <div class="form-group">
+              <label class="form-label">Was the facility open / operating?</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="weather-pill active" id="fop-open" onclick="facOpen('open')">Open</button>
+                <button class="weather-pill" id="fop-partial" onclick="facOpen('partial')">Partial</button>
+                <button class="weather-pill" id="fop-closed" onclick="facOpen('closed')">Closed</button>
               </div>
             </div>
-            <div class="staff-row">
-              <div><div class="staff-name">Nurse Peter Aia</div><div class="staff-role">Registered Nurse</div></div>
-              <div class="attend-toggle">
-                <button class="attend-btn present" onclick="atnd(this,'present')">Present</button>
-                <button class="attend-btn" onclick="atnd(this,'absent')">Absent</button>
+            <div class="form-group">
+              <label class="form-label">Staff present today</label>
+              <input type="number" id="facStaffPresent" class="form-input" placeholder="e.g. 3" min="0" style="font-size:0.85rem;padding:7px 10px;">
+            </div>
+            <div class="form-group" id="studentCountGroup" style="display:none;">
+              <label class="form-label">Total students present today <span class="req">*</span></label>
+              <input type="number" id="facStudents" class="form-input" placeholder="e.g. 42" min="0" style="font-size:0.85rem;padding:7px 10px;">
+            </div>
+            <div class="form-group" id="medsGroup" style="display:none;">
+              <label class="form-label">Essential medicines in stock?</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="weather-pill active" id="fmed-yes" onclick="facMeds('yes')">Yes</button>
+                <button class="weather-pill" id="fmed-partial" onclick="facMeds('partial')">Some</button>
+                <button class="weather-pill" id="fmed-no" onclick="facMeds('no')">No</button>
               </div>
             </div>
-            <div class="staff-row">
-              <div><div class="staff-name">Orderly Grace Kari</div><div class="staff-role">Health Orderly</div></div>
-              <div class="attend-toggle">
-                <button class="attend-btn" onclick="atnd(this,'present')">Present</button>
-                <button class="attend-btn absent" onclick="atnd(this,'absent')">Absent</button>
-              </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Notes</label>
+              <textarea id="facNotes" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Observations about service delivery, issues raised…"></textarea>
             </div>
           </div>
 
-          <button class="btn-outline" style="margin-bottom:14px;" onclick="toast('Add staff — feature coming soon')">
-            + Add New Staff Member
-          </button>
-
-          <div class="form-group" id="studentCountGroup" style="display:none;">
-            <label class="form-label">Total students present today <span class="req">*</span></label>
-            <input type="number" class="form-input" placeholder="e.g. 42" min="0"/>
+          <div style="font-size:0.9rem;font-weight:700;color:#283593;margin:14px 0 8px;">📷 Photo <span style="color:#B71C1C;">*</span></div>
+          <div class="card" style="padding:12px 16px;">
+            <div id="fvPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="fvTriggerPhoto()">
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the facility today</div></div>
+            </div>
+            <input type="file" id="fvPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="fvHandlePhoto(this)">
+            <div id="fvPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
           </div>
 
-          <button class="btn-primary" onclick="toast('Visit record submitted successfully ✓')">Submit Visit Record</button>
+          <button class="btn-primary" style="background:#283593;margin-top:14px;" onclick="submitFacilityVisit()">Submit Visit Record</button>
         </div>
       </div>
     </div>
@@ -5167,7 +5238,7 @@ const ALL_SCREENS = [
   'screen-qabb-setup','screen-qabb-matrix',
   'screen-water-setup','screen-water-record','screen-water-sources','screen-water-source-register','screen-water-approve',
   'screen-pheno-setup','screen-pheno-plots','screen-pheno-establish','screen-pheno-inactive','screen-pheno-record',
-  'screen-sdm','screen-facility',
+  'screen-sdm','screen-facility','screen-facilities','screen-facility-register','screen-facility-approve',
   'screen-alerts',
   'screen-meetings','screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3',
   'screen-meeting-detail','screen-meeting-active',
@@ -5218,6 +5289,7 @@ function showScreen(id) {
     loadCachedReport(_reportProfile);
   }
   if (id === 'screen-water-approve') initWaterApprove();
+  if (id === 'screen-facility-approve') initFacilityApprove();
 }
 
 /* Navigate, pushing to history */
@@ -5232,6 +5304,10 @@ function nav(id) {
   if (id === 'screen-water-sources') initWaterSources();
   if (id === 'screen-water-source-register') initRegisterSource();
   if (id === 'screen-water-approve') initWaterApprove();
+  if (id === 'screen-sdm') initSDM();
+  if (id === 'screen-facilities') initFacilities();
+  if (id === 'screen-facility-register') initRegisterFacility();
+  if (id === 'screen-facility-approve') initFacilityApprove();
   if (id === 'screen-pheno-setup') initPheno();
   if (id === 'screen-pheno-plots') initPhenoPlots();
   if (id === 'screen-pheno-establish') initPhenoEstablish();
@@ -5390,6 +5466,7 @@ function enrollCheckPasscode() {
       document.getElementById('enrollUpdateProfileBtn').style.display = 'block';
       document.getElementById('enrollGrantAuthBtn').style.display = 'block';
       document.getElementById('enrollApproveWaterBtn').style.display = 'block';
+      document.getElementById('enrollApproveFacBtn').style.display = 'block';
       document.getElementById('enrollPassStatus').textContent = '✓ Coordinator verified. Choose an action.';
       document.getElementById('enrollPassStatus').style.color = '#2E7D32';
       /* Pre-load zones and topics ready for step 2 */
@@ -5762,19 +5839,368 @@ function tc(btn, delta) {
   el.textContent = v;
 }
 
-/* ── SDM ── */
-function openFacility(name, type) {
-  document.getElementById('facilityTitle').textContent = name;
-  const sc = document.getElementById('studentCountGroup');
-  sc.style.display = (type === 'school') ? 'block' : 'none';
-  nav('screen-facility');
+/* ══════════════════════════════════════
+   SERVICE DELIVERY MONITORING — facilities registry, approval, ownership
+   (mirrors the water-source module)
+══════════════════════════════════════ */
+var FAC_TYPES = [
+  {key:'school',  label:'School',        emoji:'🏫'},
+  {key:'health',  label:'Health Centre', emoji:'🏥'},
+  {key:'aidpost', label:'Aid Post',      emoji:'⛑'}
+];
+var facSelectedType = '', facPhotoData = null, facGPSFix = null, _activeFacility = null;
+var fvPhotoData = null, _fOpen = 'open', _fMeds = 'yes';
+
+function facTypeMeta(key){ return FAC_TYPES.find(function(t){return t.key===key;}) || {label:key||'—', emoji:'🏢'}; }
+
+/* ── Registry list (steward view) ── */
+function initFacilities() {
+  renderFacilitiesList();
+  syncFacilitiesFromServer(function(ok){ if (ok) renderFacilitiesList(); });
+}
+function renderFacilitiesList() {
+  var c = document.getElementById('facilitiesContent');
+  if (!c) return;
+  getAllRecords('facilities', function(rows) {
+    var mine = rows.filter(function(r){ return r.proposed_clan === myClan() || r.owner_clan === myClan() || r.owner_clan_2 === myClan(); });
+    if (mine.length === 0) {
+      c.innerHTML = '<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No facilities registered yet for '+(myClan()||'your clan')+'. Tap “Register New Facility” to add the first one.</div>';
+      return;
+    }
+    var order = {pending:0, approved:1, rejected:2};
+    mine.sort(function(a,b){ return (order[a.status]||9)-(order[b.status]||9); });
+    var h = '';
+    mine.forEach(function(r){
+      var tm = facTypeMeta(r.facility_type);
+      var badge, bcol, bbg, bbd;
+      if (r.status==='approved'){ badge='✓ Approved'; bcol='#2E7D32'; bbg='#E8F5E9'; bbd='#A5D6A7'; }
+      else if (r.status==='rejected'){ badge='✕ Rejected'; bcol='#B71C1C'; bbg='#FFEBEE'; bbd='#FFCDD2'; }
+      else { badge='⏳ Pending Approval'; bcol='#F57F17'; bbg='#FFF8E1'; bbd='#FFE082'; }
+      h += '<div class="card" style="padding:12px 14px;margin-bottom:10px;">';
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
+      h += '<span style="font-size:0.9rem;font-weight:700;">'+tm.emoji+' '+(r.name||'(unnamed)')+'</span>';
+      h += '<span style="font-size:0.68rem;font-weight:700;color:'+bcol+';background:'+bbg+';border:1px solid '+bbd+';padding:2px 8px;border-radius:10px;white-space:nowrap;">'+badge+'</span>';
+      h += '</div>';
+      h += '<div style="font-size:0.74rem;color:#666;">'+tm.label+' · 📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-top:4px;">'+r.description+'</div>';
+      if (r.status==='approved') {
+        var own = r.owner_clan || '—';
+        if (r.owner_clan_2) own += ' + ' + r.owner_clan_2 + ' (split)';
+        h += '<div style="font-size:0.72rem;color:#2E7D32;margin-top:6px;">Owner clan: <strong>'+own+'</strong></div>';
+      }
+      h += '</div>';
+    });
+    c.innerHTML = h;
+  });
 }
 
-/* ── Facility Visit: Attendance ── */
-function atnd(btn, state) {
-  const row = btn.closest('.attend-toggle');
-  row.querySelectorAll('.attend-btn').forEach(b => b.classList.remove('present','absent'));
-  btn.classList.add(state);
+/* ── Registration form ── */
+function openRegisterFacility() { nav('screen-facility-register'); }
+function initRegisterFacility() {
+  facSelectedType = ''; facPhotoData = null; facGPSFix = null;
+  var nm = document.getElementById('facName'); if (nm) nm.value = '';
+  var ds = document.getElementById('facDesc'); if (ds) ds.value = '';
+  FAC_TYPES.forEach(function(t){ var el=document.getElementById('factype-'+t.key); if(el) el.classList.remove('active'); });
+  var ps = document.getElementById('facPhotoStatus'); if (ps){ ps.textContent='No photo taken'; ps.style.color='#888'; }
+  var pb = document.getElementById('facPhotoBox');
+  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
+  var g = document.getElementById('facGPS');
+  if (g){ g.textContent='📍 Acquiring GPS…'; g.style.color='#888'; }
+  captureGPS(function(gps, err){
+    if (gps){ facGPSFix=gps; if(g){ g.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'; g.style.color='#2E6B38'; } }
+    else { if(g){ g.textContent='⚠ '+err; g.style.color='#E65100'; } }
+  });
+}
+function facSelectType(key) {
+  facSelectedType = key;
+  FAC_TYPES.forEach(function(t){ var el=document.getElementById('factype-'+t.key); if(el) el.classList.toggle('active', t.key===key); });
+}
+function facTriggerPhoto() { var inp=document.getElementById('facPhotoInput'); if(inp) inp.click(); }
+function facHandlePhoto(input) {
+  var file = input.files && input.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    facPhotoData = e.target.result;
+    var box=document.getElementById('facPhotoBox');
+    if (box) box.innerHTML = '<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;" alt="Facility photo">';
+    var s=document.getElementById('facPhotoStatus'); if (s){ s.textContent='✓ Photo attached'; s.style.color='#2E7D32'; }
+  };
+  reader.readAsDataURL(file);
+}
+function submitFacility() {
+  var name = ((document.getElementById('facName')||{}).value || '').trim();
+  if (!name) { toast('Enter a facility name.'); return; }
+  if (!facSelectedType) { toast('Select the facility type.'); return; }
+  if (!facGPSFix) { toast('Wait for GPS before submitting.'); return; }
+  if (!facPhotoData) { toast('Capture a reference photo first.'); return; }
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var now=new Date();
+  var data = {
+    survey_type:'facility', uid: generateRecordId('FAC'),
+    name: name, facility_type: facSelectedType,
+    lat: facGPSFix.lat, lng: facGPSFix.lng, gps_accuracy: facGPSFix.accuracy,
+    description: ((document.getElementById('facDesc')||{}).value||'').trim(),
+    photo: facPhotoData, status: 'pending',
+    proposed_by: (window._cachedProfile && window._cachedProfile.stewardId) || '',
+    proposed_clan: myClan(), owner_clan: null, owner_clan_2: null,
+    registered_date: now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear()
+  };
+  saveRecord('facilities', data, function(){
+    postRegisterFacility(data);
+    toast('Facility submitted for approval ✓');
+    nav('screen-facilities');
+  });
+}
+
+/* ── Approval (coordinator) ── */
+function facClanCandidates(rows) {
+  var set = {};
+  rows.forEach(function(r){ [r.proposed_clan, r.owner_clan, r.owner_clan_2].forEach(function(cl){ if (cl) set[cl]=true; }); });
+  var list = Object.keys(set);
+  ['Afore','Itokama','Jegarata'].forEach(function(cl){ if (list.indexOf(cl)<0) list.push(cl); });
+  list.sort();
+  return list;
+}
+function initFacilityApprove() {
+  renderFacilityApprove();
+  syncFacilitiesFromServer(function(ok){ if (ok) renderFacilityApprove(); });
+}
+function renderFacilityApprove() {
+  var c = document.getElementById('facilityApproveContent');
+  if (!c) return;
+  getAllRecords('facilities', function(rows) {
+    var pending = rows.filter(function(r){ return r.status==='pending'; });
+    var clans = facClanCandidates(rows);
+    if (pending.length === 0) {
+      c.innerHTML = '<div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;">No facilities awaiting approval. New registrations from stewards will appear here.</div>';
+      return;
+    }
+    var h = '<div class="matrix-note" style="background:#FFF8E1;border-color:#FFE082;color:#F57F17;">'+pending.length+' facilit'+(pending.length>1?'ies':'y')+' awaiting approval. Assign the owning clan — only that clan will see the monitoring task. Add a second clan only when a controlled split is justified.</div>';
+    pending.forEach(function(r){
+      var tm = facTypeMeta(r.facility_type);
+      var ownOpts = clans.map(function(cl){ return '<option value="'+cl+'"'+(cl===r.proposed_clan?' selected':'')+'>'+cl+'</option>'; }).join('');
+      var own2Opts = '<option value="">None (single clan)</option>' + clans.map(function(cl){ return '<option value="'+cl+'">'+cl+'</option>'; }).join('');
+      h += '<div class="card" style="padding:12px 14px;margin-bottom:12px;">';
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
+      h += '<span style="font-size:0.92rem;font-weight:700;">'+tm.emoji+' '+(r.name||'(unnamed)')+'</span>';
+      h += '<span style="font-size:0.68rem;font-weight:700;color:#283593;background:#e8eaf6;border:1px solid #9fa8da;padding:2px 8px;border-radius:10px;">'+tm.label+'</span>';
+      h += '</div>';
+      if (r.photo) h += '<img src="'+r.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" alt="Facility photo">';
+      h += '<div style="font-size:0.74rem;color:#666;">📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      h += '<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Proposed by '+(r.proposed_by||'—')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
+      if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
+      h += '<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label>';
+      h += '<select id="fa-owner-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+ownOpts+'</select></div>';
+      h += '<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span></label>';
+      h += '<select id="fa-owner2-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+own2Opts+'</select>';
+      h += '<div style="font-size:0.68rem;color:#888;margin-top:4px;">A split allows 2 visits/month — one per clan. Leave as None for single ownership.</div></div>';
+      h += '<div style="display:flex;gap:8px;">';
+      h += '<button class="btn-primary" style="background:#2E7D32;flex:2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="approveFacility('+r.id+')">✓ Approve</button>';
+      h += '<button class="btn-outline" style="flex:1;color:#B71C1C;border-color:#FFCDD2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="rejectFacility('+r.id+')">Reject</button>';
+      h += '</div></div>';
+    });
+    c.innerHTML = h;
+  });
+}
+function approveFacility(id) {
+  var ownerEl = document.getElementById('fa-owner-'+id);
+  var owner2El = document.getElementById('fa-owner2-'+id);
+  var owner = ownerEl ? ownerEl.value : '';
+  var owner2 = owner2El ? owner2El.value : '';
+  if (!owner) { toast('Select an owner clan.'); return; }
+  if (owner2 && owner2 === owner) { toast('Second clan must differ from the owner clan.'); return; }
+  getAllRecords('facilities', function(rows) {
+    var r = rows.find(function(x){ return x.id === id; });
+    if (!r) { toast('Facility not found.'); return; }
+    r.status = 'approved'; r.owner_clan = owner; r.owner_clan_2 = owner2 || null;
+    r.approved_date = new Date().toISOString().split('T')[0];
+    r.approved_by = (window._cachedProfile && window._cachedProfile.stewardId) || 'coordinator';
+    r.synced = false;
+    updateRecord('facilities', r, function(){
+      pushFacilityRegistry(function(ok){ toast('Approved — ' + owner + (owner2 ? ' + ' + owner2 : '') + (ok ? ' · synced ✓' : ' ✓')); });
+      initFacilityApprove();
+    });
+  });
+}
+function rejectFacility(id) {
+  getAllRecords('facilities', function(rows) {
+    var r = rows.find(function(x){ return x.id === id; });
+    if (!r) return;
+    r.status = 'rejected'; r.synced = false;
+    updateRecord('facilities', r, function(){ pushFacilityRegistry(function(){}); toast('Facility rejected'); initFacilityApprove(); });
+  });
+}
+
+/* ── Ownership-gated monitoring task list (SDM) ── */
+function facVisitsThisMonth(records, facId, clan) {
+  var mk = monthKey();
+  return records.filter(function(r){
+    if (r.facility_id !== facId) return false;
+    if (clan && r.clan && r.clan !== clan) return false;
+    var t = r.timestamp ? new Date(r.timestamp) : null;
+    return t && monthKey(t) === mk;
+  }).length;
+}
+function initSDM() {
+  renderFacilityTasks();
+  syncFacilitiesFromServer(function(ok){ if (ok) renderFacilityTasks(); });
+}
+function renderFacilityTasks() {
+  var tasks = document.getElementById('facilityTasks');
+  if (!tasks) return;
+  var clan = myClan();
+  getAllRecords('facilities', function(facs) {
+    getAllRecords('facility_visits', function(visits) {
+      var owned = facs.filter(function(s){ return s.status === 'approved' && (s.owner_clan === clan || s.owner_clan_2 === clan); });
+      var h = '<div style="font-size:0.82rem;font-weight:700;color:#283593;margin:4px 2px 8px;">Your clan’s facilities — '+(clan||'your clan')+'</div>';
+      if (owned.length === 0) {
+        h += '<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No facilities are assigned to your clan yet. Register a facility and the coordinator will assign ownership before it appears here.</div>';
+        tasks.innerHTML = h; return;
+      }
+      owned.forEach(function(s){
+        var tm = facTypeMeta(s.facility_type);
+        var done = facVisitsThisMonth(visits, s.id, clan) > 0;
+        var split = s.owner_clan_2 ? true : false;
+        var border = done ? '#A5D6A7' : '#9fa8da';
+        h += '<div class="card" style="padding:12px 14px;margin-bottom:10px;border:1px solid '+border+';cursor:'+(done?'default':'pointer')+';" onclick="'+(done?'':'selectFacilityTask('+s.id+')')+'">';
+        h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">';
+        h += '<span style="font-size:0.9rem;font-weight:700;">'+tm.emoji+' '+(s.name||'(unnamed)')+'</span>';
+        if (done) h += '<span style="font-size:0.68rem;font-weight:700;color:#2E7D32;background:#E8F5E9;border:1px solid #A5D6A7;padding:2px 8px;border-radius:10px;white-space:nowrap;">✓ Done this month</span>';
+        else h += '<span style="font-size:0.68rem;font-weight:700;color:#283593;background:#e8eaf6;border:1px solid #9fa8da;padding:2px 8px;border-radius:10px;white-space:nowrap;">Due — tap to visit</span>';
+        h += '</div>';
+        h += '<div style="font-size:0.73rem;color:#666;">'+tm.label+' · 📍 '+(s.lat||'?')+', '+(s.lng||'?')+'</div>';
+        if (split) {
+          var other = (s.owner_clan === clan) ? s.owner_clan_2 : s.owner_clan;
+          h += '<div style="font-size:0.7rem;color:#8a6d00;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:4px 8px;margin-top:6px;">⚖ Shared with '+other+' — 2 visits/month, one per clan</div>';
+        }
+        h += '</div>';
+      });
+      tasks.innerHTML = h;
+    });
+  });
+}
+function selectFacilityTask(id) {
+  getAllRecords('facilities', function(facs) {
+    var s = facs.find(function(x){ return x.id === id; });
+    if (!s) { toast('Facility not found.'); return; }
+    _activeFacility = s;
+    openFacilityVisit();
+  });
+}
+
+/* ── Facility visit form ── */
+function openFacilityVisit() {
+  var s = _activeFacility; if (!s) return;
+  var tm = facTypeMeta(s.facility_type);
+  document.getElementById('facilityTitle').textContent = s.name || 'Facility Visit';
+  document.getElementById('facVisitType').textContent = tm.emoji + ' ' + tm.label;
+  var owner = s.owner_clan || '—'; if (s.owner_clan_2) owner += ' + ' + s.owner_clan_2 + ' (split)';
+  document.getElementById('facVisitOwner').textContent = owner;
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var now=new Date();
+  document.getElementById('facVisitDate').textContent = now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+  /* type-driven fields */
+  document.getElementById('studentCountGroup').style.display = (s.facility_type==='school') ? 'block' : 'none';
+  document.getElementById('medsGroup').style.display = (s.facility_type==='health' || s.facility_type==='aidpost') ? 'block' : 'none';
+  /* reset inputs */
+  _fOpen='open'; _fMeds='yes';
+  ['open','partial','closed'].forEach(function(k){ var el=document.getElementById('fop-'+k); if(el) el.classList.toggle('active', k==='open'); });
+  ['yes','partial','no'].forEach(function(k){ var el=document.getElementById('fmed-'+k); if(el) el.classList.toggle('active', k==='yes'); });
+  ['facStaffPresent','facStudents','facNotes'].forEach(function(fid){ var el=document.getElementById(fid); if(el) el.value=''; });
+  fvPhotoData = null;
+  var pb = document.getElementById('fvPhotoBox');
+  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the facility today</div></div>';
+  var ps = document.getElementById('fvPhotoStatus'); if (ps){ ps.textContent='No photo taken'; ps.style.color='#888'; }
+  nav('screen-facility');
+}
+function facOpen(v){ _fOpen=v; ['open','partial','closed'].forEach(function(k){var el=document.getElementById('fop-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function facMeds(v){ _fMeds=v; ['yes','partial','no'].forEach(function(k){var el=document.getElementById('fmed-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function fvTriggerPhoto(){ var inp=document.getElementById('fvPhotoInput'); if(inp) inp.click(); }
+function fvHandlePhoto(input){
+  var file = input.files && input.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    fvPhotoData = e.target.result;
+    var box=document.getElementById('fvPhotoBox');
+    if (box) box.innerHTML = '<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;" alt="Visit photo">';
+    var s=document.getElementById('fvPhotoStatus'); if (s){ s.textContent='✓ Photo attached'; s.style.color='#2E7D32'; }
+  };
+  reader.readAsDataURL(file);
+}
+function submitFacilityVisit() {
+  var s = _activeFacility || {};
+  if (!fvPhotoData) { toast('Capture a photo of the facility before submitting.'); return; }
+  var val = function(id){ var e=document.getElementById(id); return e ? e.value : ''; };
+  var data = {
+    survey_type:'facility_visit',
+    facility_id: (typeof s.id !== 'undefined') ? s.id : null,
+    facility_name: s.name || '', facility_type: s.facility_type || '',
+    clan: myClan(),
+    date: document.getElementById('facVisitDate') ? document.getElementById('facVisitDate').textContent : '',
+    operating: _fOpen,
+    staff_present: val('facStaffPresent'),
+    notes: val('facNotes'),
+    photo: fvPhotoData
+  };
+  if (s.facility_type === 'school') data.students_present = val('facStudents');
+  if (s.facility_type === 'health' || s.facility_type === 'aidpost') data.medicines_in_stock = _fMeds;
+  saveRecord('facility_visits', data, function(){
+    toast('Visit record saved to device ✓');
+    _activeFacility = null;
+    nav('screen-sdm');
+  });
+}
+
+/* ── Central sync (mirrors water sources) ── */
+function facRegistryRecord(r) {
+  return {
+    uid: r.uid, name: r.name, facility_type: r.facility_type,
+    lat: r.lat, lng: r.lng, gps_accuracy: r.gps_accuracy,
+    description: r.description, photo: r.photo || null,
+    status: r.status, proposed_by: r.proposed_by, proposed_clan: r.proposed_clan,
+    owner_clan: r.owner_clan || null, owner_clan_2: r.owner_clan_2 || null,
+    registered_date: r.registered_date, approved_date: r.approved_date || null, approved_by: r.approved_by || null
+  };
+}
+function postRegisterFacility(rec) {
+  if (!UPLOAD_ENDPOINT || !navigator.onLine || !rec || !rec.uid) return;
+  fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ _action:'register_facility', _secret: UPLOAD_SECRET, record: facRegistryRecord(rec) }) }).catch(function(){});
+}
+function pushFacilityRegistry(cb) {
+  if (!UPLOAD_ENDPOINT || !navigator.onLine) { if (cb) cb(false); return; }
+  getAllRecords('facilities', function(rows) {
+    var list = rows.map(facRegistryRecord).filter(function(r){ return r.uid; });
+    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ _action:'update_facilities', _secret: UPLOAD_SECRET, _coordinator_secret: window._coordSecret, facilities: list }) })
+      .then(function(r){ return r.json(); }).then(function(d){ if (cb) cb(d && d.status === 'ok'); }).catch(function(){ if (cb) cb(false); });
+  });
+}
+function syncFacilitiesFromServer(cb) {
+  if (!UPLOAD_ENDPOINT || !navigator.onLine) { if (cb) cb(false); return; }
+  fetch(UPLOAD_ENDPOINT + '?action=facilities').then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d || d.status !== 'ok' || !d.facilities) { if (cb) cb(false); return; }
+      getAllRecords('facilities', function(localRows) {
+        var byUid = {};
+        localRows.forEach(function(r){ if (r.uid) byUid[r.uid] = r; });
+        var pending = d.facilities.slice();
+        var next = function() {
+          if (pending.length === 0) { if (cb) cb(true); return; }
+          var sr = pending.shift();
+          if (!sr.uid) { next(); return; }
+          var local = byUid[sr.uid];
+          if (local) {
+            ['name','facility_type','lat','lng','gps_accuracy','description','photo','status','owner_clan','owner_clan_2','approved_date','approved_by','proposed_by','proposed_clan','registered_date'].forEach(function(k){ local[k] = sr[k]; });
+            updateRecord('facilities', local, function(){ next(); });
+          } else {
+            sr.survey_type = 'facility'; sr.synced = true;
+            saveRecord('facilities', sr, function(){ next(); });
+          }
+        };
+        next();
+      });
+    }).catch(function(){ if (cb) cb(false); });
 }
 
 /* ── Map Layer Toggles ── */
@@ -7606,8 +8032,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 7;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources'];
+var DB_VERSION = 8;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }

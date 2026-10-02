@@ -50,7 +50,7 @@ var REPORT_EMAILS     = ['w.unsworth@landscapealliance.org'];
  *      (it is now stored in Script Properties and this code is no longer needed).
  *
  * The key protects: update_zones, update_topics, grant_authorisation,
- * certify_trainer, update_water_sources.
+ * certify_trainer, update_water_sources, update_facilities.
  * It is NEVER stored in the phone app — only held in memory during a session.
  */
 function setCoordinatorSecret() {
@@ -200,6 +200,43 @@ function registerWaterSource(record) {
 function updateWaterSources(list) {
   saveWaterSourcesList(list || []);
   return { status: 'ok', message: 'Water source registry saved', count: (list || []).length };
+}
+
+/* ─── Facility registry (schools, health facilities) ───────────────────
+ * _facilities.json in Drive, same model as the water source registry. */
+function loadFacilitiesList() {
+  try {
+    var folder = getDataFolder();
+    var files  = folder.getFilesByName('_facilities.json');
+    if (files.hasNext()) { return JSON.parse(files.next().getBlob().getDataAsString()) || []; }
+  } catch(e) { /* fall through */ }
+  return [];
+}
+function saveFacilitiesList(list) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_facilities.json');
+  var json   = JSON.stringify(list || [], null, 2);
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_facilities.json', json, MimeType.PLAIN_TEXT); }
+}
+function getFacilities() {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', facilities: loadFacilitiesList() }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function registerFacility(record) {
+  if (!record || !record.uid) { return { status: 'error', message: 'Missing facility uid' }; }
+  var list = loadFacilitiesList();
+  var idx = -1;
+  for (var i = 0; i < list.length; i++) { if (list[i].uid === record.uid) { idx = i; break; } }
+  if (idx === -1) { list.push(record); }
+  else if (list[idx].status === 'pending') { list[idx] = record; }
+  saveFacilitiesList(list);
+  return { status: 'ok', uid: record.uid, count: list.length };
+}
+function updateFacilities(list) {
+  saveFacilitiesList(list || []);
+  return { status: 'ok', message: 'Facility registry saved', count: (list || []).length };
 }
 
 /* ─── Training authorisation records ───────────────────────────────── */
@@ -660,7 +697,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -715,6 +752,22 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    /* Facility registry — steward registration (upload secret only) */
+    if (body._action === 'register_facility') {
+      var facRegResult = registerFacility(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(facRegResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    /* Facility registry — coordinator approval/ownership (coordinator key required) */
+    if (body._action === 'update_facilities') {
+      var facUpResult = updateFacilities(body.facilities);
+      return ContentService
+        .createTextOutput(JSON.stringify(facUpResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     /* Normal steward data upload */
     var folder = getDataFolder();
 
@@ -762,6 +815,7 @@ function doGet(e) {
   if (action === 'zones')  { return getZoneList();  }
   if (action === 'topics') { return getTopicList(); }
   if (action === 'water_sources') { return getWaterSources(); }
+  if (action === 'facilities') { return getFacilities(); }
 
   if (action === 'authorisations') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';

@@ -2702,7 +2702,8 @@ select.msel {
             </div>
           </div>
 
-          <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;">🌊 Water Observations</div>
+          <div id="waterNaturalObs">
+          <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="river" data-size="16"></span> Water Observations</div>
           <div class="card" style="padding:12px 16px;">
             <div class="form-group">
               <label class="form-label">Water Colour</label>
@@ -2735,8 +2736,68 @@ select.msel {
             </div>
           </div>
 
+          </div><!-- /waterNaturalObs -->
+
+          <div id="waterSourceCondSection" style="display:none;">
+            <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="spring" data-size="16"></span> Source Condition</div>
+            <div class="card" style="padding:12px 16px;">
+              <div class="form-group">
+                <label class="form-label">Is water reaching / present at the source?</label>
+                <select id="engSourceFlow" class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+                  <option selected>Good flow</option><option>Low / reduced</option><option>None — dry</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Water clean &amp; clear?</label>
+                <select id="engSourceClean" class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+                  <option selected>Clean &amp; clear</option><option>Slightly turbid</option><option>Dirty / discoloured</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Signs of contamination? <span style="font-size:0.68rem;font-weight:400;color:#888;">(animals, waste, algae upstream)</span></label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button class="weather-pill active" id="engcon-none" onclick="wxEngCon('none')">None</button>
+                  <button class="weather-pill" id="engcon-possible" onclick="wxEngCon('possible')">Possible</button>
+                  <button class="weather-pill" id="engcon-yes" onclick="wxEngCon('yes')">Yes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="waterDeliverySection" style="display:none;">
+            <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="wrench" data-size="16"></span> Delivery &amp; Infrastructure</div>
+            <div class="card" style="padding:12px 16px;">
+              <div class="form-group">
+                <label class="form-label">Water at the delivery point (tap / outlet)?</label>
+                <select id="engDeliveryFlow" class="form-input" style="padding:8px 11px;font-size:0.8rem;">
+                  <option selected>Good flow</option><option>Low / reduced</option><option>No water</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Leaks?</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button class="weather-pill active" id="engleak-none" onclick="wxEngLeak('none')">None</button>
+                  <button class="weather-pill" id="engleak-minor" onclick="wxEngLeak('minor')">Minor</button>
+                  <button class="weather-pill" id="engleak-major" onclick="wxEngLeak('major')">Major</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Damage to pipes / tank / pump / fittings?</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button class="weather-pill active" id="engdmg-none" onclick="wxEngDmg('none')">None</button>
+                  <button class="weather-pill" id="engdmg-minor" onclick="wxEngDmg('minor')">Minor</button>
+                  <button class="weather-pill" id="engdmg-major" onclick="wxEngDmg('major')">Major</button>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Repair needed / notes</label>
+                <textarea id="engNotes" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="What needs fixing, parts required, who to notify…"></textarea>
+              </div>
+            </div>
+          </div>
+
           <div id="waterCreekSection" style="display:none;">
-            <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;">🐛 Creek Health <span style="font-size:0.7rem;font-weight:400;color:#888;">(small creeks)</span></div>
+            <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="creek" data-size="16"></span> Creek Health <span style="font-size:0.7rem;font-weight:400;color:#888;">(small creeks)</span></div>
             <div class="card" style="padding:12px 16px;">
               <div class="form-group">
                 <label class="form-label">Pond skaters / surface insects</label>
@@ -2758,7 +2819,7 @@ select.msel {
             </div>
           </div>
 
-          <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;">📷 Photo <span style="color:#B71C1C;">*</span></div>
+          <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="camera" data-size="16"></span> Photo <span style="color:#B71C1C;">*</span></div>
           <div class="card" style="padding:12px 16px;">
             <div id="wrPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="wrTriggerPhoto()">
               <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the source today</div></div>
@@ -2815,12 +2876,20 @@ select.msel {
           </div>
           <div class="form-group">
             <label class="form-label">Water Source Type <span style="color:#B71C1C;">*</span></label>
-            <div id="wsTypePills" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div style="font-size:0.68rem;font-weight:700;color:#0277BD;text-transform:uppercase;letter-spacing:0.03em;margin:2px 0 4px;">Natural</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <button class="weather-pill" id="wstype-river"  onclick="wsSelectType('river')"><span data-icon="river" data-size="16"></span> River</button>
               <button class="weather-pill" id="wstype-creek"  onclick="wsSelectType('creek')"><span data-icon="creek" data-size="16"></span> Creek</button>
               <button class="weather-pill" id="wstype-spring" onclick="wsSelectType('spring')"><span data-icon="spring" data-size="16"></span> Spring</button>
             </div>
-            <div id="wsTypeHint" style="font-size:0.72rem;color:#888;margin-top:6px;">River readings include a Secchi disc; creeks add pond skaters &amp; shading; springs use the core checks.</div>
+            <div style="font-size:0.68rem;font-weight:700;color:#0277BD;text-transform:uppercase;letter-spacing:0.03em;margin:10px 0 4px;">Engineered / manmade</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="weather-pill" id="wstype-reservoir" onclick="wsSelectType('reservoir')"><span data-icon="reservoir" data-size="16"></span> Reservoir &amp; pipes</button>
+              <button class="weather-pill" id="wstype-rampump"   onclick="wsSelectType('rampump')"><span data-icon="rampump" data-size="16"></span> Ram pump</button>
+              <button class="weather-pill" id="wstype-solarpump" onclick="wsSelectType('solarpump')"><span data-icon="solarpump" data-size="16"></span> Solar pump</button>
+              <button class="weather-pill" id="wstype-well"      onclick="wsSelectType('well')"><span data-icon="well" data-size="16"></span> Well / borehole</button>
+            </div>
+            <div id="wsTypeHint" style="font-size:0.72rem;color:#888;margin-top:8px;">Natural sources use water-condition checks (rivers add a Secchi disc, creeks add pond skaters &amp; shading). Engineered sources are checked at both the source and the delivery end.</div>
           </div>
           <div class="card" style="padding:12px 16px;margin-bottom:10px;">
             <div class="transect-row"><span class="td-label">📍 GPS</span><span id="wsGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
@@ -6611,6 +6680,7 @@ function checkWaterReady() {
   document.getElementById('waterBeginBtn').disabled = !(waterVerifiedFlag && waterArrivedFlag);
 }
 var _wSkaters = 'many', _wShade = 'partial', wrPhotoData = null;
+var _engCon = 'none', _engLeak = 'none', _engDmg = 'none';
 
 function initWaterRecord() {
   var now = new Date();
@@ -6627,16 +6697,28 @@ function initWaterRecord() {
   if (sub) sub.textContent = src ? (src.name + ' · ' + tm.label) : 'Monthly reading';
 
   /* type-driven sections */
+  var engineered = wsIsEngineered(type);
   var isRiver = (type === 'river');
   var isCreek = (type === 'creek');
   document.getElementById('waterSecchiSection').style.display = isRiver ? 'block' : 'none';
   document.getElementById('waterSecchiNote').style.display   = isRiver ? 'block' : 'none';
   document.getElementById('waterCreekSection').style.display = isCreek ? 'block' : 'none';
+  document.getElementById('waterNaturalObs').style.display   = engineered ? 'none' : 'block';
+  document.getElementById('waterSourceCondSection').style.display = engineered ? 'block' : 'none';
+  document.getElementById('waterDeliverySection').style.display   = engineered ? 'block' : 'none';
 
   /* reset creek pills to defaults */
   _wSkaters = 'many'; _wShade = 'partial';
   ['many','few','none'].forEach(function(k){ var el=document.getElementById('wsk-'+k); if(el) el.classList.toggle('active', k==='many'); });
   ['open','partial','shaded'].forEach(function(k){ var el=document.getElementById('wsh-'+k); if(el) el.classList.toggle('active', k==='partial'); });
+
+  /* reset engineered pills + selects */
+  _engCon='none'; _engLeak='none'; _engDmg='none';
+  ['none','possible','yes'].forEach(function(k){ var el=document.getElementById('engcon-'+k); if(el) el.classList.toggle('active', k==='none'); });
+  ['none','minor','major'].forEach(function(k){ var el=document.getElementById('engleak-'+k); if(el) el.classList.toggle('active', k==='none'); });
+  ['none','minor','major'].forEach(function(k){ var el=document.getElementById('engdmg-'+k); if(el) el.classList.toggle('active', k==='none'); });
+  ['engSourceFlow','engSourceClean','engDeliveryFlow'].forEach(function(id){ var el=document.getElementById(id); if(el) el.selectedIndex=0; });
+  var en=document.getElementById('engNotes'); if(en) en.value='';
 
   /* reset photo */
   wrPhotoData = null;
@@ -6653,6 +6735,9 @@ function adjSecchi(d) {
 }
 function wxSkaters(v){ _wSkaters=v; ['many','few','none'].forEach(function(k){var el=document.getElementById('wsk-'+k);if(el)el.classList.toggle('active',k===v);}); }
 function wxShade(v){ _wShade=v; ['open','partial','shaded'].forEach(function(k){var el=document.getElementById('wsh-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function wxEngCon(v){ _engCon=v; ['none','possible','yes'].forEach(function(k){var el=document.getElementById('engcon-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function wxEngLeak(v){ _engLeak=v; ['none','minor','major'].forEach(function(k){var el=document.getElementById('engleak-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function wxEngDmg(v){ _engDmg=v; ['none','minor','major'].forEach(function(k){var el=document.getElementById('engdmg-'+k);if(el)el.classList.toggle('active',k===v);}); }
 function wrTriggerPhoto(){ var inp=document.getElementById('wrPhotoInput'); if(inp) inp.click(); }
 function wrHandlePhoto(input){
   var file = input.files && input.files[0];
@@ -6683,10 +6768,15 @@ function wxPol(on, off) { document.getElementById('wpol-'+on).classList.add('act
    WATER SOURCES — registry, registration, approval, ownership
 ══════════════════════════════════════ */
 var WS_TYPES = [
-  {key:'river',  label:'River',  emoji:'🌊'},
-  {key:'creek',  label:'Creek',  emoji:'💧'},
-  {key:'spring', label:'Spring', emoji:'⛲'}
+  {key:'river',  label:'River',  natural:true},
+  {key:'creek',  label:'Creek',  natural:true},
+  {key:'spring', label:'Spring', natural:true},
+  {key:'reservoir', label:'Reservoir & pipes', natural:false},
+  {key:'rampump',   label:'Ram pump',           natural:false},
+  {key:'solarpump', label:'Solar pump',         natural:false},
+  {key:'well',      label:'Well / borehole',    natural:false}
 ];
+function wsIsEngineered(type){ var t=WS_TYPES.find(function(x){return x.key===type;}); return t ? !t.natural : false; }
 var wsSelectedType = '', wsPhotoData = null, wsGPSFix = null;
 
 function wsTypeMeta(key){ return WS_TYPES.find(function(t){return t.key===key;}) || {key:key, label:key||'—'}; }
@@ -9613,19 +9703,26 @@ function collectWaterData() {
     date: document.getElementById('waterDate') ? document.getElementById('waterDate').textContent : '',
     time: val('waterTime'),
     weather: (document.getElementById('wwx-sunny') && document.getElementById('wwx-sunny').classList.contains('active')) ? 'Sunny' : 'Cloudy',
-    water_colour: val('waterColour'),
-    odour: val('waterOdour'),
-    flow: val('waterFlow'),
-    pollution: document.getElementById('wpol-y') && document.getElementById('wpol-y').classList.contains('active') ? 'Yes' : 'No',
-    notes: val('waterNotes'),
     photo: wrPhotoData || null
   };
-  if (type === 'river') {
-    data.secchi_depth_cm = parseInt(val('secchiInput') || 0) || 0;
-  }
-  if (type === 'creek') {
-    data.pond_skaters = _wSkaters;
-    data.shading = _wShade;
+  if (wsIsEngineered(type)) {
+    /* two-part engineered check: source condition + delivery/infrastructure */
+    data.source_flow      = val('engSourceFlow');
+    data.source_clean     = val('engSourceClean');
+    data.contamination    = _engCon;
+    data.delivery_flow    = val('engDeliveryFlow');
+    data.leaks            = _engLeak;
+    data.damage           = _engDmg;
+    data.notes            = val('engNotes');
+  } else {
+    /* natural water condition checks */
+    data.water_colour = val('waterColour');
+    data.odour        = val('waterOdour');
+    data.flow         = val('waterFlow');
+    data.pollution    = document.getElementById('wpol-y') && document.getElementById('wpol-y').classList.contains('active') ? 'Yes' : 'No';
+    data.notes        = val('waterNotes');
+    if (type === 'river') data.secchi_depth_cm = parseInt(val('secchiInput') || 0) || 0;
+    if (type === 'creek') { data.pond_skaters = _wSkaters; data.shading = _wShade; }
   }
   return data;
 }

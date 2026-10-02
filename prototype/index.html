@@ -1529,7 +1529,7 @@ select.msel {
 </head>
 <body>
 
-<div class="proto-banner">⚠ PROTOTYPE — Not real data — For demonstration only</div>
+<div class="proto-banner"><span data-icon="warning" data-size="14"></span> PROTOTYPE — Not real data — For demonstration only</div>
 
 <div class="phone-frame" id="phoneFrame">
   <div class="notch"></div>
@@ -1590,14 +1590,14 @@ select.msel {
           </div>
           <div class="enroll-status" id="enrollPassStatus"></div>
           <button class="enroll-next-btn" id="enrollPassBtn" onclick="enrollCheckPasscode()">Verify →</button>
-          <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:10px;width:100%;" onclick="showScreen('screen-zone-config')">⚙ Manage Zones</button>
-          <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')">📋 Manage Training Topics</button>
-          <button class="btn-outline" id="enrollUpdateProfileBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showUpdateProfile()">✏ Update Existing Profile</button>
-          <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()">🎓 Grant Training Authorisation</button>
-          <button class="btn-outline" id="enrollApproveWaterBtn" style="display:none;margin-top:8px;width:100%;border-color:#0277BD;color:#0277BD;" onclick="showScreen('screen-water-approve')">💧 Approve Water Sources</button>
-          <button class="btn-outline" id="enrollApproveFacBtn" style="display:none;margin-top:8px;width:100%;border-color:#283593;color:#283593;" onclick="showScreen('screen-facility-approve')">🏫 Approve Facilities</button>
-          <button class="btn-outline" id="enrollApproveMetBtn" style="display:none;margin-top:8px;width:100%;border-color:#37474F;color:#37474F;" onclick="showScreen('screen-met-approve')">🌧 Approve Met Stations</button>
-          <button class="btn-outline" id="enrollApproveTreeBtn" style="display:none;margin-top:8px;width:100%;border-color:#E65100;color:#E65100;" onclick="showScreen('screen-pheno-approve')">🌳 Approve Trees</button>
+          <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:10px;width:100%;" onclick="showScreen('screen-zone-config')"><span data-icon="gear" data-size="14"></span> Manage Zones</button>
+          <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')"><span data-icon="clipboard" data-size="14"></span> Manage Training Topics</button>
+          <button class="btn-outline" id="enrollUpdateProfileBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showUpdateProfile()"><span data-icon="edit" data-size="14"></span> Update Existing Profile</button>
+          <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()"><span data-icon="mortarboard" data-size="14"></span> Grant Training Authorisation</button>
+          <button class="btn-outline" id="enrollApproveWaterBtn" style="display:none;margin-top:8px;width:100%;border-color:#0277BD;color:#0277BD;" onclick="showScreen('screen-water-approve')"><span data-icon="spring" data-size="14"></span> Approve Water Sources</button>
+          <button class="btn-outline" id="enrollApproveFacBtn" style="display:none;margin-top:8px;width:100%;border-color:#283593;color:#283593;" onclick="showScreen('screen-facility-approve')"><span data-icon="school" data-size="14"></span> Approve Facilities</button>
+          <button class="btn-outline" id="enrollApproveMetBtn" style="display:none;margin-top:8px;width:100%;border-color:#37474F;color:#37474F;" onclick="showScreen('screen-met-approve')"><span data-icon="cloudrain" data-size="14"></span> Approve Met Stations</button>
+          <button class="btn-outline" id="enrollApproveTreeBtn" style="display:none;margin-top:8px;width:100%;border-color:#E65100;color:#E65100;" onclick="showScreen('screen-pheno-approve')"><span data-icon="tree" data-size="14"></span> Approve Trees</button>
         </div>
 
         <!-- STEP 2: Profile -->
@@ -1638,7 +1638,7 @@ select.msel {
           <!-- Authorised topics — Field Officer only -->
           <div id="enrollTopicsGroup" style="display:none;">
             <div style="background:#EDE7F6;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
-              <div style="font-size:0.82rem;font-weight:700;color:#4A148C;margin-bottom:6px;">📋 Authorised Training Topics</div>
+              <div style="font-size:0.82rem;font-weight:700;color:#4A148C;margin-bottom:6px;"><span data-icon="clipboard" data-size="14"></span> Authorised Training Topics</div>
               <div style="font-size:0.75rem;color:#666;margin-bottom:10px;">Select the topics this Field Officer is permitted to deliver. Only these will appear in their training form.</div>
               <div id="enrollTopicsList" style="display:flex;flex-direction:column;gap:6px;"></div>
               <div style="margin-top:8px;font-size:0.72rem;color:#888;">Topics not listed? Use <strong>Manage Topics</strong> to add them first.</div>
@@ -1651,7 +1651,7 @@ select.msel {
         <div id="enrollStep3" style="display:none;">
           <div class="enroll-section-title">Register Primary Biometric</div>
           <div class="enroll-section-sub">Ask the steward to <strong>press their dominant thumb</strong> on the sensor, or <strong>look at the camera</strong> if this is a Face ID device. This is used for daily login and field verification.</div>
-          <div class="enroll-warn">⚠ Make sure you are on the steward's device, not yours. The credential is saved to this phone only.</div>
+          <div class="enroll-warn"><span data-icon="warning" data-size="14"></span> Make sure you are on the steward's device, not yours. The credential is saved to this phone only.</div>
           <button class="enroll-fp-btn" id="enrollThumb1Btn" onclick="enrollRegisterThumb(1)">
             <span class="enroll-fp-icon">👍</span>
             <span id="enrollThumb1Label">Register Fingerprint or Face</span>
@@ -1664,7 +1664,7 @@ select.msel {
         <div id="enrollStep4" style="display:none;">
           <div class="enroll-section-title">Register Second Thumb <span style="font-weight:400;font-size:0.85rem;">(optional)</span></div>
           <div class="enroll-section-sub"><strong>Fingerprint phones only</strong> — register the other thumb as a backup so a dirty or injured hand doesn't lock them out.<br><br>If this device uses <strong>Face ID</strong>, tap <em>Skip</em> — one face is enough.</div>
-          <div class="enroll-warn">⚠ Same steward, different thumb. Do not use your own fingerprint.</div>
+          <div class="enroll-warn"><span data-icon="warning" data-size="14"></span> Same steward, different thumb. Do not use your own fingerprint.</div>
           <button class="enroll-fp-btn" id="enrollThumb2Btn" onclick="enrollRegisterThumb(2)">
             <span class="enroll-fp-icon">👍</span>
             <span id="enrollThumb2Label">Register Other Thumb</span>
@@ -1761,7 +1761,7 @@ select.msel {
         </div>
         <div class="form-group">
           <label class="form-label">Certificate Photo <span style="font-size:0.72rem;font-weight:400;color:#888;">(optional but recommended)</span></label>
-          <label class="cert-photo-label" for="gaCertPhoto">📷 Tap to capture or upload photo</label>
+          <label class="cert-photo-label" for="gaCertPhoto"><span data-icon="camera" data-size="14"></span> Tap to capture or upload photo</label>
           <input type="file" id="gaCertPhoto" accept="image/*" capture="environment" style="display:none;" onchange="gaCertPhotoPreview(this)">
           <div id="gaCertPhotoPreview" style="margin-top:6px;display:none;font-size:0.78rem;color:#2E7D32;"></div>
         </div>
@@ -1772,7 +1772,7 @@ select.msel {
         <button class="enroll-next-btn" onclick="submitGrantAuth()" id="gaSubmitBtn">Record Authorisation →</button>
         <div id="gaStatus" style="font-size:0.8rem;color:#2E7D32;margin-top:10px;text-align:center;"></div>
         <div style="margin-top:16px;padding:12px;background:#FFF3E0;border-radius:8px;font-size:0.75rem;color:#E65100;">
-          <strong>⚠ Sync note:</strong> The record is saved locally immediately. The steward's app will show their certification badge on their next login when they have signal, or when you sync from their phone.
+          <strong><span data-icon="warning" data-size="14"></span> Sync note:</strong> The record is saved locally immediately. The steward's app will show their certification badge on their next login when they have signal, or when you sync from their phone.
         </div>
       </div>
     </div>
@@ -1999,12 +1999,12 @@ select.msel {
             <span class="obs-arrow">›</span>
           </div>
           <div class="obs-card" onclick="openObsEntry('Natural Disaster')">
-            <span class="obs-icon">🌊</span>
+            <span class="obs-icon"><span data-icon="river" data-size="14"></span></span>
             <div><div class="obs-name">Natural Disaster</div><div class="obs-desc">Document natural events</div></div>
             <span class="obs-arrow">›</span>
           </div>
           <div class="obs-card" onclick="openObsEntry('Forest Fire')">
-            <span class="obs-icon">🔥</span>
+            <span class="obs-icon"><span data-icon="flame" data-size="14"></span></span>
             <div><div class="obs-name">Forest Fire</div><div class="obs-desc">Report fire incidents</div></div>
             <span class="obs-arrow">›</span>
           </div>
@@ -2028,7 +2028,7 @@ select.msel {
           <div class="form-group">
             <label class="form-label">Location (GPS)</label>
             <div class="gps-field">
-              <span>📍 -9.1523° S, 148.3847° E</span>
+              <span><span data-icon="pin" data-size="14"></span> -9.1523° S, 148.3847° E</span>
               <button class="gps-recapture" onclick="toast('GPS recaptured')">Recapture</button>
             </div>
           </div>
@@ -2040,7 +2040,7 @@ select.msel {
             <label class="form-label">Attach Media</label>
             <div class="media-row">
               <button class="media-btn" onclick="toast('Camera not available in prototype')">
-                <span class="media-icon">📷</span>Photo
+                <span class="media-icon"><span data-icon="camera" data-size="14"></span></span>Photo
               </button>
               <button class="media-btn" onclick="toast('Microphone not available in prototype')">
                 <span class="media-icon">🎤</span>Voice
@@ -2049,7 +2049,7 @@ select.msel {
                 <span class="media-icon">🎥</span>Video
               </button>
               <button class="media-btn" onclick="toast('Extended text editor opened')">
-                <span class="media-icon">📝</span>Extended
+                <span class="media-icon"><span data-icon="edit" data-size="14"></span></span>Extended
               </button>
             </div>
           </div>
@@ -2116,7 +2116,7 @@ select.msel {
             <!-- Transect details -->
             <div class="card" style="padding:12px 16px;">
               <div class="transect-row">
-                <span class="td-label">📍 Start</span>
+                <span class="td-label"><span data-icon="pin" data-size="14"></span> Start</span>
                 <span>-9.1489° S, 148.3812° E</span>
               </div>
               <div class="transect-row">
@@ -2124,18 +2124,18 @@ select.msel {
                 <span>-9.1534° S, 148.3891° E</span>
               </div>
               <div class="transect-row">
-                <span class="td-label">🧭 Bearing</span>
+                <span class="td-label"><span data-icon="compass" data-size="14"></span> Bearing</span>
                 <span>127° SE</span>
               </div>
               <div class="transect-row">
-                <span class="td-label">📏 Length</span>
+                <span class="td-label"><span data-icon="ruler" data-size="14"></span> Length</span>
                 <span>500 m</span>
               </div>
             </div>
 
             <!-- GPS navigation gate — always visible -->
             <div class="nav-gate-card" id="navGateCard">
-              <div style="font-size:0.82rem;font-weight:700;color:#E65100;margin-bottom:8px;">📍 Navigate to Transect Start Point</div>
+              <div style="font-size:0.82rem;font-weight:700;color:#E65100;margin-bottom:8px;"><span data-icon="pin" data-size="14"></span> Navigate to Transect Start Point</div>
               <div class="compass-row">
                 <svg width="72" height="72" viewBox="0 0 72 72" style="flex-shrink:0;">
                   <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
@@ -2189,7 +2189,7 @@ select.msel {
         </div>
         <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Fund" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><ellipse cx="13" cy="9.5" rx="6.5" ry="6" fill="rgba(255,255,255,0.9)"/><ellipse cx="13" cy="13.5" rx="8" ry="5" fill="rgba(255,255,255,0.8)"/><rect x="12" y="18" width="2" height="5" rx="1" fill="rgba(255,255,255,0.7)"/></svg></div><div class="logo-ph" title="European Union" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" style="border-radius:5px;" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" fill="#003399"/><polygon points="13.00,1.43 13.42,2.55 14.61,2.60 13.68,3.34 13.99,4.49 13.00,3.83 12.01,4.49 12.32,3.34 11.39,2.60 12.58,2.55" fill="#FFD700"/><polygon points="17.94,2.75 18.36,3.87 19.55,3.92 18.62,4.66 18.93,5.81 17.94,5.15 16.95,5.81 17.26,4.66 16.33,3.92 17.52,3.87" fill="#FFD700"/><polygon points="21.56,6.37 21.97,7.49 23.16,7.54 22.23,8.28 22.55,9.43 21.56,8.77 20.56,9.43 20.88,8.28 19.95,7.54 21.14,7.49" fill="#FFD700"/><polygon points="22.88,11.31 23.30,12.43 24.49,12.48 23.56,13.22 23.87,14.37 22.88,13.71 21.89,14.37 22.20,13.22 21.27,12.48 22.46,12.43" fill="#FFD700"/><polygon points="21.56,16.25 21.97,17.37 23.16,17.42 22.23,18.16 22.55,19.31 21.56,18.65 20.56,19.31 20.88,18.16 19.95,17.42 21.14,17.37" fill="#FFD700"/><polygon points="17.94,19.87 18.36,20.98 19.55,21.03 18.62,21.78 18.93,22.92 17.94,22.27 16.95,22.92 17.26,21.78 16.33,21.03 17.52,20.98" fill="#FFD700"/><polygon points="13.00,21.19 13.42,22.31 14.61,22.36 13.68,23.10 13.99,24.25 13.00,23.59 12.01,24.25 12.32,23.10 11.39,22.36 12.58,22.31" fill="#FFD700"/><polygon points="8.06,19.87 8.48,20.98 9.67,21.03 8.74,21.78 9.05,22.92 8.06,22.27 7.07,22.92 7.38,21.78 6.45,21.03 7.64,20.98" fill="#FFD700"/><polygon points="4.44,16.25 4.86,17.37 6.05,17.42 5.12,18.16 5.44,19.31 4.44,18.65 3.45,19.31 3.77,18.16 2.84,17.42 4.03,17.37" fill="#FFD700"/><polygon points="3.12,11.31 3.54,12.43 4.73,12.48 3.80,13.22 4.11,14.37 3.12,13.71 2.13,14.37 2.44,13.22 1.51,12.48 2.70,12.43" fill="#FFD700"/><polygon points="4.44,6.37 4.86,7.49 6.05,7.54 5.12,8.28 5.44,9.43 4.44,8.77 3.45,9.43 3.77,8.28 2.84,7.54 4.03,7.49" fill="#FFD700"/><polygon points="8.06,2.75 8.48,3.87 9.67,3.92 8.74,4.66 9.05,5.81 8.06,5.15 7.07,5.81 7.38,4.66 6.45,3.92 7.64,3.87" fill="#FFD700"/></svg></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><path d="M13 4 C9 6 7 10 7 13 C7 17 9.5 20 13 21 C16.5 20 19 17 19 13 C19 10 17 6 13 4Z" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/><line x1="13" y1="4" x2="13" y2="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/><line x1="7" y1="13" x2="19" y2="13" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/></svg></div></div>
       </div>
-      <div class="matrix-note">📋 Questions fixed left — scroll right for sub-transects ST1–ST5</div>
+      <div class="matrix-note"><span data-icon="clipboard" data-size="14"></span> Questions fixed left — scroll right for sub-transects ST1–ST5</div>
       <div class="st-progress">
         <span class="st-chip done">ST1 ✓</span>
         <span class="st-chip done">ST2 ✓</span>
@@ -2406,11 +2406,11 @@ select.msel {
 
             <div class="card" style="padding:12px 16px;">
               <div class="transect-row">
-                <span class="td-label">🦋 Survey</span>
+                <span class="td-label"><span data-icon="butterfly" data-size="14"></span> Survey</span>
                 <span>QABB Transect #14</span>
               </div>
               <div class="transect-row">
-                <span class="td-label">📍 Start</span>
+                <span class="td-label"><span data-icon="pin" data-size="14"></span> Start</span>
                 <span>-9.1320° S, 148.4050° E</span>
               </div>
               <div class="transect-row">
@@ -2418,17 +2418,17 @@ select.msel {
                 <span>-9.1276° S, 148.4105° E</span>
               </div>
               <div class="transect-row">
-                <span class="td-label">🧭 Bearing</span>
+                <span class="td-label"><span data-icon="compass" data-size="14"></span> Bearing</span>
                 <span>142° SE</span>
               </div>
               <div class="transect-row">
-                <span class="td-label">📏 Length</span>
+                <span class="td-label"><span data-icon="ruler" data-size="14"></span> Length</span>
                 <span>500 m (10 × 50 m sub-transects, 10 m wide)</span>
               </div>
             </div>
 
             <div class="nav-gate-card" id="qabbNavGateCard">
-              <div style="font-size:0.82rem;font-weight:700;color:#00695C;margin-bottom:8px;">📍 Navigate to Transect Start Point</div>
+              <div style="font-size:0.82rem;font-weight:700;color:#00695C;margin-bottom:8px;"><span data-icon="pin" data-size="14"></span> Navigate to Transect Start Point</div>
               <div class="compass-row">
                 <svg width="72" height="72" viewBox="0 0 72 72" style="flex-shrink:0;">
                   <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
@@ -2486,26 +2486,26 @@ select.msel {
 
         <div class="p14" style="padding-top:6px;padding-bottom:0;">
           <div class="card" style="padding:10px 14px;">
-            <div class="transect-row"><span class="td-label">📅 Date</span><span id="qabbDate">18 June 2026</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="calendar" data-size="14"></span> Date</span><span id="qabbDate">18 June 2026</span></div>
             <div class="transect-row">
-              <span class="td-label">🕘 Start Time</span>
+              <span class="td-label"><span data-icon="clock" data-size="14"></span> Start Time</span>
               <span style="display:flex;align-items:center;gap:6px;">
                 <input type="time" id="qabbStartTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" value="08:45">
                 <span style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">auto</span>
               </span>
             </div>
             <div class="transect-row">
-              <span class="td-label">🕐 End Time</span>
+              <span class="td-label"><span data-icon="clock" data-size="14"></span> End Time</span>
               <span style="display:flex;align-items:center;gap:6px;">
                 <input type="time" id="qabbEndTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" placeholder="--:--">
                 <span id="qabbEndAuto" style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">set on submit</span>
               </span>
             </div>
             <div class="transect-row">
-              <span class="td-label">☁ Weather</span>
+              <span class="td-label"><span data-icon="cloud" data-size="14"></span> Weather</span>
               <span>
-                <button class="weather-pill active" id="qwx-cloudy" onclick="wxQ('cloudy','sunny')">☁ Cloudy</button>
-                <button class="weather-pill" id="qwx-sunny" onclick="wxQ('sunny','cloudy')">☀ Sunny</button>
+                <button class="weather-pill active" id="qwx-cloudy" onclick="wxQ('cloudy','sunny')"><span data-icon="cloud" data-size="14"></span> Cloudy</button>
+                <button class="weather-pill" id="qwx-sunny" onclick="wxQ('sunny','cloudy')"><span data-icon="sun" data-size="14"></span> Sunny</button>
               </span>
             </div>
           </div>
@@ -2598,7 +2598,7 @@ select.msel {
         </div>
         <div id="waterContent" style="display:none;">
           <div class="p14" style="padding-bottom:20px;">
-            <button class="btn-outline" style="width:100%;margin-bottom:12px;border-color:#0277BD;color:#0277BD;" onclick="nav('screen-water-sources')">🗂 Manage Water Sources</button>
+            <button class="btn-outline" style="width:100%;margin-bottom:12px;border-color:#0277BD;color:#0277BD;" onclick="nav('screen-water-sources')"><span data-icon="folder" data-size="14"></span> Manage Water Sources</button>
 
             <div id="waterSourceTasks">
               <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
@@ -2608,14 +2608,14 @@ select.msel {
               <button class="btn-outline" style="width:100%;margin-bottom:10px;color:#888;border-color:#ccc;font-size:0.8rem;padding:7px;" onclick="waterBackToTasks()">← Choose a different source</button>
 
               <div class="card" style="padding:12px 16px;">
-                <div class="transect-row"><span class="td-label">🌊 Source</span><span id="waterActiveName">—</span></div>
-                <div class="transect-row"><span class="td-label">🏷 Type</span><span id="waterActiveType">—</span></div>
-                <div class="transect-row"><span class="td-label">🧭 Coordinates</span><span id="waterActiveCoords">—</span></div>
-                <div class="transect-row"><span class="td-label">👪 Owner</span><span id="waterActiveOwner">—</span></div>
+                <div class="transect-row"><span class="td-label"><span data-icon="river" data-size="14"></span> Source</span><span id="waterActiveName">—</span></div>
+                <div class="transect-row"><span class="td-label"><span data-icon="tag" data-size="14"></span> Type</span><span id="waterActiveType">—</span></div>
+                <div class="transect-row"><span class="td-label"><span data-icon="compass" data-size="14"></span> Coordinates</span><span id="waterActiveCoords">—</span></div>
+                <div class="transect-row"><span class="td-label"><span data-icon="people" data-size="14"></span> Owner</span><span id="waterActiveOwner">—</span></div>
               </div>
 
             <div class="nav-gate-card" id="waterNavGateCard">
-              <div style="font-size:0.82rem;font-weight:700;color:#0277BD;margin-bottom:8px;">📍 Navigate to Monitoring Point</div>
+              <div style="font-size:0.82rem;font-weight:700;color:#0277BD;margin-bottom:8px;"><span data-icon="pin" data-size="14"></span> Navigate to Monitoring Point</div>
               <div class="compass-row">
                 <svg width="60" height="60" viewBox="0 0 72 72" style="flex-shrink:0;">
                   <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
@@ -2670,19 +2670,19 @@ select.msel {
         </div>
         <div class="p14" style="padding-top:6px;">
           <div class="card" style="padding:10px 14px;">
-            <div class="transect-row"><span class="td-label">📅 Date</span><span id="waterDate">10 June 2026</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="calendar" data-size="14"></span> Date</span><span id="waterDate">10 June 2026</span></div>
             <div class="transect-row">
-              <span class="td-label">🕘 Time</span>
+              <span class="td-label"><span data-icon="clock" data-size="14"></span> Time</span>
               <span style="display:flex;align-items:center;gap:6px;">
                 <input type="time" id="waterTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" value="09:15">
                 <span style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">auto</span>
               </span>
             </div>
             <div class="transect-row">
-              <span class="td-label">☁ Weather</span>
+              <span class="td-label"><span data-icon="cloud" data-size="14"></span> Weather</span>
               <span>
-                <button class="weather-pill active" id="wwx-cloudy" onclick="wxW('cloudy','sunny')">☁ Cloudy</button>
-                <button class="weather-pill" id="wwx-sunny" onclick="wxW('sunny','cloudy')">☀ Sunny</button>
+                <button class="weather-pill active" id="wwx-cloudy" onclick="wxW('cloudy','sunny')"><span data-icon="cloud" data-size="14"></span> Cloudy</button>
+                <button class="weather-pill" id="wwx-sunny" onclick="wxW('sunny','cloudy')"><span data-icon="sun" data-size="14"></span> Sunny</button>
               </span>
             </div>
           </div>
@@ -2824,7 +2824,7 @@ select.msel {
           <div style="font-size:0.9rem;font-weight:700;color:#0277BD;margin:14px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="camera" data-size="16"></span> Photo <span style="color:#B71C1C;">*</span></div>
           <div class="card" style="padding:12px 16px;">
             <div id="wrPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="wrTriggerPhoto()">
-              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the source today</div></div>
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;"><span data-icon="camera" data-size="30"></span></div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the source today</div></div>
             </div>
             <input type="file" id="wrPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="wrHandlePhoto(this)">
             <div id="wrPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
@@ -2894,12 +2894,12 @@ select.msel {
             <div id="wsTypeHint" style="font-size:0.72rem;color:#888;margin-top:8px;">Natural sources use water-condition checks (rivers add a Secchi disc, creeks add pond skaters &amp; shading). Engineered sources are checked at both the source and the delivery end.</div>
           </div>
           <div class="card" style="padding:12px 16px;margin-bottom:10px;">
-            <div class="transect-row"><span class="td-label">📍 GPS</span><span id="wsGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> GPS</span><span id="wsGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
           </div>
           <div class="form-group">
-            <label class="form-label">📷 Reference Photo <span style="color:#B71C1C;">*</span></label>
+            <label class="form-label"><span data-icon="camera" data-size="14"></span> Reference Photo <span style="color:#B71C1C;">*</span></label>
             <div id="wsPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="wsTriggerPhoto()">
-              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;"><span data-icon="camera" data-size="30"></span></div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
             </div>
             <input type="file" id="wsPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="wsHandlePhoto(this)">
             <div id="wsPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
@@ -2909,7 +2909,7 @@ select.msel {
             <textarea id="wsDesc" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Landmarks, who uses it, access path, upstream activity…"></textarea>
           </div>
           <div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.75rem;margin-bottom:12px;">
-            ℹ️ This source will be marked <strong>Pending Approval</strong>. The coordinator reviews it and assigns the owning clan before monitoring begins.
+            <span data-icon="info" data-size="14"></span> This source will be marked <strong>Pending Approval</strong>. The coordinator reviews it and assigns the owning clan before monitoring begins.
           </div>
           <button class="btn-primary" style="background:#0277BD;" onclick="submitWaterSource()">Submit for Approval</button>
           <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
@@ -2978,19 +2978,19 @@ select.msel {
         </div>
         <div class="p14" style="padding-top:6px;">
           <div class="card" style="padding:10px 14px;">
-            <div class="transect-row"><span class="td-label">📅 Date</span><span id="phenoDate">10 June 2026</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="calendar" data-size="14"></span> Date</span><span id="phenoDate">10 June 2026</span></div>
             <div class="transect-row">
-              <span class="td-label">🕘 Time</span>
+              <span class="td-label"><span data-icon="clock" data-size="14"></span> Time</span>
               <span style="display:flex;align-items:center;gap:6px;">
                 <input type="time" id="phenoTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" value="10:00">
                 <span style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">auto</span>
               </span>
             </div>
             <div class="transect-row">
-              <span class="td-label">☁ Weather</span>
+              <span class="td-label"><span data-icon="cloud" data-size="14"></span> Weather</span>
               <span>
-                <button class="weather-pill active" id="pwx-cloudy" onclick="wxP('cloudy','sunny')">☁ Cloudy</button>
-                <button class="weather-pill" id="pwx-sunny" onclick="wxP('sunny','cloudy')">☀ Sunny</button>
+                <button class="weather-pill active" id="pwx-cloudy" onclick="wxP('cloudy','sunny')"><span data-icon="cloud" data-size="14"></span> Cloudy</button>
+                <button class="weather-pill" id="pwx-sunny" onclick="wxP('sunny','cloudy')"><span data-icon="sun" data-size="14"></span> Sunny</button>
               </span>
             </div>
           </div>
@@ -3044,14 +3044,14 @@ select.msel {
       <div class="scroll-content">
         <div class="p14" style="padding-bottom:20px;">
           <div class="card" style="padding:12px 16px;margin-bottom:10px;">
-            <div class="transect-row"><span class="td-label">🌿 Crop</span><span id="estCropLabel" style="font-weight:700;color:#E65100;">—</span></div>
-            <div class="transect-row"><span class="td-label">🔢 Plant #</span><span id="estPlantNum" style="font-weight:700;">—</span></div>
-            <div class="transect-row"><span class="td-label">📍 GPS</span><span id="estGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="leaf" data-size="14"></span> Crop</span><span id="estCropLabel" style="font-weight:700;color:#E65100;">—</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="hash" data-size="14"></span> Plant #</span><span id="estPlantNum" style="font-weight:700;">—</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> GPS</span><span id="estGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
           </div>
           <div class="form-group">
-            <label class="form-label">📷 Photo <span style="color:#B71C1C;">*</span></label>
+            <label class="form-label"><span data-icon="camera" data-size="14"></span> Photo <span style="color:#B71C1C;">*</span></label>
             <div id="estPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="triggerPhotoCapture()">
-              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;"><span data-icon="camera" data-size="30"></span></div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
             </div>
             <input type="file" id="estPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoFile(this)">
             <div id="estPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
@@ -3065,7 +3065,7 @@ select.msel {
             <textarea id="estNotes" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Height, condition, identifying features…"></textarea>
           </div>
           <div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.75rem;margin-bottom:12px;">
-            ℹ️ This plant will be marked <strong>Pending Approval</strong> until a Zone Staff member reviews it. Monthly monitoring can only begin once plants are approved.
+            <span data-icon="info" data-size="14"></span> This plant will be marked <strong>Pending Approval</strong> until a Zone Staff member reviews it. Monthly monitoring can only begin once plants are approved.
           </div>
           <button class="btn-primary" style="background:#E65100;" onclick="submitEstablish()">Submit for Approval</button>
           <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
@@ -3087,12 +3087,12 @@ select.msel {
       <div class="scroll-content">
         <div class="p14" style="padding-bottom:20px;">
           <div class="matrix-note" style="background:#FFEBEE;border-color:#FFCDD2;color:#B71C1C;margin-bottom:12px;">
-            ⚠️ Reporting this plant inactive removes it from your monitoring schedule. You will be prompted to establish a replacement, which requires Zone Staff approval before monitoring resumes.
+            <span data-icon="warning" data-size="14"></span> Reporting this plant inactive removes it from your monitoring schedule. You will be prompted to establish a replacement, which requires Zone Staff approval before monitoring resumes.
           </div>
           <div class="card" style="padding:12px 16px;margin-bottom:12px;">
-            <div class="transect-row"><span class="td-label">🌿 Crop</span><span id="inactiveCropLabel" style="font-weight:700;color:#E65100;">—</span></div>
-            <div class="transect-row"><span class="td-label">🔢 Plant #</span><span id="inactivePlantNum">—</span></div>
-            <div class="transect-row"><span class="td-label">📍 Location</span><span id="inactiveLocation" style="font-size:0.78rem;">—</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="leaf" data-size="14"></span> Crop</span><span id="inactiveCropLabel" style="font-weight:700;color:#E65100;">—</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="hash" data-size="14"></span> Plant #</span><span id="inactivePlantNum">—</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> Location</span><span id="inactiveLocation" style="font-size:0.78rem;">—</span></div>
           </div>
           <div class="form-group">
             <label class="form-label">Reason <span style="color:#B71C1C;">*</span></label>
@@ -3140,7 +3140,7 @@ select.msel {
           Register each facility once. The coordinator approves it and assigns the owning clan. Only the owning clan sees it as a monitoring task.
         </div>
         <div class="p14" style="padding-bottom:20px;">
-          <button class="btn-outline" style="width:100%;margin-bottom:12px;border-color:#283593;color:#283593;" onclick="nav('screen-facilities')">🗂 Manage Facilities</button>
+          <button class="btn-outline" style="width:100%;margin-bottom:12px;border-color:#283593;color:#283593;" onclick="nav('screen-facilities')"><span data-icon="folder" data-size="14"></span> Manage Facilities</button>
           <div id="facilityTasks">
             <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
           </div>
@@ -3192,12 +3192,12 @@ select.msel {
             </div>
           </div>
           <div class="card" style="padding:12px 16px;margin-bottom:10px;">
-            <div class="transect-row"><span class="td-label">📍 GPS</span><span id="facGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> GPS</span><span id="facGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
           </div>
           <div class="form-group">
-            <label class="form-label">📷 Reference Photo <span style="color:#B71C1C;">*</span></label>
+            <label class="form-label"><span data-icon="camera" data-size="14"></span> Reference Photo <span style="color:#B71C1C;">*</span></label>
             <div id="facPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="facTriggerPhoto()">
-              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;"><span data-icon="camera" data-size="30"></span></div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
             </div>
             <input type="file" id="facPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="facHandlePhoto(this)">
             <div id="facPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
@@ -3207,7 +3207,7 @@ select.msel {
             <textarea id="facDesc" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="Operating authority, villages served, access path…"></textarea>
           </div>
           <div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.75rem;margin-bottom:12px;">
-            ℹ️ This facility will be marked <strong>Pending Approval</strong>. The coordinator assigns the owning clan before monitoring begins.
+            <span data-icon="info" data-size="14"></span> This facility will be marked <strong>Pending Approval</strong>. The coordinator assigns the owning clan before monitoring begins.
           </div>
           <button class="btn-primary" style="background:#283593;" onclick="submitFacility()">Submit for Approval</button>
           <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
@@ -3246,9 +3246,9 @@ select.msel {
       <div class="scroll-content">
         <div class="p14" style="padding-bottom:20px;">
           <div class="card" style="padding:12px 16px;">
-            <div class="transect-row"><span class="td-label">🏷 Type</span><span id="facVisitType">—</span></div>
-            <div class="transect-row"><span class="td-label">👪 Owner</span><span id="facVisitOwner">—</span></div>
-            <div class="transect-row"><span class="td-label">📅 Date</span><span id="facVisitDate">—</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="tag" data-size="14"></span> Type</span><span id="facVisitType">—</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="people" data-size="14"></span> Owner</span><span id="facVisitOwner">—</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="calendar" data-size="14"></span> Date</span><span id="facVisitDate">—</span></div>
           </div>
 
           <div style="font-size:0.9rem;font-weight:700;color:#283593;margin:14px 0 8px;">Service Delivery Today</div>
@@ -3283,10 +3283,10 @@ select.msel {
             </div>
           </div>
 
-          <div style="font-size:0.9rem;font-weight:700;color:#283593;margin:14px 0 8px;">📷 Photo <span style="color:#B71C1C;">*</span></div>
+          <div style="font-size:0.9rem;font-weight:700;color:#283593;margin:14px 0 8px;"><span data-icon="camera" data-size="14"></span> Photo <span style="color:#B71C1C;">*</span></div>
           <div class="card" style="padding:12px 16px;">
             <div id="fvPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="fvTriggerPhoto()">
-              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the facility today</div></div>
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;"><span data-icon="camera" data-size="30"></span></div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the facility today</div></div>
             </div>
             <input type="file" id="fvPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="fvHandlePhoto(this)">
             <div id="fvPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
@@ -3341,9 +3341,9 @@ select.msel {
               <text x="353.0" y="91.8" fill="#534AB7" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">9</text>
               <text x="109.9" y="30.5" fill="#A32D2D" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">10</text>
               <circle cx="232.7" cy="78.6" r="13" fill="#c62828" opacity="0.82"/>
-              <text x="225.7" y="84.6" fill="#fff" font-size="14" font-family="Arial">🔥</text>
+              <text x="225.7" y="84.6" fill="#fff" font-size="14" font-family="Arial"><span data-icon="flame" data-size="14"></span></text>
               <circle cx="284.7" cy="69.8" r="13" fill="#E65100" opacity="0.78"/>
-              <text x="277.7" y="75.8" fill="#fff" font-size="14" font-family="Arial">🔥</text>
+              <text x="277.7" y="75.8" fill="#fff" font-size="14" font-family="Arial"><span data-icon="flame" data-size="14"></span></text>
               <ellipse cx="172.7" cy="46.4" rx="22" ry="14" fill="#388E3C" opacity="0.35" stroke="#1B5E20" stroke-width="1" stroke-dasharray="4,2"/>
               <text x="172.7" y="50.4" fill="#1B5E20" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle">−2.3ha</text>
               <rect x="0" y="158" width="362" height="22" fill="rgba(0,0,0,0.18)"/>
@@ -3351,33 +3351,33 @@ select.msel {
             </svg>
           </div>
 
-          <div style="font-size:0.9rem;font-weight:700;color:#333;margin-bottom:9px;">🔥 Active Fire Alerts</div>
+          <div style="font-size:0.9rem;font-weight:700;color:#333;margin-bottom:9px;"><span data-icon="flame" data-size="14"></span> Active Fire Alerts</div>
 
           <div class="alert-card">
             <div class="alert-title">Fire Point 1</div>
             <div class="alert-meta">
-              📅 Detected: 12 June 2026<br>
+              <span data-icon="calendar" data-size="14"></span> Detected: 12 June 2026<br>
               🎯 Confidence: <span class="conf-high">High (87%)</span><br>
-              📡 Source: FIRMS / NASA VIIRS
+              <span data-icon="signal" data-size="14"></span> Source: FIRMS / NASA VIIRS
             </div>
           </div>
           <div class="alert-card">
             <div class="alert-title">Fire Point 2</div>
             <div class="alert-meta">
-              📅 Detected: 11 June 2026<br>
+              <span data-icon="calendar" data-size="14"></span> Detected: 11 June 2026<br>
               🎯 Confidence: <span class="conf-med">Medium (61%)</span><br>
-              📡 Source: FIRMS / NASA VIIRS
+              <span data-icon="signal" data-size="14"></span> Source: FIRMS / NASA VIIRS
             </div>
           </div>
 
-          <div style="font-size:0.9rem;font-weight:700;color:#333;margin:14px 0 9px;">🌳 Forest Cover Change</div>
+          <div style="font-size:0.9rem;font-weight:700;color:#333;margin:14px 0 9px;"><span data-icon="tree" data-size="14"></span> Forest Cover Change</div>
 
           <div class="alert-card forest">
             <div class="alert-title">Deforestation Alert — Grid 7B-04</div>
             <div class="alert-meta">
-              📉 2.3 ha loss detected<br>
-              📅 Period: May – June 2026<br>
-              📡 Source: Global Forest Watch
+              <span data-icon="linechart" data-size="14"></span> 2.3 ha loss detected<br>
+              <span data-icon="calendar" data-size="14"></span> Period: May – June 2026<br>
+              <span data-icon="signal" data-size="14"></span> Source: Global Forest Watch
             </div>
           </div>
 
@@ -3405,10 +3405,10 @@ select.msel {
         <div id="tc-upcoming" class="p14">
           <div class="meeting-card">
             <div class="meeting-title">Zone 7B Sub-Committee Meeting</div>
-            <div class="meeting-meta">📅 20 June 2026</div>
-            <div class="meeting-meta">🕙 10:00 am</div>
-            <div class="meeting-meta" style="margin-bottom:10px;">📍 Afore Village Hall</div>
-            <div class="agenda-badge">📋 Agenda: Pending Chairman Approval</div>
+            <div class="meeting-meta"><span data-icon="calendar" data-size="14"></span> 20 June 2026</div>
+            <div class="meeting-meta"><span data-icon="clock" data-size="14"></span> 10:00 am</div>
+            <div class="meeting-meta" style="margin-bottom:10px;"><span data-icon="pin" data-size="14"></span> Afore Village Hall</div>
+            <div class="agenda-badge"><span data-icon="clipboard" data-size="14"></span> Agenda: Pending Chairman Approval</div>
             <div class="meeting-btns">
               <button class="btn-sm green" onclick="nav('screen-meeting-detail')">View Details</button>
               <button class="btn-sm blue" onclick="toast('Jitsi: joining meeting room…')">Join (Jitsi)</button>
@@ -3446,8 +3446,8 @@ select.msel {
         <div class="p14">
           <div class="card">
             <div style="font-size:1rem;font-weight:700;color:#1B5E20;margin-bottom:8px;">Zone 7B Sub-Committee Meeting</div>
-            <div style="font-size:0.82rem;color:#555;">📅 20 June 2026 &nbsp;|&nbsp; 🕙 10:00 am</div>
-            <div style="font-size:0.82rem;color:#555;margin-top:3px;">📍 Afore Village Hall</div>
+            <div style="font-size:0.82rem;color:#555;"><span data-icon="calendar" data-size="14"></span> 20 June 2026 &nbsp;|&nbsp; <span data-icon="clock" data-size="14"></span> 10:00 am</div>
+            <div style="font-size:0.82rem;color:#555;margin-top:3px;"><span data-icon="pin" data-size="14"></span> Afore Village Hall</div>
           </div>
 
           <div class="section-label" style="padding-left:0;">Agenda Items</div>
@@ -3462,7 +3462,7 @@ select.msel {
               <li><span class="ag-num">7</span>Date of Next Meeting<span class="type-chip chip-fixed">Fixed</span></li>
               <li><span class="ag-num">8</span>Closing Prayer<span class="type-chip chip-fixed">Fixed</span></li>
             </ul>
-            <button class="btn-outline" onclick="toast('Agenda suggestion sent for chairman review')">➕ Suggest Agenda Item</button>
+            <button class="btn-outline" onclick="toast('Agenda suggestion sent for chairman review')"><span data-icon="plus" data-size="14"></span> Suggest Agenda Item</button>
           </div>
 
           <div class="section-label" style="padding-left:0;">Attendance</div>
@@ -3506,7 +3506,7 @@ select.msel {
             <div class="detail-row"><span class="dl">Enrolled</span><span class="dv">14 March 2024</span></div>
             <div class="detail-row"><span class="dl">Steward ID</span><span class="dv">MCA-7B-042</span></div>
           </div>
-          <button class="btn-outline" style="width:100%;margin:10px 0 4px;" onclick="nav('screen-timesheet')">🧾 My Timesheet</button>
+          <button class="btn-outline" style="width:100%;margin:10px 0 4px;" onclick="nav('screen-timesheet')"><span data-icon="document" data-size="14"></span> My Timesheet</button>
           <!-- Trainer certifications — shown only when certs exist for this steward -->
           <div id="trainerCertSection" style="display:none;margin-bottom:4px;">
             <div class="section-label" style="padding-left:0;margin-bottom:6px;">Training Certifications</div>
@@ -3561,7 +3561,7 @@ select.msel {
           </div>
 
           <!-- Print button -->
-          <button class="btn-primary" style="width:100%;margin-bottom:8px;" onclick="printTimesheet()">🖨️ Print / Save Timesheet</button>
+          <button class="btn-primary" style="width:100%;margin-bottom:8px;" onclick="printTimesheet()"><span data-icon="print" data-size="14"></span> Print / Save Timesheet</button>
           <div style="font-size:0.72rem;color:#888;text-align:center;line-height:1.4;">Prints a signed timesheet for activity-based payment review.</div>
         </div>
       </div>
@@ -3576,7 +3576,7 @@ select.msel {
     <div class="screen" id="screen-patrol-stub">
       <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Patrol</div></div><div class="top-logos"><div class="logo-ph" title="Managalas Conservation Fund" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><ellipse cx="13" cy="9.5" rx="6.5" ry="6" fill="rgba(255,255,255,0.9)"/><ellipse cx="13" cy="13.5" rx="8" ry="5" fill="rgba(255,255,255,0.8)"/><rect x="12" y="18" width="2" height="5" rx="1" fill="rgba(255,255,255,0.7)"/></svg></div><div class="logo-ph" title="European Union" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" style="border-radius:5px;" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" fill="#003399"/><polygon points="13.00,1.43 13.42,2.55 14.61,2.60 13.68,3.34 13.99,4.49 13.00,3.83 12.01,4.49 12.32,3.34 11.39,2.60 12.58,2.55" fill="#FFD700"/><polygon points="17.94,2.75 18.36,3.87 19.55,3.92 18.62,4.66 18.93,5.81 17.94,5.15 16.95,5.81 17.26,4.66 16.33,3.92 17.52,3.87" fill="#FFD700"/><polygon points="21.56,6.37 21.97,7.49 23.16,7.54 22.23,8.28 22.55,9.43 21.56,8.77 20.56,9.43 20.88,8.28 19.95,7.54 21.14,7.49" fill="#FFD700"/><polygon points="22.88,11.31 23.30,12.43 24.49,12.48 23.56,13.22 23.87,14.37 22.88,13.71 21.89,14.37 22.20,13.22 21.27,12.48 22.46,12.43" fill="#FFD700"/><polygon points="21.56,16.25 21.97,17.37 23.16,17.42 22.23,18.16 22.55,19.31 21.56,18.65 20.56,19.31 20.88,18.16 19.95,17.42 21.14,17.37" fill="#FFD700"/><polygon points="17.94,19.87 18.36,20.98 19.55,21.03 18.62,21.78 18.93,22.92 17.94,22.27 16.95,22.92 17.26,21.78 16.33,21.03 17.52,20.98" fill="#FFD700"/><polygon points="13.00,21.19 13.42,22.31 14.61,22.36 13.68,23.10 13.99,24.25 13.00,23.59 12.01,24.25 12.32,23.10 11.39,22.36 12.58,22.31" fill="#FFD700"/><polygon points="8.06,19.87 8.48,20.98 9.67,21.03 8.74,21.78 9.05,22.92 8.06,22.27 7.07,22.92 7.38,21.78 6.45,21.03 7.64,20.98" fill="#FFD700"/><polygon points="4.44,16.25 4.86,17.37 6.05,17.42 5.12,18.16 5.44,19.31 4.44,18.65 3.45,19.31 3.77,18.16 2.84,17.42 4.03,17.37" fill="#FFD700"/><polygon points="3.12,11.31 3.54,12.43 4.73,12.48 3.80,13.22 4.11,14.37 3.12,13.71 2.13,14.37 2.44,13.22 1.51,12.48 2.70,12.43" fill="#FFD700"/><polygon points="4.44,6.37 4.86,7.49 6.05,7.54 5.12,8.28 5.44,9.43 4.44,8.77 3.45,9.43 3.77,8.28 2.84,7.54 4.03,7.49" fill="#FFD700"/><polygon points="8.06,2.75 8.48,3.87 9.67,3.92 8.74,4.66 9.05,5.81 8.06,5.15 7.07,5.81 7.38,4.66 6.45,3.92 7.64,3.87" fill="#FFD700"/></svg></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><path d="M13 4 C9 6 7 10 7 13 C7 17 9.5 20 13 21 C16.5 20 19 17 19 13 C19 10 17 6 13 4Z" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/><line x1="13" y1="4" x2="13" y2="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/><line x1="7" y1="13" x2="19" y2="13" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/></svg></div></div></div>
       <div class="scroll-content"><div class="stub-body">
-        <div class="stub-icon">🌿</div>
+        <div class="stub-icon"><span data-icon="leaf" data-size="14"></span></div>
         <div class="stub-title">Patrol Module</div>
         <div class="stub-desc">GPS track recording, waypoint logging, and patrol report submission will be available here in the next sprint.</div>
       </div></div>
@@ -3727,7 +3727,7 @@ select.msel {
           </g>
           <g id="map-layer-fire" style="display:none">
             <circle cx="332" cy="171" r="14" fill="#c62828" opacity="0.75"/>
-            <text x="325" y="178" fill="#fff" font-size="14" font-family="Arial">🔥</text>
+            <text x="325" y="178" fill="#fff" font-size="14" font-family="Arial"><span data-icon="flame" data-size="14"></span></text>
           </g>
           <g id="map-layer-forest" style="display:none">
             <ellipse cx="265" cy="52" rx="50" ry="28" fill="#388E3C" opacity="0.28"/>
@@ -3742,8 +3742,8 @@ select.msel {
         <button class="layer-pill active" id="lp-mca" onclick="toggleLayer('mca')">MCA Boundary</button>
         <button class="layer-pill active" id="lp-zones" onclick="toggleLayer('zones')">Zones</button>
         <button class="layer-pill active" id="lp-clans" onclick="toggleLayer('clans')">Clans</button>
-        <button class="layer-pill" id="lp-fire" onclick="toggleLayer('fire')">🔥 Fire Alerts</button>
-        <button class="layer-pill" id="lp-forest" onclick="toggleLayer('forest')">🌳 Forest Change</button>
+        <button class="layer-pill" id="lp-fire" onclick="toggleLayer('fire')"><span data-icon="flame" data-size="14"></span> Fire Alerts</button>
+        <button class="layer-pill" id="lp-forest" onclick="toggleLayer('forest')"><span data-icon="tree" data-size="14"></span> Forest Change</button>
       </div>
       <nav class="bottom-nav">
         <button class="nav-item" onclick="bottomNav('home')"><span class="nav-icon" data-icon="home" data-size="22"></span><span class="nav-label">Home</span></button>
@@ -3809,11 +3809,11 @@ select.msel {
 
           <div class="section-label" style="padding-left:0;">Monthly Effort Report — June 2026</div>
           <div class="card" style="padding:10px 16px;">
-            <div class="effort-row"><span>🌿 Patrol</span><span style="font-weight:600;color:#2E7D32;">× 3</span></div>
-            <div class="effort-row"><span>🏥 SDM Visits</span><span style="font-weight:600;color:#2E7D32;">× 2</span></div>
-            <div class="effort-row"><span>📊 MaFIA Survey</span><span style="font-weight:600;color:#2E7D32;">× 1</span></div>
-            <div class="effort-row"><span>👁️ Observations</span><span style="font-weight:600;color:#2E7D32;">× 5</span></div>
-            <div class="effort-row"><span>🤝 Meetings attended</span><span style="font-weight:600;color:#2E7D32;">× 2</span></div>
+            <div class="effort-row"><span><span data-icon="leaf" data-size="14"></span> Patrol</span><span style="font-weight:600;color:#2E7D32;">× 3</span></div>
+            <div class="effort-row"><span><span data-icon="health" data-size="14"></span> SDM Visits</span><span style="font-weight:600;color:#2E7D32;">× 2</span></div>
+            <div class="effort-row"><span><span data-icon="barchart" data-size="14"></span> MaFIA Survey</span><span style="font-weight:600;color:#2E7D32;">× 1</span></div>
+            <div class="effort-row"><span><span data-icon="eye" data-size="14"></span> Observations</span><span style="font-weight:600;color:#2E7D32;">× 5</span></div>
+            <div class="effort-row"><span><span data-icon="people" data-size="14"></span> Meetings attended</span><span style="font-weight:600;color:#2E7D32;">× 2</span></div>
           </div>
           <button class="btn-outline" onclick="toast('Monthly report downloaded ✓')">⬇ Download Effort Report</button>
 
@@ -3831,7 +3831,7 @@ select.msel {
               <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#F57F17;"></div>Upcoming</div>
             </div>
           </div>
-          <button class="btn-outline" onclick="nav('screen-recent-activity')" style="margin-top:4px;">🗺 View Recent Activity Map</button>
+          <button class="btn-outline" onclick="nav('screen-recent-activity')" style="margin-top:4px;"><span data-icon="map" data-size="14"></span> View Recent Activity Map</button>
         </div>
       </div>
     </div>
@@ -3842,7 +3842,7 @@ select.msel {
     <div class="screen" id="screen-community-stub">
       <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Community Data</div></div><div class="top-logos"><div class="logo-ph" title="Managalas Conservation Fund" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><ellipse cx="13" cy="9.5" rx="6.5" ry="6" fill="rgba(255,255,255,0.9)"/><ellipse cx="13" cy="13.5" rx="8" ry="5" fill="rgba(255,255,255,0.8)"/><rect x="12" y="18" width="2" height="5" rx="1" fill="rgba(255,255,255,0.7)"/></svg></div><div class="logo-ph" title="European Union" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" style="border-radius:5px;" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" fill="#003399"/><polygon points="13.00,1.43 13.42,2.55 14.61,2.60 13.68,3.34 13.99,4.49 13.00,3.83 12.01,4.49 12.32,3.34 11.39,2.60 12.58,2.55" fill="#FFD700"/><polygon points="17.94,2.75 18.36,3.87 19.55,3.92 18.62,4.66 18.93,5.81 17.94,5.15 16.95,5.81 17.26,4.66 16.33,3.92 17.52,3.87" fill="#FFD700"/><polygon points="21.56,6.37 21.97,7.49 23.16,7.54 22.23,8.28 22.55,9.43 21.56,8.77 20.56,9.43 20.88,8.28 19.95,7.54 21.14,7.49" fill="#FFD700"/><polygon points="22.88,11.31 23.30,12.43 24.49,12.48 23.56,13.22 23.87,14.37 22.88,13.71 21.89,14.37 22.20,13.22 21.27,12.48 22.46,12.43" fill="#FFD700"/><polygon points="21.56,16.25 21.97,17.37 23.16,17.42 22.23,18.16 22.55,19.31 21.56,18.65 20.56,19.31 20.88,18.16 19.95,17.42 21.14,17.37" fill="#FFD700"/><polygon points="17.94,19.87 18.36,20.98 19.55,21.03 18.62,21.78 18.93,22.92 17.94,22.27 16.95,22.92 17.26,21.78 16.33,21.03 17.52,20.98" fill="#FFD700"/><polygon points="13.00,21.19 13.42,22.31 14.61,22.36 13.68,23.10 13.99,24.25 13.00,23.59 12.01,24.25 12.32,23.10 11.39,22.36 12.58,22.31" fill="#FFD700"/><polygon points="8.06,19.87 8.48,20.98 9.67,21.03 8.74,21.78 9.05,22.92 8.06,22.27 7.07,22.92 7.38,21.78 6.45,21.03 7.64,20.98" fill="#FFD700"/><polygon points="4.44,16.25 4.86,17.37 6.05,17.42 5.12,18.16 5.44,19.31 4.44,18.65 3.45,19.31 3.77,18.16 2.84,17.42 4.03,17.37" fill="#FFD700"/><polygon points="3.12,11.31 3.54,12.43 4.73,12.48 3.80,13.22 4.11,14.37 3.12,13.71 2.13,14.37 2.44,13.22 1.51,12.48 2.70,12.43" fill="#FFD700"/><polygon points="4.44,6.37 4.86,7.49 6.05,7.54 5.12,8.28 5.44,9.43 4.44,8.77 3.45,9.43 3.77,8.28 2.84,7.54 4.03,7.49" fill="#FFD700"/><polygon points="8.06,2.75 8.48,3.87 9.67,3.92 8.74,4.66 9.05,5.81 8.06,5.15 7.07,5.81 7.38,4.66 6.45,3.92 7.64,3.87" fill="#FFD700"/></svg></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><path d="M13 4 C9 6 7 10 7 13 C7 17 9.5 20 13 21 C16.5 20 19 17 19 13 C19 10 17 6 13 4Z" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/><line x1="13" y1="4" x2="13" y2="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/><line x1="7" y1="13" x2="19" y2="13" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/></svg></div></div></div>
       <div class="scroll-content"><div class="stub-body">
-        <div class="stub-icon">👥</div>
+        <div class="stub-icon"><span data-icon="people" data-size="14"></span></div>
         <div class="stub-title">Community Data</div>
         <div class="stub-desc">Household survey tools, demographic data entry, and community mapping features will be available here.</div>
       </div></div>
@@ -3883,9 +3883,9 @@ select.msel {
       <div class="scroll-content"><div class="p14">
         <div class="step-dots"><div class="step-dot active"></div><div class="step-dot active"></div><div class="step-dot"></div></div>
         <div class="card" style="padding:10px 14px;">
-          <div class="agenda-fixed-item">🔒 Opening Prayer</div>
-          <div class="agenda-fixed-item">🔒 Apologies</div>
-          <div class="agenda-fixed-item">🔒 Review of Previous Minutes</div>
+          <div class="agenda-fixed-item"><span data-icon="lock" data-size="14"></span> Opening Prayer</div>
+          <div class="agenda-fixed-item"><span data-icon="lock" data-size="14"></span> Apologies</div>
+          <div class="agenda-fixed-item"><span data-icon="lock" data-size="14"></span> Review of Previous Minutes</div>
           <div style="font-size:0.72rem;font-weight:700;color:#1B5E20;padding:8px 0 4px;border-top:1px solid #f0f0f0;margin-top:4px;">Variable Agenda Items</div>
           <div id="agendaVarList">
             <div class="agenda-var-item"><span>Water Resource Management Update</span><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1.1rem;">×</button></div>
@@ -3897,9 +3897,9 @@ select.msel {
             <button class="btn-sm green" onclick="addAgendaItem()" style="flex-shrink:0;white-space:nowrap;">Add</button>
           </div>
           <div style="border-top:1px solid #f0f0f0;margin-top:8px;padding-top:4px;">
-            <div class="agenda-fixed-item">🔒 Any Other Business</div>
-            <div class="agenda-fixed-item">🔒 Date of Next Meeting</div>
-            <div class="agenda-fixed-item">🔒 Closing Prayer</div>
+            <div class="agenda-fixed-item"><span data-icon="lock" data-size="14"></span> Any Other Business</div>
+            <div class="agenda-fixed-item"><span data-icon="lock" data-size="14"></span> Date of Next Meeting</div>
+            <div class="agenda-fixed-item"><span data-icon="lock" data-size="14"></span> Closing Prayer</div>
           </div>
         </div>
         <button class="btn-primary" onclick="nav('screen-new-meeting-3')">Next →</button>
@@ -3913,7 +3913,7 @@ select.msel {
         <div class="step-dots"><div class="step-dot active"></div><div class="step-dot active"></div><div class="step-dot active"></div></div>
         <div class="card">
           <div style="font-size:0.95rem;font-weight:700;color:#1B5E20;margin-bottom:6px;">Zone 7B Sub-Committee Meeting</div>
-          <div style="font-size:0.82rem;color:#666;">📅 20 June 2026 &nbsp;·&nbsp; 🕙 10:00 am &nbsp;·&nbsp; 📍 Afore Village Hall</div>
+          <div style="font-size:0.82rem;color:#666;"><span data-icon="calendar" data-size="14"></span> 20 June 2026 &nbsp;·&nbsp; <span data-icon="clock" data-size="14"></span> 10:00 am &nbsp;·&nbsp; <span data-icon="pin" data-size="14"></span> Afore Village Hall</div>
           <div style="margin-top:12px;font-size:0.82rem;font-weight:600;color:#333;">Send agenda to:</div>
           <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">
             <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;"><input type="checkbox" checked> John Kapari (you)</label>
@@ -3947,7 +3947,7 @@ select.msel {
           <div class="staff-row"><div><div class="staff-name">Lina Kasi</div></div><div class="attend-toggle"><button class="attend-btn" onclick="atnd(this,'present')">Present</button><button class="attend-btn absent" onclick="atnd(this,'absent')">Absent</button></div></div>
           <div class="staff-row"><div><div class="staff-name">David Bako</div></div><div class="attend-toggle"><button class="attend-btn" onclick="atnd(this,'present')">Present</button><button class="attend-btn absent" onclick="atnd(this,'absent')">Absent</button></div></div>
         </div>
-        <button class="btn-primary" onclick="nav('screen-motion-entry')" style="margin-bottom:8px;">📝 Record Motion</button>
+        <button class="btn-primary" onclick="nav('screen-motion-entry')" style="margin-bottom:8px;"><span data-icon="edit" data-size="14"></span> Record Motion</button>
         <button class="btn-outline-red" onclick="toast('Meeting ended — summary saved ✓');setTimeout(()=>goBack(),900)">End Meeting</button>
       </div></div>
     </div>
@@ -3972,7 +3972,7 @@ select.msel {
     <div class="screen" id="screen-motion-verify">
       <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Verify Motion Wording</div></div></div>
       <div class="scroll-content"><div class="p14">
-        <div class="motion-instruction">📢 Read aloud to all participants. Confirm the exact wording before proceeding to vote.</div>
+        <div class="motion-instruction"><span data-icon="megaphone" data-size="14"></span> Read aloud to all participants. Confirm the exact wording before proceeding to vote.</div>
         <div class="motion-text-display" id="motionVerifyText">That the Zone 7B Sub-Committee endorses the proposed Q3 patrol schedule as presented by John Kapari and recommends its submission to MCF for approval.</div>
         <button class="btn-primary" onclick="nav('screen-motion-vote')">✓ Wording Confirmed — Proceed to Vote</button>
       </div></div>
@@ -4019,7 +4019,7 @@ select.msel {
           </div>
         </div>
         <div class="vote-outcome" id="voteOutcome">CARRIED 6–1</div>
-        <button class="btn-primary" onclick="nav('screen-motion-locked')">🔒 Lock Motion &amp; Record</button>
+        <button class="btn-primary" onclick="nav('screen-motion-locked')"><span data-icon="lock" data-size="14"></span> Lock Motion &amp; Record</button>
       </div></div>
     </div>
 
@@ -4028,7 +4028,7 @@ select.msel {
       <div class="top-bar"><button class="back-btn" onclick="showScreen('screen-meeting-active')">←</button><div><div class="bar-title">Motion Recorded</div></div></div>
       <div class="scroll-content"><div class="p14">
         <div class="locked-card">
-          <div style="font-size:2rem;margin-bottom:6px;">🔒</div>
+          <div style="font-size:2rem;margin-bottom:6px;"><span data-icon="lock" data-size="14"></span></div>
           <div class="locked-badge">LOCKED</div>
           <div style="font-size:1rem;font-weight:700;color:#1B5E20;margin:8px 0 4px;">Motion Carried</div>
           <div class="locked-motion-text">That the Zone 7B Sub-Committee endorses the proposed Q3 patrol schedule as presented by John Kapari and recommends its submission to MCF for approval.</div>
@@ -4095,10 +4095,10 @@ select.msel {
         </div>
                 <!-- Layer toggles -->
         <div class="layer-row">
-          <button class="layer-pill" id="lp-mafia" onclick="toggleActivityLayer('mafia')">🌿 MaFIA</button>
-          <button class="layer-pill" id="lp-obs" onclick="toggleActivityLayer('obs')">👁 Observations</button>
-          <button class="layer-pill" id="lp-patrol" onclick="toggleActivityLayer('patrol')">🥾 Patrol</button>
-          <button class="layer-pill" id="lp-sdm" onclick="toggleActivityLayer('sdm')">🏥 SDM</button>
+          <button class="layer-pill" id="lp-mafia" onclick="toggleActivityLayer('mafia')"><span data-icon="leaf" data-size="14"></span> MaFIA</button>
+          <button class="layer-pill" id="lp-obs" onclick="toggleActivityLayer('obs')"><span data-icon="eye" data-size="14"></span> Observations</button>
+          <button class="layer-pill" id="lp-patrol" onclick="toggleActivityLayer('patrol')"><span data-icon="walk" data-size="14"></span> Patrol</button>
+          <button class="layer-pill" id="lp-sdm" onclick="toggleActivityLayer('sdm')"><span data-icon="health" data-size="14"></span> SDM</button>
         </div>
         <!-- Legend -->
         <div class="map-legend">
@@ -4165,11 +4165,11 @@ select.msel {
             </div>
 
             <div class="card" style="padding:12px 16px;">
-              <div class="transect-row"><span class="td-label">🌧️ Station</span><span>MET-7B-01</span></div>
-              <div class="transect-row"><span class="td-label">📍 Location</span><span>Afore Weather Station</span></div>
-              <div class="transect-row"><span class="td-label">🧭 Coordinates</span><span>-9.1350° S, 148.3900° E</span></div>
-              <div class="transect-row"><span class="td-label">📅 Schedule</span><span>10th &amp; 24th of every month</span></div>
-              <div class="transect-row"><span class="td-label">📋 Equipment</span><span>Rain gauge, water level marker</span></div>
+              <div class="transect-row"><span class="td-label"><span data-icon="cloudrain" data-size="14"></span> Station</span><span>MET-7B-01</span></div>
+              <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> Location</span><span>Afore Weather Station</span></div>
+              <div class="transect-row"><span class="td-label"><span data-icon="compass" data-size="14"></span> Coordinates</span><span>-9.1350° S, 148.3900° E</span></div>
+              <div class="transect-row"><span class="td-label"><span data-icon="calendar" data-size="14"></span> Schedule</span><span>10th &amp; 24th of every month</span></div>
+              <div class="transect-row"><span class="td-label"><span data-icon="clipboard" data-size="14"></span> Equipment</span><span>Rain gauge, water level marker</span></div>
             </div>
 
             <div style="background:#ECEFF1;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:0.75rem;color:#455A64;">
@@ -4177,7 +4177,7 @@ select.msel {
             </div>
 
             <div class="nav-gate-card" id="meteoNavGateCard">
-              <div style="font-size:0.82rem;font-weight:700;color:#37474F;margin-bottom:8px;">📍 Navigate to Weather Station</div>
+              <div style="font-size:0.82rem;font-weight:700;color:#37474F;margin-bottom:8px;"><span data-icon="pin" data-size="14"></span> Navigate to Weather Station</div>
               <div class="compass-row">
                 <svg width="60" height="60" viewBox="0 0 72 72" style="flex-shrink:0;">
                   <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
@@ -4254,7 +4254,7 @@ select.msel {
           <div class="form-group">
             <label class="form-label"><span data-icon="camera" data-size="14"></span> Reference Photo <span style="color:#B71C1C;">*</span></label>
             <div id="metPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="metTriggerPhoto()">
-              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;"><span data-icon="camera" data-size="30"></span></div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>
             </div>
             <input type="file" id="metPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="metHandlePhoto(this)">
             <div id="metPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
@@ -4264,7 +4264,7 @@ select.msel {
             <textarea id="metDesc" class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" placeholder="When installed, read schedule, who maintains it…"></textarea>
           </div>
           <div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.75rem;margin-bottom:12px;">
-            ℹ️ This instrument will be marked <strong>Pending Approval</strong>. The coordinator assigns the owning clan before monitoring begins.
+            <span data-icon="info" data-size="14"></span> This instrument will be marked <strong>Pending Approval</strong>. The coordinator assigns the owning clan before monitoring begins.
           </div>
           <button class="btn-primary" style="background:#37474F;" onclick="submitMetStation()">Submit for Approval</button>
           <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
@@ -4352,7 +4352,7 @@ select.msel {
           <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:8px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="camera" data-size="16"></span> Photo <span style="color:#B71C1C;">*</span></div>
           <div class="card" style="padding:12px 16px;">
             <div id="mrPhotoBox" style="width:100%;height:110px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="mrTriggerPhoto()">
-              <div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the instrument today</div></div>
+              <div style="text-align:center;color:#999;"><div style="font-size:2rem;"><span data-icon="camera" data-size="30"></span></div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the instrument today</div></div>
             </div>
             <input type="file" id="mrPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="mrHandlePhoto(this)">
             <div id="mrPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
@@ -4380,24 +4380,24 @@ select.msel {
         </div>
         <div class="p14" style="padding-top:6px;">
           <div class="card" style="padding:10px 14px;">
-            <div class="transect-row"><span class="td-label">📅 Date</span><span id="meteoDate">10 June 2026</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="calendar" data-size="14"></span> Date</span><span id="meteoDate">10 June 2026</span></div>
             <div class="transect-row">
-              <span class="td-label">🕘 Time</span>
+              <span class="td-label"><span data-icon="clock" data-size="14"></span> Time</span>
               <span style="display:flex;align-items:center;gap:6px;">
                 <input type="time" id="meteoTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;" value="08:00">
                 <span style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">auto</span>
               </span>
             </div>
             <div class="transect-row">
-              <span class="td-label">☁ Weather</span>
+              <span class="td-label"><span data-icon="cloud" data-size="14"></span> Weather</span>
               <span>
-                <button class="weather-pill active" id="mwx-cloudy" onclick="wxM('cloudy','sunny')">☁ Cloudy</button>
-                <button class="weather-pill" id="mwx-sunny" onclick="wxM('sunny','cloudy')">☀ Sunny</button>
+                <button class="weather-pill active" id="mwx-cloudy" onclick="wxM('cloudy','sunny')"><span data-icon="cloud" data-size="14"></span> Cloudy</button>
+                <button class="weather-pill" id="mwx-sunny" onclick="wxM('sunny','cloudy')"><span data-icon="sun" data-size="14"></span> Sunny</button>
               </span>
             </div>
           </div>
 
-          <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;">🌧️ Rain Gauge Reading</div>
+          <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;"><span data-icon="cloudrain" data-size="14"></span> Rain Gauge Reading</div>
           <div class="card" style="padding:14px 16px;text-align:center;">
             <div style="font-size:0.75rem;color:#888;margin-bottom:8px;">Rainfall since last reading (mm)</div>
             <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
@@ -4417,7 +4417,7 @@ select.msel {
             </div>
           </div>
 
-          <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;">📏 Water Level Reading</div>
+          <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;"><span data-icon="ruler" data-size="14"></span> Water Level Reading</div>
           <div class="card" style="padding:14px 16px;text-align:center;">
             <div style="font-size:0.75rem;color:#888;margin-bottom:8px;">River / stream level at marker (cm)</div>
             <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
@@ -4438,7 +4438,7 @@ select.msel {
             </div>
           </div>
 
-          <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;">🌡️ General Conditions</div>
+          <div style="font-size:0.9rem;font-weight:700;color:#37474F;margin:14px 0 8px;"><span data-icon="thermometer" data-size="14"></span> General Conditions</div>
           <div class="card" style="padding:12px 16px;">
             <div class="form-group">
               <label class="form-label">Wind</label>
@@ -4486,15 +4486,15 @@ select.msel {
           <div class="card" style="padding:14px 16px;margin-bottom:12px;">
             <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin-bottom:10px;">Garden Type</div>
             <div style="display:flex;gap:6px;margin-bottom:14px;">
-              <button class="weather-pill active" id="gtype-cash" onclick="selectGardenType('cash')" style="font-size:0.78rem;padding:8px 14px;flex:1;text-align:center;">💰 Cash Crop<br><span style="font-size:0.62rem;color:#888;">Permanent · One-off</span></button>
+              <button class="weather-pill active" id="gtype-cash" onclick="selectGardenType('cash')" style="font-size:0.78rem;padding:8px 14px;flex:1;text-align:center;"><span data-icon="money" data-size="14"></span> Cash Crop<br><span style="font-size:0.62rem;color:#888;">Permanent · One-off</span></button>
               <button class="weather-pill" id="gtype-food" onclick="selectGardenType('food')" style="font-size:0.78rem;padding:8px 14px;flex:1;text-align:center;">🍠 Food Garden<br><span style="font-size:0.62rem;color:#888;">Annual mapping</span></button>
             </div>
 
             <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin-bottom:8px;">Crop Type</div>
             <div id="gardenCropsCash" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
-              <button class="weather-pill" id="gc-vanilla" onclick="toggleCrop('vanilla')" style="font-size:0.75rem;padding:5px 10px;">🌿 Vanilla</button>
-              <button class="weather-pill" id="gc-coffee" onclick="toggleCrop('coffee')" style="font-size:0.75rem;padding:5px 10px;">☕ Coffee</button>
-              <button class="weather-pill" id="gc-cocoa" onclick="toggleCrop('cocoa')" style="font-size:0.75rem;padding:5px 10px;">🫘 Cocoa</button>
+              <button class="weather-pill" id="gc-vanilla" onclick="toggleCrop('vanilla')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="leaf" data-size="14"></span> Vanilla</button>
+              <button class="weather-pill" id="gc-coffee" onclick="toggleCrop('coffee')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="coffee" data-size="14"></span> Coffee</button>
+              <button class="weather-pill" id="gc-cocoa" onclick="toggleCrop('cocoa')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="cocoa" data-size="14"></span> Cocoa</button>
             </div>
             <div id="gardenCropsFood" style="display:none;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
               <button class="weather-pill" id="gc-taro" onclick="toggleCrop('taro')" style="font-size:0.75rem;padding:5px 10px;">🥔 Taro</button>
@@ -4502,19 +4502,19 @@ select.msel {
               <button class="weather-pill" id="gc-banana" onclick="toggleCrop('banana')" style="font-size:0.75rem;padding:5px 10px;">🍌 Banana</button>
               <button class="weather-pill" id="gc-sweetpotato" onclick="toggleCrop('sweetpotato')" style="font-size:0.75rem;padding:5px 10px;">🍠 Sweet Potato</button>
               <button class="weather-pill" id="gc-greens" onclick="toggleCrop('greens')" style="font-size:0.75rem;padding:5px 10px;">🥬 Greens</button>
-              <button class="weather-pill" id="gc-sugarcane" onclick="toggleCrop('sugarcane')" style="font-size:0.75rem;padding:5px 10px;">🌾 Sugarcane</button>
+              <button class="weather-pill" id="gc-sugarcane" onclick="toggleCrop('sugarcane')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="grain" data-size="14"></span> Sugarcane</button>
             </div>
             <input type="text" id="gardenCropOther" class="form-input" style="font-size:0.78rem;padding:8px 10px;margin-bottom:10px;" placeholder="Other crops (type in local language)...">
           </div>
 
           <div class="card" style="padding:14px 16px;margin-bottom:12px;">
-            <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin-bottom:8px;">📍 Garden Boundary</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin-bottom:8px;"><span data-icon="pin" data-size="14"></span> Garden Boundary</div>
             <div style="font-size:0.75rem;color:#666;margin-bottom:10px;">Walk around the garden edge. Tap "Add Corner" at each turn. Minimum 3 points to form a boundary.</div>
             <div id="gardenPointsList" style="margin-bottom:10px;">
               <div style="font-size:0.75rem;color:#aaa;text-align:center;padding:10px;">No boundary points yet</div>
             </div>
             <div style="display:flex;gap:8px;">
-              <button class="btn-outline" onclick="addGardenPoint()" style="flex:1;border-color:#558B2F;color:#558B2F;font-size:0.78rem;padding:10px;">📍 Add Corner Point</button>
+              <button class="btn-outline" onclick="addGardenPoint()" style="flex:1;border-color:#558B2F;color:#558B2F;font-size:0.78rem;padding:10px;"><span data-icon="pin" data-size="14"></span> Add Corner Point</button>
               <button class="btn-outline" onclick="clearGardenPoints()" style="border-color:#c62828;color:#c62828;font-size:0.78rem;padding:10px;">Clear</button>
             </div>
             <div id="gardenPointCount" style="text-align:center;font-size:0.72rem;color:#888;margin-top:6px;">0 points captured</div>
@@ -4522,7 +4522,7 @@ select.msel {
 
           <div class="card" style="padding:14px 16px;margin-bottom:12px;">
             <div class="form-group" style="margin-bottom:8px;">
-              <label class="form-label" style="font-size:0.75rem;font-weight:600;">📅 Date of Mapping</label>
+              <label class="form-label" style="font-size:0.75rem;font-weight:600;"><span data-icon="calendar" data-size="14"></span> Date of Mapping</label>
               <input type="date" id="gardenDate" class="form-input" style="font-size:0.78rem;padding:8px 10px;">
             </div>
             <div class="form-group" style="margin-bottom:8px;">
@@ -4573,13 +4573,13 @@ select.msel {
             <div class="form-group" style="margin-bottom:10px;">
               <label class="form-label" style="font-size:0.75rem;font-weight:600;">Species</label>
               <div style="display:flex;gap:6px;">
-                <button class="weather-pill active" id="tree-sp-okari" onclick="selectTreeSpecies('okari')" style="font-size:0.78rem;padding:6px 16px;">🥜 Okari</button>
-                <button class="weather-pill" id="tree-sp-massoy" onclick="selectTreeSpecies('massoy')" style="font-size:0.78rem;padding:6px 16px;">🌲 Massoy</button>
+                <button class="weather-pill active" id="tree-sp-okari" onclick="selectTreeSpecies('okari')" style="font-size:0.78rem;padding:6px 16px;"><span data-icon="nut" data-size="14"></span> Okari</button>
+                <button class="weather-pill" id="tree-sp-massoy" onclick="selectTreeSpecies('massoy')" style="font-size:0.78rem;padding:6px 16px;"><span data-icon="tree" data-size="14"></span> Massoy</button>
               </div>
             </div>
 
             <div class="form-group" style="margin-bottom:10px;">
-              <label class="form-label" style="font-size:0.75rem;font-weight:600;">📍 GPS Location</label>
+              <label class="form-label" style="font-size:0.75rem;font-weight:600;"><span data-icon="pin" data-size="14"></span> GPS Location</label>
               <div style="display:flex;align-items:center;gap:8px;">
                 <button class="btn-outline" onclick="captureTreeGPS()" style="border-color:#5D4037;color:#5D4037;font-size:0.78rem;padding:8px 14px;flex:1;">Capture GPS</button>
               </div>
@@ -4652,9 +4652,9 @@ select.msel {
 
             <!-- Mode: New Activity vs Follow-up -->
             <div style="display:flex;gap:6px;margin-bottom:14px;">
-              <button class="weather-pill active" id="cmode-new" onclick="setConservMode('new')" style="flex:1;font-size:0.78rem;padding:8px;">🌱 New Activity</button>
-              <button class="weather-pill" id="cmode-followup" onclick="setConservMode('followup')" style="flex:1;font-size:0.78rem;padding:8px;">📋 Follow-up Visit</button>
-              <button class="weather-pill" onclick="nav('screen-conserv-schedule')" style="flex:0 0 auto;font-size:0.78rem;padding:8px 10px;background:#E0F2F1;color:#006064;border:1px solid #b2dfdb;">📊 Schedule</button>
+              <button class="weather-pill active" id="cmode-new" onclick="setConservMode('new')" style="flex:1;font-size:0.78rem;padding:8px;"><span data-icon="sprout" data-size="14"></span> New Activity</button>
+              <button class="weather-pill" id="cmode-followup" onclick="setConservMode('followup')" style="flex:1;font-size:0.78rem;padding:8px;"><span data-icon="clipboard" data-size="14"></span> Follow-up Visit</button>
+              <button class="weather-pill" onclick="nav('screen-conserv-schedule')" style="flex:0 0 auto;font-size:0.78rem;padding:8px 10px;background:#E0F2F1;color:#006064;border:1px solid #b2dfdb;"><span data-icon="barchart" data-size="14"></span> Schedule</button>
             </div>
 
             <!-- Activity Type (new mode) -->
@@ -4662,11 +4662,11 @@ select.msel {
               <div class="card" style="padding:12px 16px;margin-bottom:12px;">
                 <div style="font-size:0.82rem;font-weight:700;color:#006064;margin-bottom:8px;">Activity Type</div>
                 <div style="display:flex;flex-direction:column;gap:6px;">
-                  <button class="weather-pill active" id="ctype-planting" onclick="selectConservType('planting')" style="font-size:0.78rem;padding:8px;text-align:left;">🌱 Tree / Vine Planting</button>
-                  <button class="weather-pill" id="ctype-weeds" onclick="selectConservType('weeds')" style="font-size:0.78rem;padding:8px;text-align:left;">🌿 Invasive Weed Removal</button>
-                  <button class="weather-pill" id="ctype-riparian" onclick="selectConservType('riparian')" style="font-size:0.78rem;padding:8px;text-align:left;">🌊 Riparian Restoration</button>
-                  <button class="weather-pill" id="ctype-fire" onclick="selectConservType('fire')" style="font-size:0.78rem;padding:8px;text-align:left;">🔥 Fire Management</button>
-                  <button class="weather-pill" id="ctype-other" onclick="selectConservType('other')" style="font-size:0.78rem;padding:8px;text-align:left;">📝 Other</button>
+                  <button class="weather-pill active" id="ctype-planting" onclick="selectConservType('planting')" style="font-size:0.78rem;padding:8px;text-align:left;"><span data-icon="sprout" data-size="14"></span> Tree / Vine Planting</button>
+                  <button class="weather-pill" id="ctype-weeds" onclick="selectConservType('weeds')" style="font-size:0.78rem;padding:8px;text-align:left;"><span data-icon="leaf" data-size="14"></span> Invasive Weed Removal</button>
+                  <button class="weather-pill" id="ctype-riparian" onclick="selectConservType('riparian')" style="font-size:0.78rem;padding:8px;text-align:left;"><span data-icon="river" data-size="14"></span> Riparian Restoration</button>
+                  <button class="weather-pill" id="ctype-fire" onclick="selectConservType('fire')" style="font-size:0.78rem;padding:8px;text-align:left;"><span data-icon="flame" data-size="14"></span> Fire Management</button>
+                  <button class="weather-pill" id="ctype-other" onclick="selectConservType('other')" style="font-size:0.78rem;padding:8px;text-align:left;"><span data-icon="edit" data-size="14"></span> Other</button>
                 </div>
                 <input type="text" id="conservTypeOther" class="form-input" style="display:none;font-size:0.78rem;padding:7px 10px;margin-top:8px;" placeholder="Describe activity…">
               </div>
@@ -4706,7 +4706,7 @@ select.msel {
 
             <!-- GPS Gate -->
             <div class="nav-gate-card" id="conservNavGateCard">
-              <div style="font-size:0.82rem;font-weight:700;color:#006064;margin-bottom:8px;">📍 Navigate to Activity Site</div>
+              <div style="font-size:0.82rem;font-weight:700;color:#006064;margin-bottom:8px;"><span data-icon="pin" data-size="14"></span> Navigate to Activity Site</div>
               <div class="compass-row">
                 <svg width="60" height="60" viewBox="0 0 72 72" style="flex-shrink:0;">
                   <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
@@ -4757,16 +4757,16 @@ select.msel {
 
           <!-- Date / Time / People -->
           <div class="card" style="padding:10px 14px;margin-bottom:10px;">
-            <div class="transect-row"><span class="td-label">📅 Date</span><span id="conservDate">10 June 2026</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="calendar" data-size="14"></span> Date</span><span id="conservDate">10 June 2026</span></div>
             <div class="transect-row">
-              <span class="td-label">🕘 Time</span>
+              <span class="td-label"><span data-icon="clock" data-size="14"></span> Time</span>
               <span style="display:flex;align-items:center;gap:6px;">
                 <input type="time" id="conservTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;">
                 <span style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">auto</span>
               </span>
             </div>
             <div class="transect-row">
-              <span class="td-label">👥 People</span>
+              <span class="td-label"><span data-icon="people" data-size="14"></span> People</span>
               <span>
                 <div class="tally" style="display:inline-flex;">
                   <button class="tally-btn" onclick="tc(this,-1)">−</button>
@@ -4776,25 +4776,25 @@ select.msel {
               </span>
             </div>
             <div class="transect-row">
-              <span class="td-label">☁ Weather</span>
+              <span class="td-label"><span data-icon="cloud" data-size="14"></span> Weather</span>
               <span>
-                <button class="weather-pill active" id="cwx-cloudy" onclick="wxCons('cloudy','sunny')">☁ Cloudy</button>
-                <button class="weather-pill" id="cwx-sunny" onclick="wxCons('sunny','cloudy')">☀ Sunny</button>
+                <button class="weather-pill active" id="cwx-cloudy" onclick="wxCons('cloudy','sunny')"><span data-icon="cloud" data-size="14"></span> Cloudy</button>
+                <button class="weather-pill" id="cwx-sunny" onclick="wxCons('sunny','cloudy')"><span data-icon="sun" data-size="14"></span> Sunny</button>
               </span>
             </div>
           </div>
 
           <!-- Activity-specific fields: Planting -->
           <div id="conservFields-planting">
-            <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;">🌱 Planting Details</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;"><span data-icon="sprout" data-size="14"></span> Planting Details</div>
             <div class="card" style="padding:12px 16px;margin-bottom:10px;">
               <div class="form-group">
                 <label class="form-label">Species Planted</label>
                 <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">
-                  <button class="weather-pill" id="csp-okari" onclick="toggleConservSp('okari')" style="font-size:0.72rem;padding:4px 10px;">🥜 Okari</button>
-                  <button class="weather-pill" id="csp-massoy" onclick="toggleConservSp('massoy')" style="font-size:0.72rem;padding:4px 10px;">🌲 Massoy</button>
-                  <button class="weather-pill" id="csp-vanilla" onclick="toggleConservSp('vanilla')" style="font-size:0.72rem;padding:4px 10px;">🌿 Vanilla</button>
-                  <button class="weather-pill" id="csp-aristolochia" onclick="toggleConservSp('aristolochia')" style="font-size:0.72rem;padding:4px 10px;">🦋 Aristolochia</button>
+                  <button class="weather-pill" id="csp-okari" onclick="toggleConservSp('okari')" style="font-size:0.72rem;padding:4px 10px;"><span data-icon="nut" data-size="14"></span> Okari</button>
+                  <button class="weather-pill" id="csp-massoy" onclick="toggleConservSp('massoy')" style="font-size:0.72rem;padding:4px 10px;"><span data-icon="tree" data-size="14"></span> Massoy</button>
+                  <button class="weather-pill" id="csp-vanilla" onclick="toggleConservSp('vanilla')" style="font-size:0.72rem;padding:4px 10px;"><span data-icon="leaf" data-size="14"></span> Vanilla</button>
+                  <button class="weather-pill" id="csp-aristolochia" onclick="toggleConservSp('aristolochia')" style="font-size:0.72rem;padding:4px 10px;"><span data-icon="butterfly" data-size="14"></span> Aristolochia</button>
                   <button class="weather-pill" id="csp-other" onclick="toggleConservSp('other')" style="font-size:0.72rem;padding:4px 10px;">Other</button>
                 </div>
                 <input type="text" id="conservSpOther" class="form-input" style="font-size:0.75rem;padding:6px 10px;" placeholder="Other species name…">
@@ -4829,7 +4829,7 @@ select.msel {
 
           <!-- Activity-specific fields: Weed Removal -->
           <div id="conservFields-weeds" style="display:none;">
-            <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;">🌿 Weed Removal Details</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;"><span data-icon="leaf" data-size="14"></span> Weed Removal Details</div>
             <div class="card" style="padding:12px 16px;margin-bottom:10px;">
               <div class="form-group">
                 <label class="form-label">Weed Species</label>
@@ -4882,11 +4882,11 @@ select.msel {
           </div>
 
           <!-- Photos -->
-          <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;">📸 Photographs</div>
+          <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;"><span data-icon="camera" data-size="14"></span> Photographs</div>
           <div class="card" style="padding:12px 16px;margin-bottom:10px;">
             <div style="font-size:0.75rem;color:#666;margin-bottom:8px;">Take photos showing the site before / during / after. Photos are required for verification.</div>
             <div style="display:flex;gap:8px;align-items:center;">
-              <button class="btn-outline" onclick="addConservPhoto()" style="border-color:#006064;color:#006064;font-size:0.78rem;padding:10px;flex:1;">📷 Take / Add Photo</button>
+              <button class="btn-outline" onclick="addConservPhoto()" style="border-color:#006064;color:#006064;font-size:0.78rem;padding:10px;flex:1;"><span data-icon="camera" data-size="14"></span> Take / Add Photo</button>
             </div>
             <div id="conservPhotoCount" style="text-align:center;font-size:0.78rem;color:#888;margin-top:8px;">0 photos attached</div>
             <div id="conservPhotoThumbs" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
@@ -4900,7 +4900,7 @@ select.msel {
 
           <!-- Follow-up schedule reminder -->
           <div style="background:#E0F2F1;border-radius:8px;padding:12px;margin-bottom:12px;border-left:3px solid #006064;">
-            <div style="font-size:0.78rem;font-weight:700;color:#006064;margin-bottom:4px;">📅 Follow-up Schedule</div>
+            <div style="font-size:0.78rem;font-weight:700;color:#006064;margin-bottom:4px;"><span data-icon="calendar" data-size="14"></span> Follow-up Schedule</div>
             <div style="font-size:0.73rem;color:#444;line-height:1.6;" id="conservFollowupDates">Follow-up dates will appear after saving.</div>
           </div>
 
@@ -4927,11 +4927,11 @@ select.msel {
             <div style="font-size:0.78rem;font-weight:700;color:#006064;margin-bottom:6px;">Status Key</div>
             <div style="display:flex;flex-wrap:wrap;gap:5px;">
               <span style="font-size:0.65rem;background:#E8F5E9;color:#2E7D32;padding:2px 7px;border-radius:8px;font-weight:600;">✅ Completed on time</span>
-              <span style="font-size:0.65rem;background:#FFF3E0;color:#E65100;padding:2px 7px;border-radius:8px;font-weight:600;">⚠️ Completed late</span>
+              <span style="font-size:0.65rem;background:#FFF3E0;color:#E65100;padding:2px 7px;border-radius:8px;font-weight:600;"><span data-icon="warning" data-size="14"></span> Completed late</span>
               <span style="font-size:0.65rem;background:#FFEBEE;color:#B71C1C;padding:2px 7px;border-radius:8px;font-weight:600;">🔴 Missed</span>
               <span style="font-size:0.65rem;background:#FFF3E0;color:#E65100;padding:2px 7px;border-radius:8px;font-weight:600;">❗ Due soon</span>
               <span style="font-size:0.65rem;background:#FFFDE7;color:#F57F17;padding:2px 7px;border-radius:8px;font-weight:600;">⏰ Upcoming</span>
-              <span style="font-size:0.65rem;background:#E3F2FD;color:#1565C0;padding:2px 7px;border-radius:8px;font-weight:600;">📅 Future</span>
+              <span style="font-size:0.65rem;background:#E3F2FD;color:#1565C0;padding:2px 7px;border-radius:8px;font-weight:600;"><span data-icon="calendar" data-size="14"></span> Future</span>
             </div>
           </div>
           <div id="conservSchedList">
@@ -4959,18 +4959,18 @@ select.msel {
         <div class="p14" style="padding-top:6px;">
 
           <div class="card" style="padding:10px 14px;margin-bottom:10px;">
-            <div class="transect-row"><span class="td-label">📋 Activity</span><span id="fuActivityLabel">Tree Planting — CA-7B-01</span></div>
-            <div class="transect-row"><span class="td-label">🗓️ Visit</span><span id="fuVisitLabel" style="font-weight:700;color:#006064;">Month 1 (Due: 10 July 2026)</span></div>
-            <div class="transect-row"><span class="td-label">📅 Date</span><span id="fuDate">10 July 2026</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="clipboard" data-size="14"></span> Activity</span><span id="fuActivityLabel">Tree Planting — CA-7B-01</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="calendar" data-size="14"></span> Visit</span><span id="fuVisitLabel" style="font-weight:700;color:#006064;">Month 1 (Due: 10 July 2026)</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="calendar" data-size="14"></span> Date</span><span id="fuDate">10 July 2026</span></div>
             <div class="transect-row">
-              <span class="td-label">🕘 Time</span>
+              <span class="td-label"><span data-icon="clock" data-size="14"></span> Time</span>
               <span style="display:flex;align-items:center;gap:6px;">
                 <input type="time" id="fuTime" class="form-input" style="width:110px;padding:4px 8px;font-size:0.78rem;">
                 <span style="font-size:0.62rem;color:#888;background:#f0f0f0;padding:2px 6px;border-radius:8px;">auto</span>
               </span>
             </div>
             <div class="transect-row">
-              <span class="td-label">👥 People</span>
+              <span class="td-label"><span data-icon="people" data-size="14"></span> People</span>
               <div class="tally" style="display:inline-flex;">
                 <button class="tally-btn" onclick="tc(this,-1)">−</button>
                 <span class="tally-count">2</span>
@@ -4981,7 +4981,7 @@ select.msel {
 
           <!-- Planting follow-up fields -->
           <div id="fuFields-planting">
-            <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;">🌱 Planting Survival Assessment</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;"><span data-icon="sprout" data-size="14"></span> Planting Survival Assessment</div>
             <div class="card" style="padding:12px 16px;margin-bottom:10px;">
               <div class="form-group">
                 <label class="form-label">Number of Trees / Vines Surviving</label>
@@ -5012,7 +5012,7 @@ select.msel {
 
           <!-- Weed removal follow-up fields -->
           <div id="fuFields-weeds" style="display:none;">
-            <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;">🌿 Weed Regrowth Assessment</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;"><span data-icon="leaf" data-size="14"></span> Weed Regrowth Assessment</div>
             <div class="card" style="padding:12px 16px;margin-bottom:10px;">
               <div class="form-group">
                 <label class="form-label">Weed Regrowth (%)</label>
@@ -5052,10 +5052,10 @@ select.msel {
           </div>
 
           <!-- Photos -->
-          <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;">📸 Follow-up Photographs</div>
+          <div style="font-size:0.85rem;font-weight:700;color:#006064;margin:12px 0 6px;"><span data-icon="camera" data-size="14"></span> Follow-up Photographs</div>
           <div class="card" style="padding:12px 16px;margin-bottom:10px;">
             <div style="font-size:0.75rem;color:#666;margin-bottom:8px;">Photograph the same angles as the original activity for comparison.</div>
-            <button class="btn-outline" onclick="addFuPhoto()" style="border-color:#006064;color:#006064;font-size:0.78rem;padding:10px;width:100%;">📷 Take / Add Photo</button>
+            <button class="btn-outline" onclick="addFuPhoto()" style="border-color:#006064;color:#006064;font-size:0.78rem;padding:10px;width:100%;"><span data-icon="camera" data-size="14"></span> Take / Add Photo</button>
             <div id="fuPhotoCount" style="text-align:center;font-size:0.78rem;color:#888;margin-top:8px;">0 photos attached</div>
           </div>
 
@@ -5102,18 +5102,18 @@ select.msel {
         <!-- Category filter pills -->
         <div style="padding:10px 14px 4px;overflow-x:auto;white-space:nowrap;">
           <button class="weather-pill active" id="tfilter-all" onclick="filterTraining('all',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;background:#5C3D7A;color:#fff;border:none;">All</button>
-          <button class="weather-pill" id="tfilter-governance" onclick="filterTraining('Governance',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🏛 Governance</button>
-          <button class="weather-pill" id="tfilter-finance" onclick="filterTraining('Financial Literacy',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">💰 Finance</button>
-          <button class="weather-pill" id="tfilter-agriculture" onclick="filterTraining('Agriculture',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🌾 Agriculture</button>
+          <button class="weather-pill" id="tfilter-governance" onclick="filterTraining('Governance',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;"><span data-icon="bank" data-size="14"></span> Governance</button>
+          <button class="weather-pill" id="tfilter-finance" onclick="filterTraining('Financial Literacy',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;"><span data-icon="money" data-size="14"></span> Finance</button>
+          <button class="weather-pill" id="tfilter-agriculture" onclick="filterTraining('Agriculture',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;"><span data-icon="grain" data-size="14"></span> Agriculture</button>
           <button class="weather-pill" id="tfilter-livestock" onclick="filterTraining('Livestock',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🐄 Livestock</button>
           <button class="weather-pill" id="tfilter-sewing" onclick="filterTraining('Sewing & Textiles',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🧵 Sewing</button>
           <button class="weather-pill" id="tfilter-processing" onclick="filterTraining('Food Processing',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🫙 Processing</button>
-          <button class="weather-pill" id="tfilter-nursery" onclick="filterTraining('Nursery',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🌱 Nursery</button>
-          <button class="weather-pill" id="tfilter-conservation" onclick="filterTraining('Conservation',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🌿 Conservation</button>
-          <button class="weather-pill" id="tfilter-monitoring" onclick="filterTraining('Monitoring & Data',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">📊 Monitoring</button>
-          <button class="weather-pill" id="tfilter-health" onclick="filterTraining('Health & Nutrition',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🏥 Health</button>
-          <button class="weather-pill" id="tfilter-livelihoods" onclick="filterTraining('Livelihoods',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">🛠 Livelihoods</button>
-          <button class="weather-pill" id="tfilter-other" onclick="filterTraining('Other',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;">📚 Other</button>
+          <button class="weather-pill" id="tfilter-nursery" onclick="filterTraining('Nursery',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;"><span data-icon="sprout" data-size="14"></span> Nursery</button>
+          <button class="weather-pill" id="tfilter-conservation" onclick="filterTraining('Conservation',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;"><span data-icon="leaf" data-size="14"></span> Conservation</button>
+          <button class="weather-pill" id="tfilter-monitoring" onclick="filterTraining('Monitoring & Data',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;"><span data-icon="barchart" data-size="14"></span> Monitoring</button>
+          <button class="weather-pill" id="tfilter-health" onclick="filterTraining('Health & Nutrition',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;"><span data-icon="health" data-size="14"></span> Health</button>
+          <button class="weather-pill" id="tfilter-livelihoods" onclick="filterTraining('Livelihoods',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;"><span data-icon="wrench" data-size="14"></span> Livelihoods</button>
+          <button class="weather-pill" id="tfilter-other" onclick="filterTraining('Other',this)" style="font-size:0.72rem;padding:5px 12px;margin-right:6px;"><span data-icon="document" data-size="14"></span> Other</button>
         </div>
 
         <!-- Session list -->
@@ -5143,7 +5143,7 @@ select.msel {
 
           <!-- Awareness session banner (zone staff mode, shown via JS) -->
           <div id="trainingAwarenessBanner" style="display:none;background:#7B1FA2;color:#fff;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:0.82rem;">
-            <strong>📢 Awareness Session</strong><br>
+            <strong><span data-icon="megaphone" data-size="14"></span> Awareness Session</strong><br>
             <span style="font-size:0.75rem;opacity:0.9;">You are recording a community awareness session. Attendance and a photo are required.</span>
           </div>
 
@@ -5153,25 +5153,25 @@ select.msel {
             <div id="trainingTypePills" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
               <!-- Rebuilt dynamically for field officers / authorised clan stewards -->
               <!-- shown as fallback only -->
-              <button class="weather-pill" onclick="selectTrainingType('Awareness',this)" style="font-size:0.75rem;padding:6px 10px;">📢 Awareness</button>
-              <button class="weather-pill" onclick="selectTrainingType('Coffee — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;">☕ Coffee — Agriculture</button>
-              <button class="weather-pill" onclick="selectTrainingType('Coffee — Processing',this)" style="font-size:0.75rem;padding:6px 10px;">☕ Coffee — Processing</button>
-              <button class="weather-pill" onclick="selectTrainingType('Coffee — Sales',this)" style="font-size:0.75rem;padding:6px 10px;">☕ Coffee — Sales</button>
-              <button class="weather-pill" onclick="selectTrainingType('Cocoa — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;">🍫 Cocoa — Agriculture</button>
-              <button class="weather-pill" onclick="selectTrainingType('Cocoa — Processing',this)" style="font-size:0.75rem;padding:6px 10px;">🍫 Cocoa — Processing</button>
-              <button class="weather-pill" onclick="selectTrainingType('Cocoa — Sales',this)" style="font-size:0.75rem;padding:6px 10px;">🍫 Cocoa — Sales</button>
-              <button class="weather-pill" onclick="selectTrainingType('Vanilla — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;">🌿 Vanilla — Agriculture</button>
-              <button class="weather-pill" onclick="selectTrainingType('Vanilla — Processing',this)" style="font-size:0.75rem;padding:6px 10px;">🌿 Vanilla — Processing</button>
-              <button class="weather-pill" onclick="selectTrainingType('Vanilla — Sales',this)" style="font-size:0.75rem;padding:6px 10px;">🌿 Vanilla — Sales</button>
-              <button class="weather-pill" onclick="selectTrainingType('Okari — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;">🌰 Okari — Agriculture</button>
-              <button class="weather-pill" onclick="selectTrainingType('Okari — Processing',this)" style="font-size:0.75rem;padding:6px 10px;">🌰 Okari — Processing</button>
-              <button class="weather-pill" onclick="selectTrainingType('Okari — Sales',this)" style="font-size:0.75rem;padding:6px 10px;">🌰 Okari — Sales</button>
-              <button class="weather-pill" onclick="selectTrainingType('Agroforestry',this)" style="font-size:0.75rem;padding:6px 10px;">🌳 Agroforestry</button>
-              <button class="weather-pill" onclick="selectTrainingType('Composting & Soil Health',this)" style="font-size:0.75rem;padding:6px 10px;">🌱 Composting &amp; Soil Health</button>
+              <button class="weather-pill" onclick="selectTrainingType('Awareness',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="megaphone" data-size="14"></span> Awareness</button>
+              <button class="weather-pill" onclick="selectTrainingType('Coffee — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="coffee" data-size="14"></span> Coffee — Agriculture</button>
+              <button class="weather-pill" onclick="selectTrainingType('Coffee — Processing',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="coffee" data-size="14"></span> Coffee — Processing</button>
+              <button class="weather-pill" onclick="selectTrainingType('Coffee — Sales',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="coffee" data-size="14"></span> Coffee — Sales</button>
+              <button class="weather-pill" onclick="selectTrainingType('Cocoa — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="cocoa" data-size="14"></span> Cocoa — Agriculture</button>
+              <button class="weather-pill" onclick="selectTrainingType('Cocoa — Processing',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="cocoa" data-size="14"></span> Cocoa — Processing</button>
+              <button class="weather-pill" onclick="selectTrainingType('Cocoa — Sales',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="cocoa" data-size="14"></span> Cocoa — Sales</button>
+              <button class="weather-pill" onclick="selectTrainingType('Vanilla — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="leaf" data-size="14"></span> Vanilla — Agriculture</button>
+              <button class="weather-pill" onclick="selectTrainingType('Vanilla — Processing',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="leaf" data-size="14"></span> Vanilla — Processing</button>
+              <button class="weather-pill" onclick="selectTrainingType('Vanilla — Sales',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="leaf" data-size="14"></span> Vanilla — Sales</button>
+              <button class="weather-pill" onclick="selectTrainingType('Okari — Agriculture',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="nut" data-size="14"></span> Okari — Agriculture</button>
+              <button class="weather-pill" onclick="selectTrainingType('Okari — Processing',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="nut" data-size="14"></span> Okari — Processing</button>
+              <button class="weather-pill" onclick="selectTrainingType('Okari — Sales',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="nut" data-size="14"></span> Okari — Sales</button>
+              <button class="weather-pill" onclick="selectTrainingType('Agroforestry',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="tree" data-size="14"></span> Agroforestry</button>
+              <button class="weather-pill" onclick="selectTrainingType('Composting & Soil Health',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="sprout" data-size="14"></span> Composting &amp; Soil Health</button>
               <button class="weather-pill" onclick="selectTrainingType('Pest & Disease Management',this)" style="font-size:0.75rem;padding:6px 10px;">🐛 Pest &amp; Disease</button>
               <button class="weather-pill" onclick="selectTrainingType('Beekeeping',this)" style="font-size:0.75rem;padding:6px 10px;">🐝 Beekeeping</button>
               <button class="weather-pill" onclick="selectTrainingType('Fish Farming (Aquaculture)',this)" style="font-size:0.75rem;padding:6px 10px;">🐟 Fish Farming</button>
-              <button class="weather-pill" onclick="selectTrainingType('Nursery & Seedling Management',this)" style="font-size:0.75rem;padding:6px 10px;">🪴 Nursery Management</button>
+              <button class="weather-pill" onclick="selectTrainingType('Nursery & Seedling Management',this)" style="font-size:0.75rem;padding:6px 10px;"><span data-icon="sprout" data-size="14"></span> Nursery Management</button>
               <button class="weather-pill" onclick="selectTrainingType('Livestock Health & Husbandry',this)" style="font-size:0.75rem;padding:6px 10px;">🐄 Livestock Health</button>
               <button class="weather-pill" onclick="selectTrainingType('Household Food Security',this)" style="font-size:0.75rem;padding:6px 10px;">🍱 Household Food Security</button>
             </div>
@@ -5216,7 +5216,7 @@ select.msel {
 
           <!-- Participants -->
           <div class="card" style="padding:12px 14px;margin-bottom:12px;">
-            <div style="font-weight:700;font-size:0.82rem;margin-bottom:10px;color:#5C3D7A;">👥 Participants</div>
+            <div style="font-weight:700;font-size:0.82rem;margin-bottom:10px;color:#5C3D7A;"><span data-icon="people" data-size="14"></span> Participants</div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
               <div>
                 <label class="form-label" style="color:#555;">Women</label>
@@ -5238,10 +5238,10 @@ select.msel {
           <div class="form-group" style="margin-bottom:14px;" id="trainingMaterialsGroup">
             <label class="form-label">Materials / Resources Provided</label>
             <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
-              <button class="weather-pill" onclick="toggleMaterial('Handout',this)" style="font-size:0.73rem;padding:5px 9px;">📄 Handout</button>
-              <button class="weather-pill" onclick="toggleMaterial('Manual',this)" style="font-size:0.73rem;padding:5px 9px;">📖 Manual</button>
-              <button class="weather-pill" onclick="toggleMaterial('Tools/Equipment',this)" style="font-size:0.73rem;padding:5px 9px;">🛠 Tools/Equipment</button>
-              <button class="weather-pill" onclick="toggleMaterial('Seeds/Seedlings',this)" style="font-size:0.73rem;padding:5px 9px;">🌱 Seeds/Seedlings</button>
+              <button class="weather-pill" onclick="toggleMaterial('Handout',this)" style="font-size:0.73rem;padding:5px 9px;"><span data-icon="document" data-size="14"></span> Handout</button>
+              <button class="weather-pill" onclick="toggleMaterial('Manual',this)" style="font-size:0.73rem;padding:5px 9px;"><span data-icon="document" data-size="14"></span> Manual</button>
+              <button class="weather-pill" onclick="toggleMaterial('Tools/Equipment',this)" style="font-size:0.73rem;padding:5px 9px;"><span data-icon="wrench" data-size="14"></span> Tools/Equipment</button>
+              <button class="weather-pill" onclick="toggleMaterial('Seeds/Seedlings',this)" style="font-size:0.73rem;padding:5px 9px;"><span data-icon="sprout" data-size="14"></span> Seeds/Seedlings</button>
               <button class="weather-pill" onclick="toggleMaterial('Food provided',this)" style="font-size:0.73rem;padding:5px 9px;">🍱 Food provided</button>
               <button class="weather-pill" onclick="toggleMaterial('Transport support',this)" style="font-size:0.73rem;padding:5px 9px;">🚐 Transport support</button>
               <button class="weather-pill" onclick="toggleMaterial('Certificate',this)" style="font-size:0.73rem;padding:5px 9px;">🏅 Certificate</button>
@@ -5252,7 +5252,7 @@ select.msel {
           <!-- Photo (required for awareness, optional for field officer) -->
           <div class="form-group" id="trainingPhotoGroup">
             <label class="form-label">Photo <span id="trainingPhotoRequired" style="color:#e53935;display:none;">*</span></label>
-            <button type="button" class="btn-outline" onclick="trainingTriggerPhoto()" style="width:100%;margin-bottom:8px;">📷 Take Photo</button>
+            <button type="button" class="btn-outline" onclick="trainingTriggerPhoto()" style="width:100%;margin-bottom:8px;"><span data-icon="camera" data-size="14"></span> Take Photo</button>
             <div id="trainingPhotoPreview" style="display:none;">
               <img id="trainingPhotoImg" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin-bottom:6px;">
               <button type="button" class="btn-outline" onclick="trainingClearPhoto()" style="font-size:0.75rem;padding:5px 10px;color:#B71C1C;border-color:#B71C1C;">Remove</button>
@@ -5316,7 +5316,7 @@ select.msel {
             <div style="color:#A5D6A7;font-size:0.75rem;font-weight:700;letter-spacing:0.06em;margin-bottom:6px;">DAILY DATA SEND</div>
             <div style="color:#fff;font-size:0.88rem;margin-bottom:14px;line-height:1.4;" id="exportSummaryLine">Tap when you have signal to send all new records to your coordinator.</div>
             <button id="sendAllBtn" onclick="sendAllData()" style="background:#fff;color:#1B5E20;border:none;border-radius:10px;padding:13px 28px;font-size:1rem;font-weight:800;cursor:pointer;width:100%;">
-              📤 Send All New Records
+              <span data-icon="upload" data-size="14"></span> Send All New Records
             </button>
             <div style="color:rgba(255,255,255,0.6);font-size:0.7rem;margin-top:8px;" id="lastSentLine"></div>
           </div>
@@ -5443,9 +5443,9 @@ select.msel {
 
           <!-- Local backup -->
           <div style="background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-            <div style="font-size:0.8rem;font-weight:700;color:#333;margin-bottom:4px;">💾 Local Backup</div>
+            <div style="font-size:0.8rem;font-weight:700;color:#333;margin-bottom:4px;"><span data-icon="save" data-size="14"></span> Local Backup</div>
             <div style="font-size:0.74rem;color:#666;margin-bottom:10px;line-height:1.4;">Creates a copy of <strong>all</strong> records on this phone — even already-sent ones. Share the file to WhatsApp, email, or save to phone storage as an emergency backup.</div>
-            <button id="backupBtn" onclick="backupAllData()" style="width:100%;background:#37474F;color:#fff;border:none;border-radius:10px;padding:11px 16px;font-size:0.88rem;font-weight:700;cursor:pointer;">💾 Backup All Data</button>
+            <button id="backupBtn" onclick="backupAllData()" style="width:100%;background:#37474F;color:#fff;border:none;border-radius:10px;padding:11px 16px;font-size:0.88rem;font-weight:700;cursor:pointer;"><span data-icon="save" data-size="14"></span> Backup All Data</button>
             <div id="backupStatus" style="font-size:0.72rem;color:#666;margin-top:6px;text-align:center;"></div>
           </div>
 
@@ -5649,7 +5649,30 @@ var ICON_PATHS = {
   home:    '<path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/>',
   map:     '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>',
   bell:    '<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 19a2 2 0 0 0 4 0"/>',
-  user:    '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/>'
+  user:    '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/>',
+  cloud:   '<path d="M7 18a4 4 0 0 1-.5-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 16.5 18z"/>',
+  sun:     '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>',
+  compass: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+  tag:     '<path d="M3 12l8-8h7a1 1 0 0 1 1 1v7l-8 8a1.5 1.5 0 0 1-2 0l-6-6a1.5 1.5 0 0 1 0-2z"/><circle cx="15.5" cy="8.5" r="1.3"/>',
+  hash:    '<path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/>',
+  ruler:   '<rect x="3" y="7" width="18" height="10" rx="1"/><path d="M7 7v3M11 7v4M15 7v3M19 7v4"/>',
+  lock:    '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  warning: '<path d="M12 4l9 15H3z"/><path d="M12 10v4M12 17v.5"/>',
+  info:    '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.5"/>',
+  save:    '<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>',
+  trash:   '<path d="M5 7h14M10 7V5h4v2M6 7l1 13h10l1-13"/>',
+  edit:    '<path d="M4 20h4L19 9a2 2 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/>',
+  gear:    '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  document:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+  money:   '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 9v6M18 9v6"/>',
+  bank:    '<path d="M4 9l8-5 8 5"/><path d="M5 9v9M19 9v9M9 9v9M15 9v9M3 20h18"/>',
+  megaphone:'<path d="M4 10v4l10 5V5z"/><path d="M14 8a4 4 0 0 1 0 8"/><path d="M6 14v4h3v-3"/>',
+  thermometer:'<path d="M12 4a2 2 0 0 0-2 2v8a3.5 3.5 0 1 0 4 0V6a2 2 0 0 0-2-2z"/><circle cx="12" cy="17" r="1.3"/>',
+  coffee:  '<path d="M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 9h2a2 2 0 0 1 0 4h-2"/><path d="M8 3v2M11 3v2"/>',
+  cocoa:   '<path d="M12 3c4 2 6 6 6 10s-2 6-6 8c-4-2-6-4-6-8s2-8 6-10z"/><path d="M12 5v15M9 9c1 .5 2 .5 3 0M9 13c1 .5 2 .5 3 0"/>',
+  nut:     '<path d="M12 3l7 4v8l-7 4-7-4V7z"/><path d="M12 3v18M5 7l14 8M19 7L5 15"/>',
+  print:   '<path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="7" rx="1"/><path d="M7 14h10v6H7z"/>',
+  signal:  '<path d="M12 20v-6"/><path d="M8.5 14a5 5 0 0 1 7 0M5.5 11a9 9 0 0 1 13 0"/><circle cx="12" cy="18" r="1.2"/>'
 };
 
 function icon(name, size) {
@@ -5792,7 +5815,7 @@ function enrollCheckPasscode() {
       document.getElementById('enrollServerKey').value = '';
       /* Show coordinator options: enroll, manage zones, manage topics, update profile */
       btn.disabled = false;
-      btn.textContent = '➕ Enroll New Person →';
+      btn.innerHTML = ''+icon('plus',13)+' Enroll New Person →';
       btn.onclick = enrollGoToStep2;
       document.getElementById('enrollManageZonesBtn').style.display = 'block';
       document.getElementById('enrollManageTopicsBtn').style.display = 'block';
@@ -6034,7 +6057,7 @@ function webAuthnVerify(opts) {
   if (!navigator.credentials || !window.PublicKeyCredential) {
     /* Device doesn't support WebAuthn — fail open with warning */
     opts.setVerified(true);
-    if (opts.txtId) document.getElementById(opts.txtId).textContent = '⚠ Fingerprint not available — unverified';
+    if (opts.txtId) document.getElementById(opts.txtId).innerHTML = ''+icon('warning',13)+' Fingerprint not available — unverified';
     if (opts.btnId) document.getElementById(opts.btnId).classList.add('verified');
     opts.onSuccess();
     return;
@@ -6124,7 +6147,7 @@ function initMafia() {
 function mafiaArrive() {
   var btn = document.getElementById('btnArrive');
   btn.disabled = true;
-  btn.textContent = '📍 Getting GPS…';
+  btn.innerHTML = ''+icon('pin',13)+' Getting GPS…';
   captureGPS(function(gps, err) {
     mafiaArrived = true;
     document.getElementById('navGateCard').classList.add('arrived');
@@ -6179,9 +6202,9 @@ function tc(btn, delta) {
    (mirrors the water-source module)
 ══════════════════════════════════════ */
 var FAC_TYPES = [
-  {key:'school',  label:'School',        emoji:'🏫'},
-  {key:'health',  label:'Health Centre', emoji:'🏥'},
-  {key:'aidpost', label:'Aid Post',      emoji:'⛑'}
+  {key:'school',  label:'School',        emoji:''+icon('school',13)+''},
+  {key:'health',  label:'Health Centre', emoji:''+icon('health',13)+''},
+  {key:'aidpost', label:'Aid Post',      emoji:''+icon('aidpost',13)+''}
 ];
 var facSelectedType = '', facPhotoData = null, facGPSFix = null, _activeFacility = null;
 var fvPhotoData = null, _fOpen = 'open', _fMeds = 'yes';
@@ -6216,7 +6239,7 @@ function renderFacilitiesList() {
       h += '<span style="font-size:0.9rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span>';
       h += '<span style="font-size:0.68rem;font-weight:700;color:'+bcol+';background:'+bbg+';border:1px solid '+bbd+';padding:2px 8px;border-radius:10px;white-space:nowrap;">'+badge+'</span>';
       h += '</div>';
-      h += '<div style="font-size:0.74rem;color:#666;">'+tm.label+' · 📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      h += '<div style="font-size:0.74rem;color:#666;">'+tm.label+' · '+icon('pin',13)+' '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
       if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-top:4px;">'+r.description+'</div>';
       if (r.status==='approved') {
         var own = r.owner_clan || '—';
@@ -6238,12 +6261,12 @@ function initRegisterFacility() {
   FAC_TYPES.forEach(function(t){ var el=document.getElementById('factype-'+t.key); if(el) el.classList.remove('active'); });
   var ps = document.getElementById('facPhotoStatus'); if (ps){ ps.textContent='No photo taken'; ps.style.color='#888'; }
   var pb = document.getElementById('facPhotoBox');
-  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
+  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">'+icon('camera',30)+'</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
   var g = document.getElementById('facGPS');
-  if (g){ g.textContent='📍 Acquiring GPS…'; g.style.color='#888'; }
+  if (g){ g.innerHTML=''+icon('pin',13)+' Acquiring GPS…'; g.style.color='#888'; }
   captureGPS(function(gps, err){
     if (gps){ facGPSFix=gps; if(g){ g.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'; g.style.color='#2E6B38'; } }
-    else { if(g){ g.textContent='⚠ '+err; g.style.color='#E65100'; } }
+    else { if(g){ g.innerHTML=''+icon('warning',13)+' '+err; g.style.color='#E65100'; } }
   });
 }
 function facSelectType(key) {
@@ -6321,7 +6344,7 @@ function renderFacilityApprove() {
       h += '<span style="font-size:0.68rem;font-weight:700;color:#283593;background:#e8eaf6;border:1px solid #9fa8da;padding:2px 8px;border-radius:10px;">'+tm.label+'</span>';
       h += '</div>';
       if (r.photo) h += '<img src="'+r.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" alt="Facility photo">';
-      h += '<div style="font-size:0.74rem;color:#666;">📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      h += '<div style="font-size:0.74rem;color:#666;">'+icon('pin',13)+' '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
       h += '<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Proposed by '+(r.proposed_by||'—')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
       if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
       h += '<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label>';
@@ -6403,10 +6426,10 @@ function renderFacilityTasks() {
         if (done) h += '<span style="font-size:0.68rem;font-weight:700;color:#2E7D32;background:#E8F5E9;border:1px solid #A5D6A7;padding:2px 8px;border-radius:10px;white-space:nowrap;">✓ Done this month</span>';
         else h += '<span style="font-size:0.68rem;font-weight:700;color:#283593;background:#e8eaf6;border:1px solid #9fa8da;padding:2px 8px;border-radius:10px;white-space:nowrap;">Due — tap to visit</span>';
         h += '</div>';
-        h += '<div style="font-size:0.73rem;color:#666;">'+tm.label+' · 📍 '+(s.lat||'?')+', '+(s.lng||'?')+'</div>';
+        h += '<div style="font-size:0.73rem;color:#666;">'+tm.label+' · '+icon('pin',13)+' '+(s.lat||'?')+', '+(s.lng||'?')+'</div>';
         if (split) {
           var other = (s.owner_clan === clan) ? s.owner_clan_2 : s.owner_clan;
-          h += '<div style="font-size:0.7rem;color:#8a6d00;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:4px 8px;margin-top:6px;">⚖ Shared with '+other+' — 2 visits/month, one per clan</div>';
+          h += '<div style="font-size:0.7rem;color:#8a6d00;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:4px 8px;margin-top:6px;">'+icon('split',13)+' Shared with '+other+' — 2 visits/month, one per clan</div>';
         }
         h += '</div>';
       });
@@ -6444,7 +6467,7 @@ function openFacilityVisit() {
   ['facStaffPresent','facStudents','facNotes'].forEach(function(fid){ var el=document.getElementById(fid); if(el) el.value=''; });
   fvPhotoData = null;
   var pb = document.getElementById('fvPhotoBox');
-  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the facility today</div></div>';
+  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">'+icon('camera',30)+'</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the facility today</div></div>';
   var ps = document.getElementById('fvPhotoStatus'); if (ps){ ps.textContent='No photo taken'; ps.style.color='#888'; }
   nav('screen-facility');
 }
@@ -6569,7 +6592,7 @@ function renderMetStationsList(){
       h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
       h+='<span style="font-size:0.9rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span>';
       h+='<span style="font-size:0.68rem;font-weight:700;color:'+bcol+';background:'+bbg+';border:1px solid '+bbd+';padding:2px 8px;border-radius:10px;white-space:nowrap;">'+badge+'</span></div>';
-      h+='<div style="font-size:0.74rem;color:#666;">'+tm.label+' · 📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      h+='<div style="font-size:0.74rem;color:#666;">'+tm.label+' · '+icon('pin',13)+' '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
       if(r.description) h+='<div style="font-size:0.73rem;color:#888;margin-top:4px;">'+r.description+'</div>';
       if(r.status==='approved'){ var own=r.owner_clan||'—'; if(r.owner_clan_2) own+=' + '+r.owner_clan_2+' (split)'; h+='<div style="font-size:0.72rem;color:#2E7D32;margin-top:6px;">Owner clan: <strong>'+own+'</strong></div>'; }
       h+='</div>';
@@ -6586,9 +6609,9 @@ function initRegisterMet(){
   var ds=document.getElementById('metDesc'); if(ds) ds.value='';
   MET_TYPES.forEach(function(t){ var el=document.getElementById('mettype-'+t.key); if(el) el.classList.remove('active'); });
   var ps=document.getElementById('metPhotoStatus'); if(ps){ps.textContent='No photo taken';ps.style.color='#888';}
-  var pb=document.getElementById('metPhotoBox'); if(pb) pb.innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
-  var g=document.getElementById('metGPS'); if(g){g.textContent='📍 Acquiring GPS…';g.style.color='#888';}
-  captureGPS(function(gps,err){ if(gps){metGPSFix=gps; if(g){g.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m';g.style.color='#2E6B38';}} else {if(g){g.textContent='⚠ '+err;g.style.color='#E65100';}} });
+  var pb=document.getElementById('metPhotoBox'); if(pb) pb.innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">'+icon('camera',30)+'</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
+  var g=document.getElementById('metGPS'); if(g){g.innerHTML=''+icon('pin',13)+' Acquiring GPS…';g.style.color='#888';}
+  captureGPS(function(gps,err){ if(gps){metGPSFix=gps; if(g){g.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m';g.style.color='#2E6B38';}} else {if(g){g.innerHTML=''+icon('warning',13)+' '+err;g.style.color='#E65100';}} });
 }
 function metSelectType(key){ metSelectedType=key; MET_TYPES.forEach(function(t){ var el=document.getElementById('mettype-'+t.key); if(el) el.classList.toggle('active', t.key===key); }); }
 function metTriggerPhoto(){ var inp=document.getElementById('metPhotoInput'); if(inp) inp.click(); }
@@ -6620,7 +6643,7 @@ function renderMetApprove(){
       h+='<div class="card" style="padding:12px 14px;margin-bottom:12px;">';
       h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;"><span style="font-size:0.92rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span><span style="font-size:0.68rem;font-weight:700;color:#37474F;background:#ECEFF1;border:1px solid #B0BEC5;padding:2px 8px;border-radius:10px;">'+tm.label+'</span></div>';
       if(r.photo) h+='<img src="'+r.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;">';
-      h+='<div style="font-size:0.74rem;color:#666;">📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      h+='<div style="font-size:0.74rem;color:#666;">'+icon('pin',13)+' '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
       h+='<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Proposed by '+(r.proposed_by||'—')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
       if(r.description) h+='<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
       h+='<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label><select id="ma-owner-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+ownOpts+'</select></div>';
@@ -6661,8 +6684,8 @@ function renderMetTasks(){
       h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;"><span style="font-size:0.9rem;font-weight:700;">'+icon(tm.key,18)+' '+(s.name||'(unnamed)')+'</span>';
       if(done) h+='<span style="font-size:0.68rem;font-weight:700;color:#2E7D32;background:#E8F5E9;border:1px solid #A5D6A7;padding:2px 8px;border-radius:10px;white-space:nowrap;">✓ Done this month</span>';
       else h+='<span style="font-size:0.68rem;font-weight:700;color:#37474F;background:#ECEFF1;border:1px solid #B0BEC5;padding:2px 8px;border-radius:10px;white-space:nowrap;">Due — tap to read</span>';
-      h+='</div><div style="font-size:0.73rem;color:#666;">'+tm.label+' · 📍 '+(s.lat||'?')+', '+(s.lng||'?')+'</div>';
-      if(split){ var other=(s.owner_clan===clan)?s.owner_clan_2:s.owner_clan; h+='<div style="font-size:0.7rem;color:#8a6d00;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:4px 8px;margin-top:6px;">⚖ Shared with '+other+' — 2 readings/month, one per clan</div>'; }
+      h+='</div><div style="font-size:0.73rem;color:#666;">'+tm.label+' · '+icon('pin',13)+' '+(s.lat||'?')+', '+(s.lng||'?')+'</div>';
+      if(split){ var other=(s.owner_clan===clan)?s.owner_clan_2:s.owner_clan; h+='<div style="font-size:0.7rem;color:#8a6d00;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:4px 8px;margin-top:6px;">'+icon('split',13)+' Shared with '+other+' — 2 readings/month, one per clan</div>'; }
       h+='</div>';
     });
     tasks.innerHTML=h;
@@ -6687,7 +6710,7 @@ function openMetRecord(){
   ['none','minor','major'].forEach(function(k){ var el=document.getElementById('mdmg-'+k); if(el) el.classList.toggle('active',k==='none'); });
   var rn=document.getElementById('metRain'); if(rn) rn.value='0'; var lv=document.getElementById('metLevel'); if(lv) lv.value='50'; var nt=document.getElementById('metNotes'); if(nt) nt.value='';
   var ge=document.getElementById('metGaugeEmptied'); if(ge) ge.checked=false;
-  mrPhotoData=null; var pb=document.getElementById('mrPhotoBox'); if(pb) pb.innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the instrument today</div></div>'; var ps=document.getElementById('mrPhotoStatus'); if(ps){ps.textContent='No photo taken';ps.style.color='#888';}
+  mrPhotoData=null; var pb=document.getElementById('mrPhotoBox'); if(pb) pb.innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">'+icon('camera',30)+'</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the instrument today</div></div>'; var ps=document.getElementById('mrPhotoStatus'); if(ps){ps.textContent='No photo taken';ps.style.color='#888';}
   nav('screen-met-record');
 }
 function metFn(v){ _metFn=v; ['working','faulty','down'].forEach(function(k){var el=document.getElementById('mfn-'+k);if(el)el.classList.toggle('active',k===v);}); }
@@ -6849,7 +6872,7 @@ function initQabb() {
 function qabbArrive() {
   var btn = document.getElementById('qabbBtnArrive');
   btn.disabled = true;
-  btn.textContent = '📍 Getting GPS…';
+  btn.innerHTML = ''+icon('pin',13)+' Getting GPS…';
   captureGPS(function(gps, err) {
     qabbArrived = true;
     document.getElementById('qabbNavGateCard').classList.add('arrived');
@@ -6963,10 +6986,10 @@ function renderWaterTasks() {
         if (done) h += '<span style="font-size:0.68rem;font-weight:700;color:#2E7D32;background:#E8F5E9;border:1px solid #A5D6A7;padding:2px 8px;border-radius:10px;white-space:nowrap;">✓ Done this month</span>';
         else h += '<span style="font-size:0.68rem;font-weight:700;color:#0277BD;background:#E1F5FE;border:1px solid #81d4fa;padding:2px 8px;border-radius:10px;white-space:nowrap;">Due — tap to monitor</span>';
         h += '</div>';
-        h += '<div style="font-size:0.73rem;color:#666;">'+tm.label+' · 📍 '+(s.lat||'?')+', '+(s.lng||'?')+'</div>';
+        h += '<div style="font-size:0.73rem;color:#666;">'+tm.label+' · '+icon('pin',13)+' '+(s.lat||'?')+', '+(s.lng||'?')+'</div>';
         if (split) {
           var other = (s.owner_clan === clan) ? s.owner_clan_2 : s.owner_clan;
-          h += '<div style="font-size:0.7rem;color:#8a6d00;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:4px 8px;margin-top:6px;">⚖ Shared with '+other+' — 2 readings/month, one per clan</div>';
+          h += '<div style="font-size:0.7rem;color:#8a6d00;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:4px 8px;margin-top:6px;">'+icon('split',13)+' Shared with '+other+' — 2 readings/month, one per clan</div>';
         }
         h += '</div>';
       });
@@ -7012,7 +7035,7 @@ function selectWaterTask(id) {
 function waterArrive() {
   var btn = document.getElementById('waterBtnArrive');
   btn.disabled = true;
-  btn.textContent = '📍 Getting GPS…';
+  btn.innerHTML = ''+icon('pin',13)+' Getting GPS…';
   captureGPS(function(gps, err) {
     waterArrivedFlag = true;
     document.getElementById('waterNavGateCard').classList.add('arrived');
@@ -7082,7 +7105,7 @@ function initWaterRecord() {
   /* reset photo */
   wrPhotoData = null;
   var pb = document.getElementById('wrPhotoBox');
-  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the source today</div></div>';
+  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">'+icon('camera',30)+'</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo of the source today</div></div>';
   var ps = document.getElementById('wrPhotoStatus');
   if (ps){ ps.textContent='No photo taken'; ps.style.color='#888'; }
 }
@@ -7171,7 +7194,7 @@ function renderWaterSourcesList() {
       h += '<span style="font-size:0.9rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span>';
       h += '<span style="font-size:0.68rem;font-weight:700;color:'+bcol+';background:'+bbg+';border:1px solid '+bbd+';padding:2px 8px;border-radius:10px;white-space:nowrap;">'+badge+'</span>';
       h += '</div>';
-      h += '<div style="font-size:0.74rem;color:#666;">'+tm.label+' · 📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      h += '<div style="font-size:0.74rem;color:#666;">'+tm.label+' · '+icon('pin',13)+' '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
       if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-top:4px;">'+r.description+'</div>';
       if (r.status==='approved') {
         var own = r.owner_clan || '—';
@@ -7194,12 +7217,12 @@ function initRegisterSource() {
   WS_TYPES.forEach(function(t){ var el=document.getElementById('wstype-'+t.key); if(el) el.classList.remove('active'); });
   var ps = document.getElementById('wsPhotoStatus'); if (ps){ ps.textContent='No photo taken'; ps.style.color='#888'; }
   var pb = document.getElementById('wsPhotoBox');
-  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
+  if (pb) pb.innerHTML = '<div style="text-align:center;color:#999;"><div style="font-size:2rem;">'+icon('camera',30)+'</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
   var g = document.getElementById('wsGPS');
-  if (g){ g.textContent='📍 Acquiring GPS…'; g.style.color='#888'; }
+  if (g){ g.innerHTML=''+icon('pin',13)+' Acquiring GPS…'; g.style.color='#888'; }
   captureGPS(function(gps, err){
     if (gps){ wsGPSFix=gps; if(g){ g.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'; g.style.color='#2E6B38'; } }
-    else { if(g){ g.textContent='⚠ '+err; g.style.color='#E65100'; } }
+    else { if(g){ g.innerHTML=''+icon('warning',13)+' '+err; g.style.color='#E65100'; } }
   });
 }
 
@@ -7356,7 +7379,7 @@ function renderWaterApprove() {
       h += '<span style="font-size:0.68rem;font-weight:700;color:#F57F17;background:#FFF8E1;border:1px solid #FFE082;padding:2px 8px;border-radius:10px;">'+tm.label+'</span>';
       h += '</div>';
       if (r.photo) h += '<img src="'+r.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" alt="Source photo">';
-      h += '<div style="font-size:0.74rem;color:#666;">📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
+      h += '<div style="font-size:0.74rem;color:#666;">'+icon('pin',13)+' '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
       h += '<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Proposed by '+(r.proposed_by||'—')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
       if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
       h += '<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label>';
@@ -7411,11 +7434,11 @@ function rejectWaterSource(id) {
 
 /* ── Phenology ── */
 var PHENO_CROPS = [
-  {key:'vanilla', label:'Vanilla', emoji:'🌿'},
-  {key:'cocoa',   label:'Cocoa',   emoji:'🫘'},
-  {key:'coffee',  label:'Coffee',  emoji:'☕'},
-  {key:'okari',   label:'Okari',   emoji:'🥜'},
-  {key:'massoy',  label:'Massoy',  emoji:'🌲'}
+  {key:'vanilla', label:'Vanilla', emoji:''+icon('leaf',13)+''},
+  {key:'cocoa',   label:'Cocoa',   emoji:''+icon('cocoa',13)+''},
+  {key:'coffee',  label:'Coffee',  emoji:''+icon('coffee',13)+''},
+  {key:'okari',   label:'Okari',   emoji:''+icon('nut',13)+''},
+  {key:'massoy',  label:'Massoy',  emoji:''+icon('tree',13)+''}
 ];
 var phenoEditCrop='', phenoEditPlantNum=0, phenoEditReplacesId=null;
 var phenoInactiveId=null, phenoInactiveReason='', phenoPhotoTaken=false;
@@ -7476,7 +7499,7 @@ function initPheno() {
     var ne=total-plots.filter(function(p){return p.status!=='inactive_replaced';}).length;
     if(ne>0) h+=' · '+ne+' not established';
     h += '</div>';
-    h += '<button class="btn-outline" style="width:100%;margin-bottom:8px;" onclick="nav(\'screen-pheno-plots\')">🗂 Manage Plots</button>';
+    h += '<button class="btn-outline" style="width:100%;margin-bottom:8px;" onclick="nav(\'screen-pheno-plots\')">'+icon('folder',13)+' Manage Plots</button>';
     var canRec=approved.length>0;
     h += '<button class="btn-primary" style="background:#E65100;width:100%;"'+(canRec?'':' disabled')+' onclick="nav(\'screen-pheno-record\')">'+(canRec?'Begin Monthly Observations':'No approved plants yet')+'</button>';
     if(!canRec) h+='<p style="font-size:0.72rem;color:#888;margin-top:6px;text-align:center;">Establish and get plants approved first</p>';
@@ -7518,7 +7541,7 @@ function initPhenoPlots() {
       var inactive=cp.filter(function(p){return p.status==='inactive';});
       inactive.forEach(function(p){
         h+='<div style="padding:6px 0;border-top:1px solid #FFCDD2;background:#FFF8F8;border-radius:0 0 8px 8px;">';
-        h+='<span style="font-size:0.73rem;color:#B71C1C;">⚠️ Plant '+p.plant_num+' inactive ('+( p.inactive_reason||'unknown')+')</span> ';
+        h+='<span style="font-size:0.73rem;color:#B71C1C;">'+icon('warning',13)+' Plant '+p.plant_num+' inactive ('+( p.inactive_reason||'unknown')+')</span> ';
         h+='<button class="btn-sm-export" style="background:#E65100;color:#fff;padding:3px 8px;font-size:0.7rem;margin-top:4px;" onclick="openEstablishPlant(\''+cr.key+'\','+p.plant_num+','+p.id+')">Establish Replacement</button>';
         h+='</div>';
       });
@@ -7535,7 +7558,7 @@ function openEstablishPlant(crop, plantNum, replacesId) {
 }
 
 function initPhenoEstablish() {
-  var cr=PHENO_CROPS.find(function(c){return c.key===phenoEditCrop;})||{label:'—',emoji:'🌿'};
+  var cr=PHENO_CROPS.find(function(c){return c.key===phenoEditCrop;})||{label:'—',emoji:''+icon('leaf',13)+''};
   var titleText=phenoEditReplacesId?'Establish Replacement — '+cr.label:('Establish '+cr.emoji+' '+cr.label);
   document.getElementById('phenoEstTitle').textContent=titleText;
   document.getElementById('phenoEstSubtitle').textContent='Plant #'+phenoEditPlantNum+' · GPS & Photo Required';
@@ -7546,15 +7569,15 @@ function initPhenoEstablish() {
   document.getElementById('estPhotoStatus').textContent='No photo taken';
   document.getElementById('estPhotoStatus').style.color='#888';
   document.getElementById('estPhotoBox').style.borderColor='#ccc';
-  document.getElementById('estPhotoBox').innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">📷</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
+  document.getElementById('estPhotoBox').innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:2rem;">'+icon('camera',30)+'</div><div style="font-size:0.73rem;margin-top:2px;">Tap to capture photo</div></div>';
   phenoPhotoTaken=false;
   var gpsEl=document.getElementById('estGPS');
-  if(gpsEl){gpsEl.textContent='📍 Acquiring GPS…';gpsEl.style.color='#888';}
+  if(gpsEl){gpsEl.innerHTML=''+icon('pin',13)+' Acquiring GPS…';gpsEl.style.color='#888';}
   captureGPS(function(gps, err) {
     if (gps) {
       if(gpsEl){gpsEl.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m';gpsEl.style.color='#2E6B38';}
     } else {
-      if(gpsEl){gpsEl.textContent='⚠ '+err;gpsEl.style.color='#E65100';}
+      if(gpsEl){gpsEl.innerHTML=''+icon('warning',13)+' '+err;gpsEl.style.color='#E65100';}
     }
   });
 }
@@ -7638,7 +7661,7 @@ function renderPhenoApprove(){
       var own2Opts='<option value="">None (single clan)</option>'+clans.map(function(cl){return '<option value="'+cl+'">'+cl+'</option>';}).join('');
       h+='<div class="card" style="padding:12px 14px;margin-bottom:12px;">';
       h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;"><span style="font-size:0.92rem;font-weight:700;">'+icon('tree',18)+' '+phenoCropLabel(r.crop_type)+' — Plant '+r.plant_num+'</span></div>';
-      h+='<div style="font-size:0.74rem;color:#666;">📍 '+(r.lat||'?')+', '+(r.lng||'?')+(r.location_name?(' · '+r.location_name):'')+'</div>';
+      h+='<div style="font-size:0.74rem;color:#666;">'+icon('pin',13)+' '+(r.lat||'?')+', '+(r.lng||'?')+(r.location_name?(' · '+r.location_name):'')+'</div>';
       h+='<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Established '+(r.established_date||'')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
       h+='<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label><select id="pa-owner-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+ownOpts+'</select></div>';
       h+='<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span></label><select id="pa-owner2-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+own2Opts+'</select></div>';
@@ -7848,7 +7871,7 @@ function toggleConservWeed(w) {
 function conservArrive() {
   var btn = document.getElementById('conservBtnArrive');
   btn.disabled = true;
-  btn.textContent = '📍 Getting GPS…';
+  btn.innerHTML = ''+icon('pin',13)+' Getting GPS…';
   captureGPS(function(gps, err) {
     conservArrived = true;
     document.getElementById('conservNavGateCard').classList.add('arrived');
@@ -7934,7 +7957,7 @@ function addConservPhoto() {
   var thumbs = document.getElementById('conservPhotoThumbs');
   var div = document.createElement('div');
   div.style.cssText = 'width:60px;height:60px;border-radius:6px;background:#B2DFDB;display:flex;align-items:center;justify-content:center;font-size:1.4rem;';
-  div.textContent = '📷';
+  div.innerHTML = ''+icon('camera',13)+'';
   thumbs.appendChild(div);
 }
 
@@ -8042,15 +8065,15 @@ function getFollowupStatus(dueISO, completedISO) {
     var comp = new Date(completedISO); comp.setHours(0,0,0,0);
     var late = Math.round((comp - due) / dayMs);
     if (late <= 7)  return { label:'Completed on time', color:'#2E7D32', bg:'#E8F5E9', icon:'✅' };
-    if (late <= 30) return { label:'Completed late', color:'#E65100', bg:'#FFF3E0', icon:'⚠️' };
+    if (late <= 30) return { label:'Completed late', color:'#E65100', bg:'#FFF3E0', icon:''+icon('warning',13)+'' };
     return { label:'Completed very late', color:'#B71C1C', bg:'#FFEBEE', icon:'🔴' };
   }
   var daysUntil = Math.round((due - today) / dayMs);
-  if (daysUntil > 30)  return { label:'Upcoming', color:'#1565C0', bg:'#E3F2FD', icon:'📅' };
+  if (daysUntil > 30)  return { label:'Upcoming', color:'#1565C0', bg:'#E3F2FD', icon:''+icon('calendar',13)+'' };
   if (daysUntil > 7)   return { label:'Due in ' + daysUntil + 'd', color:'#F57F17', bg:'#FFFDE7', icon:'⏰' };
   if (daysUntil >= 0)  return { label:'Due soon', color:'#E65100', bg:'#FFF3E0', icon:'❗' };
   var over = -daysUntil;
-  if (over <= 30) return { label:'Overdue ' + over + 'd', color:'#E65100', bg:'#FFF3E0', icon:'⚠️' };
+  if (over <= 30) return { label:'Overdue ' + over + 'd', color:'#E65100', bg:'#FFF3E0', icon:''+icon('warning',13)+'' };
   return { label:'Missed (' + over + 'd)', color:'#B71C1C', bg:'#FFEBEE', icon:'🔴' };
 }
 
@@ -8093,7 +8116,7 @@ function initConservSchedule() {
         var actScheds = schedules.filter(function(s) { return s.activity_id === act.id; });
         out += '<div style="background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.1);">';
         out += '<div style="font-size:0.82rem;font-weight:700;color:#006064;margin-bottom:2px;">' + (act.activity_type || 'Activity') + '</div>';
-        out += '<div style="font-size:0.7rem;color:#666;margin-bottom:8px;">📍 ' + (act.site || '') + ' &nbsp;·&nbsp; 📅 ' + (act.date || '') + ' &nbsp;·&nbsp; 👥 ' + (act.num_people || 0) + ' people</div>';
+        out += '<div style="font-size:0.7rem;color:#666;margin-bottom:8px;">'+icon('pin',13)+' ' + (act.site || '') + ' &nbsp;·&nbsp; '+icon('calendar',13)+' ' + (act.date || '') + ' &nbsp;·&nbsp; '+icon('people',13)+' ' + (act.num_people || 0) + ' people</div>';
         [1, 4, 9].forEach(function(m) {
           var sched = actScheds.find(function(s) { return s.visit_month === m; });
           out += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid #f0f0f0;">';
@@ -8255,7 +8278,7 @@ function initMeteoLegacy() {
 function meteoArrive() {
   var btn = document.getElementById('meteoBtnArrive');
   btn.disabled = true;
-  btn.textContent = '📍 Getting GPS…';
+  btn.innerHTML = ''+icon('pin',13)+' Getting GPS…';
   captureGPS(function(gps, err) {
     meteoArrivedFlag = true;
     document.getElementById('meteoNavGateCard').classList.add('arrived');
@@ -8480,7 +8503,7 @@ function renderGardenLog() {
   }
   var h = '';
   gardenSessionLog.forEach(function(g) {
-    var icon = g.garden_type === 'cash_crop' ? '💰' : '🍠';
+    var icon = g.garden_type === 'cash_crop' ? ''+icon('money',13)+'' : '🍠';
     var typeLabel = g.garden_type === 'cash_crop' ? 'Cash Crop' : 'Food Garden';
     h += '<div style="background:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;box-shadow:0 1px 2px rgba(0,0,0,0.08);">';
     h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
@@ -8526,13 +8549,13 @@ function captureTreeGPS() {
     }, function(err) {
       treeLat = -9.1400 + (Math.random() - 0.5) * 0.01;
       treeLon = 148.4000 + (Math.random() - 0.5) * 0.01;
-      display.innerHTML = '<span style="color:#E65100;">⚠ GPS unavailable — simulated: ' +
+      display.innerHTML = '<span style="color:#E65100;">'+icon('warning',13)+' GPS unavailable — simulated: ' +
         treeLat.toFixed(6) + '°, ' + treeLon.toFixed(6) + '°</span>';
     }, { enableHighAccuracy: true, timeout: 10000 });
   } else {
     treeLat = -9.1400 + (Math.random() - 0.5) * 0.01;
     treeLon = 148.4000 + (Math.random() - 0.5) * 0.01;
-    display.innerHTML = '<span style="color:#E65100;">⚠ GPS not supported — simulated: ' +
+    display.innerHTML = '<span style="color:#E65100;">'+icon('warning',13)+' GPS not supported — simulated: ' +
       treeLat.toFixed(6) + '°, ' + treeLon.toFixed(6) + '°</span>';
   }
 }
@@ -8575,7 +8598,7 @@ function renderTreeLog() {
   }
   var h = '';
   treeSessionLog.forEach(function(t, i) {
-    var icon = t.species === 'okari' ? '🥜' : '🌲';
+    var icon = t.species === 'okari' ? ''+icon('nut',13)+'' : ''+icon('tree',13)+'';
     h += '<div style="background:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;box-shadow:0 1px 2px rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;">';
     h += '<div><span style="font-size:0.9rem;margin-right:4px;">' + icon + '</span>';
     h += '<span style="font-size:0.78rem;font-weight:600;text-transform:capitalize;">' + t.species + '</span>';
@@ -8766,7 +8789,7 @@ function renderZoneConfigList() {
       '<input type="text" value="' + z.name.replace(/"/g,'&quot;') + '" ' +
         'onchange="_editZones[' + i + '].name=this.value" ' +
         'placeholder="Zone name">' +
-      '<button class="zone-del-btn" onclick="zoneConfigDelete(' + i + ')">🗑</button>';
+      '<button class="zone-del-btn" onclick="zoneConfigDelete(' + i + ')">'+icon('trash',14)+'</button>';
     list.appendChild(row);
   });
 }
@@ -8812,12 +8835,12 @@ function zoneConfigSave() {
           status.textContent = '✓ Saved to Drive (' + _editZones.length + ' zones)';
           status.style.color = '#2E7D32';
         } else {
-          status.textContent = '⚠ Saved locally. Drive sync failed: ' + (d.message || '');
+          status.textContent = 'Saved locally. Drive sync failed: ' + (d.message || '');
           status.style.color = '#E65100';
         }
       }).catch(function() {
         btn.disabled = false; btn.textContent = 'Save Changes';
-        status.textContent = '⚠ Saved locally — no network. Drive will update on next upload.';
+        status.textContent = 'Saved locally — no network. Drive will update on next upload.';
         status.style.color = '#E65100';
       });
   } else {
@@ -8914,7 +8937,7 @@ function renderTopicsConfigList() {
         '<input type="checkbox" ' + (t.certifiable ? 'checked' : '') + ' ' +
           'onchange="_editTopics[' + i + '].certifiable=this.checked" ' +
           'style="width:14px;height:14px;accent-color:#1B5E20;"> Cert</label>' +
-      '<button class="zone-del-btn" onclick="topicsConfigDelete(' + i + ')">🗑</button>';
+      '<button class="zone-del-btn" onclick="topicsConfigDelete(' + i + ')">'+icon('trash',14)+'</button>';
     list.appendChild(row);
   });
 }
@@ -8951,11 +8974,11 @@ function topicsConfigSave() {
         btn.disabled = false; btn.textContent = 'Save Changes';
         status.textContent = d.status === 'ok'
           ? '✓ Saved to Drive (' + _editTopics.length + ' topics)'
-          : '⚠ Saved locally. Drive sync failed.';
+          : 'Saved locally. Drive sync failed.';
         status.style.color = d.status === 'ok' ? '#2E7D32' : '#E65100';
       }).catch(function() {
         btn.disabled = false; btn.textContent = 'Save Changes';
-        status.textContent = '⚠ Saved locally — no network.';
+        status.textContent = 'Saved locally — no network.';
         status.style.color = '#E65100';
       });
   } else {
@@ -9111,7 +9134,7 @@ function gaCertPhotoPreview(input) {
       var preview = document.getElementById('gaCertPhotoPreview');
       if (preview) {
         preview.style.display = 'block';
-        preview.textContent = '📎 ' + file.name + ' (' + Math.round(b64.length * 0.75 / 1024) + ' KB compressed)';
+        preview.textContent = file.name + ' (' + Math.round(b64.length * 0.75 / 1024) + ' KB compressed)';
       }
     };
     img.src = e.target.result;
@@ -9217,12 +9240,12 @@ function submitGrantAuth() {
           status.style.color = '#1B5E20';
           clearGrantAuthForm();
         } else {
-          status.textContent = '⚠ Saved locally. Drive sync: ' + (d.message || 'failed');
+          status.textContent = 'Saved locally. Drive sync: ' + (d.message || 'failed');
           status.style.color = '#E65100';
         }
       }).catch(function() {
         btn.disabled = false; btn.textContent = 'Record Authorisation →';
-        status.textContent = '⚠ Saved locally — will sync when online.';
+        status.textContent = 'Saved locally — will sync when online.';
         status.style.color = '#E65100';
       });
   } else {
@@ -9291,7 +9314,7 @@ function syncAuthorisations(profile) {
           }
         });
         if (newCerts > 0) {
-          toast('🎓 ' + newCerts + ' trainer certification(s) synced');
+          toast(newCerts + ' trainer certification(s) synced');
         }
       });
     }).catch(function() { /* silent */ });
@@ -9342,7 +9365,7 @@ function loadProfileScreen() {
           var isPending = cert.status === 'pending';
           var span = document.createElement('span');
           span.className = 'cert-badge' + (isPending ? ' pending' : '');
-          span.innerHTML = (isPending ? '⏳ ' : '🎓 ') + cert.topic_name + (isPending ? ' <em style="font-weight:400;">(pending admin review)</em>' : '');
+          span.innerHTML = (isPending ? icon('clock',13)+' ' : icon('mortarboard',13)+' ') + cert.topic_name + (isPending ? ' <em style="font-weight:400;">(pending admin review)</em>' : '');
           span.title = (cert.certifying_body || '') + (cert.cert_date ? ' · ' + cert.cert_date : '');
           badges.appendChild(span);
         });
@@ -9396,7 +9419,7 @@ function fetchReport() {
   }
   if (!navigator.onLine) {
     loadCachedReport(_reportProfile);
-    document.getElementById('reportCacheNote').textContent = '⚠ Offline — showing cached data';
+    document.getElementById('reportCacheNote').textContent = 'Offline — showing cached data';
     return;
   }
   body.innerHTML = '<div style="text-align:center;padding:40px 0;color:#888;">Loading…</div>';
@@ -9423,7 +9446,7 @@ function fetchReport() {
       }
     }).catch(function(err) {
       loadCachedReport(_reportProfile);
-      document.getElementById('reportCacheNote').textContent = '⚠ Network error — showing cached data';
+      document.getElementById('reportCacheNote').textContent = 'Network error — showing cached data';
     });
 }
 
@@ -9786,7 +9809,7 @@ function updateStorageInfo() {
       persEl.textContent = '✅ Data is protected — OS cannot auto-delete it';
       persEl.style.color = '#2E7D32';
     } else if (storedVal === '0') {
-      persEl.textContent = '⚠ Data is NOT protected. Install the app to your home screen to protect it.';
+      persEl.innerHTML = ''+icon('warning',13)+' Data is NOT protected. Install the app to your home screen to protect it.';
       persEl.style.color = '#B71C1C';
     } else {
       persEl.textContent = 'Checking protection status…';
@@ -9795,7 +9818,7 @@ function updateStorageInfo() {
         navigator.storage.persisted().then(function(isPersisted) {
           persEl.textContent = isPersisted
             ? '✅ Data is protected — OS cannot auto-delete it'
-            : '⚠ Data is NOT protected. Install the app to your home screen to protect it.';
+            : ''+icon('warning',13)+' Data is NOT protected. Install the app to your home screen to protect it.';
           persEl.style.color = isPersisted ? '#2E7D32' : '#B71C1C';
           try { localStorage.setItem('mcaStoragePersisted', isPersisted ? '1' : '0'); } catch(e) {}
         });
@@ -9839,7 +9862,7 @@ function backupAllData() {
         if (storesDone < DATA_STORES.length) return;
 
         /* All stores read */
-        if (btn) { btn.disabled = false; btn.textContent = '💾 Backup All Data'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = ''+icon('save',13)+' Backup All Data'; }
 
         var json     = JSON.stringify(bundle, null, 2);
         var sid      = (profile.stewardId || 'STEWARD').replace(/[^A-Z0-9-]/gi, '');
@@ -9956,7 +9979,7 @@ function sendAllData() {
         if (storesDone === DATA_STORES.length) {
           if (bundle.record_count === 0) {
             toast('No new records to send.');
-            if (btn) { btn.disabled = false; btn.textContent = '📤 Send All New Records'; }
+            if (btn) { btn.disabled = false; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
             return;
           }
 
@@ -9984,7 +10007,7 @@ function sendAllData() {
                   var lastLine = document.getElementById('lastSentLine');
                   if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
                   toast(bundle.record_count + ' records uploaded to MCA Drive ✓');
-                  if (btn) { btn.disabled = false; btn.textContent = '📤 Send All New Records'; }
+                  if (btn) { btn.disabled = false; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
                 } else {
                   toast('Upload error — falling back to share');
                   tryShare();
@@ -10013,7 +10036,7 @@ function sendAllData() {
                   if (err.name !== 'AbortError') toast('Share failed — try again');
                 })
                 .finally(function() {
-                  if (btn) { btn.disabled = false; btn.textContent = '📤 Send All New Records'; }
+                  if (btn) { btn.disabled = false; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
                 });
             } else {
               /* Fallback: download the file */
@@ -10027,7 +10050,7 @@ function sendAllData() {
               syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, null); });
               updateRecordCounts();
               toast(bundle.record_count + ' records saved — transfer the file to your coordinator');
-              if (btn) { btn.disabled = false; btn.textContent = '📤 Send All New Records'; }
+              if (btn) { btn.disabled = false; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
             }
           }
           tryShare();
@@ -10549,8 +10572,8 @@ function loadTrainingSessions(filter) {
       h += '<div style="font-weight:700;font-size:0.88rem;color:#1a1a1a;">' + (r.topic||'Untitled') + '</div>';
       h += '<div style="font-size:0.75rem;color:#666;margin-top:2px;">' + (r.type||'Training') + '</div>';
       h += '<div style="font-size:0.72rem;color:#888;margin-top:4px;display:flex;gap:10px;flex-wrap:wrap;">';
-      h += '<span>📅 ' + (r.date||'') + '</span>';
-      if (r.location) h += '<span>📍 ' + r.location + '</span>';
+      h += '<span>'+icon('calendar',12)+' ' + (r.date||'') + '</span>';
+      if (r.location) h += '<span>'+icon('pin',12)+' ' + r.location + '</span>';
       if (r.duration) h += '<span>⏱ ' + r.duration + 'h</span>';
       h += '</div>';
       h += '</div>';
@@ -10561,7 +10584,7 @@ function loadTrainingSessions(filter) {
       h += '</div></div>';
       if (r.trainer_name) {
         h += '<div style="font-size:0.72rem;color:#666;margin-top:6px;border-top:1px solid #f0f0f0;padding-top:6px;">';
-        h += '👤 ' + r.trainer_name + (r.trainer_org ? ' · ' + r.trainer_org : '');
+        h += icon('user',12)+' ' + r.trainer_name + (r.trainer_org ? ' · ' + r.trainer_org : '');
         h += '</div>';
       }
       h += '</div>';

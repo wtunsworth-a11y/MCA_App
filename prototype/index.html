@@ -1864,7 +1864,7 @@ select.msel {
       <div class="dash-top">
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <div>
-            <div class="dash-greeting" id="dashGreeting">Good morning 👋</div>
+            <div class="dash-greeting" id="dashGreeting">Good morning</div>
             <div class="dash-clan" id="dashClan">Managalas Conservation Area</div>
           </div>
           <div style="display:flex;gap:4px;align-items:center;"><div title="Managalas Conservation Fund" style="width:42px;height:42px;border-radius:8px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;overflow:hidden;"><svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="21" cy="14" rx="10" ry="9" fill="rgba(255,255,255,0.9)"/><ellipse cx="21" cy="20" rx="13" ry="8" fill="rgba(255,255,255,0.78)"/><rect x="19.5" y="28" width="3" height="9" rx="1.5" fill="rgba(255,255,255,0.7)"/><text x="21" y="41" text-anchor="middle" font-size="7" font-weight="800" fill="rgba(255,255,255,0.85)" font-family="Arial,sans-serif">MCF</text></svg></div><div title="European Union" style="width:42px;height:28px;border-radius:5px;overflow:hidden;"><svg width="42" height="28" viewBox="0 0 42 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="42" height="28" fill="#003399"/><polygon points="21.00,1.54 21.45,2.74 22.73,2.80 21.73,3.60 22.07,4.83 21.00,4.12 19.93,4.83 20.27,3.60 19.27,2.80 20.55,2.74" fill="#FFD700"/><polygon points="26.32,2.97 26.77,4.17 28.05,4.22 27.05,5.02 27.39,6.26 26.32,5.55 25.25,6.26 25.59,5.02 24.59,4.22 25.87,4.17" fill="#FFD700"/><polygon points="30.21,6.86 30.66,8.06 31.95,8.12 30.94,8.92 31.28,10.15 30.21,9.44 29.14,10.15 29.49,8.92 28.48,8.12 29.77,8.06" fill="#FFD700"/><polygon points="31.64,12.18 32.09,13.38 33.37,13.44 32.37,14.24 32.71,15.47 31.64,14.76 30.57,15.47 30.91,14.24 29.91,13.44 31.19,13.38" fill="#FFD700"/><polygon points="30.21,17.50 30.66,18.70 31.95,18.76 30.94,19.56 31.28,20.79 30.21,20.08 29.14,20.79 29.49,19.56 28.48,18.76 29.77,18.70" fill="#FFD700"/><polygon points="26.32,21.39 26.77,22.60 28.05,22.65 27.05,23.45 27.39,24.69 26.32,23.98 25.25,24.69 25.59,23.45 24.59,22.65 25.87,22.60" fill="#FFD700"/><polygon points="21.00,22.82 21.45,24.02 22.73,24.08 21.73,24.88 22.07,26.11 21.00,25.40 19.93,26.11 20.27,24.88 19.27,24.08 20.55,24.02" fill="#FFD700"/><polygon points="15.68,21.39 16.13,22.60 17.41,22.65 16.41,23.45 16.75,24.69 15.68,23.98 14.61,24.69 14.95,23.45 13.95,22.65 15.23,22.60" fill="#FFD700"/><polygon points="11.79,17.50 12.23,18.70 13.52,18.76 12.51,19.56 12.86,20.79 11.79,20.08 10.72,20.79 11.06,19.56 10.05,18.76 11.34,18.70" fill="#FFD700"/><polygon points="10.36,12.18 10.81,13.38 12.09,13.44 11.09,14.24 11.43,15.47 10.36,14.76 9.29,15.47 9.63,14.24 8.63,13.44 9.91,13.38" fill="#FFD700"/><polygon points="11.79,6.86 12.23,8.06 13.52,8.12 12.51,8.92 12.86,10.15 11.79,9.44 10.72,10.15 11.06,8.92 10.05,8.12 11.34,8.06" fill="#FFD700"/><polygon points="15.68,2.97 16.13,4.17 17.41,4.22 16.41,5.02 16.75,6.26 15.68,5.55 14.61,6.26 14.95,5.02 13.95,4.22 15.23,4.17" fill="#FFD700"/></svg></div></div>
@@ -1875,87 +1875,87 @@ select.msel {
         <div id="syncWarningBanner" style="display:none;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;font-size:0.79rem;line-height:1.4;cursor:pointer;" onclick="nav('screen-data-export')"></div>
         <div class="module-grid">
           <div class="module-tile" onclick="nav('screen-patrol-stub')">
-            <span class="module-emoji">🌿</span>
+            <span class="module-emoji" data-icon="walk" data-size="26"></span>
             <span class="module-name">Patrol</span>
           </div>
           <div class="module-tile" onclick="nav('screen-observations')">
-            <span class="module-emoji">👁️</span>
+            <span class="module-emoji" data-icon="eye" data-size="26"></span>
             <span class="module-name">Observations</span>
           </div>
           <div class="module-tile" onclick="nav('screen-sdm')">
-            <span class="module-emoji">🏥</span>
+            <span class="module-emoji" data-icon="clipboard" data-size="26"></span>
             <span class="module-name">Service Delivery Monitoring</span>
           </div>
           <div class="module-tile" onclick="nav('screen-alerts')">
-            <span class="module-emoji">🔥</span>
+            <span class="module-emoji" data-icon="flame" data-size="26"></span>
             <span class="module-name">Environmental Alerts</span>
           </div>
           <div class="module-tile" onclick="nav('screen-mafia-setup')">
-            <span class="module-emoji">📊</span>
+            <span class="module-emoji" data-icon="barchart" data-size="26"></span>
             <span class="module-name">MaFIA Tool</span>
           </div>
           <div class="module-tile" onclick="nav('screen-meetings')">
-            <span class="module-emoji">🤝</span>
+            <span class="module-emoji" data-icon="people" data-size="26"></span>
             <span class="module-name">Meetings</span>
           </div>
           <div class="module-tile" onclick="nav('screen-community-stub')">
-            <span class="module-emoji">👥</span>
+            <span class="module-emoji" data-icon="people" data-size="26"></span>
             <span class="module-name">Community Data</span>
           </div>
           <div class="module-tile" onclick="nav('screen-performance')">
-            <span class="module-emoji">📈</span>
+            <span class="module-emoji" data-icon="linechart" data-size="26"></span>
             <span class="module-name">Performance Monitoring</span>
           </div>
           <div class="module-tile" onclick="nav('screen-qabb-setup')">
-            <span class="module-emoji">🦋</span>
+            <span class="module-emoji" data-icon="butterfly" data-size="26"></span>
             <span class="module-name">QABB Butterfly Survey</span>
           </div>
           <div class="module-tile" onclick="nav('screen-water-setup')">
-            <span class="module-emoji">🌊</span>
+            <span class="module-emoji" data-icon="river" data-size="26"></span>
             <span class="module-name">Water Quality</span>
           </div>
           <div class="module-tile" onclick="nav('screen-pheno-setup')">
-            <span class="module-emoji">🌺</span>
+            <span class="module-emoji" data-icon="flower" data-size="26"></span>
             <span class="module-name">Phenology Monitoring</span>
           </div>
           <div class="module-tile" onclick="nav('screen-meteo-setup')">
-            <span class="module-emoji">🌧️</span>
+            <span class="module-emoji" data-icon="cloudrain" data-size="26"></span>
             <span class="module-name">Weather Station</span>
           </div>
           <div class="module-tile" onclick="nav('screen-tree-mapping')">
-            <span class="module-emoji">🌳</span>
+            <span class="module-emoji" data-icon="tree" data-size="26"></span>
             <span class="module-name">Tree Mapping</span>
           </div>
           <div class="module-tile" onclick="nav('screen-garden-mapping')">
-            <span class="module-emoji">🌾</span>
+            <span class="module-emoji" data-icon="grain" data-size="26"></span>
             <span class="module-name">Garden Mapping</span>
           </div>
           <div class="module-tile" onclick="nav('screen-conserv-setup')">
-            <span class="module-emoji">🌱</span>
+            <span class="module-emoji" data-icon="sprout" data-size="26"></span>
             <span class="module-name">Conservation Activities</span>
           </div>
           <div class="module-tile" id="tile-training" onclick="nav('screen-training-setup')">
-            <span class="module-emoji">🎓</span>
+            <span class="module-emoji" data-icon="mortarboard" data-size="26"></span>
             <span class="module-name">Training Records</span>
           </div>
           <div class="module-tile" onclick="nav('screen-data-export')">
-            <span class="module-emoji">📤</span>
+            <span class="module-emoji" data-icon="upload" data-size="26"></span>
             <span class="module-name">Export Data</span>
           </div>
         </div>
       </div>
       <nav class="bottom-nav" id="dash-nav">
         <button class="nav-item active" onclick="bottomNav('home')">
-          <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+          <span class="nav-icon" data-icon="home" data-size="22"></span><span class="nav-label">Home</span>
         </button>
         <button class="nav-item" onclick="bottomNav('map')">
-          <span class="nav-icon">🗺️</span><span class="nav-label">Map</span>
+          <span class="nav-icon" data-icon="map" data-size="22"></span><span class="nav-label">Map</span>
         </button>
         <button class="nav-item" onclick="bottomNav('alerts')">
-          <span class="nav-icon">🔔</span><span class="nav-label">Alerts</span>
+          <span class="nav-icon" data-icon="bell" data-size="22"></span><span class="nav-label">Alerts</span>
         </button>
         <button class="nav-item" onclick="bottomNav('profile')">
-          <span class="nav-icon">👤</span><span class="nav-label">Profile</span>
+          <span class="nav-icon" data-icon="user" data-size="22"></span><span class="nav-label">Profile</span>
         </button>
       </nav>
     </div>
@@ -2816,9 +2816,9 @@ select.msel {
           <div class="form-group">
             <label class="form-label">Water Source Type <span style="color:#B71C1C;">*</span></label>
             <div id="wsTypePills" style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="weather-pill" id="wstype-river"  onclick="wsSelectType('river')">🏞 River</button>
-              <button class="weather-pill" id="wstype-creek"  onclick="wsSelectType('creek')">💧 Creek</button>
-              <button class="weather-pill" id="wstype-spring" onclick="wsSelectType('spring')">⛲ Spring</button>
+              <button class="weather-pill" id="wstype-river"  onclick="wsSelectType('river')"><span data-icon="river" data-size="16"></span> River</button>
+              <button class="weather-pill" id="wstype-creek"  onclick="wsSelectType('creek')"><span data-icon="creek" data-size="16"></span> Creek</button>
+              <button class="weather-pill" id="wstype-spring" onclick="wsSelectType('spring')"><span data-icon="spring" data-size="16"></span> Spring</button>
             </div>
             <div id="wsTypeHint" style="font-size:0.72rem;color:#888;margin-top:6px;">River readings include a Secchi disc; creeks add pond skaters &amp; shading; springs use the core checks.</div>
           </div>
@@ -3100,9 +3100,9 @@ select.msel {
           <div class="form-group">
             <label class="form-label">Facility Type <span style="color:#B71C1C;">*</span></label>
             <div id="facTypePills" style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="weather-pill" id="factype-school" onclick="facSelectType('school')">🏫 School</button>
-              <button class="weather-pill" id="factype-health" onclick="facSelectType('health')">🏥 Health Centre</button>
-              <button class="weather-pill" id="factype-aidpost" onclick="facSelectType('aidpost')">⛑ Aid Post</button>
+              <button class="weather-pill" id="factype-school" onclick="facSelectType('school')"><span data-icon="school" data-size="16"></span> School</button>
+              <button class="weather-pill" id="factype-health" onclick="facSelectType('health')"><span data-icon="health" data-size="16"></span> Health Centre</button>
+              <button class="weather-pill" id="factype-aidpost" onclick="facSelectType('aidpost')"><span data-icon="aidpost" data-size="16"></span> Aid Post</button>
             </div>
           </div>
           <div class="card" style="padding:12px 16px;margin-bottom:10px;">
@@ -3436,10 +3436,10 @@ select.msel {
         </div>
       </div>
       <nav class="bottom-nav">
-        <button class="nav-item" onclick="bottomNav('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
-        <button class="nav-item" onclick="bottomNav('map')"><span class="nav-icon">🗺️</span><span class="nav-label">Map</span></button>
-        <button class="nav-item" onclick="bottomNav('alerts')"><span class="nav-icon">🔔</span><span class="nav-label">Alerts</span></button>
-        <button class="nav-item active" onclick="bottomNav('profile')"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
+        <button class="nav-item" onclick="bottomNav('home')"><span class="nav-icon" data-icon="home" data-size="22"></span><span class="nav-label">Home</span></button>
+        <button class="nav-item" onclick="bottomNav('map')"><span class="nav-icon" data-icon="map" data-size="22"></span><span class="nav-label">Map</span></button>
+        <button class="nav-item" onclick="bottomNav('alerts')"><span class="nav-icon" data-icon="bell" data-size="22"></span><span class="nav-label">Alerts</span></button>
+        <button class="nav-item active" onclick="bottomNav('profile')"><span class="nav-icon" data-icon="user" data-size="22"></span><span class="nav-label">Profile</span></button>
       </nav>
     </div>
 
@@ -3660,10 +3660,10 @@ select.msel {
         <button class="layer-pill" id="lp-forest" onclick="toggleLayer('forest')">🌳 Forest Change</button>
       </div>
       <nav class="bottom-nav">
-        <button class="nav-item" onclick="bottomNav('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
-        <button class="nav-item active" onclick="bottomNav('map')"><span class="nav-icon">🗺️</span><span class="nav-label">Map</span></button>
-        <button class="nav-item" onclick="bottomNav('alerts')"><span class="nav-icon">🔔</span><span class="nav-label">Alerts</span></button>
-        <button class="nav-item" onclick="bottomNav('profile')"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
+        <button class="nav-item" onclick="bottomNav('home')"><span class="nav-icon" data-icon="home" data-size="22"></span><span class="nav-label">Home</span></button>
+        <button class="nav-item active" onclick="bottomNav('map')"><span class="nav-icon" data-icon="map" data-size="22"></span><span class="nav-label">Map</span></button>
+        <button class="nav-item" onclick="bottomNav('alerts')"><span class="nav-icon" data-icon="bell" data-size="22"></span><span class="nav-label">Alerts</span></button>
+        <button class="nav-item" onclick="bottomNav('profile')"><span class="nav-icon" data-icon="user" data-size="22"></span><span class="nav-label">Profile</span></button>
       </nav>
     </div>
 
@@ -5085,105 +5085,105 @@ select.msel {
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;" id="syncModuleList">
               <div class="sync-row" id="sync-row-mafia">
-                <div class="sync-row-label"><span class="sync-emoji">🌿</span><span class="sync-name">MaFIA Surveys</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="leaf" data-size="16"></span><span class="sync-name">MaFIA Surveys</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-mafia" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-mafia" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-qabb">
-                <div class="sync-row-label"><span class="sync-emoji">🦋</span><span class="sync-name">QABB Surveys</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="butterfly" data-size="16"></span><span class="sync-name">QABB Surveys</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-qabb" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-qabb" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-water">
-                <div class="sync-row-label"><span class="sync-emoji">🌊</span><span class="sync-name">Water Quality</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="river" data-size="16"></span><span class="sync-name">Water Quality</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-water" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-water" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-phenology">
-                <div class="sync-row-label"><span class="sync-emoji">🌺</span><span class="sync-name">Phenology</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="flower" data-size="16"></span><span class="sync-name">Phenology</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-phenology" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-phenology" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-pheno_plots">
-                <div class="sync-row-label"><span class="sync-emoji">🌱</span><span class="sync-name">Phenology Plots</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="sprout" data-size="16"></span><span class="sync-name">Phenology Plots</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-pheno_plots" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-pheno_plots" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-observations">
-                <div class="sync-row-label"><span class="sync-emoji">👁️</span><span class="sync-name">Observations</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="eye" data-size="16"></span><span class="sync-name">Observations</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-observations" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-observations" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-conservation">
-                <div class="sync-row-label"><span class="sync-emoji">🌳</span><span class="sync-name">Conservation Activities</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="tree" data-size="16"></span><span class="sync-name">Conservation Activities</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-conservation" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-conservation" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-followups">
-                <div class="sync-row-label"><span class="sync-emoji">📋</span><span class="sync-name">Follow-up Visits</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="clipboard" data-size="16"></span><span class="sync-name">Follow-up Visits</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-followups" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-followups" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-patrols">
-                <div class="sync-row-label"><span class="sync-emoji">🚶</span><span class="sync-name">Patrols</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="walk" data-size="16"></span><span class="sync-name">Patrols</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-patrols" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-patrols" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-gardens">
-                <div class="sync-row-label"><span class="sync-emoji">🌾</span><span class="sync-name">Garden Mapping</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="grain" data-size="16"></span><span class="sync-name">Garden Mapping</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-gardens" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-gardens" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-trees">
-                <div class="sync-row-label"><span class="sync-emoji">🌲</span><span class="sync-name">Tree Mapping</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="tree" data-size="16"></span><span class="sync-name">Tree Mapping</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-trees" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-trees" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-meteo">
-                <div class="sync-row-label"><span class="sync-emoji">🌧️</span><span class="sync-name">Weather Station</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="cloudrain" data-size="16"></span><span class="sync-name">Weather Station</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-meteo" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-meteo" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-training">
-                <div class="sync-row-label"><span class="sync-emoji">🎓</span><span class="sync-name">Training Records</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="mortarboard" data-size="16"></span><span class="sync-name">Training Records</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-training" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-training" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-schedule">
-                <div class="sync-row-label"><span class="sync-emoji">📅</span><span class="sync-name">Schedule</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="calendar" data-size="16"></span><span class="sync-name">Schedule</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-schedule" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-schedule" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-meetings">
-                <div class="sync-row-label"><span class="sync-emoji">🤝</span><span class="sync-name">Meetings</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="people" data-size="16"></span><span class="sync-name">Meetings</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-meetings" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-meetings" style="display:none;"></span>
@@ -5336,6 +5336,84 @@ function goBack() {
   const prev = history.pop();
   showScreen(prev);
 }
+
+/* ══════════════════════════════════════
+   INLINE SVG ICON SYSTEM
+   One consistent, theme-able icon set (stroke = currentColor), replacing
+   emoji used as icons. Use icon(name,size) in generated HTML, or a
+   <span data-icon="name" data-size="20"></span> placeholder in static HTML
+   (hydrated on load by hydrateIcons()).
+══════════════════════════════════════ */
+var ICON_PATHS = {
+  /* water — natural */
+  river:   '<path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>',
+  creek:   '<path d="M3 13c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M3 18c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>',
+  spring:  '<path d="M12 21a5 5 0 0 0 5-5c0-3.5-5-9-5-9s-5 5.5-5 9a5 5 0 0 0 5 5z"/>',
+  /* water — engineered */
+  reservoir:'<path d="M5 4h14v3H5z"/><path d="M6 7v12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7"/><path d="M6 13h12"/>',
+  rampump: '<rect x="4" y="10" width="9" height="8" rx="1"/><path d="M13 13h4a3 3 0 0 1 3 3v2"/><path d="M8 10V6l4-2"/>',
+  solarpump:'<rect x="3" y="12" width="10" height="7" rx="1"/><path d="M3 15.5h10M8 12v7"/><circle cx="18" cy="6" r="2.5"/><path d="M18 2v1.5M18 8.5V10M21.5 6H20M16 6h-1.5M20.5 3.5l-1 1M16.5 8.5l-1 1"/>',
+  well:    '<ellipse cx="12" cy="8" rx="5" ry="2"/><path d="M7 8v11M17 8v11"/><path d="M7 19h10"/><path d="M12 10v3"/><rect x="10" y="13" width="4" height="3" rx="0.5"/>',
+  /* facilities */
+  school:  '<path d="M3 10l9-5 9 5"/><path d="M5 10v9h14v-9"/><rect x="10" y="13" width="4" height="6"/>',
+  health:  '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 8v8M8 12h8"/>',
+  aidpost: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',
+  /* met instruments */
+  raingauge:'<path d="M9 3h6v12a3 3 0 0 1-6 0z"/><path d="M9 9h6"/><path d="M12 19v2"/>',
+  metstation:'<path d="M12 3v7"/><circle cx="12" cy="11" r="1.4"/><path d="M6 21l6-10 6 10"/><path d="M8.5 17h7"/>',
+  waterlevel:'<path d="M7 3v18"/><path d="M7 7h4M7 11h3M7 15h4"/><path d="M13 16c2-1.5 4-1.5 6 0"/><path d="M13 20c2-1.5 4-1.5 6 0"/>',
+  /* nature */
+  tree:    '<path d="M12 3c-3 0-5 2.5-5 5 0 1.2.4 2 1 2.8C6.5 11.5 6 12.6 6 14a4 4 0 0 0 4 4h.5"/><path d="M12 3c3 0 5 2.5 5 5 0 1.2-.4 2-1 2.8 1.5.7 2 1.8 2 3.2a4 4 0 0 1-4 4h-1"/><path d="M12 10v11"/>',
+  /* ui */
+  pin:     '<path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  camera:  '<path d="M4 8h3l2-2h6l2 2h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
+  folder:  '<path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>',
+  check:   '<path d="M5 13l4 4L19 7"/>',
+  clock:   '<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/>',
+  plus:    '<path d="M12 5v14M5 12h14"/>',
+  shieldcheck:'<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  split:   '<path d="M12 4v4M12 8c-3 0-6 2-6 6m6-6c3 0 6 2 6 6"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><circle cx="12" cy="4" r="2"/>',
+  wrench:  '<path d="M14.5 6a3.5 3.5 0 0 0-4.6 4.2l-5.6 5.6a1.5 1.5 0 0 0 2.1 2.1l5.6-5.6A3.5 3.5 0 0 0 18 9.5l-2.2 2.2-1.8-.4-.4-1.8z"/>',
+  /* dashboard / sync module icons */
+  walk:    '<circle cx="13" cy="4.5" r="1.8"/><path d="M13 7l-2.5 4.5 3 2.5 1.5 5M10.5 11.5L7 14M15.5 14l3 1.5"/>',
+  eye:     '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  clipboard:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1H9z"/><path d="M8.5 12l2 2 4-4"/>',
+  flame:   '<path d="M12 3c1.5 3.5 4.5 5 4.5 9A4.5 4.5 0 0 1 7.5 12c0-1.8 1-3 1.5-4 .6 1.8 1.8 2 1.8 2 .2-3-.3-5 1.2-7z"/>',
+  barchart:'<path d="M3 20h18"/><rect x="5" y="11" width="3" height="7"/><rect x="10.5" y="7" width="3" height="11"/><rect x="16" y="4" width="3" height="14"/>',
+  linechart:'<path d="M3 4v16h18"/><path d="M6 15l4-5 3 3 5-7"/>',
+  people:  '<circle cx="9" cy="8" r="3"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 6a3 3 0 0 1 0 6"/><path d="M17.5 14.5c2 .5 3.5 2 3.5 4.5"/>',
+  butterfly:'<path d="M12 6v11"/><path d="M12 8C10 4 4 4.5 4 9c0 3.5 5 5.5 8 2.5M12 8c2-4 8-3.5 8 1 0 3.5-5 5.5-8 2.5"/>',
+  flower:  '<circle cx="12" cy="12" r="2.3"/><path d="M12 9.7C12 7 14 6 15 6.5M14.3 12C17 12 18 14 17.5 15M12 14.3C12 17 10 18 9 17.5M9.7 12C7 12 6 10 6.5 9"/><path d="M12 14.3V21"/>',
+  cloudrain:'<path d="M7.5 14a4 4 0 0 1-.5-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 16.5 14z"/><path d="M8.5 17l-1 2.5M12 17l-1 2.5M15.5 17l-1 2.5"/>',
+  grain:   '<path d="M12 21V9"/><path d="M12 9c-2.5 0-4-2-4-2 2.5 0 4 2 4 2zM12 9c2.5 0 4-2 4-2-2.5 0-4 2-4 2zM12 14c-2.5 0-4-2-4-2 2.5 0 4 2 4 2zM12 14c2.5 0 4-2 4-2-2.5 0-4 2-4 2z"/>',
+  sprout:  '<path d="M12 21v-9"/><path d="M12 12C12 8 9 6 5 6c0 4 3 6 7 6zM12 12c0-3 2.5-5 6-5 0 3.5-2.5 5-6 5z"/>',
+  mortarboard:'<path d="M2 9l10-4 10 4-10 4L2 9z"/><path d="M6 11v4.5c0 1.2 3 2.5 6 2.5s6-1.3 6-2.5V11"/><path d="M22 9.5V14"/>',
+  upload:  '<path d="M12 15V4M7.5 8.5L12 4l4.5 4.5"/><path d="M4 20h16"/>',
+  calendar:'<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>',
+  leaf:    '<path d="M4 20c0-9 7-15 16-15 0 9-7 15-16 15z"/><path d="M4 20C9 15 13 11 17 8"/>',
+  home:    '<path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/>',
+  map:     '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>',
+  bell:    '<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 19a2 2 0 0 0 4 0"/>',
+  user:    '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/>'
+};
+
+function icon(name, size) {
+  var inner = ICON_PATHS[name];
+  if (!inner) return '';
+  var s = size || 20;
+  return '<svg class="ic ic-' + name + '" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-0.15em;flex-shrink:0;">' + inner + '</svg>';
+}
+
+function hydrateIcons(root) {
+  var scope = root || document;
+  var nodes = scope.querySelectorAll('[data-icon]');
+  nodes.forEach(function(el) {
+    var name = el.getAttribute('data-icon');
+    var size = parseInt(el.getAttribute('data-size') || '20', 10);
+    if (ICON_PATHS[name]) { el.innerHTML = icon(name, size); el.removeAttribute('data-icon'); }
+  });
+}
+window.addEventListener('DOMContentLoaded', function(){ try { hydrateIcons(document); } catch(e){} });
 
 /* ── Toast ── */
 let toastTimer;
@@ -5851,7 +5929,7 @@ var FAC_TYPES = [
 var facSelectedType = '', facPhotoData = null, facGPSFix = null, _activeFacility = null;
 var fvPhotoData = null, _fOpen = 'open', _fMeds = 'yes';
 
-function facTypeMeta(key){ return FAC_TYPES.find(function(t){return t.key===key;}) || {label:key||'—', emoji:'🏢'}; }
+function facTypeMeta(key){ return FAC_TYPES.find(function(t){return t.key===key;}) || {key:key, label:key||'—'}; }
 
 /* ── Registry list (steward view) ── */
 function initFacilities() {
@@ -5878,7 +5956,7 @@ function renderFacilitiesList() {
       else { badge='⏳ Pending Approval'; bcol='#F57F17'; bbg='#FFF8E1'; bbd='#FFE082'; }
       h += '<div class="card" style="padding:12px 14px;margin-bottom:10px;">';
       h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
-      h += '<span style="font-size:0.9rem;font-weight:700;">'+tm.emoji+' '+(r.name||'(unnamed)')+'</span>';
+      h += '<span style="font-size:0.9rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span>';
       h += '<span style="font-size:0.68rem;font-weight:700;color:'+bcol+';background:'+bbg+';border:1px solid '+bbd+';padding:2px 8px;border-radius:10px;white-space:nowrap;">'+badge+'</span>';
       h += '</div>';
       h += '<div style="font-size:0.74rem;color:#666;">'+tm.label+' · 📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
@@ -5982,7 +6060,7 @@ function renderFacilityApprove() {
       var own2Opts = '<option value="">None (single clan)</option>' + clans.map(function(cl){ return '<option value="'+cl+'">'+cl+'</option>'; }).join('');
       h += '<div class="card" style="padding:12px 14px;margin-bottom:12px;">';
       h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
-      h += '<span style="font-size:0.92rem;font-weight:700;">'+tm.emoji+' '+(r.name||'(unnamed)')+'</span>';
+      h += '<span style="font-size:0.92rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span>';
       h += '<span style="font-size:0.68rem;font-weight:700;color:#283593;background:#e8eaf6;border:1px solid #9fa8da;padding:2px 8px;border-radius:10px;">'+tm.label+'</span>';
       h += '</div>';
       if (r.photo) h += '<img src="'+r.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" alt="Facility photo">';
@@ -6064,7 +6142,7 @@ function renderFacilityTasks() {
         var border = done ? '#A5D6A7' : '#9fa8da';
         h += '<div class="card" style="padding:12px 14px;margin-bottom:10px;border:1px solid '+border+';cursor:'+(done?'default':'pointer')+';" onclick="'+(done?'':'selectFacilityTask('+s.id+')')+'">';
         h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">';
-        h += '<span style="font-size:0.9rem;font-weight:700;">'+tm.emoji+' '+(s.name||'(unnamed)')+'</span>';
+        h += '<span style="font-size:0.9rem;font-weight:700;">'+icon(tm.key,18)+' '+(s.name||'(unnamed)')+'</span>';
         if (done) h += '<span style="font-size:0.68rem;font-weight:700;color:#2E7D32;background:#E8F5E9;border:1px solid #A5D6A7;padding:2px 8px;border-radius:10px;white-space:nowrap;">✓ Done this month</span>';
         else h += '<span style="font-size:0.68rem;font-weight:700;color:#283593;background:#e8eaf6;border:1px solid #9fa8da;padding:2px 8px;border-radius:10px;white-space:nowrap;">Due — tap to visit</span>';
         h += '</div>';
@@ -6093,7 +6171,7 @@ function openFacilityVisit() {
   var s = _activeFacility; if (!s) return;
   var tm = facTypeMeta(s.facility_type);
   document.getElementById('facilityTitle').textContent = s.name || 'Facility Visit';
-  document.getElementById('facVisitType').textContent = tm.emoji + ' ' + tm.label;
+  document.getElementById('facVisitType').innerHTML = icon(tm.key,16) + ' ' + tm.label;
   var owner = s.owner_clan || '—'; if (s.owner_clan_2) owner += ' + ' + s.owner_clan_2 + ' (split)';
   document.getElementById('facVisitOwner').textContent = owner;
   var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -6453,7 +6531,7 @@ function renderWaterTasks() {
         var border = done ? '#A5D6A7' : '#81d4fa';
         h += '<div class="card" style="padding:12px 14px;margin-bottom:10px;border:1px solid '+border+';cursor:'+(done?'default':'pointer')+';" onclick="'+(done?'':'selectWaterTask('+s.id+')')+'">';
         h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">';
-        h += '<span style="font-size:0.9rem;font-weight:700;">'+tm.emoji+' '+(s.name||'(unnamed)')+'</span>';
+        h += '<span style="font-size:0.9rem;font-weight:700;">'+icon(tm.key,18)+' '+(s.name||'(unnamed)')+'</span>';
         if (done) h += '<span style="font-size:0.68rem;font-weight:700;color:#2E7D32;background:#E8F5E9;border:1px solid #A5D6A7;padding:2px 8px;border-radius:10px;white-space:nowrap;">✓ Done this month</span>';
         else h += '<span style="font-size:0.68rem;font-weight:700;color:#0277BD;background:#E1F5FE;border:1px solid #81d4fa;padding:2px 8px;border-radius:10px;white-space:nowrap;">Due — tap to monitor</span>';
         h += '</div>';
@@ -6483,7 +6561,7 @@ function selectWaterTask(id) {
     if (!s) { toast('Source not found.'); return; }
     _activeWaterSource = s;
     var tm = wsTypeMeta(s.source_type);
-    document.getElementById('waterActiveName').textContent = tm.emoji + ' ' + (s.name||'');
+    document.getElementById('waterActiveName').innerHTML = icon(tm.key,16) + ' ' + (s.name||'');
     document.getElementById('waterActiveType').textContent = tm.label;
     document.getElementById('waterActiveCoords').textContent = (s.lat||'?') + ', ' + (s.lng||'?');
     var owner = s.owner_clan || '—';
@@ -6546,7 +6624,7 @@ function initWaterRecord() {
   var type = src ? src.source_type : 'river';
   var tm = wsTypeMeta(type);
   var sub = document.getElementById('waterRecordSubtitle');
-  if (sub) sub.textContent = src ? (tm.emoji + ' ' + src.name + ' · ' + tm.label) : 'Monthly reading';
+  if (sub) sub.textContent = src ? (src.name + ' · ' + tm.label) : 'Monthly reading';
 
   /* type-driven sections */
   var isRiver = (type === 'river');
@@ -6611,7 +6689,7 @@ var WS_TYPES = [
 ];
 var wsSelectedType = '', wsPhotoData = null, wsGPSFix = null;
 
-function wsTypeMeta(key){ return WS_TYPES.find(function(t){return t.key===key;}) || {label:key||'—', emoji:'🌊'}; }
+function wsTypeMeta(key){ return WS_TYPES.find(function(t){return t.key===key;}) || {key:key, label:key||'—'}; }
 function myClan(){ return (window._cachedProfile && window._cachedProfile.clan) || ''; }
 
 /* ── Registry list (steward view) ── */
@@ -6641,7 +6719,7 @@ function renderWaterSourcesList() {
       else { badge='⏳ Pending Approval'; bcol='#F57F17'; bbg='#FFF8E1'; bbd='#FFE082'; }
       h += '<div class="card" style="padding:12px 14px;margin-bottom:10px;">';
       h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
-      h += '<span style="font-size:0.9rem;font-weight:700;">'+tm.emoji+' '+(r.name||'(unnamed)')+'</span>';
+      h += '<span style="font-size:0.9rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span>';
       h += '<span style="font-size:0.68rem;font-weight:700;color:'+bcol+';background:'+bbg+';border:1px solid '+bbd+';padding:2px 8px;border-radius:10px;white-space:nowrap;">'+badge+'</span>';
       h += '</div>';
       h += '<div style="font-size:0.74rem;color:#666;">'+tm.label+' · 📍 '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
@@ -6825,7 +6903,7 @@ function renderWaterApprove() {
       var own2Opts = '<option value="">None (single clan)</option>' + clans.map(function(cl){ return '<option value="'+cl+'">'+cl+'</option>'; }).join('');
       h += '<div class="card" style="padding:12px 14px;margin-bottom:12px;">';
       h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
-      h += '<span style="font-size:0.92rem;font-weight:700;">'+tm.emoji+' '+(r.name||'(unnamed)')+'</span>';
+      h += '<span style="font-size:0.92rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span>';
       h += '<span style="font-size:0.68rem;font-weight:700;color:#F57F17;background:#FFF8E1;border:1px solid #FFE082;padding:2px 8px;border-radius:10px;">'+tm.label+'</span>';
       h += '</div>';
       if (r.photo) h += '<img src="'+r.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" alt="Source photo">';

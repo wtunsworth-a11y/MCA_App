@@ -1597,6 +1597,7 @@ select.msel {
           <button class="btn-outline" id="enrollApproveWaterBtn" style="display:none;margin-top:8px;width:100%;border-color:#0277BD;color:#0277BD;" onclick="showScreen('screen-water-approve')">💧 Approve Water Sources</button>
           <button class="btn-outline" id="enrollApproveFacBtn" style="display:none;margin-top:8px;width:100%;border-color:#283593;color:#283593;" onclick="showScreen('screen-facility-approve')">🏫 Approve Facilities</button>
           <button class="btn-outline" id="enrollApproveMetBtn" style="display:none;margin-top:8px;width:100%;border-color:#37474F;color:#37474F;" onclick="showScreen('screen-met-approve')">🌧 Approve Met Stations</button>
+          <button class="btn-outline" id="enrollApproveTreeBtn" style="display:none;margin-top:8px;width:100%;border-color:#E65100;color:#E65100;" onclick="showScreen('screen-pheno-approve')">🌳 Approve Trees</button>
         </div>
 
         <!-- STEP 2: Profile -->
@@ -3107,6 +3108,21 @@ select.msel {
           </div>
           <button class="btn-primary" style="background:#B71C1C;margin-top:4px;" onclick="submitInactive()">Confirm &amp; Establish Replacement</button>
           <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: APPROVE TREES (coordinator)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-pheno-approve">
+      <div class="top-bar" style="background:#E65100;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Approve Trees</div><div class="bar-subtitle">Coordinator — assign owning clan</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div id="phenoApproveContent"><div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div></div>
         </div>
       </div>
     </div>
@@ -5470,7 +5486,7 @@ const ALL_SCREENS = [
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-qabb-setup','screen-qabb-matrix',
   'screen-water-setup','screen-water-record','screen-water-sources','screen-water-source-register','screen-water-approve',
-  'screen-pheno-setup','screen-pheno-plots','screen-pheno-establish','screen-pheno-inactive','screen-pheno-record',
+  'screen-pheno-setup','screen-pheno-plots','screen-pheno-establish','screen-pheno-inactive','screen-pheno-record','screen-pheno-approve',
   'screen-sdm','screen-facility','screen-facilities','screen-facility-register','screen-facility-approve',
   'screen-met-stations','screen-met-register','screen-met-approve','screen-met-record',
   'screen-alerts',
@@ -5525,6 +5541,7 @@ function showScreen(id) {
   if (id === 'screen-water-approve') initWaterApprove();
   if (id === 'screen-facility-approve') initFacilityApprove();
   if (id === 'screen-met-approve') initMetApprove();
+  if (id === 'screen-pheno-approve') initPhenoApprove();
 }
 
 /* Navigate, pushing to history */
@@ -5784,6 +5801,7 @@ function enrollCheckPasscode() {
       document.getElementById('enrollApproveWaterBtn').style.display = 'block';
       document.getElementById('enrollApproveFacBtn').style.display = 'block';
       document.getElementById('enrollApproveMetBtn').style.display = 'block';
+      document.getElementById('enrollApproveTreeBtn').style.display = 'block';
       document.getElementById('enrollPassStatus').textContent = '✓ Coordinator verified. Choose an action.';
       document.getElementById('enrollPassStatus').style.color = '#2E7D32';
       /* Pre-load zones and topics ready for step 2 */
@@ -7570,12 +7588,13 @@ function submitEstablish() {
   var lat=parts[0]?parts[0].trim().split(' ')[0]:'';
   var lng=parts[1]?parts[1].trim().split(' ')[0]:'';
   var data={
-    survey_type:'pheno_plot', crop_type:phenoEditCrop, plant_num:phenoEditPlantNum,
+    survey_type:'pheno_plot', uid:generateRecordId('PHN'), crop_type:phenoEditCrop, plant_num:phenoEditPlantNum,
     lat:lat, lng:lng,
     location_name:(document.getElementById('estLocationName')||{}).value||'',
     notes:(document.getElementById('estNotes')||{}).value||'',
     established_date:now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear(),
     status:'pending', inactive_reason:null, inactive_date:null,
+    proposed_clan:myClan(), owner_clan:null, owner_clan_2:null,
     replaces_id:phenoEditReplacesId
   };
   if(phenoEditReplacesId) {
@@ -7585,6 +7604,7 @@ function submitEstablish() {
     });
   }
   saveRecord('pheno_plots',data,function(){
+    postRegisterPheno(data);
     toast('Plant submitted for approval ✓');
     nav('screen-pheno-plots');
   });
@@ -7595,11 +7615,53 @@ function approvePlot(id) {
     var plot=plots.find(function(p){return p.id===id;});
     if(plot){
       plot.status='approved';
+      plot.owner_clan=plot.owner_clan||plot.proposed_clan||myClan();
       plot.approved_date=new Date().toISOString().split('T')[0];
-      updateRecord('pheno_plots',plot,function(){toast('Plant approved ✓');initPhenoPlots();});
+      plot.synced=false;
+      updateRecord('pheno_plots',plot,function(){pushPhenoRegistry(function(){});toast('Plant approved ✓');initPhenoPlots();});
     }
   });
 }
+
+/* ── Phenology clan ownership: coordinator approval + central sync ── */
+function phenoCropLabel(key){ var c=PHENO_CROPS.find(function(x){return x.key===key;}); return c?c.label:(key||'—'); }
+function phenoClanCandidates(rows){ var set={}; rows.forEach(function(r){ [r.proposed_clan,r.owner_clan,r.owner_clan_2].forEach(function(cl){ if(cl) set[cl]=true; }); }); var list=Object.keys(set); ['Afore','Itokama','Jegarata'].forEach(function(cl){ if(list.indexOf(cl)<0) list.push(cl); }); list.sort(); return list; }
+function initPhenoApprove(){ renderPhenoApprove(); syncPhenoFromServer(function(ok){ if(ok) renderPhenoApprove(); }); }
+function renderPhenoApprove(){
+  var c=document.getElementById('phenoApproveContent'); if(!c) return;
+  getAllRecords('pheno_plots', function(rows){
+    var pending=rows.filter(function(r){return r.status==='pending';}); var clans=phenoClanCandidates(rows);
+    if(pending.length===0){ c.innerHTML='<div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;">No trees awaiting approval.</div>'; return; }
+    var h='<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">'+pending.length+' tree'+(pending.length>1?'s':'')+' awaiting approval. Assign the owning clan — only that clan will see the tree as a monitoring task. Reject a duplicate claimed by another clan.</div>';
+    pending.forEach(function(r){
+      var ownOpts=clans.map(function(cl){return '<option value="'+cl+'"'+(cl===r.proposed_clan?' selected':'')+'>'+cl+'</option>';}).join('');
+      var own2Opts='<option value="">None (single clan)</option>'+clans.map(function(cl){return '<option value="'+cl+'">'+cl+'</option>';}).join('');
+      h+='<div class="card" style="padding:12px 14px;margin-bottom:12px;">';
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;"><span style="font-size:0.92rem;font-weight:700;">'+icon('tree',18)+' '+phenoCropLabel(r.crop_type)+' — Plant '+r.plant_num+'</span></div>';
+      h+='<div style="font-size:0.74rem;color:#666;">📍 '+(r.lat||'?')+', '+(r.lng||'?')+(r.location_name?(' · '+r.location_name):'')+'</div>';
+      h+='<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Established '+(r.established_date||'')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
+      h+='<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label><select id="pa-owner-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+ownOpts+'</select></div>';
+      h+='<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span></label><select id="pa-owner2-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+own2Opts+'</select></div>';
+      h+='<div style="display:flex;gap:8px;"><button class="btn-primary" style="background:#2E7D32;flex:2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="approvePhenoTree('+r.id+')">✓ Approve</button><button class="btn-outline" style="flex:1;color:#B71C1C;border-color:#FFCDD2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="rejectPhenoTree('+r.id+')">Reject</button></div></div>';
+    });
+    c.innerHTML=h;
+  });
+}
+function approvePhenoTree(id){
+  var owner=(document.getElementById('pa-owner-'+id)||{}).value||''; var owner2=(document.getElementById('pa-owner2-'+id)||{}).value||'';
+  if(!owner){toast('Select an owner clan.');return;} if(owner2&&owner2===owner){toast('Second clan must differ.');return;}
+  getAllRecords('pheno_plots', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r){toast('Not found.');return;}
+    r.status='approved'; r.owner_clan=owner; r.owner_clan_2=owner2||null; r.approved_date=new Date().toISOString().split('T')[0]; r.synced=false;
+    updateRecord('pheno_plots', r, function(){ pushPhenoRegistry(function(ok){ toast('Approved — '+owner+(owner2?' + '+owner2:'')+(ok?' · synced ✓':' ✓')); }); initPhenoApprove(); });
+  });
+}
+function rejectPhenoTree(id){ getAllRecords('pheno_plots', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r) return; r.status='rejected'; r.synced=false; updateRecord('pheno_plots', r, function(){ pushPhenoRegistry(function(){}); toast('Tree rejected'); initPhenoApprove(); }); }); }
+function phenoOwnedByMyClan(p){ return !p.owner_clan || p.owner_clan===myClan() || p.owner_clan_2===myClan(); }
+
+function phenoRegistryRecord(r){ return { uid:r.uid, crop_type:r.crop_type, plant_num:r.plant_num, lat:r.lat, lng:r.lng, location_name:r.location_name, notes:r.notes, established_date:r.established_date, status:r.status, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, approved_date:r.approved_date||null, inactive_reason:r.inactive_reason||null }; }
+function postRegisterPheno(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'register_pheno_plot',_secret:UPLOAD_SECRET,record:phenoRegistryRecord(rec)})}).catch(function(){}); }
+function pushPhenoRegistry(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('pheno_plots', function(rows){ var list=rows.filter(function(r){return r.uid;}).map(phenoRegistryRecord); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'update_pheno_plots',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,pheno_plots:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
+function syncPhenoFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=pheno_plots').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.pheno_plots){if(cb)cb(false);return;} getAllRecords('pheno_plots', function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pending=d.pheno_plots.slice(); var next=function(){ if(pending.length===0){if(cb)cb(true);return;} var sr=pending.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['status','owner_clan','owner_clan_2','approved_date','proposed_clan'].forEach(function(k){local[k]=sr[k];}); updateRecord('pheno_plots', local, function(){next();}); } else { sr.survey_type='pheno_plot'; sr.synced=true; saveRecord('pheno_plots', sr, function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
 
 function openInactivePlot(id, cropLabel, plantNum, location) {
   phenoInactiveId=id; phenoInactiveReason='';
@@ -7646,7 +7708,7 @@ function initPhenoRecord() {
   if(!container) return;
   container.innerHTML='<div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>';
   getAllRecords('pheno_plots',function(plots){
-    var approved=plots.filter(function(p){return p.status==='approved';});
+    var approved=plots.filter(function(p){return p.status==='approved' && phenoOwnedByMyClan(p);});
     if(approved.length===0){
       container.innerHTML='<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No approved plants yet. Use Manage Plots to establish and get plants approved.</div>';
       return;

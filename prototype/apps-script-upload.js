@@ -50,7 +50,8 @@ var REPORT_EMAILS     = ['w.unsworth@landscapealliance.org'];
  *      (it is now stored in Script Properties and this code is no longer needed).
  *
  * The key protects: update_zones, update_topics, grant_authorisation,
- * certify_trainer, update_water_sources, update_facilities, update_met_stations.
+ * certify_trainer, update_water_sources, update_facilities, update_met_stations,
+ * update_pheno_plots.
  * It is NEVER stored in the phone app — only held in memory during a session.
  */
 function setCoordinatorSecret() {
@@ -274,6 +275,43 @@ function registerMetStation(record) {
 function updateMetStations(list) {
   saveMetStationsList(list || []);
   return { status: 'ok', message: 'Met station registry saved', count: (list || []).length };
+}
+
+/* ─── Phenology tree registry ──────────────────────────────────────────
+ * _pheno_plots.json in Drive: shared ownership/status for monitored trees. */
+function loadPhenoPlotsList() {
+  try {
+    var folder = getDataFolder();
+    var files  = folder.getFilesByName('_pheno_plots.json');
+    if (files.hasNext()) { return JSON.parse(files.next().getBlob().getDataAsString()) || []; }
+  } catch(e) { /* fall through */ }
+  return [];
+}
+function savePhenoPlotsList(list) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_pheno_plots.json');
+  var json   = JSON.stringify(list || [], null, 2);
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_pheno_plots.json', json, MimeType.PLAIN_TEXT); }
+}
+function getPhenoPlots() {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', pheno_plots: loadPhenoPlotsList() }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function registerPhenoPlot(record) {
+  if (!record || !record.uid) { return { status: 'error', message: 'Missing pheno plot uid' }; }
+  var list = loadPhenoPlotsList();
+  var idx = -1;
+  for (var i = 0; i < list.length; i++) { if (list[i].uid === record.uid) { idx = i; break; } }
+  if (idx === -1) { list.push(record); }
+  else if (list[idx].status === 'pending') { list[idx] = record; }
+  savePhenoPlotsList(list);
+  return { status: 'ok', uid: record.uid, count: list.length };
+}
+function updatePhenoPlots(list) {
+  savePhenoPlotsList(list || []);
+  return { status: 'ok', message: 'Pheno plot registry saved', count: (list || []).length };
 }
 
 /* ─── Training authorisation records ───────────────────────────────── */
@@ -734,7 +772,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -821,6 +859,22 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    /* Phenology tree registry — steward establishment (upload secret only) */
+    if (body._action === 'register_pheno_plot') {
+      var phnRegResult = registerPhenoPlot(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(phnRegResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    /* Phenology tree registry — coordinator approval/ownership (coordinator key required) */
+    if (body._action === 'update_pheno_plots') {
+      var phnUpResult = updatePhenoPlots(body.pheno_plots);
+      return ContentService
+        .createTextOutput(JSON.stringify(phnUpResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     /* Normal steward data upload */
     var folder = getDataFolder();
 
@@ -870,6 +924,7 @@ function doGet(e) {
   if (action === 'water_sources') { return getWaterSources(); }
   if (action === 'facilities') { return getFacilities(); }
   if (action === 'met_stations') { return getMetStations(); }
+  if (action === 'pheno_plots') { return getPhenoPlots(); }
 
   if (action === 'authorisations') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';

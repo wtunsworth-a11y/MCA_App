@@ -76,10 +76,18 @@ this repo (assets, decisions, accounts, field protocols) are grouped at the end.
 no Google accounts for stewards, no external calendar dependency. The schedule
 is coordinator-defined and syncs down like the other registries.
 
-- [ ] **Unified activity calendar** — a single internal schedule of when each
-      activity is due (monthly, annual, seasonal) per clan/zone. Consolidates
-      the existing SDM monitoring days, conservation follow-ups, and the
-      monthly/annual cadence of the monitoring modules.
+- [x] **Unified activity calendar — v1 built** — one internal month-view
+      calendar (dashboard tile) aggregating recurring monitoring (water/
+      facility/met/phenology, derived) + scheduled events + conservation
+      follow-ups, showing who (clan + role) / where (zone) / when (date) and
+      whether it was done. Coordinator can **schedule activities and meetings**
+      (serves as the meetings scheduler) with a zone-staff briefing flag.
+      Includes a **compliance report** (planned vs done, % per activity). Synced
+      via `_calendar.json`.
+  - [ ] **Grow it** — recurrence rules (auto-generate monthly/annual instances
+        rather than one-off dates), link meetings to the Meetings module
+        (agenda/quorum), let stewards mark their own survey/interview done
+        (or auto-complete from the linked record), and a day/agenda view.
 - [x] **In-app status page (home) — v1 built** — a calm, static traffic-light
       roll-up at the top of the opening page (dashboard): per module (Water,
       Service Delivery, Met, Phenology) it shows done/total and a green/amber/

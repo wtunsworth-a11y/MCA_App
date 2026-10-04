@@ -1,0 +1,206 @@
+# MCA Steward App — Monitoring Parameters
+
+**Reference catalogue · Version 3 · October 2026**
+
+This document lists **what the app captures** in each monitoring module — the
+parameters, their options/units, and how each module is scoped. It is intended
+as the reference for designing findings reporting.
+
+Two kinds of data are captured:
+
+- **Registry (catalogue) data** — recorded **once** when a thing is registered,
+  then fixed (what it is, where it is, who owns it).
+- **Reading (findings) data** — recorded **each monitoring visit** (the actual
+  observations).
+
+---
+
+## 1. Registry (catalogue) parameters
+
+Every registered thing — water source, facility, met instrument, tree — shares
+the same catalogue fields, plus a type-specific set.
+
+**Common registry fields**
+
+| Parameter | Type / options |
+|---|---|
+| Name / location | text |
+| Type | see per-registry below |
+| GPS | latitude, longitude, accuracy (m) |
+| Reference photo | image (required) |
+| Description | text (local name, access, who runs it) |
+| Status | Pending · Approved · Rejected |
+| Proposing clan | the clan that registered it |
+| Owning clan | assigned by coordinator at approval |
+| Second owning clan | optional — controlled split (2 readings/month) |
+
+**Per-registry type lists**
+
+| Registry | Store | Types |
+|---|---|---|
+| Water sources | `water_sources` | **Natural:** River, Creek, Spring · **Engineered:** Reservoir & pipes, Ram pump, Solar pump, Well/borehole |
+| Facilities | `facilities` | School, Health Centre, Aid Post |
+| Met instruments | `met_stations` | Rain gauge, Weather station, Water level meter |
+| Phenology plants | `pheno_plots` | Crop (vanilla, cocoa, coffee, okari, massoy) + plant number (1–5) |
+
+---
+
+## 2. Reading (findings) parameters
+
+### 2.1 Water Quality — natural sources
+Store `water`. Common: date, time, weather (cloudy/sunny), **photo**.
+
+| Parameter | Options / units | Applies to |
+|---|---|---|
+| Water colour | Clear · Green · Brown · Milky/White · Dark | all natural |
+| Odour | None · Earthy · Chemical · Rotten | all natural |
+| Flow (is it flowing?) | Still/Not flowing · Slow · Moderate · Fast/Flood | all natural |
+| Visible pollution or debris? | Yes · No | all natural |
+| Notes | text | all natural |
+| **Secchi disc depth** | centimetres | **River** only |
+| **Pond skaters / surface insects** | Many · Few · None | **Creek** only |
+| **Shading over water** | Open/No shade · Partial · Shaded | **Creek** only |
+
+### 2.2 Water Quality — engineered / manmade sources
+Store `water`. Two-part inspection. Common: date, time, weather, **photo**.
+
+**Source condition**
+
+| Parameter | Options |
+|---|---|
+| Water present / flowing at source | Good flow · Low/reduced · None (dry) |
+| Water clean & clear | Clean & clear · Slightly turbid · Dirty/discoloured |
+| Signs of contamination | None · Possible · Yes |
+
+**Delivery & infrastructure**
+
+| Parameter | Options |
+|---|---|
+| Water at delivery point (tap/outlet) | Good flow · Low/reduced · No water |
+| Leaks | None · Minor · Major |
+| Damage (pipes/tank/pump/fittings) | None · Minor · Major |
+| Repair needed / notes | text |
+
+### 2.3 Service Delivery — facilities
+Store `facility_visits`. Common: date, **photo**, operating status.
+
+| Parameter | Options / units | Applies to |
+|---|---|---|
+| Facility open / operating? | Open · Partial · Closed | all |
+| Staff present | number | all |
+| Notes | text | all |
+| **Students present** | number | **School** only |
+| **Essential medicines in stock** | Yes · Some · No | **Health Centre / Aid Post** |
+
+### 2.4 Met instruments — readings
+Store `met_readings`. Centred on equipment function. Common: date, **photo**, notes.
+
+| Parameter | Options / units | Applies to |
+|---|---|---|
+| Instrument working? | Working · Faulty · Not working | all |
+| Damage | None · Minor · Major | all |
+| **Rainfall since last reading** | millimetres | Rain gauge, Weather station |
+| **Gauge emptied after reading?** | yes/no | Rain gauge, Weather station |
+| **Water level at marker** | centimetres | Water level meter, Weather station |
+| **Flow condition** | Dry/No flow · Normal · High · Flood | Water level meter, Weather station |
+
+### 2.5 Phenology — observations
+Store `phenology`. Per approved plant of each crop, each month.
+
+| Parameter | Options |
+|---|---|
+| Phenophase | Vegetative · Flowering · Fruiting · Ripe · Dormant |
+| Health | Good · Fair · Poor |
+| Notes | text |
+
+---
+
+## 3. Other monitoring modules (pre-existing)
+
+These were in the app before the registry/ownership work and are **not** yet
+clan-ownership gated.
+
+### 3.1 MaFIA — Forest Integrity Assessment
+Store `mafia`. A **matrix survey**: indicators (rows) scored per steward
+plot/column, across modules:
+
+- **Module A** — Topography & Physical Setting
+- **Module B/C** — (soil / canopy structure)
+- **Module D** — Vegetation & Species Count
+- **Module E** — Undergrowth & Cultivation
+- **Module F** — Wildlife Indicators
+- **Module G** — Human Use
+
+Each cell is a dropdown rating, a tally count, or a yes/no, plus free-text
+comments. (Full indicator list: see `technical_specification.md`.)
+
+### 3.2 QABB — Butterfly Survey
+Store `qabb`. Transect-based matrix: date, start/end time, and per-species
+counts/entries across the transect stations, plus habitat/threat notes.
+
+### 3.3 Conservation activities
+Store `conservation`. Activity type: **Tree/Vine Planting** or **Invasive Weed
+Removal**.
+
+| Parameter | Options / units | Applies to |
+|---|---|---|
+| Date, time, site | — | all |
+| Number of people | number | all |
+| Photos | count | all |
+| Notes | text | all |
+| Species planted | list | planting |
+| Number planted | number | planting |
+| Seedling source | text | planting |
+| Area planted | value + unit | planting |
+| Weed species | list | weeding |
+| Area cleared | value + unit | weeding |
+| Method | text | weeding |
+| Density before | text | weeding |
+
+Planting activities auto-schedule **follow-up visits** (store `followups`).
+
+### 3.4 Garden mapping
+Store `gardens`. Garden type (food garden / cash crop), crops (list),
+boundary points (GPS polygon ≥3 points), owner, date, notes.
+
+### 3.5 Tree mapping
+Store `trees`. Species (e.g. okari, massoy), latitude, longitude,
+**DBH (diameter at breast height, cm)**, notes.
+
+### 3.6 Weather Station (legacy single-station form)
+Store `meteo`. The older combined form: rainfall (mm), gauge emptied, water
+level (cm), flow condition, wind, recent rain, notes. (Superseded by the
+per-instrument met registry in §2.4, which is kept alongside it.)
+
+### 3.7 Training records
+Store `training`. Type, topic, date, duration, trainer name & org, location,
+participants (**female / male / youth** counts), materials, topics covered,
+outcomes, follow-up, challenges, notes, **photo**, session mode.
+
+---
+
+## 4. Metadata on every new-module record
+
+The water / facility / met / phenology readings also carry:
+
+| Field | Meaning |
+|---|---|
+| `clan` | the recording steward's clan (drives one-reading-per-clan-per-month) |
+| link to its registry item | `water_source_id` / `facility_id` / `met_station_id` / plant id |
+| `photo` | the visit photo |
+| `record_uid` | unique steward-prefixed ID (dedup on Drive) |
+| `timestamp`, `synced` | when captured; whether uploaded |
+
+---
+
+## 5. What is reported today vs. not
+
+- **Reported today:** activity/compliance only — per-steward upload counts,
+  record counts, active days, module tallies, last upload (zone and MCF email
+  reports).
+- **Not reported today:** the **findings** in §2–§3 above. The values are
+  captured and stored but nothing aggregates, trends, or presents them.
+
+This catalogue is the input for deciding which of these parameters should flow
+into findings reports, and at what granularity (per item over time vs. area
+roll-up).

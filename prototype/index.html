@@ -7447,6 +7447,13 @@ function exportFreemapById(id){ getAllRecords('freemap', function(rows){ var r=r
 ══════════════════════════════════════ */
 var _liveMap=null, _dataLayer=null, _locMarker=null, _liveBase=null, _mcaBoundary=null;
 var MCA_CENTER=[-9.146,148.391];
+/* Expand a LatLngBounds outward by a fixed distance in km (approx) */
+function _padBoundsKm(b, km){
+  var dLat = km/111;
+  var midLat = (b.getNorth()+b.getSouth())/2;
+  var dLon = km/(111*Math.cos(midLat*Math.PI/180));
+  return L.latLngBounds([b.getSouth()-dLat, b.getWest()-dLon],[b.getNorth()+dLat, b.getEast()+dLon]);
+}
 
 function initLiveMap(){
   var note=document.getElementById('liveMapNote');
@@ -7466,7 +7473,8 @@ function initLiveMap(){
     /* MCA boundary overlay (bundled GeoJSON, works offline) */
     fetch('vendor/mca_boundary.geojson').then(function(r){return r.json();}).then(function(gj){
       _mcaBoundary=L.geoJSON(gj,{ style:{ color:'#D84315', weight:2.5, fill:false, dashArray:'6,4' } }).addTo(_liveMap);
-      try{ _liveMap.fitBounds(_mcaBoundary.getBounds(),{padding:[20,20]}); }catch(e){}
+      /* Default view = boundary plus ~5 km all round, so the surrounds are visible */
+      try{ _liveMap.fitBounds(_padBoundsKm(_mcaBoundary.getBounds(), 5)); }catch(e){}
     }).catch(function(){});
   }
   setTimeout(function(){ try{ _liveMap.invalidateSize(); }catch(e){} }, 150);
@@ -7498,7 +7506,8 @@ function liveMapPlotData(){
       if(r.map_type==='line' && r.points && r.points.length>1){ var ll=r.points.map(function(p){return [p.lat,p.lon];}); var pl=L.polyline(ll,{color:'#00695C',weight:4,opacity:0.85}); pl.bindPopup('<strong>'+r.title+'</strong><br><span style="color:#777">'+(r.category_label||'')+' · ~'+r.length_m+' m</span>'); pl.addTo(_dataLayer); ll.forEach(function(c){bounds.push(c);}); }
       else if(r.points && r.points[0]){ var p=r.points[0]; add(_mk(p.lat,p.lon,'#00695C',r.title,(r.category_label||'')),p.lat,p.lon); }
     });
-    if(bounds.length>0){ try{ _liveMap.fitBounds(bounds,{padding:[40,40],maxZoom:14}); }catch(e){} }
+    /* Only auto-fit to data when the boundary (which sets the wider default view) isn't loaded */
+    if(!_mcaBoundary && bounds.length>0){ try{ _liveMap.fitBounds(bounds,{padding:[40,40],maxZoom:14}); }catch(e){} }
   });});});});});
 }
 

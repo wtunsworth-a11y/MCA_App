@@ -406,6 +406,37 @@ function updateDisturbances(list) {
   return { status: 'ok', message: 'Disturbance registry saved', count: (list || []).length };
 }
 
+/* ─── Help registry (per-field help text, coordinator-editable) ─────────
+ * _help.json in Drive: { fields:{ key:{title,html} }, updated_at }. The app
+ * ships a baseline; this registry overlays it so coordinators can refine
+ * field help without a new app release. GET ?action=help; coordinator
+ * overwrite via update_help. */
+function loadHelpFile() {
+  try {
+    var folder = getDataFolder();
+    var files  = folder.getFilesByName('_help.json');
+    if (files.hasNext()) { return JSON.parse(files.next().getBlob().getDataAsString()) || { fields:{} }; }
+  } catch(e) { /* fall through */ }
+  return { fields:{} };
+}
+function saveHelpFile(data) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_help.json');
+  var json   = JSON.stringify(data || { fields:{} }, null, 2);
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_help.json', json, MimeType.PLAIN_TEXT); }
+}
+function getHelp() {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', help: loadHelpFile() }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function updateHelp(help) {
+  saveHelpFile(help || { fields:{} });
+  var n = (help && help.fields) ? Object.keys(help.fields).length : 0;
+  return { status: 'ok', message: 'Help registry saved', count: n };
+}
+
 /* ══════════════════════════════════════════════════════════════════════
  * DISTURBANCE FEED — automated satellite detection
  * ----------------------------------------------------------------------
@@ -416,9 +447,14 @@ function updateDisturbances(list) {
  *   FIRMS_MAP_KEY        free key from https://firms.modaps.eosdis.nasa.gov/api/
  *   MCA_BBOX             "minLon,minLat,maxLon,maxLat"  (defaults to Managalas)
  *   FIRMS_DAYRANGE       1–10, days of history per run (default 2)
- *   FIRMS_MIN_CONF       nominal|low|high — min VIIRS confidence (default nominal)
+ *   FIRE_MIN_DETECTIONS  min detections in a ~1 km cell to task it (default 3)
+ *   FIRE_MIN_FRP         OR min fire power in MW to task it (default 15)
  *   GFW_API_KEY          (optional) Global Forest Watch data-API key for RADD
- *   CLEARANCE_MIN_HA     min forest-loss patch to raise (default 2)
+ *   CLEARANCE_MIN_HA     min forest-loss patch to raise, in ha (default 2)
+ * The size/area thresholds are applied in the feed, before any task is
+ * created — only events big enough to need a check are ever sent, and a
+ * steward never decides whether something "counts". An event that overlaps
+ * two or more clan boundaries raises one independent task per clan.
  * Clan routing reads an optional polygon file _clan_boundaries.json in the
  * data folder (GeoJSON FeatureCollection; each feature's properties.clan /
  * properties.zone name the owner). With no polygons, alerts route to the
@@ -464,22 +500,42 @@ function _pointInRing(lat, lon, ring) {
   }
   return inside;
 }
-function routeToClan(lat, lon, polys) {
-  for (var i = 0; i < polys.length; i++) {
-    if (_pointInRing(lat, lon, polys[i].ring)) return { owner_clan: polys[i].clan, zone: polys[i].zone, routed_by: 'boundary' };
+/* Which clans own a disturbance. A point returns every polygon that
+ * contains it (usually one). An AREA event (a footprint ring, e.g. from
+ * GFW) returns every clan whose boundary the footprint overlaps — so a
+ * clearance straddling two clans tasks BOTH, independently. */
+function _slug(s){ return (s||'').toString().replace(/[^A-Za-z0-9]/g,'').toUpperCase().slice(0,12); }
+function _ringsOverlap(a, b){
+  for (var i=0;i<a.length;i++){ if (_pointInRing(a[i][1], a[i][0], b)) return true; }
+  for (var j=0;j<b.length;j++){ if (_pointInRing(b[j][1], b[j][0], a)) return true; }
+  return false;
+}
+function routeEventToClans(ev, polys){
+  var out = [];
+  if (ev.footprint && ev.footprint.length >= 3){
+    for (var i=0;i<polys.length;i++){ if (_ringsOverlap(ev.footprint, polys[i].ring)) out.push({ owner_clan:polys[i].clan, zone:polys[i].zone, routed_by:'boundary' }); }
+  } else {
+    var lat=parseFloat(ev.lat), lon=parseFloat(ev.lng);
+    for (var k=0;k<polys.length;k++){ if (_pointInRing(lat, lon, polys[k].ring)) out.push({ owner_clan:polys[k].clan, zone:polys[k].zone, routed_by:'boundary' }); }
   }
-  return { owner_clan: null, zone: '', routed_by: 'triage' };
+  return out; /* empty => triage */
 }
 
-/* NASA FIRMS active-fire detections (CSV area API). */
+/* NASA FIRMS active-fire detections (CSV area API).
+ * Detections are clustered onto a ~1 km grid and ONLY cells big enough to
+ * matter are emitted as fire events — a steward is tasked only for the big
+ * ones, never a single faint pixel. "Big" = enough detections in the cell
+ * (FIRE_MIN_DETECTIONS) OR enough fire power (FIRE_MIN_FRP, MW). This gate
+ * runs here, before any alert is created, so the field has no say in it. */
 function fetchFirmsFires(bbox) {
   var key = _prop('FIRMS_MAP_KEY', '');
   if (!key) return [];
   var dayRange = Math.max(1, Math.min(10, parseInt(_prop('FIRMS_DAYRANGE', '2'), 10) || 2));
-  var minConf  = _prop('FIRMS_MIN_CONF', 'nominal'); /* low|nominal|high */
-  var confRank = { low:0, nominal:1, n:1, high:2, h:2, l:0 };
+  var minDet   = Math.max(1, parseInt(_prop('FIRE_MIN_DETECTIONS', '3'), 10) || 3);
+  var minFrp   = parseFloat(_prop('FIRE_MIN_FRP', '15')) || 15; /* MW */
+  var GRID     = 0.009; /* ~1 km */
   var area = bbox.minLon + ',' + bbox.minLat + ',' + bbox.maxLon + ',' + bbox.maxLat;
-  var out = [];
+  var cells = {};
   ['VIIRS_SNPP_NRT', 'VIIRS_NOAA20_NRT', 'MODIS_NRT'].forEach(function(src){
     var url = 'https://firms.modaps.eosdis.nasa.gov/api/area/csv/' + key + '/' + src + '/' + area + '/' + dayRange;
     try {
@@ -489,47 +545,58 @@ function fetchFirmsFires(bbox) {
       if (!rows || rows.length < 2) return;
       var head = rows[0];
       var cLat = head.indexOf('latitude'), cLon = head.indexOf('longitude'),
-          cDate = head.indexOf('acq_date'), cConf = head.indexOf('confidence');
+          cDate = head.indexOf('acq_date'), cConf = head.indexOf('confidence'),
+          cFrp  = head.indexOf('frp');
       for (var r = 1; r < rows.length; r++) {
         var row = rows[r]; if (!row || row.length < head.length) continue;
         var lat = parseFloat(row[cLat]), lon = parseFloat(row[cLon]);
         if (isNaN(lat) || isNaN(lon) || !_inBbox(lat, lon, bbox)) continue;
-        var confRaw = (row[cConf] || '').toString().toLowerCase();
-        var confNum = parseFloat(confRaw);
-        var rank = !isNaN(confNum) ? (confNum >= 80 ? 2 : confNum >= 50 ? 1 : 0) : (confRank[confRaw] != null ? confRank[confRaw] : 1);
-        if (rank < (confRank[minConf] != null ? confRank[minConf] : 1)) continue;
-        out.push({
-          source: 'FIRMS/' + src.split('_')[0], kind: 'fire',
-          lat: lat.toFixed(5), lng: lon.toFixed(5),
-          detected_date: row[cDate] || '', confidence: row[cConf] || '',
-          priority: rank >= 2 ? 'high' : 'normal',
-          detail: src.replace('_NRT','').replace('_',' ') + ' thermal detection',
-          /* round to ~500 m grid so the same fire over days de-duplicates */
-          uid: 'FIRMS-' + (row[cDate]||'').replace(/-/g,'') + '-' + Math.round(lat*200) + '-' + Math.round(lon*200)
-        });
+        var frp = (cFrp>=0) ? (parseFloat(row[cFrp])||0) : 0;
+        var gl = Math.round(lat/GRID), gn = Math.round(lon/GRID), kkey = gl+'_'+gn;
+        var c = cells[kkey] || (cells[kkey] = { n:0, sumLat:0, sumLon:0, maxFrp:0, date:'', gl:gl, gn:gn, src:src });
+        c.n++; c.sumLat+=lat; c.sumLon+=lon; if(frp>c.maxFrp) c.maxFrp=frp;
+        var d = row[cDate]||''; if (d>c.date) c.date=d;
       }
     } catch(e) { /* skip this source */ }
+  });
+  var out = [];
+  Object.keys(cells).forEach(function(k){
+    var c = cells[k];
+    if (c.n < minDet && c.maxFrp < minFrp) return; /* not a big fire — not tasked */
+    var lat = c.sumLat/c.n, lon = c.sumLon/c.n;
+    out.push({
+      source:'FIRMS/'+c.src.split('_')[0], kind:'fire',
+      lat:lat.toFixed(5), lng:lon.toFixed(5),
+      detected_date:c.date, confidence:(c.maxFrp?('FRP '+Math.round(c.maxFrp)+' MW'):(c.n+' px')),
+      priority:(c.maxFrp>=minFrp*2 || c.n>=minDet*2) ? 'high' : 'normal',
+      detail:'Active fire — '+c.n+' detection'+(c.n>1?'s':'')+(c.maxFrp?(', peak '+Math.round(c.maxFrp)+' MW'):'')+' in ~1 km',
+      uid:'FIRMS-'+c.gl+'-'+c.gn /* stable per cell — a persistent fire isn’t re-raised */
+    });
   });
   return out;
 }
 
 /* Global Forest Watch / RADD radar forest-loss alerts.
  * Stubbed: returns [] unless GFW_API_KEY is set and the query below is
- * completed for your Area of Interest. Kept as a clearly-marked second
- * fetcher so the feed works with fire alone today and gains clearance
- * detection when the key + AOI are provisioned. */
+ * completed for your Area of Interest. When implemented it must emit events
+ * ALREADY FILTERED to area_ha >= CLEARANCE_MIN_HA (the threshold gate runs
+ * here, before any task is created — never in the field), each with:
+ *   { source:'GFW/RADD', kind:'clearance', lat, lng, area_ha, detected_date,
+ *     detail, uid:'GFW-<gridlat>-<gridlon>',
+ *     footprint:[[lon,lat],...] }   // the loss-patch ring, so a clearance
+ *                                   // straddling 2+ clans tasks each of them. */
 function fetchGfwClearance(bbox) {
   var key = _prop('GFW_API_KEY', '');
   if (!key) return [];
-  // var minHa = parseFloat(_prop('CLEARANCE_MIN_HA', '2')) || 2;
+  var minHa = parseFloat(_prop('CLEARANCE_MIN_HA', '2')) || 2;
   // TODO: POST to the GFW data API (dataset: gfw_integrated_alerts / wur_radd_alerts)
-  //       with an AOI geometry, parse alert centroids + area, keep area >= minHa,
-  //       and emit records shaped exactly like the FIRMS ones with kind:'clearance'
-  //       and a stable uid 'GFW-<date>-<gridlat>-<gridlon>'.
+  //       with the MCA AOI, aggregate adjacent loss pixels into patches, compute
+  //       each patch's area_ha and footprint ring, and KEEP ONLY area_ha >= minHa.
   return [];
 }
 
-/* Daily entry point — fetch, route, de-duplicate, upsert. */
+/* Daily entry point — fetch, apply the size/area gate, route to every
+ * owning clan, de-duplicate per clan, and raise one independent task each. */
 function fetchDisturbanceFeed() {
   var bbox  = _mcaBbox();
   var polys = loadClanBoundaries();
@@ -539,18 +606,30 @@ function fetchDisturbanceFeed() {
   var list = loadDisturbancesList();
   var byUid = {}; list.forEach(function(d){ if (d.uid) byUid[d.uid] = d; });
   var added = 0;
-  found.forEach(function(f){
-    if (f.area_ha != null && f.kind === 'clearance' && f.area_ha < minHa) return; /* below the >2 ha bar */
-    if (byUid[f.uid]) return; /* already have it — never re-raise */
-    var route = routeToClan(parseFloat(f.lat), parseFloat(f.lng), polys);
-    f.owner_clan = route.owner_clan; f.zone = route.zone; f.routed_by = route.routed_by;
-    f.status = 'open'; f.verify = null;
-    f.created_date = new Date().toISOString().slice(0,10); f.created_by = 'feed';
-    list.push(f); byUid[f.uid] = f; added++;
+  found.forEach(function(ev){
+    /* Size/area threshold is enforced BEFORE a task exists. Fires are
+       pre-gated in the fetcher; clearances are gated here as a backstop. */
+    if (ev.kind === 'clearance' && ev.area_ha != null && ev.area_ha < minHa) return;
+
+    var routes = routeEventToClans(ev, polys);
+    if (routes.length === 0) routes = [{ owner_clan:null, zone:'', routed_by:'triage' }];
+
+    /* One independent task per owning clan — a multi-clan event tasks each. */
+    routes.forEach(function(rt){
+      var uid = ev.uid + (rt.owner_clan ? ('-' + _slug(rt.owner_clan)) : '-TRIAGE');
+      if (byUid[uid]) return; /* already raised for this clan — never twice */
+      var rec = {};
+      for (var p in ev) { if (ev.hasOwnProperty(p)) rec[p] = ev[p]; }
+      rec.uid = uid; rec.owner_clan = rt.owner_clan; rec.zone = rt.zone; rec.routed_by = rt.routed_by;
+      rec.status = 'open'; rec.verify = null;
+      rec.created_date = new Date().toISOString().slice(0,10); rec.created_by = 'feed';
+      if (routes.length > 1) rec.multi_clan = true; /* flag a shared event */
+      list.push(rec); byUid[uid] = rec; added++;
+    });
   });
   if (added > 0) saveDisturbancesList(list);
-  Logger.log('Disturbance feed: ' + found.length + ' detections, ' + added + ' new alerts raised.');
-  return { status: 'ok', detections: found.length, added: added };
+  Logger.log('Disturbance feed: ' + found.length + ' events, ' + added + ' new clan tasks raised.');
+  return { status: 'ok', events: found.length, added: added };
 }
 /* One-time: install the daily trigger (safe to re-run — clears duplicates first). */
 function installDisturbanceFeedTrigger() {
@@ -1019,7 +1098,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1154,6 +1233,14 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    /* Help registry — coordinator-edited field help (coordinator key required) */
+    if (body._action === 'update_help') {
+      var helpUpResult = updateHelp(body.help);
+      return ContentService
+        .createTextOutput(JSON.stringify(helpUpResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     /* Normal steward data upload */
     var folder = getDataFolder();
 
@@ -1206,6 +1293,7 @@ function doGet(e) {
   if (action === 'pheno_plots') { return getPhenoPlots(); }
   if (action === 'calendar') { return getCalendar(); }
   if (action === 'disturbances') { return getDisturbances(); }
+  if (action === 'help') { return getHelp(); }
 
   if (action === 'authorisations') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';

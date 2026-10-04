@@ -1525,6 +1525,26 @@ select.msel {
   .tsp-footer { margin-top: 10pt; font-size: 7pt; color: #aaa; border-top: 0.5pt solid #ddd; padding-top: 4pt; }
 }
 
+/* ── In-app Help system ── */
+.help-btn { margin-left:auto; flex-shrink:0; background:rgba(255,255,255,0.16); border:none; color:#fff; width:34px; height:34px; border-radius:50%; font-size:1.05rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
+.help-btn:active { background:rgba(255,255,255,0.30); }
+.help-tip { display:inline-flex; align-items:center; justify-content:center; width:17px; height:17px; border-radius:50%; background:#E0E0E0; color:#555; font-size:0.72rem; font-weight:800; cursor:pointer; vertical-align:middle; margin-left:5px; border:none; flex-shrink:0; }
+.help-tip:active { background:#BDBDBD; }
+.help-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.42); z-index:3000; opacity:0; pointer-events:none; transition:opacity 0.18s; }
+.help-backdrop.show { opacity:1; pointer-events:auto; }
+.help-sheet { position:fixed; left:0; right:0; bottom:0; max-height:72%; background:#fff; border-radius:18px 18px 0 0; z-index:3001; transform:translateY(100%); transition:transform 0.22s ease; box-shadow:0 -6px 24px rgba(0,0,0,0.25); display:flex; flex-direction:column; }
+.help-sheet.show { transform:translateY(0); }
+.help-sheet .hs-grip { width:40px; height:4px; border-radius:2px; background:#ddd; margin:9px auto 4px; flex-shrink:0; }
+.help-sheet .hs-head { display:flex; align-items:center; gap:8px; padding:4px 18px 10px; border-bottom:1px solid #f0f0f0; }
+.help-sheet .hs-title { font-size:0.98rem; font-weight:800; color:#1B5E20; flex:1; }
+.help-sheet .hs-close { background:none; border:none; font-size:1.3rem; color:#888; cursor:pointer; line-height:1; }
+.help-sheet .hs-body { padding:14px 18px 22px; overflow-y:auto; font-size:0.86rem; line-height:1.5; color:#333; }
+.help-sheet .hs-body h4 { font-size:0.9rem; color:#1B5E20; margin:14px 0 5px; }
+.help-sheet .hs-body ul { margin:4px 0 8px; padding-left:20px; }
+.help-sheet .hs-body li { margin:3px 0; }
+.help-sheet .hs-body p { margin:6px 0; }
+.help-edit-link { font-size:0.74rem; color:#0277BD; font-weight:700; cursor:pointer; }
+.help-missing { color:#999; font-style:italic; }
 </style>
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <script src="vendor/leaflet/leaflet.js"></script>
@@ -3342,6 +3362,24 @@ select.msel {
       <div class="scroll-content">
         <div class="p14" id="disturbVerifyContent">
           <div style="padding:30px 20px;text-align:center;color:#888;">No disturbance selected.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: HELP CENTRE  (role-gated manuals, offline)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-help">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Help &amp; Guide</div>
+          <div class="bar-subtitle" id="helpSubtitle">User manual</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" id="helpContent">
+          <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
         </div>
       </div>
     </div>
@@ -5635,6 +5673,17 @@ select.msel {
     <!-- Toast -->
     <div class="toast" id="toastEl"></div>
 
+    <!-- Field-help bottom sheet -->
+    <div class="help-backdrop" id="helpBackdrop" onclick="closeFieldHelp()"></div>
+    <div class="help-sheet" id="helpSheet" role="dialog" aria-modal="true">
+      <div class="hs-grip"></div>
+      <div class="hs-head">
+        <span class="hs-title" id="helpSheetTitle">Help</span>
+        <button class="hs-close" onclick="closeFieldHelp()" aria-label="Close">×</button>
+      </div>
+      <div class="hs-body" id="helpSheetBody"></div>
+    </div>
+
   </div><!-- /app-viewport -->
 </div><!-- /phone-frame -->
 
@@ -5652,7 +5701,7 @@ const ALL_SCREENS = [
   'screen-sdm','screen-facility','screen-facilities','screen-facility-register','screen-facility-approve',
   'screen-met-stations','screen-met-register','screen-met-approve','screen-met-record',
   'screen-activity-calendar','screen-cal-add','screen-cal-report','screen-freemap','screen-livemap',
-  'screen-alerts','screen-disturb-verify',
+  'screen-alerts','screen-disturb-verify','screen-help',
   'screen-meetings','screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3',
   'screen-meeting-detail','screen-meeting-active',
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
@@ -5707,6 +5756,8 @@ function showScreen(id) {
   if (id === 'screen-pheno-approve') initPhenoApprove();
   if (id === 'screen-dashboard') renderDashboardStatus();
   if (id === 'screen-alerts') initDisturbances();
+  if (id === 'screen-help') renderHelpCentre();
+  mountHelpButton(id);
 }
 
 /* Navigate, pushing to history */
@@ -6530,7 +6581,7 @@ function renderFacilityApprove() {
       if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
       h += '<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label>';
       h += '<select id="fa-owner-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+ownOpts+'</select></div>';
-      h += '<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span></label>';
+      h += '<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span>'+helpTip('ws.split')+'</label>';
       h += '<select id="fa-owner2-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+own2Opts+'</select>';
       h += '<div style="font-size:0.68rem;color:#888;margin-top:4px;">A split allows 2 visits/month — one per clan. Leave as None for single ownership.</div></div>';
       h += '<div style="display:flex;gap:8px;">';
@@ -6828,7 +6879,7 @@ function renderMetApprove(){
       h+='<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Proposed by '+(r.proposed_by||'—')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
       if(r.description) h+='<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
       h+='<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label><select id="ma-owner-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+ownOpts+'</select></div>';
-      h+='<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span></label><select id="ma-owner2-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+own2Opts+'</select></div>';
+      h+='<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span>'+helpTip('ws.split')+'</label><select id="ma-owner2-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+own2Opts+'</select></div>';
       h+='<div style="display:flex;gap:8px;"><button class="btn-primary" style="background:#2E7D32;flex:2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="approveMet('+r.id+')">✓ Approve</button><button class="btn-outline" style="flex:1;color:#B71C1C;border-color:#FFCDD2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="rejectMet('+r.id+')">Reject</button></div></div>';
     });
     c.innerHTML=h;
@@ -7777,17 +7828,17 @@ function renderDisturbVerify(){
 
   /* The verification form (revealed once on site + verified) */
   h+='<div id="dzFormArea" style="display:none;">';
-  h+='<div class="form-group"><label class="form-label">What did you find? <span style="color:#B71C1C;">*</span></label><div id="dzOutcomeBtns" style="display:flex;flex-direction:column;gap:6px;">';
+  h+='<div class="form-group"><label class="form-label">What did you find? <span style="color:#B71C1C;">*</span>'+helpTip('dz.outcome')+'</label><div id="dzOutcomeBtns" style="display:flex;flex-direction:column;gap:6px;">';
   Object.keys(DIST_OUTCOMES).forEach(function(k){ h+='<button type="button" class="weather-pill" id="dzo-'+k+'" onclick="dzSetOutcome(\''+k+'\')" style="text-align:left;font-size:0.8rem;padding:9px 11px;">'+DIST_OUTCOMES[k].label+'</button>'; });
   h+='</div></div>';
-  h+='<div class="form-group"><label class="form-label">Most likely cause <span style="color:#999;font-weight:400;">(what you see, not a judgement)</span></label><div style="display:flex;flex-direction:column;gap:6px;">';
+  h+='<div class="form-group"><label class="form-label">Most likely cause <span style="color:#999;font-weight:400;">(what you see, not a judgement)</span>'+helpTip('dz.cause')+'</label><div style="display:flex;flex-direction:column;gap:6px;">';
   Object.keys(DIST_CAUSES).forEach(function(k){ h+='<button type="button" class="weather-pill" id="dzc-'+k+'" onclick="dzSetCause(\''+k+'\')" style="text-align:left;font-size:0.8rem;padding:9px 11px;">'+DIST_CAUSES[k]+'</button>'; });
   h+='</div></div>';
-  h+='<div class="form-group"><label class="form-label">Photo of the site <span style="color:#B71C1C;">*</span></label>';
+  h+='<div class="form-group"><label class="form-label">Photo of the site <span style="color:#B71C1C;">*</span>'+helpTip('dz.photo')+'</label>';
   h+='<div id="dzPhotoBox" style="width:100%;height:120px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="dzTriggerPhoto()"><div style="text-align:center;color:#999;"><div>'+icon('camera',28)+'</div><div style="font-size:0.72rem;margin-top:2px;">Tap to capture the disturbance</div></div></div>';
   h+='<input type="file" id="dzPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="dzHandlePhoto(this)">';
   h+='<div id="dzPhotoStatus" style="font-size:0.72rem;color:#888;margin-top:4px;">No photo taken</div></div>';
-  h+='<div class="form-group"><label class="form-label">Measured / estimated area affected <span style="color:#999;font-weight:400;">(ha, optional)</span></label>';
+  h+='<div class="form-group"><label class="form-label">Measured / estimated area affected <span style="color:#999;font-weight:400;">(ha, optional)</span>'+helpTip('dz.area')+'</label>';
   h+='<input type="number" step="0.1" min="0" id="dzArea" class="form-input" placeholder="e.g. 3.2"></div>';
   h+='<div class="form-group"><label class="form-label">Description <span style="color:#999;font-weight:400;">(what you saw, how far it extends, any people/equipment)</span></label>';
   h+='<textarea id="dzNotes" class="form-input" rows="3" placeholder="Describe the disturbance in your own words"></textarea></div>';
@@ -7855,6 +7906,217 @@ function flushUnsyncedVerifications(cb){
       postVerification(r, function(ok){ if(ok){ r.synced=true; updateRecord('disturbances', r, function(){ if(--left===0 && cb) cb(); }); } else { if(--left===0 && cb) cb(); } });
     });
   });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   IN-APP HELP  — role-gated manuals (offline) + per-field tips.
+   The Field Guide is available to everyone; the Administrator's Manual
+   is shown only when the coordinator unlock is active. Per-field help
+   text ships with a baseline and is overlaid by a Drive-synced
+   _help.json registry, so coordinators can refine wording without a
+   new app release.
+   ════════════════════════════════════════════════════════════════════ */
+var HELP_MANUALS = {
+  field: { title:'Field Guide', audience:'all', sections: [
+    { id:'overview', num:'', title:'Using the app', html:
+      '<p>This app records conservation and service-delivery monitoring for the Managalas Conservation Area. It works <strong>offline</strong> — record everything with no signal; it saves to the phone and uploads when you next have internet.</p>'
+     +'<p>Tap the <strong>?</strong> at the top of any screen for help on that screen, or the small <strong>?</strong> next to a field for help on that field.</p>' },
+    { id:'login', num:'1', title:'Logging in', html:
+      '<p>The app uses your <strong>fingerprint</strong> — no username or password.</p><ul>'
+     +'<li>Open the app from the <strong>home-screen icon</strong>, not a browser tab.</li>'
+     +'<li>Tap to log in with your enrolled finger. If it fails, press firmly and hold; after three tries, wait a moment.</li>'
+     +'<li>If you are locked out completely, your coordinator must re-enrol you.</li></ul>' },
+    { id:'monitoring', num:'2', title:'Register first, then monitor', html:
+      '<p>Most things you monitor go through two stages:</p><ul>'
+     +'<li><strong>Register it once</strong> — walk to the source / facility / instrument / tree and record its type, GPS and a reference photo. It becomes <em>Pending Approval</em>.</li>'
+     +'<li><strong>Monitor it monthly</strong> — after the coordinator approves it and assigns it to <strong>your clan</strong>, it appears as a task.</li></ul>'
+     +'<p>You only ever see <strong>your own clan’s</strong> approved items — deliberately, so two clans don’t both monitor (and get paid for) the same thing. Each item is read <strong>once per clan per month</strong>. Every registration and every reading needs a <strong>photo</strong>.</p>' },
+    { id:'water', num:'3', title:'Water Quality', html:
+      '<p>Register a source under <strong>Manage Water Sources</strong>. Types are grouped <strong>Natural</strong> (river / creek / spring) and <strong>Engineered</strong> (reservoir &amp; pipes, ram pump, solar pump, well / borehole).</p>'
+     +'<p>Your clan’s approved sources appear as tasks. Walk to one (unlocks within 30 m, asks for a fingerprint), then <strong>Begin Reading</strong>. What you record depends on type:</p><ul>'
+     +'<li><strong>River</strong>: water observations + a <strong>Secchi disc</strong> depth.</li>'
+     +'<li><strong>Creek</strong>: water observations + <strong>pond skaters</strong> and <strong>shading</strong>.</li>'
+     +'<li><strong>Spring</strong>: the core water observations.</li>'
+     +'<li><strong>Engineered</strong>: a two-part check — <strong>source</strong> (present/flowing, clean, contamination) and <strong>delivery</strong> (water at the outlet, leaks, damage, repair needed).</li></ul>' },
+    { id:'sdm', num:'4', title:'Service Delivery (schools &amp; health)', html:
+      '<p>Register a school, health centre or aid post under <strong>Manage Facilities</strong>. Your clan’s approved facilities appear as tasks.</p>'
+     +'<p>The visit records whether it was <strong>open / partial / closed</strong>, <strong>staff present</strong>, and — for schools, <strong>students present</strong>; for health, whether <strong>essential medicines</strong> are in stock. Add notes and a photo.</p>' },
+    { id:'met', num:'5', title:'Met instruments', html:
+      '<p>Register an instrument under <strong>Manage Met Stations</strong>: rain gauge, weather station, or water level meter. The reading is centred on <strong>equipment function</strong>:</p><ul>'
+     +'<li>Working / faulty / not working; damage none / minor / major.</li>'
+     +'<li><strong>Rain gauge</strong>: rainfall since last reading (mm), and whether you emptied it.</li>'
+     +'<li><strong>Water level meter</strong>: level at the marker (cm) and flow.</li>'
+     +'<li><strong>Weather station</strong>: both of the above.</li></ul>' },
+    { id:'phenology', num:'6', title:'Phenology (trees)', html:
+      '<p>Establish a plant under <strong>Manage Plots</strong>. Once approved and assigned to your clan, record each plant’s <strong>phenophase</strong> (vegetative / flowering / fruiting / ripe / dormant) and <strong>health</strong> (good / fair / poor). You only see your clan’s approved trees.</p>' },
+    { id:'disturbance', num:'7', title:'Disturbance verification', html:
+      '<p>A <strong>disturbance</strong> is a sudden change — fire, landslide or forest clearance — flagged from satellite or reported, and routed to your clan to check on the ground.</p><ul>'
+     +'<li>Walk to the site (unlocks within 50 m, asks for a fingerprint).</li>'
+     +'<li>Record what you found: <strong>confirmed / not found / inconclusive / couldn’t reach</strong>.</li>'
+     +'<li>Record the likely <strong>cause separately</strong> (natural / human / unclear) — report what you see, don’t pre-judge.</li>'
+     +'<li>Take a <strong>photo</strong>; add the area you see and a description.</li></ul>'
+     +'<p>You are only ever sent disturbances that are <strong>already big enough to need checking</strong> — the size threshold is applied before the alert reaches you, so there is no judgement call to make about whether it “counts”.</p>'
+     +'<p>The record carries your GPS, the time and your fingerprint as evidence, and locks once sent — so it stands up to outside scrutiny.</p>' },
+    { id:'sending', num:'8', title:'Sending your data', html:
+      '<p><strong>Send All New Records</strong> uploads everything not yet sent (needs signal). No signal? Use the share sheet to send the backup file to your coordinator (WhatsApp / USB). <strong>Storage Health</strong> should read “Data is protected” — if not, reinstall from the home-screen icon.</p>'
+     +'<p>Send whenever you find signal so nothing is lost if the phone is damaged.</p>' }
+  ]},
+  admin: { title:"Administrator’s Manual", audience:'coordinator', sections: [
+    { id:'a-overview', num:'1', title:'System overview', html:
+      '<p>An offline-first PWA on steward phones. Records are held locally and uploaded to a Google Apps Script backend that writes JSON to Google Drive. Shared <strong>registries</strong> (water sources, facilities, met, trees, calendar, disturbances, zones, topics, authorisations) sync approvals and ownership between coordinators and down to phones. After any backend change, deploy a <strong>new version</strong>.</p>' },
+    { id:'a-access', num:'2', title:'Coordinator access', html:
+      '<p>Coordinator functions sit behind the enrolment screen’s unlock: the <strong>coordinator passcode</strong> plus the <strong>server key</strong> (set once via <code>setCoordinatorSecret()</code>, held in memory for the session only). Once verified you get Enrol, Manage Zones, Manage Topics, Update Profile, Grant Authorisation, and the <strong>Approve</strong> screens.</p>' },
+    { id:'a-ownership', num:'3', title:'Registry &amp; clan-ownership', html:
+      '<p>Everything monitored follows: <em>steward registers → Pending Approval → coordinator approves &amp; assigns the owning clan → monthly task for that clan only</em>.</p><ul>'
+     +'<li><strong>One owning clan</strong> — only that clan sees the task. Stops several clans being paid to monitor the same thing.</li>'
+     +'<li><strong>Reject duplicates</strong> — approve one registration of a real-world thing, reject the others.</li>'
+     +'<li><strong>Controlled split (optional)</strong> — add a second clan only when two independent readings are justified; the item then accepts <strong>two readings/month, one per clan</strong>, and no more.</li>'
+     +'<li><strong>One reading per clan per month</strong> — then it shows “Done this month”.</li></ul>' },
+    { id:'a-approvals', num:'4', title:'Approval screens', html:
+      '<p>Each <strong>Approve …</strong> screen lists everything Pending Approval with its photo, GPS and proposer. Set the <strong>owner clan</strong> (defaults to the proposer), optionally a <strong>second clan</strong>, then <strong>Approve</strong> or <strong>Reject</strong>. Approvals push to the shared registry (needs online + the coordinator key) and sync to the other coordinator and to phones.</p>' },
+    { id:'a-disturb', num:'5', title:'Disturbance triage', html:
+      '<p>Satellite detections (NASA FIRMS fire; GFW/RADD clearance when enabled) are raised server-side and auto-routed to the owning clan by clan boundary. Any detection with <strong>no boundary match lands in your triage queue</strong> — assign the responsible clan with one tap. Clearances below 2 ha are dropped; a detection is never raised twice.</p>' },
+    { id:'a-zones', num:'6', title:'Zones, topics &amp; training', html:
+      '<p><strong>Manage Zones</strong> edits the zone list. <strong>Manage Training Topics</strong> edits deliverable topics (tick Cert to allow trainer certification). <strong>Grant Authorisation / Certify Trainer</strong> authorises a person to deliver a topic and records certifications (shown as badges on their Profile).</p>' },
+    { id:'a-trouble', num:'7', title:'Troubleshooting', html:
+      '<ul><li><strong>“Coordinator key required”</strong> — run <code>setCoordinatorSecret()</code> once.</li>'
+     +'<li><strong>Approvals not syncing</strong> — both phones online; the approving phone needs the key set; reopen the Approve screen to pull latest.</li>'
+     +'<li><strong>Steward can’t see an item</strong> — check the owning clan matches theirs and the item is approved, not pending/rejected.</li>'
+     +'<li><strong>Wrong clan on a profile</strong> — fix via Update Existing Profile; clan drives ownership visibility.</li></ul>' }
+  ]}
+};
+
+/* Which manual section a screen's header "?" opens. */
+var SCREEN_HELP = {
+  'screen-dashboard':'field:overview',
+  'screen-water-setup':'field:water','screen-water-sources':'field:water','screen-water-source-register':'field:water','screen-water-record':'field:water',
+  'screen-sdm':'field:sdm','screen-facilities':'field:sdm','screen-facility-register':'field:sdm','screen-facility':'field:sdm',
+  'screen-met-stations':'field:met','screen-met-register':'field:met','screen-met-record':'field:met','screen-meteo-setup':'field:met',
+  'screen-pheno-setup':'field:phenology','screen-pheno-plots':'field:phenology','screen-pheno-establish':'field:phenology','screen-pheno-record':'field:phenology',
+  'screen-alerts':'field:disturbance','screen-disturb-verify':'field:disturbance',
+  'screen-data-export':'field:sending',
+  'screen-activity-calendar':'field:overview','screen-freemap':'field:overview','screen-livemap':'field:overview',
+  /* coordinator screens → Administrator's Manual */
+  'screen-water-approve':'admin:a-approvals','screen-facility-approve':'admin:a-approvals','screen-met-approve':'admin:a-approvals','screen-pheno-approve':'admin:a-approvals',
+  'screen-zone-config':'admin:a-zones','screen-topics-config':'admin:a-zones','screen-grant-auth':'admin:a-zones','screen-update-profile':'admin:a-access','screen-cal-add':'admin:a-overview'
+};
+
+/* Baseline per-field help. Overlaid by _help.json at runtime. */
+var HELP_BASELINE = {
+  'dz.outcome':   { title:'What did you find?', html:'<p>Record only what is true on the ground today:</p><ul><li><strong>Confirmed present</strong> — the disturbance is really there.</li><li><strong>Not found</strong> — you reached the spot and there is nothing.</li><li><strong>Inconclusive</strong> — you got there but can’t tell for sure.</li><li><strong>Could not reach safely</strong> — the site was unreachable. Never guess from a distance.</li></ul>' },
+  'dz.cause':     { title:'Most likely cause', html:'<p>Recorded <strong>separately from the fact</strong>, and it is not a judgement. Report what you see: <strong>natural</strong> (fire, landslide, flood), <strong>human</strong> (garden clearing, logging, road), or <strong>unclear</strong>. If unsure, choose unclear — the record stays honest.</p>' },
+  'dz.area':      { title:'Area affected', html:'<p>This alert was already assessed as big enough to need checking <strong>before it reached you</strong> — you do not decide the threshold. Just record the size you actually observe on the ground (1 ha ≈ 100 m × 100 m). Use the mapping tool to measure if you can.</p>' },
+  'dz.photo':     { title:'Site photo', html:'<p>Required. The photo carries the GPS and time automatically, so it is the evidence the disturbance was really seen. Capture the disturbance itself, not just the track to it.</p>' },
+  'ws.split':     { title:'Second clan — controlled split', html:'<p>Leave as <em>None</em> for normal single ownership. Add a second clan <strong>only</strong> when two independent monthly readings are genuinely justified — the item then accepts <strong>two readings a month, one per clan</strong>, and no more. It does not mean both clans do the same job twice.</p>' },
+  'ws.secchi':    { title:'Secchi disc', html:'<p>For rivers. Lower the disc into the water and record the depth (cm) at which its pattern just disappears — a simple measure of clarity. Shallower reading = murkier water.</p>' },
+  'wr.skaters':   { title:'Pond skaters', html:'<p>For creeks. Small insects that sit on the water surface. More of them usually means healthier, less-polluted water. Record how many you see at a glance.</p>' },
+  'wr.shade':     { title:'Shading', html:'<p>For creeks. How much of the water is shaded by overhanging vegetation — shade keeps water cool and supports life. Estimate full / partial / open.</p>' },
+  'eng.source':   { title:'Source condition', html:'<p>At the intake/source end of an engineered system: is water present and flowing, is it clean and clear, and are there any signs of contamination?</p>' },
+  'eng.delivery': { title:'Delivery &amp; infrastructure', html:'<p>At the tap/outlet end: is water arriving, are there leaks, is the pipe / tank / pump damaged, and is a repair needed?</p>' },
+  'reg.gps':      { title:'GPS location', html:'<p>Stand at the thing you are registering and capture the GPS there. Accuracy is shown in metres — wait a moment outdoors for it to tighten before saving.</p>' },
+  'reg.pending':  { title:'Pending approval', html:'<p>A new registration is not a monitoring task yet. The coordinator reviews it, resolves any duplicate, and assigns the owning clan before it appears as a monthly task.</p>' }
+};
+window._helpFields = {};
+function helpMergeFields(registryFields){
+  var out={}; Object.keys(HELP_BASELINE).forEach(function(k){ out[k]=HELP_BASELINE[k]; });
+  if(registryFields){ Object.keys(registryFields).forEach(function(k){ if(registryFields[k] && registryFields[k].html) out[k]=registryFields[k]; }); }
+  window._helpFields=out;
+}
+helpMergeFields(null); /* baseline available immediately */
+
+function helpInit(){ helpMergeFields(null); syncHelpFromServer(function(){ /* merged */ }); }
+
+/* Inject the header "?" for the current screen (one place, not 60 headers). */
+function mountHelpButton(screenId){
+  var scr=document.getElementById(screenId); if(!scr) return;
+  var bar=scr.querySelector('.top-bar'); if(!bar) return;
+  var old=bar.querySelector('.help-btn'); if(old) old.parentNode.removeChild(old);
+  if(screenId==='screen-help') return;
+  var ref=SCREEN_HELP[screenId]; if(!ref) return;
+  if(ref.indexOf('admin:')===0 && !window._coordSecret) ref='field:overview'; /* no admin help without the unlock */
+  var btn=document.createElement('button'); btn.className='help-btn'; btn.type='button'; btn.textContent='?';
+  btn.setAttribute('aria-label','Help for this screen');
+  btn.onclick=function(){ openHelp(ref); };
+  bar.appendChild(btn);
+}
+
+/* Open the Help centre, optionally at a section ("manual:section"). */
+function openHelp(ref){ _helpTarget=ref||null; nav('screen-help'); }
+var _helpTarget=null;
+function renderHelpCentre(){
+  var c=document.getElementById('helpContent'); if(!c) return;
+  var isCoord=!!window._coordSecret;
+  var sub=document.getElementById('helpSubtitle'); if(sub) sub.textContent = isCoord ? 'Field Guide + Administrator’s Manual' : 'Field Guide';
+  var manuals=[HELP_MANUALS.field]; if(isCoord) manuals.push(HELP_MANUALS.admin);
+  var h='';
+  manuals.forEach(function(man){
+    h+='<div style="font-size:0.95rem;font-weight:800;color:#1B5E20;margin:6px 0 8px;">'+icon(man===HELP_MANUALS.admin?'shieldcheck':'document',16)+' '+man.title+(man.audience==='coordinator'?' <span style="font-size:0.64rem;font-weight:700;color:#8D6E00;background:#FFF8E1;border:1px solid #FFE082;padding:1px 7px;border-radius:9px;vertical-align:middle;">coordinators</span>':'')+'</div>';
+    man.sections.forEach(function(s){
+      var sid='help-sec-'+(man===HELP_MANUALS.admin?'a-':'')+s.id;
+      h+='<div id="'+sid+'" class="card" style="padding:12px 14px;margin-bottom:10px;">';
+      h+='<div style="font-size:0.88rem;font-weight:700;color:#333;margin-bottom:4px;">'+(s.num?(s.num+'. '):'')+s.title+'</div>';
+      h+='<div style="font-size:0.84rem;line-height:1.5;color:#444;">'+s.html+'</div>';
+      h+='</div>';
+    });
+  });
+  c.innerHTML=h; hydrateIcons(c);
+  if(_helpTarget){
+    var parts=_helpTarget.split(':'); var tid='help-sec-'+(parts[0]==='admin'?'a-':'')+parts[1];
+    var el=document.getElementById(tid);
+    if(el){ setTimeout(function(){ el.scrollIntoView({behavior:'smooth',block:'start'}); el.style.boxShadow='0 0 0 2px #2E7D32'; setTimeout(function(){ el.style.boxShadow=''; },1600); }, 120); }
+    _helpTarget=null;
+  }
+}
+
+/* ── Per-field help tips ── */
+function helpTip(key){ return '<button type="button" class="help-tip" onclick="showFieldHelp(\''+key+'\')" aria-label="Field help">?</button>'; }
+function showFieldHelp(key){
+  var f=window._helpFields[key];
+  var t=document.getElementById('helpSheetTitle'), b=document.getElementById('helpSheetBody');
+  if(f){ t.textContent=f.title||'Help'; b.innerHTML=f.html; }
+  else { t.textContent='Help'; b.innerHTML='<p class="help-missing">No help written for this field yet.</p>'; }
+  if(window._coordSecret){ b.innerHTML += '<p style="margin-top:12px;"><span class="help-edit-link" onclick="editFieldHelp(\''+key+'\')">'+icon('edit',12)+' Edit this help</span></p>'; hydrateIcons(b); }
+  document.getElementById('helpBackdrop').classList.add('show');
+  document.getElementById('helpSheet').classList.add('show');
+}
+function closeFieldHelp(){ document.getElementById('helpBackdrop').classList.remove('show'); document.getElementById('helpSheet').classList.remove('show'); }
+function editFieldHelp(key){
+  if(!window._coordSecret){ toast('Coordinator unlock required.'); return; }
+  var f=window._helpFields[key]||{title:'',html:''};
+  var b=document.getElementById('helpSheetBody');
+  document.getElementById('helpSheetTitle').textContent='Edit help — '+key;
+  b.innerHTML='<div class="form-group"><label class="form-label" style="font-size:0.72rem;">Title</label><input id="hfTitle" class="form-input" value="'+(f.title||'').replace(/"/g,'&quot;')+'"></div>'
+    +'<div class="form-group"><label class="form-label" style="font-size:0.72rem;">Help text (plain text or simple HTML)</label><textarea id="hfHtml" class="form-input" rows="6">'+(f.html||'').replace(/</g,'&lt;')+'</textarea></div>'
+    +'<button class="btn-primary" style="width:100%;" onclick="saveFieldHelp(\''+key+'\')">Save &amp; sync</button>';
+}
+function saveFieldHelp(key){
+  var title=(document.getElementById('hfTitle')||{}).value||'';
+  var html=(document.getElementById('hfHtml')||{}).value||'';
+  html=html.replace(/&lt;/g,'<'); /* un-escape the editor's safety escaping */
+  if(!html.trim()){ toast('Help text is empty.'); return; }
+  window._helpFields[key]={ title:title.trim(), html:html.trim() };
+  pushHelp(function(ok){ toast('Help saved'+(ok?' · synced ✓':' — will sync when online')); });
+  showFieldHelp(key);
+}
+
+/* ── _help.json registry sync ── */
+function helpRegistryPayload(){
+  /* only non-baseline or overridden entries need storing; store all current for simplicity */
+  var fields={}; Object.keys(window._helpFields).forEach(function(k){ fields[k]=window._helpFields[k]; });
+  return { fields:fields, updated_at:new Date().toISOString() };
+}
+function syncHelpFromServer(cb){
+  if(!UPLOAD_ENDPOINT||!navigator.onLine){ if(cb)cb(false); return; }
+  fetch(UPLOAD_ENDPOINT+'?action=help')
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if(d&&d.status==='ok'&&d.help&&d.help.fields){ helpMergeFields(d.help.fields); } if(cb)cb(true); })
+    .catch(function(){ if(cb)cb(false); });
+}
+function pushHelp(cb){
+  if(!UPLOAD_ENDPOINT||!navigator.onLine){ if(cb)cb(false); return; }
+  fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ _action:'update_help', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret, help:helpRegistryPayload() }) })
+    .then(function(r){ return r.json(); }).then(function(d){ if(cb)cb(d&&d.status==='ok'); }).catch(function(){ if(cb)cb(false); });
 }
 
 /* ── Map Layer Toggles ── */
@@ -8509,7 +8771,7 @@ function renderWaterApprove() {
       if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
       h += '<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label>';
       h += '<select id="wa-owner-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+ownOpts+'</select></div>';
-      h += '<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span></label>';
+      h += '<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span>'+helpTip('ws.split')+'</label>';
       h += '<select id="wa-owner2-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+own2Opts+'</select>';
       h += '<div style="font-size:0.68rem;color:#888;margin-top:4px;">A split allows 2 readings/month — one per clan. Leave as None for single ownership.</div></div>';
       h += '<div style="display:flex;gap:8px;">';
@@ -8789,7 +9051,7 @@ function renderPhenoApprove(){
       h+='<div style="font-size:0.74rem;color:#666;">'+icon('pin',13)+' '+(r.lat||'?')+', '+(r.lng||'?')+(r.location_name?(' · '+r.location_name):'')+'</div>';
       h+='<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Established '+(r.established_date||'')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
       h+='<div class="form-group" style="margin-bottom:8px;"><label class="form-label" style="font-size:0.72rem;">Owner clan <span style="color:#B71C1C;">*</span></label><select id="pa-owner-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+ownOpts+'</select></div>';
-      h+='<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span></label><select id="pa-owner2-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+own2Opts+'</select></div>';
+      h+='<div class="form-group" style="margin-bottom:10px;"><label class="form-label" style="font-size:0.72rem;">Second clan — controlled split <span style="color:#999;font-weight:400;">(optional)</span>'+helpTip('ws.split')+'</label><select id="pa-owner2-'+r.id+'" class="form-input" style="padding:8px 11px;font-size:0.8rem;">'+own2Opts+'</select></div>';
       h+='<div style="display:flex;gap:8px;"><button class="btn-primary" style="background:#2E7D32;flex:2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="approvePhenoTree('+r.id+')">✓ Approve</button><button class="btn-outline" style="flex:1;color:#B71C1C;border-color:#FFCDD2;padding:9px 6px;font-size:0.82rem;white-space:nowrap;" onclick="rejectPhenoTree('+r.id+')">Reject</button></div></div>';
     });
     c.innerHTML=h;
@@ -9826,6 +10088,7 @@ function cacheStewardProfile() {
     if (records && records.length > 0) {
       window._cachedStewardId  = records[0].stewardId || 'STE';
       window._cachedProfile    = records[0];
+      try { helpInit(); } catch(e) {}
       /* Role-based dashboard tile visibility */
       var role            = records[0].role || 'clan_steward';
       var authTopics      = records[0].authorised_topics || [];

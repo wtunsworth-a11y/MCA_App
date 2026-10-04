@@ -7112,6 +7112,9 @@ var CAL_TYPES = {
   other:{label:'Activity', icon:'calendar'}
 };
 function calTypeMeta(k){ return CAL_TYPES[k] || CAL_TYPES.other; }
+/* Which manual section the day-before "review the guide" nudge opens per
+   activity type. Falls back to the Field Guide overview. */
+var CAL_HELP = { monitoring:'field:overview', conservation:'field:overview', followup:'field:overview', meeting:'field:overview', hunter_interview:'field:overview', garden_survey:'field:overview', cashcrop_survey:'field:overview' };
 var _calWho='clan_steward', _calBrief=false, _calRepeat='none';
 var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -7205,6 +7208,12 @@ function renderActivityCalendar(){
         h += '<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.7rem;font-weight:700;color:'+stColor+';">'+dot(stColor,8)+' '+stLabel+'</span>';
         h += '</div>';
         if (e.briefing_required) h += '<div style="font-size:0.68rem;color:#8a6d00;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:3px 8px;margin-top:6px;">Zone-staff briefing required beforehand'+(e.briefing_done?' · done':'')+'</div>';
+        /* Day-before nudge: re-read the relevant part of the manual before travelling. */
+        if (e.status!=='done' && e.status!=='cancelled' && !past){
+          var ref=CAL_HELP[e.activity]||'field:overview';
+          var imminent=false; if(e.date){ var dd=(new Date(e.date)-new Date())/86400000; imminent=(dd>=-0.2 && dd<=1.2); }
+          h += '<div onclick="openHelp(\''+ref+'\')" style="display:flex;align-items:center;gap:6px;margin-top:7px;font-size:0.72rem;font-weight:700;cursor:pointer;color:'+(imminent?'#4A148C':'#0277BD')+';'+(imminent?'background:#F3E5F5;border:1px solid #CE93D8;border-radius:8px;padding:5px 9px;':'')+'">'+icon('document',13)+' '+(imminent?'Coming up — review the guide first':'Review the guide')+' ›</div>';
+        }
         if (!e._followup && e.status!=='done' && e.status!=='cancelled' && window._coordSecret && e.id!=null)
           h += '<button class="btn-outline" style="margin-top:8px;width:100%;padding:6px;font-size:0.76rem;border-color:#2E7D32;color:#2E7D32;" onclick="markCalDone('+e.id+')">Mark done</button>';
         h += '</div>';

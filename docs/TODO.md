@@ -39,6 +39,10 @@ this repo (assets, decisions, accounts, field protocols) are grouped at the end.
   - Species seen
   - Species caught
   - Use of the meat: eaten · shared · gifted whole · sold
+  - **Photo** (of the interview / interviewee)
+  - **Short verbal recording** (audio snippet of the interview) to verify the
+    interview actually took place. *New capability — the app currently captures
+    photos but not audio; needs audio recording + storage/upload.*
 
 - [ ] **Annual clan-household garden survey** — survey each clan household on
       **new gardens**: location, size, and age of fallow.
@@ -57,6 +61,25 @@ this repo (assets, decisions, accounts, field protocols) are grouped at the end.
 > **register → coordinator-approve → clan-ownership → monitor** pattern already
 > used for water sources, facilities, met instruments and trees, so ownership
 > and anti-duplication carry over.
+
+### Roles & community preparation
+
+- **Clan stewards** do the fieldwork (the surveys/interviews/monitoring above).
+- **Zone staff** prepare the community ahead of each activity — briefings so
+  households/informants expect the visit.
+- These roles should be reflected in the app (who sees what, whose task a
+  briefing is vs. whose task the fieldwork is).
+
+### Activity calendar & advance warnings
+
+- [ ] **Activity calendar** — a schedule of when each activity is due
+      (monthly, annual, seasonal) per clan/zone, so everyone knows what is
+      coming up and nothing is missed.
+- [ ] **Advance-warning reminders** — notify the steward (and zone staff for
+      briefings) ahead of each due activity, with a **preparation checklist**:
+      e.g. charge the phone, get equipment, advise the clan elder, arrange the
+      informant/household. Timing of the advance notice to be decided per
+      activity type.
 
 ---
 

@@ -50,6 +50,12 @@ grouped by who uses it.
   the likely **cause** separately (natural / human / unclear), a geotagged
   **photo**, measured area and a description. Record locks once sent.
 
+**Help**
+- **Help centre** (Field Guide) available offline; a **?** in every screen
+  header opens the matching section, and per-field **?** tips explain
+  individual fields. On an upcoming calendar activity, a "review the guide"
+  nudge (emphasised the day before) opens the relevant section.
+
 **Capture tools**
 - Capture **GPS** location and take **photos** on-device.
 
@@ -77,6 +83,9 @@ Reached behind the coordinator unlock (passcode + server key).
 - **Triage disturbance alerts** — alerts that no clan boundary matched land in
   a triage queue; assign the responsible clan with one tap. (Alerts that fall
   inside a mapped clan boundary route to that clan automatically.)
+- **Edit per-field help** — open any field's **?** and edit the text; it saves
+  to the Drive-synced `_help.json`, so wording improves without a new release.
+  Coordinators also get the **Administrator's Manual** in the Help centre.
 - **Manage Zones** — edit the zone list.
 - **Manage Training Topics** — edit topics; flag which can be certified.
 - **Grant Training Authorisation / Certify Trainer** — authorise a person to
@@ -104,6 +113,13 @@ Reached behind the coordinator unlock (passcode + server key).
   area, routes each to the owning clan by **point-in-polygon** against mapped
   clan boundaries, de-duplicates, and raises verification tasks that sync to
   stewards **when they next upload** — no satellite access needed on the phone.
+  - **Size/area thresholds applied server-side, before any task exists** — only
+    "big" fires (cluster size / fire power) and clearances **≥ 2 ha** are
+    tasked; the steward never decides whether something counts.
+  - **Multi-clan events fan out** — a disturbance overlapping two or more clan
+    boundaries raises one independent task per clan.
+- **Help registry** — `_help.json` holds coordinator-edited per-field help,
+  overlaying the app's baseline; synced down to all phones.
 - **Coordinator-key protection** — privileged approval actions require a server
   key held only in Apps Script properties.
 - **De-duplication** — each record carries a unique steward-prefixed ID.

@@ -230,6 +230,19 @@ is coordinator-defined and syncs down like the other registries.
 
 ## Done
 
+- [x] **In-app help system** (built 2026-10-04) — offline Help centre with the
+      **Field Guide** (everyone) and **Administrator's Manual** (coordinator
+      unlock only); a **?** in every screen header deep-links the right
+      section; per-field **?** tips from a baseline overlaid by a Drive-synced
+      **`_help.json`** (coordinator-editable, no redeploy); day-before
+      "review the guide" nudge on upcoming calendar activities.
+  - [ ] *follow-on*: populate per-field help for the remaining fields (framework
+        is in place — each is one registry entry; content is the work, and the
+        guides need deepening to field level first).
+- [x] **Disturbance feed thresholds** (built 2026-10-04) — the >2 ha clearance
+      gate and a fire size/power gate are applied **server-side before any task
+      is created**; big-only fires via ~1 km clustering; an event overlapping
+      two or more clans fans out to one independent task per clan.
 - [x] **Disturbance verification** (built 2026-10-04) — satellite-detected
       fires, landslides and **>2 ha forest clearance** raised as clan-owned
       field-verification tasks. Server-side daily feed (NASA FIRMS live;

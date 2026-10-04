@@ -1878,6 +1878,7 @@ select.msel {
         <!-- Offline / unsynced data warning — updated on every dashboard visit -->
         <div id="syncWarningBanner" style="display:none;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;font-size:0.79rem;line-height:1.4;cursor:pointer;" onclick="nav('screen-data-export')"></div>
         <!-- This-month monitoring status — calm, static, updated on each dashboard visit -->
+        <div id="dashDisturb" style="margin:8px 12px 0;"></div>
         <div id="dashStatus" style="margin:8px 12px 2px;"></div>
         <div class="module-grid">
           <div class="module-tile" onclick="nav('screen-activity-calendar')">
@@ -1901,8 +1902,8 @@ select.msel {
             <span class="module-name">Service Delivery Monitoring</span>
           </div>
           <div class="module-tile" onclick="nav('screen-alerts')">
-            <span class="module-emoji" data-icon="flame" data-size="26"></span>
-            <span class="module-name">Environmental Alerts</span>
+            <span class="module-emoji" data-icon="warning" data-size="26"></span>
+            <span class="module-name">Disturbance Alerts</span>
           </div>
           <div class="module-tile" onclick="nav('screen-mafia-setup')">
             <span class="module-emoji" data-icon="barchart" data-size="26"></span>
@@ -3310,96 +3311,42 @@ select.msel {
     </div>
 
     <!-- ══════════════════════════════════════
-         SCREEN: ENVIRONMENTAL ALERTS
+         SCREEN: ENVIRONMENTAL ALERTS  (Disturbance Verification inbox)
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-alerts">
       <div class="top-bar">
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
-          <div class="bar-title">Environmental Alerts</div>
-          <div class="bar-subtitle">Zone 7B | Last updated: 2 hours ago</div>
+          <div class="bar-title">Disturbance Alerts</div>
+          <div class="bar-subtitle" id="alertsSubtitle">Field-verify detected disturbances</div>
         </div>
       </div>
       <div class="scroll-content">
-        <div class="p14">
-          <!-- Fire map placeholder -->
-          <div class="map-fire-box">
-            <svg width="362" height="180" viewBox="0 0 362 180" xmlns="http://www.w3.org/2000/svg">
-              <rect width="362" height="180" fill="#c9dce8"/>
-              <polygon points="218.4,0.0 219.3,0.3 223.7,0.3 226.5,0.5 229.5,0.7 233.0,0.8 234.6,0.8 237.7,1.3 238.8,2.0 239.8,2.4 242.6,3.1 246.2,3.5 248.5,4.0 249.3,4.1 250.8,4.1 252.6,4.4 253.9,5.3 256.1,6.7 256.4,7.5 256.1,8.4 255.8,9.1 256.2,10.5 256.6,11.8 256.1,12.9 256.1,14.5 256.1,15.6 256.1,16.9 256.1,18.5 256.1,18.9 256.5,18.8 259.5,22.3 259.2,23.8 259.2,24.7 259.2,26.8 259.2,29.5 259.2,31.5 259.2,33.0 260.5,34.8 260.5,35.0 260.5,36.3 260.5,38.4 259.5,39.7 259.7,39.8 261.9,41.0 274.5,42.6 277.8,43.7 281.7,44.1 288.5,46.6 295.2,48.0 295.4,48.0 295.6,47.9 296.6,47.8 299.8,47.5 301.4,48.6 302.4,47.8 303.7,49.1 303.1,49.2 303.6,49.3 303.8,49.4 304.6,49.5 306.2,50.3 312.9,51.5 314.0,53.7 315.2,54.9 316.2,56.0 316.1,57.7 315.9,58.6 318.8,60.7 320.7,61.6 324.0,62.2 328.2,62.8 331.0,63.4 332.3,64.4 334.3,66.3 335.5,67.0 335.9,68.3 340.3,72.8 343.7,76.0 345.5,78.1 346.2,79.4 348.1,82.9 351.7,85.0 353.5,86.7 355.3,88.1 358.1,89.4 360.4,90.4 362.0,92.1 361.0,92.8 361.0,93.9 358.5,94.7 355.2,93.5 353.6,93.0 351.6,93.0 349.8,92.8 345.3,92.4 343.5,92.2 339.4,91.8 336.6,91.6 334.9,92.1 332.9,93.9 331.7,94.4 329.3,96.4 327.8,97.9 326.8,99.8 326.4,102.0 325.1,103.6 322.7,105.0 320.4,106.4 317.8,107.4 315.8,107.6 315.6,107.8 314.9,108.1 312.6,108.5 309.8,109.6 308.4,111.3 307.8,112.7 306.6,113.3 304.8,113.3 302.7,113.7 299.1,113.9 294.3,113.9 288.5,115.3 285.1,116.7 281.6,117.7 281.3,117.8 278.4,118.2 273.2,118.9 268.1,119.1 263.5,119.1 260.0,119.1 255.3,119.9 253.0,121.4 252.4,122.2 251.3,122.6 250.1,122.9 247.2,123.1 241.6,123.2 240.1,123.4 237.5,123.5 236.2,123.8 233.5,124.9 232.7,125.8 232.2,127.0 231.9,128.3 232.7,129.0 233.3,130.0 232.6,131.2 232.0,132.1 231.4,132.1 231.6,132.2 227.1,133.3 225.9,134.0 224.3,135.3 223.0,135.9 219.1,136.4 213.5,136.4 208.7,137.1 206.9,137.1 203.0,136.8 198.2,136.8 194.6,138.1 192.9,139.0 191.3,140.7 188.5,142.0 184.8,143.0 180.3,143.5 177.4,143.8 172.6,144.8 168.8,145.3 166.4,145.7 163.9,146.7 160.6,147.7 157.1,148.7 155.5,149.1 154.7,149.7 152.8,150.5 151.7,150.5 151.7,150.5 148.1,151.0 145.8,151.0 142.9,150.8 139.0,150.7 135.1,150.2 132.0,150.0 129.4,149.9 127.8,150.0 127.5,150.1 125.5,150.5 123.2,150.8 117.5,152.2 111.7,153.9 108.2,155.2 106.4,156.4 104.0,157.5 101.1,158.3 99.4,158.7 98.5,158.9 95.9,159.5 94.3,159.7 91.9,161.4 90.4,163.3 87.9,164.5 85.5,165.3 82.2,166.8 79.2,167.7 79.3,168.0 78.7,169.8 75.2,170.6 72.4,171.9 69.7,173.4 66.1,175.3 62.6,176.8 60.4,177.6 56.4,178.6 52.2,179.8 50.6,180.0 47.7,177.8 44.3,176.3 41.3,174.8 38.4,173.9 37.4,173.3 36.1,173.0 32.9,172.9 30.3,173.0 27.4,173.8 24.6,174.2 20.8,175.2 18.8,175.9 17.8,175.9 17.2,176.1 16.6,174.8 16.6,174.3 15.7,173.2 15.3,172.4 15.0,171.8 15.1,171.1 15.2,170.8 14.3,169.7 13.6,169.0 13.7,168.7 15.3,167.3 16.2,166.8 16.9,166.1 16.6,165.1 15.0,164.1 14.6,163.7 14.1,163.4 12.8,163.2 11.8,163.0 10.6,162.7 10.0,162.4 9.4,161.9 8.5,161.5 7.6,161.2 6.2,160.9 5.5,160.4 5.1,159.8 3.4,156.5 3.3,155.9 3.8,155.6 3.7,155.1 2.2,153.7 0.2,153.1 -0.0,153.0 2.6,150.7 4.9,146.8 6.6,144.7 7.8,142.6 9.3,140.9 10.8,139.5 14.2,136.4 15.6,135.5 26.1,129.8 37.1,125.4 37.4,124.9 42.3,120.9 46.9,117.8 48.5,116.0 50.4,114.5 53.3,112.0 53.9,110.0 55.3,106.7 55.3,103.1 56.5,100.5 59.0,97.2 59.5,95.7 60.3,94.7 64.6,90.3 69.3,87.9 75.6,84.9 80.4,82.3 86.2,79.3 86.5,78.0 86.5,76.7 85.3,75.9 85.3,75.7 84.6,75.2 82.6,74.4 80.0,73.6 75.2,72.9 71.7,72.5 67.4,72.4 65.5,72.4 62.0,72.2 59.3,71.4 56.4,70.2 54.0,68.8 48.8,66.8 46.9,65.9 44.2,64.8 42.6,63.0 44.2,60.8 45.9,58.7 48.8,56.7 53.6,55.1 56.5,53.1 61.1,51.8 63.7,51.2 65.9,50.6 67.1,49.3 69.7,48.9 70.1,47.9 71.0,46.9 72.0,45.5 74.3,44.6 77.1,43.4 81.6,41.9 86.4,40.1 88.1,39.6 89.1,38.3 89.1,37.3 89.5,36.5 89.5,35.8 89.1,35.2 88.2,34.3 91.1,33.3 96.8,31.3 99.5,30.6 104.9,29.4 109.7,28.1 111.9,27.8 112.4,27.3 112.9,27.1 114.2,25.9 115.8,25.5 115.8,25.3 117.9,24.4 117.4,23.6 116.1,22.5 115.1,21.7 116.8,19.7 122.3,18.5 126.8,17.3 127.8,15.9 130.0,14.6 136.5,13.2 141.9,12.0 147.7,10.9 151.4,9.8 151.4,8.9 150.9,8.0 150.7,6.8 150.0,5.5 149.5,4.4 150.1,3.7 150.3,2.4 151.6,1.7 154.9,1.5 158.1,1.4 163.5,1.4 168.4,1.4 172.3,1.5 177.2,1.5 180.3,1.2 183.3,1.0 188.5,1.4 189.7,1.4 193.2,1.4 196.2,1.4 198.1,1.3 198.1,1.2 198.5,1.1 201.6,0.8 205.2,0.6 212.0,0.1 218.4,0.0" fill="#2E7D32" fill-opacity="0.10" stroke="#1B5E20" stroke-width="1.5" stroke-linejoin="round"/>
-              <polygon points="206.9,137.1 203.0,136.8 198.2,136.8 194.6,138.1 193.7,138.5 102.1,129.7 101.4,119.9 98.2,110.5 130.5,107.8 135.4,101.7 143.7,100.7 155.4,94.3 165.0,95.3 166.8,96.0 169.5,100.6 194.7,122.7 195.3,122.9 207.8,137.1 206.9,137.1" fill="#E6F1FB" fill-opacity="0.65" stroke="#0C447C" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="69.3,87.9 75.6,84.9 80.4,82.3 86.2,79.3 86.5,78.0 86.5,76.7 85.3,75.9 85.3,75.7 84.6,75.2 82.6,74.4 80.0,73.6 75.2,72.9 71.7,72.5 67.4,72.4 65.5,72.4 62.0,72.2 59.3,71.4 56.4,70.2 54.0,68.8 48.8,66.8 46.9,65.9 44.9,65.1 93.2,61.1 104.8,58.9 115.4,54.9 132.4,56.5 133.4,56.6 139.8,63.8 144.2,64.4 169.0,72.3 166.6,76.4 167.4,78.2 159.9,81.4 163.4,85.7 161.9,87.9 165.0,95.3 155.4,94.3 143.7,100.7 135.4,101.7 130.5,107.8 98.2,110.5 95.3,109.3 81.9,94.6 77.1,92.3 65.9,89.6 69.3,87.9" fill="#E1F5EE" fill-opacity="0.65" stroke="#085041" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="159.2,75.1 147.6,72.6 150.5,78.0 159.2,75.1" fill="#E1F5EE" fill-opacity="0.65" stroke="#085041" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="166.8,96.0 165.0,95.3 161.9,87.9 163.4,85.7 159.9,81.4 167.4,78.2 166.6,76.4 169.0,72.3 144.2,64.4 139.8,63.8 133.4,56.6 158.6,48.6 170.6,52.1 177.1,61.4 184.3,63.3 178.2,70.4 193.6,74.3 195.9,82.0 195.4,82.8 196.1,84.4 209.7,90.6 214.9,94.6 195.3,122.9 194.7,122.7 169.5,100.6 166.8,96.0" fill="#FAEEDA" fill-opacity="0.65" stroke="#633806" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="150.5,78.0 147.6,72.6 159.2,75.1 150.5,78.0" fill="#FAEEDA" fill-opacity="0.65" stroke="#633806" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="192.9,139.0 191.3,140.7 188.5,142.0 184.8,143.0 180.3,143.5 177.4,143.8 172.6,144.8 168.8,145.3 166.4,145.7 163.9,146.7 160.6,147.7 157.1,148.7 155.5,149.1 154.7,149.7 152.8,150.5 151.7,150.5 151.7,150.5 148.1,151.0 145.8,151.0 142.9,150.8 139.0,150.7 135.1,150.2 132.0,150.0 129.4,149.9 127.8,150.0 127.5,150.1 125.5,150.5 123.2,150.8 117.5,152.2 111.7,153.9 108.2,155.2 106.4,156.4 104.0,157.5 101.1,158.3 99.4,158.7 98.5,158.9 95.9,159.5 94.3,159.7 91.9,161.4 90.4,163.3 87.9,164.5 85.5,165.3 82.2,166.8 79.2,167.7 79.3,168.0 78.7,169.8 75.2,170.6 72.4,171.9 69.7,173.4 66.1,175.3 62.6,176.8 60.4,177.6 56.4,178.6 52.2,179.8 50.6,180.0 47.7,177.8 44.3,176.3 41.3,174.8 38.4,173.9 37.4,173.3 36.1,173.0 32.9,172.9 30.3,173.0 27.4,173.8 24.6,174.2 20.8,175.2 18.8,175.9 17.8,175.9 17.2,176.1 16.6,174.8 16.6,174.3 15.7,173.2 15.3,172.4 15.0,171.8 15.1,171.1 15.2,170.8 14.3,169.7 13.6,169.0 13.7,168.7 15.3,167.3 16.2,166.8 16.9,166.1 16.6,165.1 15.0,164.1 14.6,163.7 14.1,163.4 12.8,163.2 11.8,163.0 10.6,162.7 10.0,162.4 9.4,161.9 8.5,161.5 7.6,161.2 6.2,160.9 5.5,160.4 5.1,159.8 3.4,156.5 3.3,155.9 3.8,155.6 3.7,155.1 2.2,153.7 0.2,153.1 -0.0,153.0 2.6,150.7 4.9,146.8 6.6,144.7 7.8,142.6 9.3,140.9 10.8,139.5 14.2,136.4 15.6,135.5 26.1,129.8 37.1,125.4 37.4,124.9 42.3,120.9 46.9,117.8 48.5,116.0 50.4,114.5 53.3,112.0 53.9,110.0 55.3,106.7 55.3,103.1 56.5,100.5 59.0,97.2 59.5,95.7 60.3,94.7 64.6,90.3 65.9,89.6 77.1,92.3 81.9,94.6 95.3,109.3 98.2,110.5 101.4,119.9 102.1,129.7 193.7,138.5 192.9,139.0" fill="#EEEDFE" fill-opacity="0.65" stroke="#3C3489" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="184.3,63.3 177.1,61.4 170.6,52.1 180.4,52.5 199.1,51.6 199.5,55.7 206.5,61.6 204.4,66.1 202.7,66.5 193.6,74.3 178.2,70.4 184.3,63.3" fill="#FAECE7" fill-opacity="0.65" stroke="#712B13" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="219.3,0.3 223.7,0.3 226.5,0.5 229.5,0.7 233.0,0.8 234.6,0.8 237.7,1.3 238.8,2.0 239.8,2.4 242.6,3.1 246.2,3.5 248.5,4.0 249.3,4.1 250.8,4.1 252.6,4.4 253.9,5.3 256.1,6.7 256.4,7.5 256.1,8.4 255.8,9.1 256.2,10.5 256.6,11.8 256.1,12.9 256.1,14.5 256.1,15.6 256.1,16.9 256.1,18.5 256.1,18.9 256.5,18.8 259.5,22.3 259.2,23.8 259.2,24.7 259.2,26.8 259.2,29.5 259.2,31.5 259.2,33.0 260.5,34.8 260.5,35.0 260.5,36.3 260.5,38.4 259.5,39.7 259.7,39.8 261.9,41.0 274.5,42.6 277.8,43.7 281.7,44.1 283.6,44.8 263.4,60.5 244.7,64.1 227.6,65.4 218.4,68.1 204.4,66.1 206.5,61.6 199.5,55.7 199.1,51.6 180.4,52.5 170.6,52.1 158.6,48.6 184.5,1.1 188.5,1.4 189.7,1.4 193.2,1.4 196.2,1.4 198.1,1.3 198.1,1.2 198.5,1.1 201.6,0.8 205.2,0.6 212.0,0.1 218.4,0.0 219.3,0.3" fill="#EAF3DE" fill-opacity="0.65" stroke="#27500A" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="221.3,74.2 218.4,68.1 227.6,65.4 244.7,64.1 233.8,73.4 221.3,74.2" fill="#FBEAF0" fill-opacity="0.65" stroke="#72243E" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="249.4,86.4 251.1,88.2 250.4,91.7 231.9,92.9 214.9,94.6 209.7,90.6 196.1,84.4 195.4,82.8 195.9,82.0 193.6,74.3 202.7,66.5 204.4,66.1 218.4,68.1 221.3,74.2 233.8,73.4 244.7,64.1 263.4,60.5 262.7,66.3 261.7,67.5 258.8,70.0 251.2,74.0 249.4,86.4" fill="#E6F1FB" fill-opacity="0.65" stroke="#185FA5" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="288.5,46.6 295.2,48.0 295.4,48.0 295.6,47.9 296.6,47.8 299.8,47.5 301.4,48.6 302.4,47.8 303.7,49.1 303.1,49.2 303.6,49.3 303.8,49.4 304.6,49.5 306.2,50.3 312.9,51.5 314.0,53.7 315.2,54.9 316.2,56.0 316.1,57.7 315.9,58.6 318.8,60.7 320.7,61.6 324.0,62.2 328.2,62.8 331.0,63.4 332.3,64.4 334.3,66.3 335.5,67.0 335.9,68.3 340.3,72.8 343.7,76.0 345.5,78.1 346.2,79.4 348.1,82.9 351.7,85.0 353.5,86.7 355.3,88.1 356.1,88.5 350.0,89.4 337.2,91.6 336.6,91.6 335.5,91.9 285.0,100.9 271.0,93.9 253.0,92.6 250.4,91.7 251.1,88.2 249.4,86.4 251.2,74.0 258.8,70.0 261.7,67.5 262.7,66.3 263.4,60.5 283.6,44.8 288.5,46.6" fill="#FAEEDA" fill-opacity="0.65" stroke="#854F0B" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="358.1,89.4 360.4,90.4 362.0,92.1 361.0,92.8 361.0,93.9 358.5,94.7 355.2,93.5 353.6,93.0 351.6,93.0 349.8,92.8 345.3,92.4 343.5,92.2 339.4,91.8 337.2,91.6 350.0,89.4 356.1,88.5 358.1,89.4" fill="#EEEDFE" fill-opacity="0.65" stroke="#534AB7" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="334.9,92.1 332.9,93.9 331.7,94.4 329.3,96.4 327.8,97.9 326.8,99.8 326.4,102.0 325.1,103.6 322.7,105.0 320.4,106.4 317.8,107.4 315.8,107.6 315.6,107.8 314.9,108.1 312.6,108.5 309.8,109.6 308.4,111.3 307.8,112.7 306.6,113.3 304.8,113.3 302.7,113.7 299.1,113.9 294.3,113.9 288.5,115.3 285.1,116.7 281.6,117.7 281.3,117.8 278.4,118.2 273.2,118.9 268.1,119.1 263.5,119.1 260.0,119.1 255.3,119.9 253.0,121.4 252.4,122.2 251.3,122.6 250.1,122.9 247.2,123.1 241.6,123.2 240.1,123.4 237.5,123.5 236.2,123.8 233.5,124.9 232.7,125.8 232.2,127.0 231.9,128.3 232.7,129.0 233.3,130.0 232.6,131.2 232.0,132.1 231.4,132.1 231.6,132.2 227.1,133.3 225.9,134.0 224.3,135.3 223.0,135.9 219.1,136.4 213.5,136.4 208.7,137.1 207.8,137.1 195.3,122.9 214.9,94.6 231.9,92.9 250.4,91.7 253.0,92.6 271.0,93.9 285.0,100.9 335.5,91.9 334.9,92.1" fill="#EEEDFE" fill-opacity="0.65" stroke="#534AB7" stroke-width="0.8" stroke-linejoin="round"/>
-              <polygon points="44.2,64.8 42.6,63.0 44.2,60.8 45.9,58.7 48.8,56.7 53.6,55.1 56.5,53.1 61.1,51.8 63.7,51.2 65.9,50.6 67.1,49.3 69.7,48.9 70.1,47.9 71.0,46.9 72.0,45.5 74.3,44.6 77.1,43.4 81.6,41.9 86.4,40.1 88.1,39.6 89.1,38.3 89.1,37.3 89.5,36.5 89.5,35.8 89.1,35.2 88.2,34.3 91.1,33.3 96.8,31.3 99.5,30.6 104.9,29.4 109.7,28.1 111.9,27.8 112.4,27.3 112.9,27.1 114.2,25.9 115.8,25.5 115.8,25.3 117.9,24.4 117.4,23.6 116.1,22.5 115.1,21.7 116.8,19.7 122.3,18.5 126.8,17.3 127.8,15.9 130.0,14.6 136.5,13.2 141.9,12.0 147.7,10.9 151.4,9.8 151.4,8.9 150.9,8.0 150.7,6.8 150.0,5.5 149.5,4.4 150.1,3.7 150.3,2.4 151.6,1.7 154.9,1.5 158.1,1.4 163.5,1.4 168.4,1.4 172.3,1.5 177.2,1.5 180.3,1.2 183.3,1.0 184.5,1.1 158.6,48.6 133.4,56.6 132.4,56.5 115.4,54.9 104.8,58.9 93.2,61.1 44.9,65.1 44.2,64.8" fill="#FCEBEB" fill-opacity="0.65" stroke="#A32D2D" stroke-width="0.8" stroke-linejoin="round"/>
-              <text x="166.8" y="119.2" fill="#0C447C" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">1</text>
-              <text x="100.5" y="78.6" fill="#085041" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">2</text>
-              <text x="174.5" y="80.9" fill="#633806" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">3</text>
-              <text x="68.5" y="151.1" fill="#3C3489" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">4</text>
-              <text x="190.1" y="61.6" fill="#712B13" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">5</text>
-              <text x="236.4" y="21.1" fill="#27500A" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">6</text>
-              <text x="227.9" y="69.9" fill="#72243E" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">7A</text>
-              <text x="230.0" y="77.5" fill="#185FA5" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">7B</text>
-              <text x="308.7" y="66.8" fill="#854F0B" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">8</text>
-              <text x="353.0" y="91.8" fill="#534AB7" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">9</text>
-              <text x="109.9" y="30.5" fill="#A32D2D" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle" opacity="0.85">10</text>
-              <circle cx="232.7" cy="78.6" r="13" fill="#c62828" opacity="0.82"/>
-              <text x="225.7" y="84.6" fill="#fff" font-size="14" font-family="Arial"><span data-icon="flame" data-size="14"></span></text>
-              <circle cx="284.7" cy="69.8" r="13" fill="#E65100" opacity="0.78"/>
-              <text x="277.7" y="75.8" fill="#fff" font-size="14" font-family="Arial"><span data-icon="flame" data-size="14"></span></text>
-              <ellipse cx="172.7" cy="46.4" rx="22" ry="14" fill="#388E3C" opacity="0.35" stroke="#1B5E20" stroke-width="1" stroke-dasharray="4,2"/>
-              <text x="172.7" y="50.4" fill="#1B5E20" font-size="7" font-weight="bold" font-family="Arial" text-anchor="middle">−2.3ha</text>
-              <rect x="0" y="158" width="362" height="22" fill="rgba(0,0,0,0.18)"/>
-              <text x="181" y="173" fill="#fff" font-size="10" font-weight="bold" font-family="Arial" text-anchor="middle">Zone 7B — Managalas Conservation Area</text>
-            </svg>
-          </div>
-
-          <div style="font-size:0.9rem;font-weight:700;color:#333;margin-bottom:9px;"><span data-icon="flame" data-size="14"></span> Active Fire Alerts</div>
-
-          <div class="alert-card">
-            <div class="alert-title">Fire Point 1</div>
-            <div class="alert-meta">
-              <span data-icon="calendar" data-size="14"></span> Detected: 12 June 2026<br>
-              🎯 Confidence: <span class="conf-high">High (87%)</span><br>
-              <span data-icon="signal" data-size="14"></span> Source: FIRMS / NASA VIIRS
-            </div>
-          </div>
-          <div class="alert-card">
-            <div class="alert-title">Fire Point 2</div>
-            <div class="alert-meta">
-              <span data-icon="calendar" data-size="14"></span> Detected: 11 June 2026<br>
-              🎯 Confidence: <span class="conf-med">Medium (61%)</span><br>
-              <span data-icon="signal" data-size="14"></span> Source: FIRMS / NASA VIIRS
-            </div>
-          </div>
-
-          <div style="font-size:0.9rem;font-weight:700;color:#333;margin:14px 0 9px;"><span data-icon="tree" data-size="14"></span> Forest Cover Change</div>
-
-          <div class="alert-card forest">
-            <div class="alert-title">Deforestation Alert — Grid 7B-04</div>
-            <div class="alert-meta">
-              <span data-icon="linechart" data-size="14"></span> 2.3 ha loss detected<br>
-              <span data-icon="calendar" data-size="14"></span> Period: May – June 2026<br>
-              <span data-icon="signal" data-size="14"></span> Source: Global Forest Watch
-            </div>
-          </div>
-
-          <div style="margin-top:16px;">
-            <button class="btn-primary" onclick="toast('Alert reported — thank you')">Report This Alert</button>
-          </div>
+        <div class="p14" id="alertsContent">
+          <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
         </div>
       </div>
     </div>
 
+    <!-- ══════════════════════════════════════
+         SCREEN: DISTURBANCE FIELD VERIFICATION
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-disturb-verify">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div>
+          <div class="bar-title">Verify Disturbance</div>
+          <div class="bar-subtitle">On-site evidence record</div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" id="disturbVerifyContent">
+          <div style="padding:30px 20px;text-align:center;color:#888;">No disturbance selected.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- (legacy static alerts markup removed — replaced by the dynamic inbox above) -->
     <!-- ══════════════════════════════════════
          SCREEN: MEETINGS LIST
     ══════════════════════════════════════ -->
@@ -5705,7 +5652,7 @@ const ALL_SCREENS = [
   'screen-sdm','screen-facility','screen-facilities','screen-facility-register','screen-facility-approve',
   'screen-met-stations','screen-met-register','screen-met-approve','screen-met-record',
   'screen-activity-calendar','screen-cal-add','screen-cal-report','screen-freemap','screen-livemap',
-  'screen-alerts',
+  'screen-alerts','screen-disturb-verify',
   'screen-meetings','screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3',
   'screen-meeting-detail','screen-meeting-active',
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
@@ -5759,6 +5706,7 @@ function showScreen(id) {
   if (id === 'screen-met-approve') initMetApprove();
   if (id === 'screen-pheno-approve') initPhenoApprove();
   if (id === 'screen-dashboard') renderDashboardStatus();
+  if (id === 'screen-alerts') initDisturbances();
 }
 
 /* Navigate, pushing to history */
@@ -7001,7 +6949,30 @@ function _statePill(s) {
   return { color:'#2E7D32', label:'Done & sent' };
 }
 
+/* Opening-page disturbance strip: a quiet traffic-light line for alerts
+   awaiting this clan's verification. No flashing, dashboard only. */
+function renderDashDisturb(){
+  var el=document.getElementById('dashDisturb'); if(!el) return;
+  var mine=myClan(), isCoord=!!window._coordSecret;
+  getAllRecords('disturbances', function(rows){
+    var myOpen=rows.filter(function(r){ return r.status==='open' && r.owner_clan===mine && mine; });
+    var triage=rows.filter(function(r){ return r.status==='open' && !r.owner_clan; });
+    var hiMine=myOpen.filter(function(r){ return r.priority==='high'; }).length;
+    if(myOpen.length===0 && !(isCoord && triage.length)){ el.innerHTML=''; return; }
+    var col = (hiMine>0||myOpen.length>0) ? '#C62828' : '#E65100';
+    var bg  = (hiMine>0||myOpen.length>0) ? '#FFEBEE' : '#FFF3E0';
+    var txt;
+    if(myOpen.length>0) txt=myOpen.length+' disturbance'+(myOpen.length>1?'s':'')+' to verify'+(hiMine>0?(' · '+hiMine+' priority'):'');
+    else txt=triage.length+' disturbance'+(triage.length>1?'s':'')+' to triage';
+    var h='<div onclick="bottomNav(\'alerts\')" style="display:flex;align-items:center;gap:9px;padding:9px 13px;border-radius:12px;background:'+bg+';border:1px solid '+col+'33;cursor:pointer;">';
+    h+='<span style="display:flex;color:'+col+';">'+icon('warning',18)+'</span>';
+    h+='<span style="flex:1;font-size:0.82rem;font-weight:700;color:'+col+';">'+txt+'</span>';
+    h+='<span style="font-size:0.7rem;color:'+col+';font-weight:700;">Verify ›</span></div>';
+    el.innerHTML=h; hydrateIcons(el);
+  });
+}
 function renderDashboardStatus() {
+  renderDashDisturb();
   var el = document.getElementById('dashStatus');
   if (!el) return;
   var clan = myClan();
@@ -7498,6 +7469,7 @@ function liveMapPlotData(){
   getAllRecords('met_stations',function(ms){
   getAllRecords('trees',function(tr){
   getAllRecords('freemap',function(fm){
+  getAllRecords('disturbances',function(dz){
     ws.forEach(function(r){ var la=parseFloat(r.lat),lo=parseFloat(r.lng); if(la&&lo) add(_mk(la,lo,'#0277BD',r.name,'Water · '+(wsTypeMeta(r.source_type).label)),la,lo); });
     fc.forEach(function(r){ var la=parseFloat(r.lat),lo=parseFloat(r.lng); if(la&&lo) add(_mk(la,lo,'#283593',r.name,'Facility · '+(facTypeMeta(r.facility_type).label)),la,lo); });
     ms.forEach(function(r){ var la=parseFloat(r.lat),lo=parseFloat(r.lng); if(la&&lo) add(_mk(la,lo,'#37474F',r.name,'Instrument · '+(metTypeMeta(r.met_type).label)),la,lo); });
@@ -7506,9 +7478,383 @@ function liveMapPlotData(){
       if(r.map_type==='line' && r.points && r.points.length>1){ var ll=r.points.map(function(p){return [p.lat,p.lon];}); var pl=L.polyline(ll,{color:'#00695C',weight:4,opacity:0.85}); pl.bindPopup('<strong>'+r.title+'</strong><br><span style="color:#777">'+(r.category_label||'')+' · ~'+r.length_m+' m</span>'); pl.addTo(_dataLayer); ll.forEach(function(c){bounds.push(c);}); }
       else if(r.points && r.points[0]){ var p=r.points[0]; add(_mk(p.lat,p.lon,'#00695C',r.title,(r.category_label||'')),p.lat,p.lon); }
     });
+    /* Disturbance alerts — triangular warning markers, coloured by status */
+    dz.forEach(function(r){
+      var la=parseFloat(r.lat),lo=parseFloat(r.lng); if(!la||!lo) return;
+      var dm=distKindMeta(r.kind); var open=(r.status==='open');
+      var col = open ? '#C62828' : (r.status==='verified' ? '#2E7D32' : '#757575');
+      var m=L.marker([la,lo],{icon:L.divIcon({className:'',html:'<div style="width:22px;height:22px;transform:translate(-11px,-11px);background:'+col+';border:2px solid #fff;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;">!</div>'})});
+      m.bindPopup('<strong>'+dm.label+'</strong>'+(r.area_ha?(' · '+r.area_ha+' ha'):'')+'<br><span style="color:#777">'+(open?'Awaiting verification':(r.status==='verified'?('Verified — '+distOutcomeMeta((r.verify||{}).outcome).label):'Closed'))+'</span><br><span style="color:#999;font-size:0.72rem;">'+(r.source||'')+' · '+(r.detected_date||'')+'</span>');
+      m.addTo(_dataLayer); bounds.push([la,lo]);
+    });
     /* Only auto-fit to data when the boundary (which sets the wider default view) isn't loaded */
     if(!_mcaBoundary && bounds.length>0){ try{ _liveMap.fitBounds(bounds,{padding:[40,40],maxZoom:14}); }catch(e){} }
-  });});});});});
+  });});});});});});
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   DISTURBANCE VERIFICATION  — satellite-detected fires, landslides and
+   forest clearance, routed to the owning clan for on-site field
+   verification. Same registry-sync rails as the other modules: alerts
+   are created server-side (NASA FIRMS / Global Forest Watch feed) or by
+   a coordinator, pulled down on sync, verified in the field with hard
+   evidence, and the result synced back up.
+   ════════════════════════════════════════════════════════════════════ */
+var DIST_KINDS = {
+  fire:      { label:'Fire',             icon:'flame',   color:'#C62828' },
+  clearance: { label:'Forest clearance', icon:'tree',    color:'#5D4037' },
+  landslide: { label:'Landslide',        icon:'warning', color:'#6D4C41' },
+  flood:     { label:'Flood / washout',  icon:'cloudrain', color:'#0277BD' },
+  other:     { label:'Other disturbance',icon:'warning', color:'#757575' }
+};
+function distKindMeta(k){ return DIST_KINDS[k] || DIST_KINDS.other; }
+var DIST_OUTCOMES = {
+  confirmed:   { label:'Confirmed present',   color:'#C62828' },
+  not_found:   { label:'Not found on ground', color:'#2E7D32' },
+  inconclusive:{ label:'Inconclusive',        color:'#E65100' },
+  unreachable: { label:'Could not reach safely', color:'#757575' }
+};
+function distOutcomeMeta(o){ return DIST_OUTCOMES[o] || { label:'—', color:'#999' }; }
+var DIST_CAUSES = {
+  natural: 'Natural (fire / landslide / flood)',
+  human:   'Human activity (garden / logging / road)',
+  unclear: 'Unclear — needs follow-up'
+};
+var DIST_AREA_THRESHOLD_HA = 2; /* clearances at or above this must be verified */
+
+/* ── Point-in-polygon router ──────────────────────────────────────────
+   Routes a lat/lng to its owning clan using approved clan-boundary
+   polygons captured through the freeform mapping module. Until clan
+   polygons exist, everything falls through to the coordinator triage
+   queue (owner_clan = null), so nothing is blocked. */
+function _pointInRing(lat, lng, ring){
+  /* ring: array of [lng,lat] (GeoJSON order) OR {lat,lon} points */
+  var inside=false, n=ring.length;
+  for(var i=0,j=n-1;i<n;j=i++){
+    var xi,yi,xj,yj;
+    if(Array.isArray(ring[i])){ xi=ring[i][0]; yi=ring[i][1]; xj=ring[j][0]; yj=ring[j][1]; }
+    else { xi=ring[i].lon; yi=ring[i].lat; xj=ring[j].lon; yj=ring[j].lat; }
+    var intersect = ((yi>lat)!==(yj>lat)) && (lng < (xj-xi)*(lat-yi)/((yj-yi)||1e-12)+xi);
+    if(intersect) inside=!inside;
+  }
+  return inside;
+}
+/* Clan polygons = approved freemap records categorised as clan boundary,
+   mapped as a closed line (3+ points). Cached once per routing pass. */
+function loadClanPolygons(cb){
+  getAllRecords('freemap', function(rows){
+    var polys=[];
+    rows.forEach(function(r){
+      /* 'boundary' = the freeform mapping "Clan boundary" category. Freemap
+         has no approval step today, so an un-statused boundary is usable;
+         if an approval flow is added later, a 'rejected' one is excluded. */
+      if(r.category==='boundary' && r.status!=='rejected' && r.points && r.points.length>=3 && r.clan){
+        polys.push({ clan:r.clan, zone:r.zone||'', ring:r.points.slice() });
+      }
+    });
+    cb(polys);
+  });
+}
+function routeDisturbance(lat, lng, cb){
+  lat=parseFloat(lat); lng=parseFloat(lng);
+  loadClanPolygons(function(polys){
+    for(var i=0;i<polys.length;i++){
+      if(_pointInRing(lat, lng, polys[i].ring)){ cb({ clan:polys[i].clan, zone:polys[i].zone, routed_by:'boundary' }); return; }
+    }
+    cb({ clan:null, zone:'', routed_by:'triage' }); /* no polygon matched → coordinator triage */
+  });
+}
+
+/* ── Registry record + sync (mirrors the water-source pattern) ── */
+function distRegistryRecord(r){
+  return { uid:r.uid, source:r.source, kind:r.kind, detected_date:r.detected_date,
+    lat:r.lat, lng:r.lng, area_ha:(r.area_ha!=null?r.area_ha:null), confidence:r.confidence||null,
+    detail:r.detail||'', owner_clan:r.owner_clan||null, zone:r.zone||'', routed_by:r.routed_by||'',
+    priority:r.priority||'normal', status:r.status||'open', verify:r.verify||null,
+    created_date:r.created_date||null, created_by:r.created_by||null };
+}
+function syncDisturbancesFromServer(cb){
+  if(!UPLOAD_ENDPOINT||!navigator.onLine){ if(cb)cb(false); return; }
+  fetch(UPLOAD_ENDPOINT+'?action=disturbances')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d||d.status!=='ok'||!d.disturbances){ if(cb)cb(false); return; }
+      getAllRecords('disturbances', function(localRows){
+        var byUid={}; localRows.forEach(function(r){ if(r.uid) byUid[r.uid]=r; });
+        var pending=d.disturbances.slice();
+        var next=function(){
+          if(pending.length===0){ if(cb)cb(true); return; }
+          var sr=pending.shift(); if(!sr.uid){ next(); return; }
+          var local=byUid[sr.uid];
+          if(local){
+            /* Server owns the alert facts + routing; never clobber a local
+               unsynced verification that hasn't reached the server yet. */
+            ['source','kind','detected_date','lat','lng','area_ha','confidence','detail','owner_clan','zone','routed_by','priority'].forEach(function(k){ local[k]=sr[k]; });
+            if(sr.verify && !(local.verify && local.synced===false)){ local.verify=sr.verify; local.status=sr.status; }
+            else if(!local.verify){ local.status=sr.status; }
+            updateRecord('disturbances', local, function(){ next(); });
+          } else {
+            sr.survey_type='disturbance'; if(!sr.status) sr.status='open';
+            /* saveRecord force-sets synced=false; the alert/verification came
+               FROM the server, so restore synced=true so it isn't re-pushed. */
+            saveRecord('disturbances', sr, function(ok, newId){ sr.id=newId; sr.synced=true; updateRecord('disturbances', sr, function(){ next(); }); });
+          }
+        };
+        next();
+      });
+    })
+    .catch(function(){ if(cb)cb(false); });
+}
+/* Coordinator pushes routing/triage edits; stewards push verifications. */
+function pushDisturbances(cb){
+  if(!UPLOAD_ENDPOINT||!navigator.onLine){ if(cb)cb(false); return; }
+  getAllRecords('disturbances', function(rows){
+    var list=rows.filter(function(r){ return r.uid; }).map(distRegistryRecord);
+    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ _action:'update_disturbances', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret, disturbances:list }) })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(cb)cb(d&&d.status==='ok'); })
+      .catch(function(){ if(cb)cb(false); });
+  });
+}
+/* A steward's verification is pushed with the upload secret only (no
+   coordinator key needed) so field officers can return results. */
+function postVerification(rec, cb){
+  if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid){ if(cb)cb(false); return; }
+  fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ _action:'verify_disturbance', _secret:UPLOAD_SECRET, record:distRegistryRecord(rec) }) })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if(cb)cb(d&&d.status==='ok'); })
+    .catch(function(){ if(cb)cb(false); });
+}
+
+/* ── Inbox ── */
+function initDisturbances(){
+  renderDisturbanceInbox();
+  syncDisturbancesFromServer(function(ok){ if(ok) renderDisturbanceInbox(); });
+}
+function renderDisturbanceInbox(){
+  var c=document.getElementById('alertsContent'); if(!c) return;
+  var isCoord=!!window._coordSecret, mine=myClan();
+  getAllRecords('disturbances', function(rows){
+    var sub=document.getElementById('alertsSubtitle');
+    var myOpen=rows.filter(function(r){ return r.status==='open' && r.owner_clan===mine && mine; });
+    var triage=rows.filter(function(r){ return r.status==='open' && !r.owner_clan; });
+    var done=rows.filter(function(r){ return r.status==='verified' || r.status==='closed'; });
+    if(sub) sub.textContent = isCoord ? (triage.length+' to triage · '+rows.filter(function(r){return r.status==='open';}).length+' open') : (myOpen.length+' task'+(myOpen.length===1?'':'s')+' for '+(mine||'your clan'));
+    var h='';
+    h+='<div class="matrix-note" style="background:#FFF8E1;border-color:#FFE082;color:#8D6E00;font-size:0.76rem;">'
+      + icon('info',13)+' A <strong>disturbance</strong> is any sudden change — fire, landslide or forest clearance — flagged from satellite or reported. Field-verify it with a photo and an honest result. Record <em>what you see</em>; the cause is noted separately and is not pre-judged.</div>';
+
+    if(rows.length===0){
+      h+='<div class="card" style="padding:18px;text-align:center;color:#888;">'+icon('shieldcheck',22)+'<div style="margin-top:6px;font-size:0.85rem;">No disturbance alerts. New satellite detections will appear here after a sync.</div></div>';
+      c.innerHTML=h; hydrateIcons(c); return;
+    }
+
+    /* Steward's own clan tasks */
+    if(mine){
+      h+='<div style="font-size:0.9rem;font-weight:700;color:#333;margin:14px 0 8px;">'+icon('clipboard',15)+' Your clan’s verification tasks</div>';
+      if(myOpen.length===0) h+='<div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.76rem;">Nothing to verify right now.</div>';
+      else myOpen.sort(distSort).forEach(function(r){ h+=distCard(r, true); });
+    }
+
+    /* Coordinator triage queue */
+    if(isCoord){
+      h+='<div style="font-size:0.9rem;font-weight:700;color:#333;margin:16px 0 8px;">'+icon('split',15)+' Triage — assign to a clan '+(triage.length?('<span style="color:#C62828;">('+triage.length+')</span>'):'')+'</div>';
+      if(triage.length===0) h+='<div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.76rem;">Nothing awaiting triage. Alerts auto-route when the clan boundary is known; the rest land here.</div>';
+      else { var clans=distClanCandidates(rows); triage.sort(distSort).forEach(function(r){ h+=distTriageCard(r, clans); }); }
+    }
+
+    /* Recently resolved */
+    if(done.length){
+      h+='<div style="font-size:0.9rem;font-weight:700;color:#333;margin:16px 0 8px;">'+icon('check',15)+' Recently verified</div>';
+      done.sort(function(a,b){ return ((b.verify&&b.verify.verified_at)||'').localeCompare((a.verify&&a.verify.verified_at)||''); }).slice(0,8).forEach(function(r){ h+=distDoneCard(r); });
+    }
+    c.innerHTML=h; hydrateIcons(c);
+  });
+}
+function distSort(a,b){
+  var pa=(a.priority==='high')?0:1, pb=(b.priority==='high')?0:1;
+  if(pa!==pb) return pa-pb;
+  return (b.detected_date||'').localeCompare(a.detected_date||'');
+}
+function distClanCandidates(rows){
+  var set={}; rows.forEach(function(r){ if(r.owner_clan) set[r.owner_clan]=true; });
+  ['Afore','Itokama','Jegarata'].forEach(function(cl){ set[cl]=true; });
+  if(myClan()) set[myClan()]=true;
+  return Object.keys(set).sort();
+}
+function distBadge(r){
+  var hi=(r.priority==='high');
+  return '<span style="font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:9px;'+(hi?'color:#B71C1C;background:#FFEBEE;border:1px solid #FFCDD2;':'color:#8D6E00;background:#FFF8E1;border:1px solid #FFE082;')+'">'+(hi?'PRIORITY':'routine')+'</span>';
+}
+function distMeta(r){
+  var dm=distKindMeta(r.kind);
+  var h='<div style="font-size:0.73rem;color:#666;">'+icon('pin',12)+' '+(r.lat||'?')+', '+(r.lng||'?');
+  if(r.area_ha!=null) h+=' · <strong>'+r.area_ha+' ha</strong>'+(r.area_ha>=DIST_AREA_THRESHOLD_HA?' <span style="color:#B71C1C;">(&gt;'+DIST_AREA_THRESHOLD_HA+' ha)</span>':'');
+  h+='</div>';
+  h+='<div style="font-size:0.72rem;color:#888;">'+icon('signal',12)+' '+(r.source||'—')+(r.confidence?(' · conf. '+r.confidence):'')+' · '+icon('calendar',12)+' '+(r.detected_date||'—')+'</div>';
+  if(r.detail) h+='<div style="font-size:0.72rem;color:#999;margin-top:3px;">'+r.detail+'</div>';
+  return h;
+}
+function distCard(r, actionable){
+  var dm=distKindMeta(r.kind);
+  var h='<div class="card" style="padding:12px 14px;margin-bottom:10px;border-left:4px solid '+dm.color+';">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
+  h+='<span style="font-size:0.9rem;font-weight:700;">'+icon(dm.icon,17)+' '+dm.label+'</span>'+distBadge(r)+'</div>';
+  h+=distMeta(r);
+  if(actionable){
+    h+='<button class="btn-primary" style="background:'+dm.color+';width:100%;margin-top:10px;font-size:0.84rem;" onclick="openDisturbVerify(\''+r.uid+'\')">'+icon('walk',13)+' Verify on site</button>';
+  }
+  h+='</div>';
+  return h;
+}
+function distTriageCard(r, clans){
+  var dm=distKindMeta(r.kind);
+  var opts='<option value="">— choose clan —</option>'+clans.map(function(cl){ return '<option value="'+cl+'">'+cl+'</option>'; }).join('');
+  var h='<div class="card" style="padding:12px 14px;margin-bottom:10px;border-left:4px solid '+dm.color+';">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">';
+  h+='<span style="font-size:0.9rem;font-weight:700;">'+icon(dm.icon,17)+' '+dm.label+'</span>'+distBadge(r)+'</div>';
+  h+=distMeta(r);
+  h+='<div style="font-size:0.68rem;color:#999;margin-top:6px;">No clan boundary matched this point — assign the responsible clan.</div>';
+  h+='<div style="display:flex;gap:8px;margin-top:8px;">';
+  h+='<select id="dz-clan-'+r.uid+'" class="form-input" style="flex:2;padding:8px 10px;font-size:0.8rem;">'+opts+'</select>';
+  h+='<button class="btn-primary" style="flex:1;background:#2E7D32;padding:8px 6px;font-size:0.8rem;white-space:nowrap;" onclick="assignDisturbance(\''+r.uid+'\')">Assign</button>';
+  h+='</div></div>';
+  return h;
+}
+function distDoneCard(r){
+  var dm=distKindMeta(r.kind), v=r.verify||{}, om=distOutcomeMeta(v.outcome);
+  var h='<div class="card" style="padding:10px 13px;margin-bottom:8px;opacity:0.95;">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">';
+  h+='<span style="font-size:0.82rem;font-weight:700;">'+icon(dm.icon,15)+' '+dm.label+'</span>';
+  h+='<span style="font-size:0.68rem;font-weight:700;color:'+om.color+';">'+om.label+'</span></div>';
+  h+='<div style="font-size:0.71rem;color:#888;margin-top:3px;">'+(v.cause?(DIST_CAUSES[v.cause]||v.cause):'')+(v.verified_by?(' · '+v.verified_by):'')+(r.synced===false?' · <span style="color:#E65100;">not yet sent</span>':' · sent ✓')+'</div>';
+  if(v.photo) h+='<img src="'+v.photo+'" style="width:100%;max-height:90px;object-fit:cover;border-radius:7px;margin-top:6px;" alt="Verification photo">';
+  h+='</div>';
+  return h;
+}
+function assignDisturbance(uid){
+  var sel=document.getElementById('dz-clan-'+uid); var clan=sel?sel.value:'';
+  if(!clan){ toast('Choose a clan first.'); return; }
+  getAllRecords('disturbances', function(rows){
+    var r=rows.find(function(x){ return x.uid===uid; }); if(!r){ toast('Alert not found.'); return; }
+    r.owner_clan=clan; r.routed_by='coordinator'; r.synced=false;
+    updateRecord('disturbances', r, function(){
+      pushDisturbances(function(ok){ toast('Assigned to '+clan+(ok?' · synced ✓':' ✓')); });
+      renderDisturbanceInbox();
+    });
+  });
+}
+
+/* ── Field verification ── */
+var _activeDisturb=null, _dzOutcome=null, _dzCause=null, _dzPhoto=null, _dzArrived=false, _dzVerified=false, _dzGps=null;
+function openDisturbVerify(uid){
+  getAllRecords('disturbances', function(rows){
+    var r=rows.find(function(x){ return x.uid===uid; }); if(!r){ toast('Alert not found.'); return; }
+    _activeDisturb=r; _dzOutcome=null; _dzCause=null; _dzPhoto=null; _dzArrived=false; _dzVerified=false; _dzGps=null;
+    renderDisturbVerify();
+    nav('screen-disturb-verify');
+  });
+}
+function renderDisturbVerify(){
+  var c=document.getElementById('disturbVerifyContent'); if(!c||!_activeDisturb) return;
+  var r=_activeDisturb, dm=distKindMeta(r.kind);
+  var h='';
+  h+='<div class="card" style="padding:12px 14px;margin-bottom:12px;border-left:4px solid '+dm.color+';">';
+  h+='<div style="font-size:0.95rem;font-weight:700;">'+icon(dm.icon,18)+' '+dm.label+'</div>';
+  h+=distMeta(r)+'</div>';
+
+  /* Navigate-to-site + on-site fingerprint gate */
+  h+='<div class="nav-gate-card" id="dzNavGateCard" style="margin-bottom:12px;">';
+  h+='<div style="font-size:0.82rem;font-weight:700;color:#333;margin-bottom:6px;">'+icon('compass',14)+' Go to the site</div>';
+  h+='<button class="btn-outline" id="dzBtnArrive" style="width:100%;" onclick="dzArrive()">Simulate: I’ve reached the site ✓</button>';
+  h+='<div id="dzNavHint" style="margin-top:4px;font-size:0.72rem;color:#888;">Walk to the detection point — unlock within 50 m</div>';
+  h+='<div id="dzFpSection" style="display:none;margin-top:8px;">';
+  h+='<button class="btn-outline" id="dzFpBtn" style="width:100%;" onclick="dzVerify()"><span id="dzFpTxt">Tap to Verify Identity</span></button>';
+  h+='<div style="font-size:0.68rem;color:#999;margin-top:4px;">Your fingerprint confirms the trained steward is the one on site.</div>';
+  h+='</div></div>';
+
+  /* The verification form (revealed once on site + verified) */
+  h+='<div id="dzFormArea" style="display:none;">';
+  h+='<div class="form-group"><label class="form-label">What did you find? <span style="color:#B71C1C;">*</span></label><div id="dzOutcomeBtns" style="display:flex;flex-direction:column;gap:6px;">';
+  Object.keys(DIST_OUTCOMES).forEach(function(k){ h+='<button type="button" class="weather-pill" id="dzo-'+k+'" onclick="dzSetOutcome(\''+k+'\')" style="text-align:left;font-size:0.8rem;padding:9px 11px;">'+DIST_OUTCOMES[k].label+'</button>'; });
+  h+='</div></div>';
+  h+='<div class="form-group"><label class="form-label">Most likely cause <span style="color:#999;font-weight:400;">(what you see, not a judgement)</span></label><div style="display:flex;flex-direction:column;gap:6px;">';
+  Object.keys(DIST_CAUSES).forEach(function(k){ h+='<button type="button" class="weather-pill" id="dzc-'+k+'" onclick="dzSetCause(\''+k+'\')" style="text-align:left;font-size:0.8rem;padding:9px 11px;">'+DIST_CAUSES[k]+'</button>'; });
+  h+='</div></div>';
+  h+='<div class="form-group"><label class="form-label">Photo of the site <span style="color:#B71C1C;">*</span></label>';
+  h+='<div id="dzPhotoBox" style="width:100%;height:120px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="dzTriggerPhoto()"><div style="text-align:center;color:#999;"><div>'+icon('camera',28)+'</div><div style="font-size:0.72rem;margin-top:2px;">Tap to capture the disturbance</div></div></div>';
+  h+='<input type="file" id="dzPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="dzHandlePhoto(this)">';
+  h+='<div id="dzPhotoStatus" style="font-size:0.72rem;color:#888;margin-top:4px;">No photo taken</div></div>';
+  h+='<div class="form-group"><label class="form-label">Measured / estimated area affected <span style="color:#999;font-weight:400;">(ha, optional)</span></label>';
+  h+='<input type="number" step="0.1" min="0" id="dzArea" class="form-input" placeholder="e.g. 3.2"></div>';
+  h+='<div class="form-group"><label class="form-label">Description <span style="color:#999;font-weight:400;">(what you saw, how far it extends, any people/equipment)</span></label>';
+  h+='<textarea id="dzNotes" class="form-input" rows="3" placeholder="Describe the disturbance in your own words"></textarea></div>';
+  h+='<button class="btn-primary" style="background:'+dm.color+';width:100%;" id="dzSubmitBtn" disabled onclick="submitDisturbVerify()">Submit verification</button>';
+  h+='<p style="font-size:0.68rem;color:#999;margin-top:6px;text-align:center;">Record locks after sending. GPS, time and your fingerprint are attached as evidence.</p>';
+  h+='</div>';
+  c.innerHTML=h; hydrateIcons(c);
+}
+function dzArrive(){
+  var btn=document.getElementById('dzBtnArrive'); btn.disabled=true; btn.innerHTML=icon('pin',13)+' Getting GPS…'; hydrateIcons(btn.parentNode);
+  captureGPS(function(gps,err){
+    _dzArrived=true; _dzGps=gps||null;
+    document.getElementById('dzNavGateCard').classList.add('arrived');
+    document.getElementById('dzNavHint').textContent = gps ? ('✓ On site ('+gps.lat+', '+gps.lng+' ±'+gps.accuracy+'m) — verify identity') : ('✓ On site (GPS: '+err+') — verify identity');
+    btn.textContent = gps ? '✓ Arrived — GPS recorded' : '✓ Arrived (no GPS)';
+    document.getElementById('dzFpSection').style.display='block';
+    dzCheckReady();
+  });
+}
+function dzVerify(){
+  if(_dzVerified) return;
+  webAuthnVerify({ btnId:'dzFpBtn', txtId:'dzFpTxt', setVerified:function(v){ _dzVerified=v; }, onSuccess:function(){ document.getElementById('dzFormArea').style.display='block'; dzCheckReady(); } });
+}
+function dzSetOutcome(k){ _dzOutcome=k; ['confirmed','not_found','inconclusive','unreachable'].forEach(function(x){ var b=document.getElementById('dzo-'+x); if(b) b.classList.toggle('active', x===k); }); dzCheckReady(); }
+function dzSetCause(k){ _dzCause=k; ['natural','human','unclear'].forEach(function(x){ var b=document.getElementById('dzc-'+x); if(b) b.classList.toggle('active', x===k); }); }
+function dzTriggerPhoto(){ var inp=document.getElementById('dzPhotoInput'); if(inp) inp.click(); }
+function dzHandlePhoto(input){ var file=input.files&&input.files[0]; if(!file) return; var rd=new FileReader(); rd.onload=function(e){ _dzPhoto=e.target.result; var b=document.getElementById('dzPhotoBox'); if(b) b.innerHTML='<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;">'; var s=document.getElementById('dzPhotoStatus'); if(s){ s.textContent='✓ Photo attached'; s.style.color='#2E7D32'; } dzCheckReady(); }; rd.readAsDataURL(file); }
+function dzCheckReady(){
+  var btn=document.getElementById('dzSubmitBtn'); if(!btn) return;
+  btn.disabled = !(_dzArrived && _dzVerified && _dzOutcome && _dzPhoto);
+}
+function submitDisturbVerify(){
+  if(!_activeDisturb){ return; }
+  if(!_dzOutcome){ toast('Choose what you found.'); return; }
+  if(!_dzPhoto){ toast('A site photo is required.'); return; }
+  var areaEl=document.getElementById('dzArea'), notesEl=document.getElementById('dzNotes');
+  var r=_activeDisturb;
+  r.verify={ outcome:_dzOutcome, cause:_dzCause||null, photo:_dzPhoto,
+    gps:_dzGps, verified_at:new Date().toISOString(),
+    verified_by:(window._cachedProfile&&window._cachedProfile.stewardId)||'', clan:myClan(),
+    area_measured_ha:(areaEl&&areaEl.value)?parseFloat(areaEl.value):null,
+    notes:(notesEl&&notesEl.value||'').trim() };
+  r.status='verified'; r.synced=false;
+  getAllRecords('disturbances', function(rows){
+    var existing=rows.find(function(x){ return x.uid===r.uid; });
+    var save=existing?updateRecord:saveRecord;
+    if(existing){ existing.verify=r.verify; existing.status='verified'; existing.synced=false; }
+    var rowToSend=existing||r;
+    save('disturbances', rowToSend, function(){
+      postVerification(rowToSend, function(ok){
+        if(ok){ rowToSend.synced=true; updateRecord('disturbances', rowToSend, function(){ renderDisturbanceInbox(); renderDashDisturb(); }); }
+        toast('Verification recorded'+(ok?' · sent ✓':' — will send on sync'));
+      });
+      goBack(); renderDisturbanceInbox(); renderDashDisturb();
+    });
+  });
+}
+/* Re-send any verifications captured offline. */
+function flushUnsyncedVerifications(cb){
+  getAllRecords('disturbances', function(rows){
+    var pending=rows.filter(function(r){ return r.verify && r.synced===false; });
+    if(pending.length===0 || !navigator.onLine){ if(cb)cb(); return; }
+    var n=pending.length, left=n;
+    pending.forEach(function(r){
+      postVerification(r, function(ok){ if(ok){ r.synced=true; updateRecord('disturbances', r, function(){ if(--left===0 && cb) cb(); }); } else { if(--left===0 && cb) cb(); } });
+    });
+  });
 }
 
 /* ── Map Layer Toggles ── */
@@ -9405,8 +9751,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 11;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap'];
+var DB_VERSION = 12;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -10787,6 +11133,9 @@ function sendAllData() {
                   if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
                   toast(bundle.record_count + ' records uploaded to MCA Drive ✓');
                   if (btn) { btn.disabled = false; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
+                  /* Same moment they upload: push any held verifications and
+                     pull down freshly detected disturbance tasks. */
+                  flushUnsyncedVerifications(function(){ syncDisturbancesFromServer(function(){ renderDashDisturb(); }); });
                 } else {
                   toast('Upload error — falling back to share');
                   tryShare();

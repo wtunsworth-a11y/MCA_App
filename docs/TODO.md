@@ -70,16 +70,36 @@ this repo (assets, decisions, accounts, field protocols) are grouped at the end.
 - These roles should be reflected in the app (who sees what, whose task a
   briefing is vs. whose task the fieldwork is).
 
-### Activity calendar & advance warnings
+### Activity calendar, status page & reminders
 
-- [ ] **Activity calendar** — a schedule of when each activity is due
-      (monthly, annual, seasonal) per clan/zone, so everyone knows what is
-      coming up and nothing is missed.
-- [ ] **Advance-warning reminders** — notify the steward (and zone staff for
-      briefings) ahead of each due activity, with a **preparation checklist**:
-      e.g. charge the phone, get equipment, advise the clan elder, arrange the
-      informant/household. Timing of the advance notice to be decided per
-      activity type.
+**Decided architecture (2026-10-04):** one **unified, internal** calendar —
+no Google accounts for stewards, no external calendar dependency. The schedule
+is coordinator-defined and syncs down like the other registries.
+
+- [ ] **Unified activity calendar** — a single internal schedule of when each
+      activity is due (monthly, annual, seasonal) per clan/zone. Consolidates
+      the existing SDM monitoring days, conservation follow-ups, and the
+      monthly/annual cadence of the monitoring modules.
+- [ ] **In-app status page (home)** — the first thing a steward sees:
+      a **traffic-light summary — on target (green) / required soon (amber) /
+      overdue (red)** — with the list of what's due and the preparation
+      checklist (charge phone, get equipment, advise clan elder, arrange the
+      informant/household). Fully offline. Can start by rolling up the
+      "done this month" status we already compute per owned item, then grow as
+      the calendar is built.
+- [ ] **Notifications — PWA approach (accepted limits):**
+  - **(1) In-app alerts while open** — reliable, offline. Use fully.
+  - **(2) Best-effort background nudges (Periodic Background Sync)** — use
+        where available; **accept that it is unreliable** (throttled, needs the
+        PWA installed and occasional connectivity).
+  - Truly reliable offline, app-closed, buzz-the-phone reminders are **not**
+    possible as a PWA.
+- [ ] **Future — native wrapper for reliable alerts** — when wanted, wrap the
+      *same* web app in a **TWA (Bubblewrap) or Capacitor** shell: one codebase
+      / one system, gains Android local-alarm scheduling (WorkManager/
+      AlarmManager) for reliable offline reminders, plus Play Store install.
+- **Roles:** zone staff do the human advance-warning layer (community
+  briefings); the app's reminders back this up, they don't replace it.
 
 ---
 

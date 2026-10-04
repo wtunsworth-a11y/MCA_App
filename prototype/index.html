@@ -1878,6 +1878,10 @@ select.msel {
         <!-- This-month monitoring status — calm, static, updated on each dashboard visit -->
         <div id="dashStatus" style="margin:8px 12px 2px;"></div>
         <div class="module-grid">
+          <div class="module-tile" onclick="nav('screen-activity-calendar')">
+            <span class="module-emoji" data-icon="calendar" data-size="26"></span>
+            <span class="module-name">Activity Calendar</span>
+          </div>
           <div class="module-tile" onclick="nav('screen-patrol-stub')">
             <span class="module-emoji" data-icon="walk" data-size="26"></span>
             <span class="module-name">Patrol</span>
@@ -4366,6 +4370,106 @@ select.msel {
     </div>
 
     <!-- ══════════════════════════════════════
+         SCREEN: ACTIVITY CALENDAR (unified)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-activity-calendar">
+      <div class="top-bar" style="background:#4A148C;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Activity Calendar</div><div class="bar-subtitle">Who, where &amp; when — and whether it was done</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+            <button class="btn-outline" style="padding:6px 12px;font-size:1rem;line-height:1;border-color:#ccc;color:#555;" onclick="calShiftMonth(-1)">‹</button>
+            <div id="calMonthLabel" style="font-size:0.95rem;font-weight:800;color:#4A148C;">—</div>
+            <button class="btn-outline" style="padding:6px 12px;font-size:1rem;line-height:1;border-color:#ccc;color:#555;" onclick="calShiftMonth(1)">›</button>
+          </div>
+          <button class="btn-outline" style="width:100%;margin-bottom:12px;border-color:#4A148C;color:#4A148C;" onclick="nav('screen-cal-report')"><span data-icon="barchart" data-size="16"></span> Compliance report</button>
+          <button class="btn-primary" id="calAddBtn" style="background:#4A148C;width:100%;margin-bottom:12px;display:none;" onclick="openCalAdd()">+ Schedule activity / meeting</button>
+          <div id="calContent"><div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: SCHEDULE ACTIVITY (coordinator)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-cal-add">
+      <div class="top-bar" style="background:#4A148C;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Schedule Activity</div><div class="bar-subtitle">Add to the calendar</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div class="form-group">
+            <label class="form-label">Activity type <span style="color:#B71C1C;">*</span></label>
+            <select id="calType" class="form-input" style="padding:8px 11px;font-size:0.8rem;" onchange="calTypeChanged()">
+              <option value="meeting">Meeting</option>
+              <option value="hunter_interview">Hunter interview (monthly)</option>
+              <option value="garden_survey">Garden survey (annual)</option>
+              <option value="cashcrop_survey">Cash-crop survey (annual)</option>
+              <option value="conservation">Conservation activity</option>
+              <option value="monitoring">Monitoring (general)</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Title / description <span style="color:#B71C1C;">*</span></label>
+            <input type="text" id="calTitle" class="form-input" placeholder="e.g. Zone 7B Sub-Committee meeting">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date <span style="color:#B71C1C;">*</span></label>
+            <input type="date" id="calDate" class="form-input" style="font-size:0.85rem;padding:7px 10px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Responsible clan</label>
+            <input type="text" id="calClan" class="form-input" placeholder="e.g. Koromba (leave blank for all)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Zone</label>
+            <input type="text" id="calZone" class="form-input" placeholder="e.g. Zone 7B">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Who does it</label>
+            <div id="calWhoPills" style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="weather-pill active" id="calwho-clan_steward" onclick="calWho('clan_steward')">Clan steward</button>
+              <button class="weather-pill" id="calwho-zone_staff" onclick="calWho('zone_staff')">Zone staff</button>
+              <button class="weather-pill" id="calwho-committee" onclick="calWho('committee')">Committee</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Zone-staff community briefing required?</label>
+            <div style="display:flex;gap:6px;">
+              <button class="weather-pill" id="calbrief-y" onclick="calBrief(true)">Yes</button>
+              <button class="weather-pill active" id="calbrief-n" onclick="calBrief(false)">No</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea id="calNotes" class="form-input" style="min-height:50px;width:100%;font-size:0.78rem;" placeholder="Equipment, who to notify, agenda…"></textarea>
+          </div>
+          <button class="btn-primary" style="background:#4A148C;" onclick="submitCalEvent()">Add to Calendar</button>
+          <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: COMPLIANCE REPORT
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-cal-report">
+      <div class="top-bar" style="background:#4A148C;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Compliance Report</div><div class="bar-subtitle">Planned vs done</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div id="calReportContent"><div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
          SCREEN: WEATHER STATION RECORD
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-meteo-record">
@@ -5491,6 +5595,7 @@ const ALL_SCREENS = [
   'screen-pheno-setup','screen-pheno-plots','screen-pheno-establish','screen-pheno-inactive','screen-pheno-record','screen-pheno-approve',
   'screen-sdm','screen-facility','screen-facilities','screen-facility-register','screen-facility-approve',
   'screen-met-stations','screen-met-register','screen-met-approve','screen-met-record',
+  'screen-activity-calendar','screen-cal-add','screen-cal-report',
   'screen-alerts',
   'screen-meetings','screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3',
   'screen-meeting-detail','screen-meeting-active',
@@ -5566,6 +5671,9 @@ function nav(id) {
   if (id === 'screen-met-stations') initMetStations();
   if (id === 'screen-met-register') initRegisterMet();
   if (id === 'screen-met-approve') initMetApprove();
+  if (id === 'screen-activity-calendar') initActivityCalendar();
+  if (id === 'screen-cal-add') initCalAdd();
+  if (id === 'screen-cal-report') renderComplianceReport();
   if (id === 'screen-pheno-setup') initPheno();
   if (id === 'screen-pheno-plots') initPhenoPlots();
   if (id === 'screen-pheno-establish') initPhenoEstablish();
@@ -6835,6 +6943,196 @@ function renderDashboardStatus() {
     el.innerHTML = h;
   });});});});});});});});
 }
+
+/* ══════════════════════════════════════
+   UNIFIED ACTIVITY CALENDAR
+   Brings together recurring monitoring (derived), scheduled events and
+   meetings (calendar store), and conservation follow-ups — for one month —
+   with a who/where/when view and a planned-vs-done compliance report.
+══════════════════════════════════════ */
+var _calMonth = new Date();
+var CAL_TYPES = {
+  meeting:{label:'Meeting', icon:'people'},
+  hunter_interview:{label:'Hunter interview', icon:'eye'},
+  garden_survey:{label:'Garden survey', icon:'grain'},
+  cashcrop_survey:{label:'Cash-crop survey', icon:'coffee'},
+  conservation:{label:'Conservation', icon:'sprout'},
+  monitoring:{label:'Monitoring', icon:'clipboard'},
+  followup:{label:'Follow-up visit', icon:'clipboard'},
+  other:{label:'Activity', icon:'calendar'}
+};
+function calTypeMeta(k){ return CAL_TYPES[k] || CAL_TYPES.other; }
+var _calWho='clan_steward', _calBrief=false;
+var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function initActivityCalendar(){
+  _calMonth = new Date();
+  var addBtn = document.getElementById('calAddBtn');
+  if (addBtn) addBtn.style.display = window._coordSecret ? 'block' : 'none';
+  renderActivityCalendar();
+  syncCalendarFromServer(function(ok){ if(ok) renderActivityCalendar(); });
+}
+function calShiftMonth(d){ _calMonth = new Date(_calMonth.getFullYear(), _calMonth.getMonth()+d, 1); renderActivityCalendar(); }
+
+/* monitoring status for a given month-key, reusing linked readings */
+function _calMonitoring(mk, isFuture, isPast, data){
+  var clan = myClan();
+  function stat(items, readings, idField){
+    var owned = items.filter(function(s){ return s.status==='approved' && (s.owner_clan===clan||s.owner_clan_2===clan); });
+    var done = owned.filter(function(it){ return readings.some(function(r){ return r[idField]===it.id && (!r.clan||r.clan===clan) && r.timestamp && monthKey(new Date(r.timestamp))===mk; }); }).length;
+    return { total:owned.length, done:done };
+  }
+  var out = [
+    { name:'Water Quality', icon:'river', nav:'screen-water-setup', s:stat(data.ws,data.wr,'water_source_id') },
+    { name:'Service Delivery', icon:'clipboard', nav:'screen-sdm', s:stat(data.fc,data.fv,'facility_id') },
+    { name:'Met Stations', icon:'raingauge', nav:'screen-meteo-setup', s:stat(data.ms,data.mr,'met_station_id') }
+  ];
+  var ownedPp = data.pp.filter(function(p){ return p.status==='approved' && (p.owner_clan===clan||p.owner_clan_2===clan||!p.owner_clan); });
+  var phDone = data.ph.some(function(r){ return r.timestamp && monthKey(new Date(r.timestamp))===mk; });
+  out.push({ name:'Phenology', icon:'flower', nav:'screen-pheno-setup', s:{ total:ownedPp.length, done: phDone?ownedPp.length:0 } });
+  return out;
+}
+function _calState(done, total, isFuture, isPast){
+  if (total===0) return { color:'#9e9e9e', label:'—' };
+  if (isFuture) return { color:'#1565C0', label:'Upcoming' };
+  if (done>=total) return { color:'#2E7D32', label:'All done' };
+  if (isPast) return { color:'#B71C1C', label:(total-done)+' missed' };
+  return { color:'#E65100', label:(total-done)+' due' };
+}
+
+function renderActivityCalendar(){
+  var c = document.getElementById('calContent'); if(!c) return;
+  var mk = monthKey(_calMonth);
+  var nowMk = monthKey();
+  var isFuture = mk > nowMk, isPast = mk < nowMk;
+  document.getElementById('calMonthLabel').textContent = MONTHS[_calMonth.getMonth()] + ' ' + _calMonth.getFullYear();
+  getAllRecords('water_sources',function(ws){getAllRecords('water',function(wr){
+  getAllRecords('facilities',function(fc){getAllRecords('facility_visits',function(fv){
+  getAllRecords('met_stations',function(ms){getAllRecords('met_readings',function(mr){
+  getAllRecords('pheno_plots',function(pp){getAllRecords('phenology',function(ph){
+  getAllRecords('calendar',function(cal){getAllRecords('followups',function(fu){
+    var data={ws:ws,wr:wr,fc:fc,fv:fv,ms:ms,mr:mr,pp:pp,ph:ph};
+    var h='';
+    /* Recurring monitoring */
+    var mons = _calMonitoring(mk, isFuture, isPast, data);
+    h += '<div style="font-size:0.8rem;font-weight:800;color:#4A148C;margin:4px 2px 8px;">Monitoring (monthly)</div>';
+    mons.forEach(function(m){
+      var st=_calState(m.s.done, m.s.total, isFuture, isPast);
+      h += '<div onclick="nav(\''+m.nav+'\')" class="card" style="padding:9px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;">';
+      h += '<span style="color:#455A64;display:flex;">'+icon(m.icon,17)+'</span>';
+      h += '<span style="flex:1;font-size:0.84rem;font-weight:600;color:#333;">'+m.name+'</span>';
+      if(m.s.total>0) h += '<span style="font-size:0.72rem;color:#888;font-variant-numeric:tabular-nums;">'+m.s.done+'/'+m.s.total+'</span>';
+      h += '<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:700;color:'+st.color+';min-width:76px;justify-content:flex-end;">'+dot(st.color,9)+' '+st.label+'</span></div>';
+    });
+    /* Scheduled events (calendar store + conservation follow-ups) for this month, this clan (or all) */
+    var clan = myClan();
+    var events = [];
+    cal.forEach(function(e){ if(e.date && e.date.slice(0,7)===mk && (!e.clan || !clan || e.clan===clan)) events.push(e); });
+    fu.forEach(function(f){ var d=f.due_date||f.date; if(d && String(d).slice(0,7)===mk){ events.push({ _followup:true, activity:'followup', title:(f.activity_type||'Follow-up')+(f.site?(' — '+f.site):''), date:d, clan:f.clan||'', responsible:'clan_steward', status:f.completed?'done':'planned' }); } });
+    events.sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+
+    h += '<div style="font-size:0.8rem;font-weight:800;color:#4A148C;margin:16px 2px 8px;">Scheduled events</div>';
+    if (events.length===0){
+      h += '<div class="matrix-note" style="background:#f3e5f5;border-color:#ce93d8;color:#4A148C;">No scheduled events this month.'+(window._coordSecret?' Use “Schedule activity / meeting” to add one.':'')+'</div>';
+    } else {
+      events.forEach(function(e){
+        var tm=calTypeMeta(e.activity);
+        var day = e.date ? new Date(e.date).getDate() : '';
+        var past = e.date && e.date < new Date().toISOString().slice(0,10);
+        var stColor, stLabel;
+        if (e.status==='done'){ stColor='#2E7D32'; stLabel='Done'; }
+        else if (e.status==='cancelled'){ stColor='#9e9e9e'; stLabel='Cancelled'; }
+        else if (past){ stColor='#B71C1C'; stLabel='Missed'; }
+        else { stColor='#1565C0'; stLabel='Planned'; }
+        h += '<div class="card" style="padding:10px 14px;margin-bottom:8px;">';
+        h += '<div style="display:flex;align-items:center;gap:10px;">';
+        h += '<div style="text-align:center;min-width:34px;"><div style="font-size:1.1rem;font-weight:800;color:#4A148C;line-height:1;">'+day+'</div><div style="font-size:0.58rem;color:#999;text-transform:uppercase;">'+MONTHS[_calMonth.getMonth()].slice(0,3)+'</div></div>';
+        h += '<span style="color:#4A148C;display:flex;">'+icon(tm.icon,17)+'</span>';
+        h += '<div style="flex:1;"><div style="font-size:0.83rem;font-weight:700;color:#333;">'+(e.title||tm.label)+'</div>';
+        var meta=[]; if(e.clan) meta.push(e.clan); if(e.zone) meta.push(e.zone); if(e.responsible) meta.push(({clan_steward:'clan steward',zone_staff:'zone staff',committee:'committee'})[e.responsible]||e.responsible);
+        h += '<div style="font-size:0.7rem;color:#888;">'+tm.label+(meta.length?(' · '+meta.join(' · ')):'')+'</div></div>';
+        h += '<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.7rem;font-weight:700;color:'+stColor+';">'+dot(stColor,8)+' '+stLabel+'</span>';
+        h += '</div>';
+        if (e.briefing_required) h += '<div style="font-size:0.68rem;color:#8a6d00;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:3px 8px;margin-top:6px;">Zone-staff briefing required beforehand'+(e.briefing_done?' · done':'')+'</div>';
+        if (!e._followup && e.status!=='done' && e.status!=='cancelled' && window._coordSecret && e.id!=null)
+          h += '<button class="btn-outline" style="margin-top:8px;width:100%;padding:6px;font-size:0.76rem;border-color:#2E7D32;color:#2E7D32;" onclick="markCalDone('+e.id+')">Mark done</button>';
+        h += '</div>';
+      });
+    }
+    c.innerHTML=h;
+  });});});});});});});});});});
+}
+
+/* ── Schedule an event ── */
+function openCalAdd(){ nav('screen-cal-add'); }
+function initCalAdd(){
+  _calWho='clan_steward'; _calBrief=false;
+  var t=document.getElementById('calType'); if(t) t.value='meeting';
+  ['calTitle','calClan','calZone','calNotes'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  var d=document.getElementById('calDate'); if(d) d.value=new Date().toISOString().slice(0,10);
+  ['clan_steward','zone_staff','committee'].forEach(function(k){ var el=document.getElementById('calwho-'+k); if(el) el.classList.toggle('active',k==='clan_steward'); });
+  document.getElementById('calbrief-y').classList.remove('active'); document.getElementById('calbrief-n').classList.add('active');
+}
+function calWho(v){ _calWho=v; ['clan_steward','zone_staff','committee'].forEach(function(k){var el=document.getElementById('calwho-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function calBrief(v){ _calBrief=v; document.getElementById('calbrief-y').classList.toggle('active',v); document.getElementById('calbrief-n').classList.toggle('active',!v); }
+function calTypeChanged(){ var t=document.getElementById('calType').value; if(t==='meeting'){ calWho('committee'); } else if(t==='hunter_interview'||t==='garden_survey'||t==='cashcrop_survey'||t==='conservation'){ calWho('clan_steward'); } }
+function submitCalEvent(){
+  var title=(document.getElementById('calTitle').value||'').trim();
+  var date=document.getElementById('calDate').value;
+  if(!title){toast('Enter a title.');return;}
+  if(!date){toast('Pick a date.');return;}
+  var data={ survey_type:'calendar_event', uid:generateRecordId('CAL'), activity:document.getElementById('calType').value, title:title, date:date, clan:(document.getElementById('calClan').value||'').trim(), zone:(document.getElementById('calZone').value||'').trim(), responsible:_calWho, briefing_required:_calBrief, briefing_done:false, status:'planned', notes:(document.getElementById('calNotes').value||'').trim(), created_by:(window._cachedProfile&&window._cachedProfile.stewardId)||'coordinator' };
+  saveRecord('calendar', data, function(){ postCalEvent(data); _calMonth=new Date(date+'T00:00:00'); toast('Added to calendar ✓'); nav('screen-activity-calendar'); });
+}
+function markCalDone(id){
+  getAllRecords('calendar', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r) return; r.status='done'; r.done_date=new Date().toISOString().slice(0,10); r.synced=false; updateRecord('calendar', r, function(){ pushCalendar(function(){}); toast('Marked done ✓'); renderActivityCalendar(); }); });
+}
+
+/* ── Compliance report ── */
+function renderComplianceReport(){
+  var c=document.getElementById('calReportContent'); if(!c) return;
+  var mk=monthKey(_calMonth); var nowMk=monthKey(); var isFuture=mk>nowMk, isPast=mk<nowMk;
+  getAllRecords('water_sources',function(ws){getAllRecords('water',function(wr){
+  getAllRecords('facilities',function(fc){getAllRecords('facility_visits',function(fv){
+  getAllRecords('met_stations',function(ms){getAllRecords('met_readings',function(mr){
+  getAllRecords('pheno_plots',function(pp){getAllRecords('phenology',function(ph){
+  getAllRecords('calendar',function(cal){getAllRecords('followups',function(fu){
+    var data={ws:ws,wr:wr,fc:fc,fv:fv,ms:ms,mr:mr,pp:pp,ph:ph};
+    var mons=_calMonitoring(mk,isFuture,isPast,data);
+    var planned=0, done=0, missed=0;
+    var rows='';
+    mons.forEach(function(m){ if(m.s.total===0) return; planned+=m.s.total; done+=m.s.done; if(isPast) missed+=(m.s.total-m.s.done); var pct=m.s.total?Math.round(m.s.done/m.s.total*100):0; rows+=complianceRow(m.icon,m.name,m.s.done,m.s.total,pct); });
+    var clan=myClan();
+    var evs=[]; cal.forEach(function(e){ if(e.date&&e.date.slice(0,7)===mk&&(!e.clan||!clan||e.clan===clan)) evs.push(e); });
+    fu.forEach(function(f){ var d=f.due_date||f.date; if(d&&String(d).slice(0,7)===mk) evs.push({activity:'followup',status:f.completed?'done':'planned',date:d}); });
+    if(evs.length){ var ed=evs.filter(function(e){return e.status==='done';}).length; planned+=evs.length; done+=ed; if(isPast) missed+=(evs.length-ed); rows+=complianceRow('calendar','Scheduled events',ed,evs.length, evs.length?Math.round(ed/evs.length*100):0); }
+
+    var overallPct = planned?Math.round(done/planned*100):0;
+    var barColor = overallPct>=80?'#2E7D32':overallPct>=50?'#E65100':'#B71C1C';
+    var h='<div style="font-size:0.95rem;font-weight:800;color:#4A148C;margin-bottom:4px;">'+MONTHS[_calMonth.getMonth()]+' '+_calMonth.getFullYear()+'</div>';
+    h+='<div style="font-size:0.75rem;color:#777;margin-bottom:10px;">For '+(clan||'your clan')+(isFuture?' · upcoming month':isPast?' · past month':' · in progress')+'</div>';
+    h+='<div class="card" style="padding:14px 16px;margin-bottom:12px;text-align:center;">';
+    h+='<div style="font-size:2rem;font-weight:800;color:'+barColor+';">'+overallPct+'%</div>';
+    h+='<div style="font-size:0.78rem;color:#555;">'+done+' of '+planned+' activities completed'+(missed?(' · '+missed+' missed'):'')+'</div>';
+    h+='<div style="height:8px;background:#eee;border-radius:5px;margin-top:10px;overflow:hidden;"><div style="height:100%;width:'+overallPct+'%;background:'+barColor+';"></div></div></div>';
+    if(!rows) h+='<div class="matrix-note">Nothing scheduled or assigned for this month.</div>';
+    else { h+='<div style="font-size:0.8rem;font-weight:800;color:#4A148C;margin:4px 2px 8px;">By activity</div>'+rows; }
+    c.innerHTML=h;
+  });});});});});});});});});});
+}
+function complianceRow(ic,name,done,total,pct){
+  var col=pct>=80?'#2E7D32':pct>=50?'#E65100':'#B71C1C';
+  var h='<div class="card" style="padding:10px 14px;margin-bottom:6px;">';
+  h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="color:#455A64;display:flex;">'+icon(ic,16)+'</span><span style="flex:1;font-size:0.82rem;font-weight:600;">'+name+'</span><span style="font-size:0.78rem;font-weight:700;color:'+col+';">'+done+'/'+total+' · '+pct+'%</span></div>';
+  h+='<div style="height:6px;background:#eee;border-radius:4px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:'+col+';"></div></div></div>';
+  return h;
+}
+
+/* ── Central sync ── */
+function calRegistryRecord(r){ return { uid:r.uid, activity:r.activity, title:r.title, date:r.date, clan:r.clan||'', zone:r.zone||'', responsible:r.responsible||'', briefing_required:!!r.briefing_required, briefing_done:!!r.briefing_done, status:r.status||'planned', done_date:r.done_date||null, notes:r.notes||'', created_by:r.created_by||'' }; }
+function postCalEvent(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'register_calendar_event',_secret:UPLOAD_SECRET,record:calRegistryRecord(rec)})}).catch(function(){}); }
+function pushCalendar(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('calendar',function(rows){ var list=rows.filter(function(r){return r.uid;}).map(calRegistryRecord); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'update_calendar',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,calendar:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
+function syncCalendarFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=calendar').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.calendar){if(cb)cb(false);return;} getAllRecords('calendar',function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pend=d.calendar.slice(); var next=function(){ if(pend.length===0){if(cb)cb(true);return;} var sr=pend.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['activity','title','date','clan','zone','responsible','briefing_required','briefing_done','status','done_date','notes'].forEach(function(k){local[k]=sr[k];}); updateRecord('calendar',local,function(){next();}); } else { sr.survey_type='calendar_event'; sr.synced=true; saveRecord('calendar',sr,function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
 
 /* ── Map Layer Toggles ── */
 function toggleLayer(id) {
@@ -8730,8 +9028,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 9;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings'];
+var DB_VERSION = 10;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }

@@ -51,7 +51,7 @@ var REPORT_EMAILS     = ['w.unsworth@landscapealliance.org'];
  *
  * The key protects: update_zones, update_topics, grant_authorisation,
  * certify_trainer, update_water_sources, update_facilities, update_met_stations,
- * update_pheno_plots.
+ * update_pheno_plots, update_calendar.
  * It is NEVER stored in the phone app — only held in memory during a session.
  */
 function setCoordinatorSecret() {
@@ -312,6 +312,42 @@ function registerPhenoPlot(record) {
 function updatePhenoPlots(list) {
   savePhenoPlotsList(list || []);
   return { status: 'ok', message: 'Pheno plot registry saved', count: (list || []).length };
+}
+
+/* ─── Activity calendar ────────────────────────────────────────────────
+ * _calendar.json in Drive: scheduled activities/meetings, keyed by uid. */
+function loadCalendarList() {
+  try {
+    var folder = getDataFolder();
+    var files  = folder.getFilesByName('_calendar.json');
+    if (files.hasNext()) { return JSON.parse(files.next().getBlob().getDataAsString()) || []; }
+  } catch(e) { /* fall through */ }
+  return [];
+}
+function saveCalendarList(list) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_calendar.json');
+  var json   = JSON.stringify(list || [], null, 2);
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_calendar.json', json, MimeType.PLAIN_TEXT); }
+}
+function getCalendar() {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', calendar: loadCalendarList() }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function registerCalendarEvent(record) {
+  if (!record || !record.uid) { return { status: 'error', message: 'Missing calendar uid' }; }
+  var list = loadCalendarList();
+  var idx = -1;
+  for (var i = 0; i < list.length; i++) { if (list[i].uid === record.uid) { idx = i; break; } }
+  if (idx === -1) { list.push(record); } else { list[idx] = record; }
+  saveCalendarList(list);
+  return { status: 'ok', uid: record.uid, count: list.length };
+}
+function updateCalendar(list) {
+  saveCalendarList(list || []);
+  return { status: 'ok', message: 'Calendar saved', count: (list || []).length };
 }
 
 /* ─── Training authorisation records ───────────────────────────────── */
@@ -772,7 +808,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -875,6 +911,22 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    /* Activity calendar — schedule an event (upload secret only) */
+    if (body._action === 'register_calendar_event') {
+      var calRegResult = registerCalendarEvent(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(calRegResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    /* Activity calendar — coordinator overwrite (coordinator key required) */
+    if (body._action === 'update_calendar') {
+      var calUpResult = updateCalendar(body.calendar);
+      return ContentService
+        .createTextOutput(JSON.stringify(calUpResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     /* Normal steward data upload */
     var folder = getDataFolder();
 
@@ -925,6 +977,7 @@ function doGet(e) {
   if (action === 'facilities') { return getFacilities(); }
   if (action === 'met_stations') { return getMetStations(); }
   if (action === 'pheno_plots') { return getPhenoPlots(); }
+  if (action === 'calendar') { return getCalendar(); }
 
   if (action === 'authorisations') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';

@@ -62,6 +62,27 @@ this repo (assets, decisions, accounts, field protocols) are grouped at the end.
 > used for water sources, facilities, met instruments and trees, so ownership
 > and anti-duplication carry over.
 
+### Monthly work/pay cycle (built 2026-10-04)
+
+- [x] **Two-part status — done AND sent** — status and compliance now
+      distinguish *completed* (recorded on device) from *uploaded* (sent to the
+      backend). The dashboard shows "Done & sent" vs "N to send"; the compliance
+      report shows done vs uploaded and a pay-ready / hold verdict.
+- [x] **Cycle deadlines** — complete by the **25th**, upload by the **28th**,
+      pay processed by the **5th** of the following month (constants in
+      `CYCLE`). Shown on the status card and in the compliance report so pay
+      isn't held up to mid-month.
+  - [ ] **Make deadlines coordinator-configurable** (currently fixed) and add
+        an **on-time vs late** flag (completed/uploaded before vs after the
+        cutoff), not just a count.
+
+### Reward / incentive (idea — 2026-10-04)
+
+- [ ] **On-time reward** — a zone that completes *and uploads* all its tasks on
+      time could earn the right to **host the next combined forum** (within the
+      existing alternate East/West hosting framework). Drive off the compliance
+      report's pay-ready/on-time status per zone.
+
 ### Roles & community preparation
 
 - **Clan stewards** do the fieldwork (the surveys/interviews/monitoring above).

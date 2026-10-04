@@ -6873,27 +6873,33 @@ function syncMetFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb
 ══════════════════════════════════════ */
 function _prevMonthKey() { var d = new Date(); return monthKey(new Date(d.getFullYear(), d.getMonth()-1, 1)); }
 
+/* Monthly work/pay cycle deadlines (day-of-month) */
+var CYCLE = { completeBy: 25, uploadBy: 28, payByNextMonth: 5 };
+
+/* Completed AND sent (uploaded) status, for the current month, per module. */
 function _linkedStatus(items, readings, idField, clan) {
   var thisMk = monthKey();
   var lastMk = _prevMonthKey();
   var now = new Date();
   var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   var owned = items.filter(function(s){ return s.status==='approved' && (s.owner_clan===clan || s.owner_clan_2===clan); });
-  var done=0, due=0, overdue=0;
+  var done=0, due=0, overdue=0, sent=0;
   owned.forEach(function(it){
-    var inMonth = function(mk){ return readings.some(function(r){ return r[idField]===it.id && (!r.clan || r.clan===clan) && r.timestamp && monthKey(new Date(r.timestamp))===mk; }); };
-    if (inMonth(thisMk)) { done++; return; }
+    var mRds = readings.filter(function(r){ return r[idField]===it.id && (!r.clan || r.clan===clan) && r.timestamp && monthKey(new Date(r.timestamp))===thisMk; });
+    if (mRds.length>0) { done++; if (mRds.some(function(r){ return r.synced; })) sent++; return; }
+    var inLast = readings.some(function(r){ return r[idField]===it.id && (!r.clan||r.clan===clan) && r.timestamp && monthKey(new Date(r.timestamp))===lastMk; });
     var approvedBefore = it.approved_date && (new Date(it.approved_date) < monthStart);
-    if (approvedBefore && !inMonth(lastMk)) overdue++; else due++;
+    if (approvedBefore && !inLast) overdue++; else due++;
   });
-  return { total: owned.length, done:done, due:due, overdue:overdue };
+  return { total: owned.length, done:done, due:due, overdue:overdue, sent:sent, unsent: done-sent };
 }
 
 function _statePill(s) {
   if (s.total === 0)   return { color:'#9e9e9e', label:'None assigned' };
   if (s.overdue > 0)   return { color:'#B71C1C', label: s.overdue + ' overdue' };
   if (s.due > 0)       return { color:'#E65100', label: s.due + ' due' };
-  return { color:'#2E7D32', label:'All done' };
+  if (s.unsent > 0)    return { color:'#E65100', label: s.unsent + ' to send' };
+  return { color:'#2E7D32', label:'Done & sent' };
 }
 
 function renderDashboardStatus() {
@@ -6915,9 +6921,11 @@ function renderDashboardStatus() {
     ];
     /* phenology: readings aren't per-plant, so status is "did I observe this month" */
     var ownedPp = pp.filter(function(p){ return p.status==='approved' && (p.owner_clan===clan || p.owner_clan_2===clan || !p.owner_clan); });
-    var phenoDone = ph.some(function(r){ return r.timestamp && monthKey(new Date(r.timestamp))===monthKey(); });
+    var phThis = ph.filter(function(r){ return r.timestamp && monthKey(new Date(r.timestamp))===monthKey(); });
+    var phenoDone = phThis.length>0;
+    var phenoSent = phThis.some(function(r){ return r.synced; });
     mods.push({ name:'Phenology', icon:'flower', nav:'screen-pheno-setup',
-      s:{ total:ownedPp.length, done: phenoDone?ownedPp.length:0, due:(ownedPp.length>0 && !phenoDone)?ownedPp.length:0, overdue:0 } });
+      s:{ total:ownedPp.length, done: phenoDone?ownedPp.length:0, due:(ownedPp.length>0 && !phenoDone)?ownedPp.length:0, overdue:0, sent: phenoSent?ownedPp.length:0, unsent: phenoDone?(phenoSent?0:ownedPp.length):0 } });
 
     var assigned = mods.filter(function(m){ return m.s.total>0; });
     if (assigned.length === 0) {
@@ -6927,15 +6935,19 @@ function renderDashboardStatus() {
       return;
     }
 
-    var totOver = mods.reduce(function(n,m){return n+m.s.overdue;},0);
-    var totDue  = mods.reduce(function(n,m){return n+m.s.due;},0);
+    var totOver   = mods.reduce(function(n,m){return n+m.s.overdue;},0);
+    var totDue    = mods.reduce(function(n,m){return n+m.s.due;},0);
+    var totUnsent = mods.reduce(function(n,m){return n+(m.s.unsent||0);},0);
     var head, headColor, headBg;
     if (totOver>0) { head = totOver+' overdue'+(totDue?(' · '+totDue+' due'):''); headColor='#B71C1C'; headBg='#FFEBEE'; }
     else if (totDue>0) { head = totDue+' task'+(totDue>1?'s':'')+' due this month'; headColor='#E65100'; headBg='#FFF3E0'; }
-    else { head = 'On target — all done this month'; headColor='#2E7D32'; headBg='#E8F5E9'; }
+    else if (totUnsent>0) { head = 'All done — '+totUnsent+' not yet sent'; headColor='#E65100'; headBg='#FFF3E0'; }
+    else { head = 'On target — done & sent'; headColor='#2E7D32'; headBg='#E8F5E9'; }
 
     var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-    var monLabel = months[new Date().getMonth()];
+    var now2 = new Date();
+    var monLabel = months[now2.getMonth()];
+    var nextMon = months[(now2.getMonth()+1)%12];
 
     var h = '<div class="card" style="padding:0;overflow:hidden;border:1px solid #e3e3e3;">';
     h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;background:'+headBg+';">';
@@ -6949,9 +6961,13 @@ function renderDashboardStatus() {
       h += '<span style="color:#455A64;display:flex;">'+icon(m.icon,18)+'</span>';
       h += '<span style="flex:1;font-size:0.85rem;font-weight:600;color:#333;">'+m.name+'</span>';
       if (countTxt) h += '<span style="font-size:0.72rem;color:#888;font-variant-numeric:tabular-nums;">'+countTxt+'</span>';
-      h += '<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:700;color:'+pill.color+';min-width:84px;justify-content:flex-end;">'+dot(pill.color,9)+' '+pill.label+'</span>';
+      h += '<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:700;color:'+pill.color+';min-width:92px;justify-content:flex-end;">'+dot(pill.color,9)+' '+pill.label+'</span>';
       h += '</div>';
     });
+    if (totUnsent>0) {
+      h += '<div onclick="nav(\'screen-data-export\')" style="padding:8px 14px;border-top:1px solid #f0f0f0;background:#FFFDF6;cursor:pointer;font-size:0.72rem;color:#8a6d00;display:flex;align-items:center;gap:6px;"><span style="display:flex;">'+icon('upload',14)+'</span> '+totUnsent+' recorded, not yet sent — tap to send</div>';
+    }
+    h += '<div style="padding:7px 14px;border-top:1px solid #f0f0f0;font-size:0.66rem;color:#999;text-align:center;">Complete by '+CYCLE.completeBy+' '+monLabel.slice(0,3)+' · upload by '+CYCLE.uploadBy+' '+monLabel.slice(0,3)+' · pay by '+CYCLE.payByNextMonth+' '+nextMon.slice(0,3)+'</div>';
     h += '</div>';
     el.innerHTML = h;
   });});});});});});});});
@@ -6992,8 +7008,9 @@ function _calMonitoring(mk, isFuture, isPast, data){
   var clan = myClan();
   function stat(items, readings, idField){
     var owned = items.filter(function(s){ return s.status==='approved' && (s.owner_clan===clan||s.owner_clan_2===clan); });
-    var done = owned.filter(function(it){ return readings.some(function(r){ return r[idField]===it.id && (!r.clan||r.clan===clan) && r.timestamp && monthKey(new Date(r.timestamp))===mk; }); }).length;
-    return { total:owned.length, done:done };
+    var done=0, sent=0;
+    owned.forEach(function(it){ var m=readings.filter(function(r){ return r[idField]===it.id && (!r.clan||r.clan===clan) && r.timestamp && monthKey(new Date(r.timestamp))===mk; }); if(m.length){ done++; if(m.some(function(r){return r.synced;})) sent++; } });
+    return { total:owned.length, done:done, sent:sent };
   }
   var out = [
     { name:'Water Quality', icon:'river', nav:'screen-water-setup', s:stat(data.ws,data.wr,'water_source_id') },
@@ -7001,8 +7018,8 @@ function _calMonitoring(mk, isFuture, isPast, data){
     { name:'Met Stations', icon:'raingauge', nav:'screen-meteo-setup', s:stat(data.ms,data.mr,'met_station_id') }
   ];
   var ownedPp = data.pp.filter(function(p){ return p.status==='approved' && (p.owner_clan===clan||p.owner_clan_2===clan||!p.owner_clan); });
-  var phDone = data.ph.some(function(r){ return r.timestamp && monthKey(new Date(r.timestamp))===mk; });
-  out.push({ name:'Phenology', icon:'flower', nav:'screen-pheno-setup', s:{ total:ownedPp.length, done: phDone?ownedPp.length:0 } });
+  var phThis = data.ph.filter(function(r){ return r.timestamp && monthKey(new Date(r.timestamp))===mk; });
+  out.push({ name:'Phenology', icon:'flower', nav:'screen-pheno-setup', s:{ total:ownedPp.length, done: phThis.length?ownedPp.length:0, sent: phThis.some(function(r){return r.synced;})?ownedPp.length:0 } });
   return out;
 }
 function _calState(done, total, isFuture, isPast){
@@ -7146,31 +7163,53 @@ function renderComplianceReport(){
   getAllRecords('calendar',function(cal){getAllRecords('followups',function(fu){
     var data={ws:ws,wr:wr,fc:fc,fv:fv,ms:ms,mr:mr,pp:pp,ph:ph};
     var mons=_calMonitoring(mk,isFuture,isPast,data);
-    var planned=0, done=0, missed=0;
+    var planned=0, done=0, sent=0, missed=0;
     var rows='';
-    mons.forEach(function(m){ if(m.s.total===0) return; planned+=m.s.total; done+=m.s.done; if(isPast) missed+=(m.s.total-m.s.done); var pct=m.s.total?Math.round(m.s.done/m.s.total*100):0; rows+=complianceRow(m.icon,m.name,m.s.done,m.s.total,pct); });
+    mons.forEach(function(m){ if(m.s.total===0) return; planned+=m.s.total; done+=m.s.done; sent+=(m.s.sent||0); if(isPast) missed+=(m.s.total-m.s.done); var pct=m.s.total?Math.round(m.s.done/m.s.total*100):0; rows+=complianceRow(m.icon,m.name,m.s.done,m.s.total,pct,m.s.sent||0); });
     var clan=myClan();
     var evs=[]; cal.forEach(function(e){ if(e.date&&e.date.slice(0,7)===mk&&(!e.clan||!clan||e.clan===clan)) evs.push(e); });
-    fu.forEach(function(f){ var d=f.due_date||f.date; if(d&&String(d).slice(0,7)===mk) evs.push({activity:'followup',status:f.completed?'done':'planned',date:d}); });
-    if(evs.length){ var ed=evs.filter(function(e){return e.status==='done';}).length; planned+=evs.length; done+=ed; if(isPast) missed+=(evs.length-ed); rows+=complianceRow('calendar','Scheduled events',ed,evs.length, evs.length?Math.round(ed/evs.length*100):0); }
+    fu.forEach(function(f){ var d=f.due_date||f.date; if(d&&String(d).slice(0,7)===mk) evs.push({activity:'followup',status:f.completed?'done':'planned',date:d,synced:true}); });
+    if(evs.length){ var ed=evs.filter(function(e){return e.status==='done';}).length; var es=evs.filter(function(e){return e.status==='done' && e.synced!==false;}).length; planned+=evs.length; done+=ed; sent+=es; if(isPast) missed+=(evs.length-ed); rows+=complianceRow('calendar','Scheduled events',ed,evs.length, evs.length?Math.round(ed/evs.length*100):0, es); }
 
     var overallPct = planned?Math.round(done/planned*100):0;
     var barColor = overallPct>=80?'#2E7D32':overallPct>=50?'#E65100':'#B71C1C';
+    var now=new Date(); var nextMon=MONTHS[(_calMonth.getMonth()+1)%12];
     var h='<div style="font-size:0.95rem;font-weight:800;color:#4A148C;margin-bottom:4px;">'+MONTHS[_calMonth.getMonth()]+' '+_calMonth.getFullYear()+'</div>';
     h+='<div style="font-size:0.75rem;color:#777;margin-bottom:10px;">For '+(clan||'your clan')+(isFuture?' · upcoming month':isPast?' · past month':' · in progress')+'</div>';
     h+='<div class="card" style="padding:14px 16px;margin-bottom:12px;text-align:center;">';
     h+='<div style="font-size:2rem;font-weight:800;color:'+barColor+';">'+overallPct+'%</div>';
-    h+='<div style="font-size:0.78rem;color:#555;">'+done+' of '+planned+' activities completed'+(missed?(' · '+missed+' missed'):'')+'</div>';
+    h+='<div style="font-size:0.78rem;color:#555;">'+done+' of '+planned+' completed · '+sent+' uploaded'+(missed?(' · '+missed+' missed'):'')+'</div>';
     h+='<div style="height:8px;background:#eee;border-radius:5px;margin-top:10px;overflow:hidden;"><div style="height:100%;width:'+overallPct+'%;background:'+barColor+';"></div></div></div>';
+
+    /* Monthly cycle — complete by 25th, upload by 28th, pay by 5th next month */
+    if (planned>0) {
+      var allDone = done>=planned, allSent = sent>=planned;
+      var payReady = allDone && allSent;
+      var pColor = payReady?'#2E7D32':(allDone?'#E65100':'#B71C1C');
+      var pBg = payReady?'#E8F5E9':'#FFF3E0';
+      var pMsg = payReady ? ('Pay-ready — process pay by '+CYCLE.payByNextMonth+' '+nextMon)
+        : (!allDone ? ((planned-done)+' still to complete (by '+CYCLE.completeBy+'th)')
+                    : ((planned-sent)+' still to upload (by '+CYCLE.uploadBy+'th)'));
+      h+='<div class="card" style="padding:0;overflow:hidden;margin-bottom:12px;">';
+      h+='<div style="padding:9px 14px;background:'+pBg+';font-size:0.8rem;font-weight:800;color:'+pColor+';display:flex;align-items:center;gap:6px;">'+dot(pColor,9)+' '+pMsg+'</div>';
+      h+='<div style="display:flex;text-align:center;font-size:0.72rem;">';
+      h+='<div style="flex:1;padding:8px 4px;border-right:1px solid #f0f0f0;"><div style="font-weight:800;color:'+(allDone?'#2E7D32':'#E65100')+';">'+done+'/'+planned+'</div><div style="color:#999;">done · by '+CYCLE.completeBy+'th</div></div>';
+      h+='<div style="flex:1;padding:8px 4px;border-right:1px solid #f0f0f0;"><div style="font-weight:800;color:'+(allSent?'#2E7D32':'#E65100')+';">'+sent+'/'+planned+'</div><div style="color:#999;">sent · by '+CYCLE.uploadBy+'th</div></div>';
+      h+='<div style="flex:1;padding:8px 4px;"><div style="font-weight:800;color:'+pColor+';">'+(payReady?'Ready':'Hold')+'</div><div style="color:#999;">pay · by '+CYCLE.payByNextMonth+' '+nextMon.slice(0,3)+'</div></div>';
+      h+='</div></div>';
+    }
+
     if(!rows) h+='<div class="matrix-note">Nothing scheduled or assigned for this month.</div>';
     else { h+='<div style="font-size:0.8rem;font-weight:800;color:#4A148C;margin:4px 2px 8px;">By activity</div>'+rows; }
     c.innerHTML=h;
   });});});});});});});});});});
 }
-function complianceRow(ic,name,done,total,pct){
+function complianceRow(ic,name,done,total,pct,sent){
   var col=pct>=80?'#2E7D32':pct>=50?'#E65100':'#B71C1C';
+  var sentTxt = (sent!=null) ? (' · '+sent+' sent') : '';
+  var sentCol = (sent!=null && sent>=done && done>0) ? '#2E7D32' : (sent!=null && sent<done ? '#E65100' : '#999');
   var h='<div class="card" style="padding:10px 14px;margin-bottom:6px;">';
-  h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="color:#455A64;display:flex;">'+icon(ic,16)+'</span><span style="flex:1;font-size:0.82rem;font-weight:600;">'+name+'</span><span style="font-size:0.78rem;font-weight:700;color:'+col+';">'+done+'/'+total+' · '+pct+'%</span></div>';
+  h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="color:#455A64;display:flex;">'+icon(ic,16)+'</span><span style="flex:1;font-size:0.82rem;font-weight:600;">'+name+'</span><span style="font-size:0.76rem;font-weight:700;color:'+col+';">'+done+'/'+total+' · '+pct+'%<span style="font-weight:600;color:'+sentCol+';">'+sentTxt+'</span></span></div>';
   h+='<div style="height:6px;background:#eee;border-radius:4px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:'+col+';"></div></div></div>';
   return h;
 }

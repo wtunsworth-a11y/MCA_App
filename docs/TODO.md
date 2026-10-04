@@ -1,72 +1,127 @@
-# MCA App — To-Do List (Pending Actions)
+# MCA App — To-Do List
 
-Items in this list require action from outside this session (assets, decisions, accounts, etc.).
+Outstanding work and planned additions. Items that require action from outside
+this repo (assets, decisions, accounts, field protocols) are grouped at the end.
 
----
-
-## Assets Needed
-
-- [x] **EU logo** — Standard EU flag + "Funded by the European Union" text. Provided 2026-06-15. Save to `prototype/assets/logo-eu.png`.
-- [x] **CIFOR-ICRAF logo** — EU-FCCB Papua New Guinea (Bird of Paradise + tree). This is the CIFOR-ICRAF project logo for this engagement. Provided 2026-06-15. Save to `prototype/assets/logo-cifor.png`.
-- [x] **Oro Provincial Government logo** — Circular badge with Birdwing butterfly, green/yellow/black. Provided 2026-06-15. Save to `prototype/assets/logo-oro.png`.
-- [x] **MCF logo** — Managalas Conservation Foundation circular seal, wildlife scene, "KUAEFIENAMI". Provided 2026-06-15. Save to `prototype/assets/logo-mcf.png`.
-- [ ] **Save logos to repo** — Copy the four logo files into `prototype/assets/` and push from your laptop. Name them: `logo-eu.png`, `logo-cifor.png`, `logo-oro.png`, `logo-mcf.png`.
+*Last updated: 2026-10-04*
 
 ---
 
-## Decisions Needed
+## Current priorities (pilot)
 
-- [x] **Acknowledgements — roles of partners** — CIFOR-ICRAF: Implementing Agency. MCF: Users. Oro Provincial Government: Project Partner. EU logo includes "Funded by the European Union" text (standard EU co-funding branding). ✓ Confirmed 2026-06-14
-- [ ] **Acknowledgements — write the page content** — Draft the full acknowledgement text for each partner (EU, CIFOR-ICRAF, Oro Provincial Government, MCF) including any required legal disclaimer language. To be written by project team.
-- [ ] **Acknowledgements — permanence** — Decide which logos/entries are hardwired (like EU) vs Admin-addable for future versions. Defer until acknowledgement page content is drafted.
-- [ ] **Acknowledgements — logo layout** — Finalise layout once logos are available. EU prominence must meet EU co-funding branding requirements.
-- [ ] **Jitsi server** — A self-hosted Jitsi Meet server is required before the Meetings module can launch video calls. Recommended: DigitalOcean Sydney droplet (~$24/month for testing). Decision needed on when to set this up.
-
----
-
-## API Keys / Data Access
-
-- [ ] **NASA FIRMS API key** — Register for a free API key at https://firms.modaps.eosdis.nasa.gov/api/ to access VIIRS near real-time fire alert data.
-- [ ] **Global Forest Watch (GFW) GLAD alerts** — Check data access requirements at https://www.globalforestwatch.org/. May require a data access agreement depending on usage. Contact GFW team early to confirm terms.
-
----
-
-## Accounts / Services to Set Up
-
-- [ ] **Supabase project** — Create a Supabase project (free tier to start) for the database and auth backend. Share the project URL and anon key when ready.
-- [ ] **Firebase project** — Create a Firebase project and enable Cloud Messaging (FCM) for push notifications (Service Delivery Monitoring alerts).
-- [ ] **DigitalOcean account** — Required for cloud hosting (testing phase) and eventual Jitsi server.
-- [ ] **Google Play Developer account** — Required to publish the Android app to the Play Store when ready.
+- [ ] **Findings reporting** — the monitoring *values* are captured and stored
+      but nothing aggregates/trends/presents them. Current reports are
+      activity/compliance only. Design + build. See
+      [monitoring-parameters.md §5](monitoring-parameters.md).
+- [ ] **Coordinator key — one-time setup** — run `setCoordinatorSecret()` once
+      in the Apps Script editor, then redeploy the backend as a new version, so
+      approvals sync between the two pilot coordinators (option 2). See
+      [installation-guide.md §2](installation-guide.md).
+- [ ] **Real-device testing** — camera, GPS, fingerprint (WebAuthn) and PWA
+      install can't be tested headlessly; run through the flows on an Android
+      phone before/with the pilot.
+- [ ] **Open the pull request** for `claude/github-app-install-7irta9` when
+      ready for review/merge.
 
 ---
 
-## Content Needed
+## Planned monitoring modules / surveys (requested 2026-10-04)
 
-- [ ] **Dummy data for prototype** — User to provide realistic names, places, facility details, and activity data. See `docs/dummy_data.md` for the full specification of what is needed. Once received, prototype will be rebuilt with data wired in.
-- [x] **PNG public holiday list** — 2026 confirmed via National Gazette; 2027 estimated (King's Birthday date needs gazette confirmation when released). See `docs/dummy_data.md`. ✓ Provided 2026-06-15
-- [ ] **PNG public holidays 2027 — King's Birthday** — Confirm exact date via National Gazette when released (currently estimated as ~10 June 2027).
-- [ ] **School holiday periods** — Provide annual school holiday calendar for PNG (used in SDM scheduling).
-- [ ] **Facility list** — Provide the list of health facilities and schools within MCA clan territories (name, type, GPS coordinates) for upload into the admin panel.
-- [ ] **Species list** — Provide the species list to be used in the Biodiversity Survey module (when protocol is defined).
-- [ ] **Committee quorum requirements** — Provide the quorum threshold (minimum members required) for each committee (Zone Sub-Committees × 11, MCF Board). Used to gate votes in the Meetings module.
-- [ ] **Acknowledgement page text** — Draft full text for each partner block (EU, CIFOR-ICRAF, Oro Provincial Government, MCF) including any legal disclaimer language required by the EU co-funding agreement.
+- [ ] **QABB transect — "Christine method plus"** — extend the existing QABB
+      butterfly survey to the Christine-method protocol plus the additional
+      fields/steps. (Protocol detail to be specified.)
+
+- [ ] **Monthly key-informant hunter interview** — a new monthly survey, one
+      per key-informant hunter:
+  - Trip this month? (yes / no)
+  - Time spent
+  - Method / tools used
+  - Species seen
+  - Species caught
+  - Use of the meat: eaten · shared · gifted whole · sold
+
+- [ ] **Annual clan-household garden survey** — survey each clan household on
+      **new gardens**: location, size, and age of fallow.
+
+- [ ] **Annual cash-crop (agroforestry) upkeep & activity survey** — per
+      cash-crop garden/plot, whether the household **opened, weeded, harvested,
+      processed, and/or sold** crops. Includes **mapping of new gardens for
+      potential EUDR reporting** (EU Deforestation Regulation — deforestation-
+      free traceability for cocoa/coffee etc.).
+
+- [ ] **Annual update of new cash-crop gardens** — register/update newly
+      established cash-crop (agroforestry) gardens each year.
+
+> These are survey/interview modules. Where they concern a specific
+> thing (a garden, a plot), consider putting them through the same
+> **register → coordinator-approve → clan-ownership → monitor** pattern already
+> used for water sources, facilities, met instruments and trees, so ownership
+> and anti-duplication carry over.
 
 ---
 
-## Prototype Rebuild Queue (changes collected from review — ready to build once dummy data received)
+## Extend existing work (optional)
 
-- [ ] Acknowledgements screen: 4 logo placeholders (EU · CIFOR-ICRAF · Oro Provincial Government · MCF) with role labels
-- [ ] Three logo placeholders in every screen header
-- [ ] New "Recent Activity" module tile + map screen with activity layers (MaFIA transect lines, Observation points colour-coded by type, Patrol route lines, SDM facility points colour-coded by compliance), time filter (7 days / 30 days / 1 year), scaled by access tier
-- [ ] Performance Monitoring: add monthly grid calendar (colour-coded dots per day) + link to Recent Activity map
-- [ ] MaFIA setup flow reorder: transect → navigate to start → fingerprint verify → begin survey
-- [ ] Weather conditions moved from setup into Transect Description section of the survey
-- [ ] MaFIA matrix: all questions A–H (71 rows), conditional rows labelled *(conditional)*, Module H as free-text below matrix
-- [ ] Meetings: new meeting creation flow (5 steps: details → agenda draft → submit to members → member input → chairman approval)
-- [ ] Meetings: motion recording flow (attendance → quorum check/notification → record motion → verify wording → seconder → vote count → lock)
-- [ ] Meetings: quorum gate — blocks votes if not met; quorum result auto-inserted into minutes; discussion-only mode if quorum not met
-- [ ] Wire in dummy data across all screens
+- [ ] **Clan-ownership gating for the older modules** — MaFIA, QABB,
+      conservation, gardens, trees are not yet ownership-gated (only water,
+      facilities, met and phenology are).
+- [ ] **Remaining emoji** — a few domain pictographs (food/garden crops,
+      animals, event/observation type pickers) are still emoji; convert if a
+      fully uniform icon set is wanted.
 
 ---
 
-*Last updated: 2026-06-14*
+## Content needed (from the project team)
+
+- [ ] **Facility list** — real schools & health facilities within MCA clan
+      territories (name, type, GPS) for registration/approval.
+- [ ] **Species list** — for the biodiversity/QABB and hunter-interview modules
+      (once protocols are defined).
+- [ ] **School-holiday calendar** — PNG annual school holidays (SDM scheduling).
+- [ ] **Committee quorum requirements** — minimum members per committee (Zone
+      Sub-Committees ×11, MCF Board) to gate votes in Meetings.
+- [ ] **PNG public holidays 2027** — confirm King's Birthday date via National
+      Gazette (currently estimated ~10 June 2027).
+- [ ] **Acknowledgements — page text** — full partner text (EU, CIFOR-ICRAF,
+      Oro Provincial Government, MCF) incl. any EU co-funding disclaimer.
+- [ ] **Acknowledgements — logos** — add the four partner logo PNGs to
+      `prototype/assets/` (`logo-eu.png`, `logo-cifor.png`, `logo-oro.png`,
+      `logo-mcf.png`). *Do not place logos anywhere without confirming
+      placement/attribution first.*
+- [ ] **Acknowledgements — permanence & layout** — which logos are hardwired
+      (e.g. EU) vs admin-addable; final layout meeting EU branding rules.
+
+---
+
+## External services / accounts (if/when needed)
+
+- [ ] **NASA FIRMS API key** — VIIRS near-real-time fire alerts
+      (https://firms.modaps.eosdis.nasa.gov/api/).
+- [ ] **Global Forest Watch (GFW) GLAD alerts** — confirm data-access terms.
+- [ ] **Jitsi server** — self-hosted Jitsi Meet for Meetings video calls
+      (e.g. DigitalOcean Sydney droplet). Decide when to set up.
+- [ ] **Supabase / Firebase / DigitalOcean / Google Play** — only if moving
+      beyond the current Google Apps Script + GitHub Pages setup (e.g. push
+      notifications, app-store distribution).
+
+---
+
+## Done
+
+- [x] **Water source registry** — register → approve → clan-ownership → monitor;
+      natural (river/creek/spring) + **engineered** (reservoir/pipes, ram pump,
+      solar pump, well) with two-part source + delivery checks.
+- [x] **Government services (facilities)** — schools/health/aid posts with the
+      same registry + ownership model and type-aware visit form.
+- [x] **Met-station registry** — rain gauge / weather station / water level
+      meter, catalogued + approved + ownership-gated, function monitoring.
+- [x] **Phenology trees** — clan-ownership gate + coordinator Approve Trees.
+- [x] **Clan-ownership model** — one owning clan, optional controlled split,
+      one reading per clan per month, duplicate rejection; central sync via
+      Drive registries.
+- [x] **Inline-SVG icon system** — replaced emoji-as-icons across the app.
+- [x] **Guides** — Installation, Administrator's Manual, Field Guide, plus the
+      Monitoring Parameters and App Functions catalogues (in `docs/`).
+- [x] **Earlier build queue** (pre-June items): Meetings creation/motion/voting
+      flows, Recent Activity map with layers, Performance calendar, MaFIA
+      matrix — present in the app.

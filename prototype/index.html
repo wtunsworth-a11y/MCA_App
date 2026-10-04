@@ -1882,6 +1882,10 @@ select.msel {
             <span class="module-emoji" data-icon="calendar" data-size="26"></span>
             <span class="module-name">Activity Calendar</span>
           </div>
+          <div class="module-tile" onclick="nav('screen-freemap')">
+            <span class="module-emoji" data-icon="pin" data-size="26"></span>
+            <span class="module-name">Field Mapping</span>
+          </div>
           <div class="module-tile" onclick="nav('screen-patrol-stub')">
             <span class="module-emoji" data-icon="walk" data-size="26"></span>
             <span class="module-name">Patrol</span>
@@ -4483,6 +4487,82 @@ select.msel {
     </div>
 
     <!-- ══════════════════════════════════════
+         SCREEN: FIELD MAPPING (freeform point / line)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-freemap">
+      <div class="top-bar" style="background:#00695C;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Field Mapping</div><div class="bar-subtitle">Mark a point or walk a line</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div class="form-group">
+            <label class="form-label">What are you mapping?</label>
+            <div style="display:flex;gap:8px;">
+              <button class="weather-pill active" id="fmmode-point" onclick="fmMode('point')" style="flex:1;"><span data-icon="pin" data-size="15"></span> Point</button>
+              <button class="weather-pill" id="fmmode-line" onclick="fmMode('line')" style="flex:1;"><span data-icon="map" data-size="15"></span> Line / track</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <div id="fmCatPills" style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="weather-pill active" id="fmcat-road" onclick="fmCat('road')">Road / track</button>
+              <button class="weather-pill" id="fmcat-infrastructure" onclick="fmCat('infrastructure')">Infrastructure</button>
+              <button class="weather-pill" id="fmcat-boundary" onclick="fmCat('boundary')">Clan boundary</button>
+              <button class="weather-pill" id="fmcat-hazard" onclick="fmCat('hazard')">Hazard / event</button>
+              <button class="weather-pill" id="fmcat-other" onclick="fmCat('other')">Other</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Title <span style="color:#B71C1C;">*</span></label>
+            <input type="text" id="fmTitle" class="form-input" placeholder="e.g. New garden access road, Landslide, Boundary peg">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea id="fmDesc" class="form-input" style="min-height:50px;width:100%;font-size:0.78rem;" placeholder="What is it, why mapped, who requested it…"></textarea>
+          </div>
+
+          <!-- Point capture -->
+          <div id="fmPointBox">
+            <div class="card" style="padding:14px 16px;text-align:center;">
+              <div id="fmPointCoords" style="font-size:0.82rem;color:#555;margin-bottom:10px;">No point captured yet</div>
+              <button class="btn-primary" style="background:#00695C;" onclick="fmCapturePoint()"><span data-icon="pin" data-size="15"></span> Capture point here</button>
+            </div>
+          </div>
+
+          <!-- Line recording -->
+          <div id="fmLineBox" style="display:none;">
+            <div class="card" style="padding:14px 16px;text-align:center;">
+              <div style="display:flex;justify-content:space-around;margin-bottom:10px;">
+                <div><div id="fmPtCount" style="font-size:1.6rem;font-weight:800;color:#00695C;line-height:1;">0</div><div style="font-size:0.64rem;color:#999;text-transform:uppercase;">points</div></div>
+                <div><div id="fmLen" style="font-size:1.6rem;font-weight:800;color:#00695C;line-height:1;">0</div><div style="font-size:0.64rem;color:#999;text-transform:uppercase;">metres</div></div>
+              </div>
+              <div id="fmRecStatus" style="font-size:0.74rem;color:#888;margin-bottom:10px;">Ready to record</div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn-primary" id="fmStartBtn" style="background:#00695C;flex:1;" onclick="fmStart()">● Start</button>
+                <button class="btn-outline" id="fmPauseBtn" style="flex:1;display:none;border-color:#E65100;color:#E65100;" onclick="fmPauseResume()">❚❚ Pause</button>
+                <button class="btn-outline" id="fmStopBtn" style="flex:1;display:none;border-color:#B71C1C;color:#B71C1C;" onclick="fmStop()">■ Stop</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size:0.9rem;font-weight:700;color:#00695C;margin:14px 0 8px;display:flex;align-items:center;gap:6px;"><span data-icon="camera" data-size="16"></span> Photo <span style="font-size:0.72rem;font-weight:400;color:#888;">(optional)</span></div>
+          <div class="card" style="padding:12px 16px;">
+            <div id="fmPhotoBox" style="width:100%;height:100px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="fmTriggerPhoto()">
+              <div style="text-align:center;color:#999;"><span data-icon="camera" data-size="28"></span><div style="font-size:0.73rem;margin-top:2px;">Tap to add a photo</div></div>
+            </div>
+            <input type="file" id="fmPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="fmHandlePhoto(this)">
+            <div id="fmPhotoStatus" style="font-size:0.72rem;color:#888;">No photo</div>
+          </div>
+
+          <button class="btn-primary" style="background:#00695C;margin-top:14px;" onclick="saveFreemap()">Save &amp; Export</button>
+
+          <div id="fmRecent" style="margin-top:18px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
          SCREEN: WEATHER STATION RECORD
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-meteo-record">
@@ -5608,7 +5688,7 @@ const ALL_SCREENS = [
   'screen-pheno-setup','screen-pheno-plots','screen-pheno-establish','screen-pheno-inactive','screen-pheno-record','screen-pheno-approve',
   'screen-sdm','screen-facility','screen-facilities','screen-facility-register','screen-facility-approve',
   'screen-met-stations','screen-met-register','screen-met-approve','screen-met-record',
-  'screen-activity-calendar','screen-cal-add','screen-cal-report',
+  'screen-activity-calendar','screen-cal-add','screen-cal-report','screen-freemap',
   'screen-alerts',
   'screen-meetings','screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3',
   'screen-meeting-detail','screen-meeting-active',
@@ -5687,6 +5767,7 @@ function nav(id) {
   if (id === 'screen-activity-calendar') initActivityCalendar();
   if (id === 'screen-cal-add') initCalAdd();
   if (id === 'screen-cal-report') renderComplianceReport();
+  if (id === 'screen-freemap') initFreemap();
   if (id === 'screen-pheno-setup') initPheno();
   if (id === 'screen-pheno-plots') initPhenoPlots();
   if (id === 'screen-pheno-establish') initPhenoEstablish();
@@ -7219,6 +7300,129 @@ function calRegistryRecord(r){ return { uid:r.uid, activity:r.activity, title:r.
 function postCalEvent(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'register_calendar_event',_secret:UPLOAD_SECRET,record:calRegistryRecord(rec)})}).catch(function(){}); }
 function pushCalendar(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('calendar',function(rows){ var list=rows.filter(function(r){return r.uid;}).map(calRegistryRecord); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'update_calendar',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,calendar:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
 function syncCalendarFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=calendar').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.calendar){if(cb)cb(false);return;} getAllRecords('calendar',function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pend=d.calendar.slice(); var next=function(){ if(pend.length===0){if(cb)cb(true);return;} var sr=pend.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['activity','title','date','clan','zone','responsible','briefing_required','briefing_done','status','done_date','notes','cadence','series_uid'].forEach(function(k){local[k]=sr[k];}); updateRecord('calendar',local,function(){next();}); } else { sr.survey_type='calendar_event'; sr.synced=true; saveRecord('calendar',sr,function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
+
+/* ══════════════════════════════════════
+   FIELD MAPPING — freeform point / line capture + KML export
+══════════════════════════════════════ */
+var _fmMode='point', _fmCat='road', _fmPhoto=null, _fmPoint=null;
+var _fmLine=[], _fmWatchId=null, _fmRecording=false, _fmPaused=false;
+var FM_CATS={ road:'Road / track', infrastructure:'Infrastructure', boundary:'Clan boundary', hazard:'Hazard / event', other:'Other' };
+
+function initFreemap(){
+  fmStopWatch();
+  _fmMode='point'; _fmCat='road'; _fmPhoto=null; _fmPoint=null; _fmLine=[]; _fmRecording=false; _fmPaused=false;
+  ['fmTitle','fmDesc'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  ['point','line'].forEach(function(k){ var el=document.getElementById('fmmode-'+k); if(el) el.classList.toggle('active',k==='point'); });
+  Object.keys(FM_CATS).forEach(function(k){ var el=document.getElementById('fmcat-'+k); if(el) el.classList.toggle('active',k==='road'); });
+  document.getElementById('fmPointBox').style.display='block';
+  document.getElementById('fmLineBox').style.display='none';
+  document.getElementById('fmPointCoords').textContent='No point captured yet';
+  fmResetLineUI();
+  _fmPhoto=null; var pb=document.getElementById('fmPhotoBox'); if(pb) pb.innerHTML='<div style="text-align:center;color:#999;"><span data-icon="camera" data-size="28"></span><div style="font-size:0.73rem;margin-top:2px;">Tap to add a photo</div></div>'; var ps=document.getElementById('fmPhotoStatus'); if(ps){ps.textContent='No photo';ps.style.color='#888';}
+  hydrateIcons(document.getElementById('screen-freemap'));
+  renderFreemapRecent();
+}
+function fmMode(v){
+  if(_fmRecording){ toast('Stop recording first.'); return; }
+  _fmMode=v; ['point','line'].forEach(function(k){var el=document.getElementById('fmmode-'+k);if(el)el.classList.toggle('active',k===v);});
+  document.getElementById('fmPointBox').style.display=(v==='point')?'block':'none';
+  document.getElementById('fmLineBox').style.display=(v==='line')?'block':'none';
+}
+function fmCat(v){ _fmCat=v; Object.keys(FM_CATS).forEach(function(k){var el=document.getElementById('fmcat-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function fmCapturePoint(){
+  document.getElementById('fmPointCoords').textContent='📍 Acquiring GPS…';
+  captureGPS(function(gps,err){
+    if(gps){ _fmPoint={lat:parseFloat(gps.lat), lon:parseFloat(gps.lng), acc:gps.accuracy}; document.getElementById('fmPointCoords').innerHTML=icon('pin',14)+' '+_fmPoint.lat.toFixed(6)+', '+_fmPoint.lon.toFixed(6)+' (±'+gps.accuracy+'m)'; }
+    else { document.getElementById('fmPointCoords').textContent='⚠ '+err; }
+  });
+}
+function _haversine(a,b){ var R=6371000, toR=function(d){return d*Math.PI/180;}; var dLat=toR(b.lat-a.lat), dLon=toR(b.lon-a.lon); var s=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(toR(a.lat))*Math.cos(toR(b.lat))*Math.sin(dLon/2)*Math.sin(dLon/2); return 2*R*Math.asin(Math.sqrt(s)); }
+function _fmLen(){ var L=0; for(var i=1;i<_fmLine.length;i++) L+=_haversine(_fmLine[i-1],_fmLine[i]); return L; }
+function fmResetLineUI(){ document.getElementById('fmPtCount').textContent='0'; document.getElementById('fmLen').textContent='0'; document.getElementById('fmRecStatus').textContent='Ready to record'; document.getElementById('fmStartBtn').style.display='block'; document.getElementById('fmStartBtn').textContent='● Start'; document.getElementById('fmPauseBtn').style.display='none'; document.getElementById('fmStopBtn').style.display='none'; }
+function fmUpdateLineUI(){ document.getElementById('fmPtCount').textContent=_fmLine.length; document.getElementById('fmLen').textContent=Math.round(_fmLen()); }
+function fmStopWatch(){ if(_fmWatchId!=null && navigator.geolocation){ navigator.geolocation.clearWatch(_fmWatchId); } _fmWatchId=null; }
+function fmStart(){
+  if(!navigator.geolocation){ toast('GPS not available on this device.'); return; }
+  if(_fmLine.length===0){ _fmLine=[]; }
+  _fmRecording=true; _fmPaused=false;
+  document.getElementById('fmStartBtn').style.display='none';
+  document.getElementById('fmPauseBtn').style.display='block'; document.getElementById('fmPauseBtn').textContent='❚❚ Pause';
+  document.getElementById('fmStopBtn').style.display='block';
+  document.getElementById('fmRecStatus').textContent='● Recording — walk the line';
+  _fmWatchId=navigator.geolocation.watchPosition(function(pos){
+    if(!_fmRecording||_fmPaused) return;
+    var p={lat:pos.coords.latitude, lon:pos.coords.longitude, acc:Math.round(pos.coords.accuracy)};
+    var last=_fmLine[_fmLine.length-1];
+    if(!last || _haversine(last,p)>=3){ _fmLine.push(p); fmUpdateLineUI(); }
+  }, function(err){ document.getElementById('fmRecStatus').textContent='⚠ GPS: '+(err&&err.message||'error'); }, {enableHighAccuracy:true, maximumAge:0, timeout:20000});
+}
+function fmPauseResume(){
+  _fmPaused=!_fmPaused;
+  document.getElementById('fmPauseBtn').textContent=_fmPaused?'► Resume':'❚❚ Pause';
+  document.getElementById('fmRecStatus').textContent=_fmPaused?'❚❚ Paused':'● Recording — walk the line';
+}
+function fmStop(){
+  fmStopWatch(); _fmRecording=false; _fmPaused=false;
+  document.getElementById('fmPauseBtn').style.display='none';
+  document.getElementById('fmStopBtn').style.display='none';
+  document.getElementById('fmStartBtn').style.display='block'; document.getElementById('fmStartBtn').textContent='● Resume recording';
+  document.getElementById('fmRecStatus').textContent='■ Stopped — '+_fmLine.length+' points, '+Math.round(_fmLen())+' m';
+}
+function fmTriggerPhoto(){ var inp=document.getElementById('fmPhotoInput'); if(inp) inp.click(); }
+function fmHandlePhoto(input){ var file=input.files&&input.files[0]; if(!file) return; var r=new FileReader(); r.onload=function(e){ _fmPhoto=e.target.result; var b=document.getElementById('fmPhotoBox'); if(b) b.innerHTML='<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;">'; var s=document.getElementById('fmPhotoStatus'); if(s){s.textContent='✓ Photo added';s.style.color='#2E7D32';} }; r.readAsDataURL(file); }
+
+function saveFreemap(){
+  var title=(document.getElementById('fmTitle').value||'').trim();
+  if(!title){ toast('Enter a title.'); return; }
+  if(_fmRecording){ toast('Stop recording first.'); return; }
+  var pts;
+  if(_fmMode==='point'){ if(!_fmPoint){ toast('Capture a point first.'); return; } pts=[_fmPoint]; }
+  else { if(_fmLine.length<2){ toast('Record at least 2 points for a line.'); return; } pts=_fmLine.slice(); }
+  var now=new Date();
+  var rec={ survey_type:'freemap', uid:generateRecordId('MAP'), map_type:_fmMode, category:_fmCat, category_label:FM_CATS[_fmCat], title:title, description:(document.getElementById('fmDesc').value||'').trim(), points:pts, length_m:(_fmMode==='line')?Math.round(_fmLen()):0, photo:_fmPhoto||null, clan:myClan(), steward:(window._cachedProfile&&window._cachedProfile.stewardId)||'', recorded_at:now.toISOString() };
+  saveRecord('freemap', rec, function(){ toast('Saved ✓ — exporting file'); exportFreemap(rec); initFreemap(); });
+}
+
+function _fmDescText(rec){
+  var d=[]; d.push(rec.category_label||rec.category); if(rec.description) d.push(rec.description);
+  if(rec.map_type==='line') d.push('Length ~'+rec.length_m+' m, '+rec.points.length+' points');
+  d.push('Mapped '+(rec.recorded_at||'').slice(0,10)+(rec.steward?(' by '+rec.steward):'')+(rec.clan?(' ('+rec.clan+')'):''));
+  return d.join('\n');
+}
+function exportFreemap(rec){
+  var placemark = (rec.map_type==='line')
+    ? kmlLine(rec.title, rec.points, _fmDescText(rec))
+    : kmlPoint(rec.title, rec.points[0].lon, rec.points[0].lat, _fmDescText(rec));
+  var kml=buildKML(rec.title, [placemark]);
+  var fname='MCA_map_'+(rec.title.replace(/[^A-Za-z0-9]+/g,'_').slice(0,30)||'point')+'_'+(rec.recorded_at||'').slice(0,10)+'.kml';
+  shareOrDownloadFile(kml, fname, 'application/vnd.google-earth.kml+xml', 'MCA field map — '+rec.title);
+}
+function shareOrDownloadFile(content, filename, mime, title){
+  try{
+    if(navigator.canShare){ var file=new File([content], filename, {type:mime}); if(navigator.canShare({files:[file]})){ navigator.share({files:[file], title:title}).catch(function(){ downloadFile(content, filename, mime); }); return; } }
+  }catch(e){}
+  downloadFile(content, filename, mime);
+}
+
+function renderFreemapRecent(){
+  var el=document.getElementById('fmRecent'); if(!el) return;
+  getAllRecords('freemap', function(rows){
+    rows.sort(function(a,b){ return String(b.recorded_at).localeCompare(String(a.recorded_at)); });
+    if(rows.length===0){ el.innerHTML=''; return; }
+    var h='<div style="font-size:0.8rem;font-weight:800;color:#00695C;margin:4px 2px 8px;">Recent maps ('+rows.length+')</div>';
+    rows.slice(0,15).forEach(function(r){
+      var ic = r.map_type==='line'?'map':'pin';
+      var meta = (r.category_label||'')+' · '+(r.map_type==='line'?('~'+r.length_m+' m'):'point')+(r.synced?'':' · not sent');
+      h+='<div class="card" style="padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">';
+      h+='<span style="color:#00695C;display:flex;">'+icon(ic,18)+'</span>';
+      h+='<div style="flex:1;"><div style="font-size:0.84rem;font-weight:700;color:#333;">'+(r.title||'(untitled)')+'</div><div style="font-size:0.7rem;color:#888;">'+meta+'</div></div>';
+      h+='<button class="btn-outline" style="padding:5px 10px;font-size:0.72rem;border-color:#00695C;color:#00695C;" onclick="exportFreemapById('+r.id+')">Export</button>';
+      h+='</div>';
+    });
+    el.innerHTML=h;
+  });
+}
+function exportFreemapById(id){ getAllRecords('freemap', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(r) exportFreemap(r); }); }
 
 /* ── Map Layer Toggles ── */
 function toggleLayer(id) {
@@ -9114,8 +9318,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 10;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar'];
+var DB_VERSION = 11;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }

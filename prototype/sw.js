@@ -8,13 +8,22 @@
  *
  * Bump CACHE_NAME on a deploy you want to force a clean re-cache.
  */
-const CACHE_NAME = 'mca-steward-v5';
+const CACHE_NAME = 'mca-steward-v6';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  /* Map library (vendored for offline) + MCA boundary */
+  './vendor/leaflet/leaflet.css',
+  './vendor/leaflet/leaflet.js',
+  './vendor/leaflet/images/layers.png',
+  './vendor/leaflet/images/layers-2x.png',
+  './vendor/leaflet/images/marker-icon.png',
+  './vendor/leaflet/images/marker-icon-2x.png',
+  './vendor/leaflet/images/marker-shadow.png',
+  './vendor/mca_boundary.geojson',
   /* Partner logos — cached for offline access */
   './logos/Logo_Gov_PNG.png',
   './logos/Logo_MCF.png',

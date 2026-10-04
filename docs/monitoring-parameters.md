@@ -113,6 +113,24 @@ Store `phenology`. Per approved plant of each crop, each month.
 | Health | Good · Fair · Poor |
 | Notes | text |
 
+### 2.6 Disturbance verification — field check
+Store `disturbances`. One verification per routed alert (clan-owned). The alert
+itself (type, location, area, source, confidence) is created by the satellite
+feed or a coordinator; the steward records the on-site result.
+
+| Parameter | Options |
+|---|---|
+| Outcome (neutral) | Confirmed present · Not found on ground · Inconclusive · Could not reach safely |
+| Likely cause (recorded separately) | Natural (fire/landslide/flood) · Human (garden/logging/road) · Unclear |
+| Photo | geotagged, required |
+| Area measured/estimated | ha (optional) |
+| Description | text |
+| Evidence attached automatically | GPS fix, timestamp, on-site fingerprint, steward ID |
+
+*Clearances are flagged for compulsory verification at ≥ 2 ha. Cause is reported
+as what the steward sees and is never pre-judged, so the record is defensible to
+outside scrutiny.*
+
 ---
 
 ## 3. Other monitoring modules (pre-existing)

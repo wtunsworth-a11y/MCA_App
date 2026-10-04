@@ -42,6 +42,14 @@ grouped by who uses it.
 - **Training records** (participants, outcomes, materials, photo).
 - **Observations** and **Patrols** (present as screens).
 
+**Disturbance verification (clan-owned)**
+- See **Disturbance Alerts** routed to your clan — satellite-detected fires,
+  landslides and forest clearance (>2 ha) flagged for field checking.
+- **Verify on site**: navigate-to-site + on-site fingerprint, then record a
+  neutral **outcome** (confirmed / not found / inconclusive / couldn't reach),
+  the likely **cause** separately (natural / human / unclear), a geotagged
+  **photo**, measured area and a description. Record locks once sent.
+
 **Capture tools**
 - Capture **GPS** location and take **photos** on-device.
 
@@ -66,6 +74,9 @@ Reached behind the coordinator unlock (passcode + server key).
 - **Approve Water Sources / Facilities / Met Stations / Trees** — review each
   pending registration, **assign the owning clan** (and an optional second
   clan for a controlled split), or **reject** duplicates.
+- **Triage disturbance alerts** — alerts that no clan boundary matched land in
+  a triage queue; assign the responsible clan with one tap. (Alerts that fall
+  inside a mapped clan boundary route to that clan automatically.)
 - **Manage Zones** — edit the zone list.
 - **Manage Training Topics** — edit topics; flag which can be certified.
 - **Grant Training Authorisation / Certify Trainer** — authorise a person to
@@ -85,8 +96,14 @@ Reached behind the coordinator unlock (passcode + server key).
   (e.g. two fingers) for backup.
 - **Backend sync** — Google Apps Script web app writes records to Google Drive;
   shared **registries** (`_water_sources`, `_facilities`, `_met_stations`,
-  `_pheno_plots`, `_zones`, `_topics`, `_authorisations`) sync approvals and
-  ownership between coordinators and down to steward phones.
+  `_pheno_plots`, `_calendar`, `_disturbances`, `_zones`, `_topics`,
+  `_authorisations`) sync approvals and ownership between coordinators and down
+  to steward phones.
+- **Disturbance feed** — a server-side daily job pulls **NASA FIRMS** active-fire
+  detections (and, once provisioned, **GFW/RADD** forest-clearance) for the MCA
+  area, routes each to the owning clan by **point-in-polygon** against mapped
+  clan boundaries, de-duplicates, and raises verification tasks that sync to
+  stewards **when they next upload** — no satellite access needed on the phone.
 - **Coordinator-key protection** — privileged approval actions require a server
   key held only in Apps Script properties.
 - **De-duplication** — each record carries a unique steward-prefixed ID.

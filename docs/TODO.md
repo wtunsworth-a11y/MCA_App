@@ -230,6 +230,18 @@ is coordinator-defined and syncs down like the other registries.
 
 ## Done
 
+- [x] **Disturbance verification** (built 2026-10-04) — satellite-detected
+      fires, landslides and **>2 ha forest clearance** raised as clan-owned
+      field-verification tasks. Server-side daily feed (NASA FIRMS live;
+      GFW/RADD stubbed) → point-in-polygon routing to the owning clan (triage
+      queue otherwise) → tasks load to stewards **on upload** → defensible
+      on-site record (neutral outcome, cause recorded separately, geotagged
+      photo, on-site fingerprint, area). Replaces the old static alerts mock.
+  - [ ] *follow-on*: complete the **GFW/RADD** clearance fetcher (needs a GFW
+        API key + AOI query) — fire works today, clearance is stubbed.
+  - [ ] *follow-on*: **clan-boundary polygon pipeline** — stewards map clan
+        boundaries via Field Mapping; publish them to `_clan_boundaries.json`
+        so auto-routing goes live (until then, everything routes to triage).
 - [x] **Water source registry** — register → approve → clan-ownership → monitor;
       natural (river/creek/spring) + **engineered** (reservoir/pipes, ram pump,
       solar pump, well) with two-part source + delivery checks.

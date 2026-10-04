@@ -142,13 +142,14 @@ is coordinator-defined and syncs down like the other registries.
 
 ## Mapping — consistency & basemap
 
-- [ ] **One consistent mapping look** — unify every GPS/mapping surface so
-      users build familiarity with one module and reapply it: Field Mapping
-      (point/line), Garden mapping (polygon), Tree mapping (point), and the
-      GPS-capture step in the Water/Facility/Met/Tree registrations. Adopt the
-      Field Mapping screen as the shared template (mode + category + title +
-      GPS capture + photo + save/export) and route the others through it or a
-      shared component, with the same colours, controls and layout.
+- [x] **One consistent mapping look — v1 (visual family)** — Field, Garden and
+      Tree mapping now share the same mapping identity (teal accent, matching
+      intro boxes, card headings, GPS-capture cards and buttons), so they read
+      as the same module.
+  - [ ] **Deeper unification** — route them through a shared capture component
+        (mode + category + title + GPS capture + photo + save/export), add the
+        photo step to Garden/Tree, and bring the embedded GPS-capture steps in
+        the Water/Facility/Met registrations into the same look.
 - [ ] **Offline background map (basemap)** — add a real map background under
       the mapping tools. Approach for this offline PWA: pre-render tiles for the
       MCA bounding box on a laptop, transfer once over WiFi/cable (size is not a

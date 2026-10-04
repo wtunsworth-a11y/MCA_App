@@ -4666,7 +4666,7 @@ select.msel {
          SCREEN: GARDEN MAPPING
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-garden-mapping">
-      <div class="top-bar" style="background:#558B2F;">
+      <div class="top-bar" style="background:#00695C;">
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
           <div class="bar-title">Garden Mapping</div>
@@ -4677,19 +4677,19 @@ select.msel {
       <div class="scroll-content">
         <div class="p14">
 
-          <div style="background:#F1F8E9;border-radius:10px;padding:14px;margin-bottom:14px;border-left:4px solid #558B2F;">
-            <div style="font-size:0.82rem;font-weight:700;color:#558B2F;margin-bottom:4px;">How it works</div>
+          <div style="background:#E0F2F1;border-radius:10px;padding:14px;margin-bottom:14px;border-left:4px solid #00695C;">
+            <div style="font-size:0.82rem;font-weight:700;color:#00695C;margin-bottom:4px;">How it works</div>
             <div style="font-size:0.75rem;color:#555;line-height:1.5;">Walk the boundary of the garden with GPS recording turned on. The app will capture corner points to create a boundary polygon. Then select the crop type and save.</div>
           </div>
 
           <div class="card" style="padding:14px 16px;margin-bottom:12px;">
-            <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin-bottom:10px;">Garden Type</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#00695C;margin-bottom:10px;">Garden Type</div>
             <div style="display:flex;gap:6px;margin-bottom:14px;">
               <button class="weather-pill active" id="gtype-cash" onclick="selectGardenType('cash')" style="font-size:0.78rem;padding:8px 14px;flex:1;text-align:center;"><span data-icon="money" data-size="14"></span> Cash Crop<br><span style="font-size:0.62rem;color:#888;">Permanent · One-off</span></button>
               <button class="weather-pill" id="gtype-food" onclick="selectGardenType('food')" style="font-size:0.78rem;padding:8px 14px;flex:1;text-align:center;">🍠 Food Garden<br><span style="font-size:0.62rem;color:#888;">Annual mapping</span></button>
             </div>
 
-            <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin-bottom:8px;">Crop Type</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#00695C;margin-bottom:8px;">Crop Type</div>
             <div id="gardenCropsCash" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
               <button class="weather-pill" id="gc-vanilla" onclick="toggleCrop('vanilla')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="leaf" data-size="14"></span> Vanilla</button>
               <button class="weather-pill" id="gc-coffee" onclick="toggleCrop('coffee')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="coffee" data-size="14"></span> Coffee</button>
@@ -4707,13 +4707,13 @@ select.msel {
           </div>
 
           <div class="card" style="padding:14px 16px;margin-bottom:12px;">
-            <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin-bottom:8px;"><span data-icon="pin" data-size="14"></span> Garden Boundary</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#00695C;margin-bottom:8px;"><span data-icon="pin" data-size="14"></span> Garden Boundary</div>
             <div style="font-size:0.75rem;color:#666;margin-bottom:10px;">Walk around the garden edge. Tap "Add Corner" at each turn. Minimum 3 points to form a boundary.</div>
             <div id="gardenPointsList" style="margin-bottom:10px;">
               <div style="font-size:0.75rem;color:#aaa;text-align:center;padding:10px;">No boundary points yet</div>
             </div>
             <div style="display:flex;gap:8px;">
-              <button class="btn-outline" onclick="addGardenPoint()" style="flex:1;border-color:#558B2F;color:#558B2F;font-size:0.78rem;padding:10px;"><span data-icon="pin" data-size="14"></span> Add Corner Point</button>
+              <button class="btn-outline" onclick="addGardenPoint()" style="flex:1;border-color:#00695C;color:#00695C;font-size:0.78rem;padding:10px;"><span data-icon="pin" data-size="14"></span> Add Corner Point</button>
               <button class="btn-outline" onclick="clearGardenPoints()" style="border-color:#c62828;color:#c62828;font-size:0.78rem;padding:10px;">Clear</button>
             </div>
             <div id="gardenPointCount" style="text-align:center;font-size:0.72rem;color:#888;margin-top:6px;">0 points captured</div>
@@ -4734,14 +4734,14 @@ select.msel {
             </div>
           </div>
 
-          <button class="btn-primary" style="background:#558B2F;" onclick="saveGarden()">Save Garden Record</button>
+          <button class="btn-primary" style="background:#00695C;" onclick="saveGarden()">Save Garden Record</button>
 
-          <div style="font-size:0.85rem;font-weight:700;color:#558B2F;margin:16px 0 8px;">Recent Recordings</div>
+          <div style="font-size:0.85rem;font-weight:700;color:#00695C;margin:16px 0 8px;">Recent Recordings</div>
           <div id="gardenLogList">
             <div style="font-size:0.78rem;color:#999;text-align:center;padding:20px;">No gardens mapped yet in this session</div>
           </div>
           <div style="margin-top:12px;">
-            <button class="btn-outline" style="border-color:#558B2F;color:#558B2F;" onclick="exportCSV('gardens')">Export Garden Data as CSV ↓</button>
+            <button class="btn-outline" style="border-color:#00695C;color:#00695C;" onclick="exportCSV('gardens')">Export Garden Data as CSV ↓</button>
           </div>
         </div>
       </div>
@@ -4751,7 +4751,7 @@ select.msel {
          SCREEN: TREE MAPPING
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-tree-mapping">
-      <div class="top-bar" style="background:#5D4037;">
+      <div class="top-bar" style="background:#00695C;">
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
           <div class="bar-title">Tree Mapping</div>
@@ -4761,13 +4761,13 @@ select.msel {
       </div>
       <div class="scroll-content">
         <div class="p14">
-          <div style="background:#EFEBE9;border-radius:10px;padding:14px;margin-bottom:14px;border-left:4px solid #5D4037;">
-            <div style="font-size:0.82rem;font-weight:700;color:#5D4037;margin-bottom:4px;">How it works</div>
+          <div style="background:#E0F2F1;border-radius:10px;padding:14px;margin-bottom:14px;border-left:4px solid #00695C;">
+            <div style="font-size:0.82rem;font-weight:700;color:#00695C;margin-bottom:4px;">How it works</div>
             <div style="font-size:0.75rem;color:#555;line-height:1.5;">Walk to each tree, stand at the trunk, and tap <strong>Capture GPS</strong>. Measure the trunk circumference at chest height with a tape, or estimate with your arms. Record the species and DBH.</div>
           </div>
 
           <div class="card" style="padding:14px 16px;margin-bottom:12px;">
-            <div style="font-size:0.85rem;font-weight:700;color:#5D4037;margin-bottom:10px;">Record New Tree</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#00695C;margin-bottom:10px;">Record New Tree</div>
 
             <div class="form-group" style="margin-bottom:10px;">
               <label class="form-label" style="font-size:0.75rem;font-weight:600;">Species</label>
@@ -4780,7 +4780,7 @@ select.msel {
             <div class="form-group" style="margin-bottom:10px;">
               <label class="form-label" style="font-size:0.75rem;font-weight:600;"><span data-icon="pin" data-size="14"></span> GPS Location</label>
               <div style="display:flex;align-items:center;gap:8px;">
-                <button class="btn-outline" onclick="captureTreeGPS()" style="border-color:#5D4037;color:#5D4037;font-size:0.78rem;padding:8px 14px;flex:1;">Capture GPS</button>
+                <button class="btn-outline" onclick="captureTreeGPS()" style="border-color:#00695C;color:#00695C;font-size:0.78rem;padding:8px 14px;flex:1;">Capture GPS</button>
               </div>
               <div id="treeGpsDisplay" style="font-size:0.75rem;color:#888;margin-top:6px;padding:6px 10px;background:#f5f5f5;border-radius:6px;">
                 Waiting for GPS capture...
@@ -4790,14 +4790,14 @@ select.msel {
             <div class="form-group" style="margin-bottom:10px;">
               <label class="form-label" style="font-size:0.75rem;font-weight:600;">DBH (Diameter at Breast Height)</label>
               <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
-                <button class="tally-btn" onclick="adjTreeDBH(-5)" style="width:44px;height:44px;font-size:1.2rem;border-radius:10px;background:#EFEBE9;border:1.5px solid #5D4037;color:#5D4037;">−5</button>
-                <button class="tally-btn" onclick="adjTreeDBH(-1)" style="width:38px;height:38px;font-size:1rem;border-radius:10px;background:#EFEBE9;border:1.5px solid #5D4037;color:#5D4037;">−1</button>
+                <button class="tally-btn" onclick="adjTreeDBH(-5)" style="width:44px;height:44px;font-size:1.2rem;border-radius:10px;background:#E0F2F1;border:1.5px solid #00695C;color:#00695C;">−5</button>
+                <button class="tally-btn" onclick="adjTreeDBH(-1)" style="width:38px;height:38px;font-size:1rem;border-radius:10px;background:#E0F2F1;border:1.5px solid #00695C;color:#00695C;">−1</button>
                 <div style="text-align:center;">
-                  <input type="number" id="treeDbhInput" value="30" min="1" max="500" style="width:70px;text-align:center;font-size:1.3rem;font-weight:700;padding:8px;border:2px solid #5D4037;border-radius:10px;color:#5D4037;">
+                  <input type="number" id="treeDbhInput" value="30" min="1" max="500" style="width:70px;text-align:center;font-size:1.3rem;font-weight:700;padding:8px;border:2px solid #00695C;border-radius:10px;color:#00695C;">
                   <div style="font-size:0.68rem;color:#888;margin-top:2px;">cm</div>
                 </div>
-                <button class="tally-btn" onclick="adjTreeDBH(1)" style="width:38px;height:38px;font-size:1rem;border-radius:10px;background:#EFEBE9;border:1.5px solid #5D4037;color:#5D4037;">+1</button>
-                <button class="tally-btn" onclick="adjTreeDBH(5)" style="width:44px;height:44px;font-size:1.2rem;border-radius:10px;background:#EFEBE9;border:1.5px solid #5D4037;color:#5D4037;">+5</button>
+                <button class="tally-btn" onclick="adjTreeDBH(1)" style="width:38px;height:38px;font-size:1rem;border-radius:10px;background:#E0F2F1;border:1.5px solid #00695C;color:#00695C;">+1</button>
+                <button class="tally-btn" onclick="adjTreeDBH(5)" style="width:44px;height:44px;font-size:1.2rem;border-radius:10px;background:#E0F2F1;border:1.5px solid #00695C;color:#00695C;">+5</button>
               </div>
               <div style="text-align:center;margin-top:6px;">
                 <span style="font-size:0.7rem;color:#888;">Quick: </span>
@@ -4815,15 +4815,15 @@ select.msel {
               <input type="text" id="treeNotes" class="form-input" style="font-size:0.78rem;padding:8px 10px;" placeholder="e.g. fruiting, near creek, tagged #12...">
             </div>
 
-            <button class="btn-primary" style="background:#5D4037;" onclick="saveTree()">Save Tree Record</button>
+            <button class="btn-primary" style="background:#00695C;" onclick="saveTree()">Save Tree Record</button>
           </div>
 
-          <div style="font-size:0.85rem;font-weight:700;color:#5D4037;margin-bottom:8px;">Recent Recordings</div>
+          <div style="font-size:0.85rem;font-weight:700;color:#00695C;margin-bottom:8px;">Recent Recordings</div>
           <div id="treeLogList">
             <div style="font-size:0.78rem;color:#999;text-align:center;padding:20px;">No trees recorded yet in this session</div>
           </div>
           <div style="margin-top:12px;">
-            <button class="btn-outline" style="border-color:#5D4037;color:#5D4037;" onclick="exportCSV('trees')">Export All Tree Data as CSV ↓</button>
+            <button class="btn-outline" style="border-color:#00695C;color:#00695C;" onclick="exportCSV('trees')">Export All Tree Data as CSV ↓</button>
           </div>
         </div>
       </div>

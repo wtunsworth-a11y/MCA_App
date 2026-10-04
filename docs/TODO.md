@@ -80,13 +80,15 @@ is coordinator-defined and syncs down like the other registries.
       activity is due (monthly, annual, seasonal) per clan/zone. Consolidates
       the existing SDM monitoring days, conservation follow-ups, and the
       monthly/annual cadence of the monitoring modules.
-- [ ] **In-app status page (home)** — the first thing a steward sees:
-      a **traffic-light summary — on target (green) / required soon (amber) /
-      overdue (red)** — with the list of what's due and the preparation
-      checklist (charge phone, get equipment, advise clan elder, arrange the
-      informant/household). Fully offline. Can start by rolling up the
-      "done this month" status we already compute per owned item, then grow as
-      the calendar is built.
+- [x] **In-app status page (home) — v1 built** — a calm, static traffic-light
+      roll-up at the top of the opening page (dashboard): per module (Water,
+      Service Delivery, Met, Phenology) it shows done/total and a green/amber/
+      red state (on target / due / overdue), each row tappable to its module.
+      Fully offline, rolls up the "done this month" data we already compute.
+      No banners or animation elsewhere in the app.
+  - [ ] **Grow it** — add the preparation checklist and the itemised "due now"
+        list, and plug in the annual/scheduled survey due-dates once the unified
+        calendar exists (overdue currently uses a last-month heuristic).
 - [ ] **Notifications — PWA approach (accepted limits):**
   - **(1) In-app alerts while open** — reliable, offline. Use fully.
   - **(2) Best-effort background nudges (Periodic Background Sync)** — use

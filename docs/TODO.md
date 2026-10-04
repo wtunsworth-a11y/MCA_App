@@ -140,6 +140,35 @@ is coordinator-defined and syncs down like the other registries.
 
 ---
 
+## Mapping — consistency & basemap
+
+- [ ] **One consistent mapping look** — unify every GPS/mapping surface so
+      users build familiarity with one module and reapply it: Field Mapping
+      (point/line), Garden mapping (polygon), Tree mapping (point), and the
+      GPS-capture step in the Water/Facility/Met/Tree registrations. Adopt the
+      Field Mapping screen as the shared template (mode + category + title +
+      GPS capture + photo + save/export) and route the others through it or a
+      shared component, with the same colours, controls and layout.
+- [ ] **Offline background map (basemap)** — add a real map background under
+      the mapping tools. Approach for this offline PWA: pre-render tiles for the
+      MCA bounding box on a laptop, transfer once over WiFi/cable (size is not a
+      concern), bundle a map library (MapLibre GL or Leaflet) in the app, and
+      read the tiles from local storage so it works with no signal.
+  - **Free data sources:**
+    - **OpenStreetMap** (ODbL) — roads, rivers, trails, place names; as raster
+      tiles or vector tiles (PMTiles is a single file that renders client-side).
+    - **Sentinel-2** (ESA Copernicus, free, ~10 m) — recent satellite imagery;
+      excellent for seeing forest, gardens and rivers in a conservation area.
+    - **Landsat** (USGS/NASA, free, ~30 m) — longer time series / fallback.
+    - **SRTM / Copernicus DEM** (free) — terrain shading and contour lines.
+    - Any existing MCF/CIFOR GIS layers (clan boundaries, zones) imported the
+      same way.
+  - **Avoid** Google/Bing/Esri imagery as an offline basemap — their licences
+    restrict offline caching and redistribution; the open sources above do not.
+  - Suggested pipeline: QGIS / `gdal2tiles` (raster) or `tippecanoe` + `pmtiles`
+    (vector) to build the tile pack → load onto the phone → MapLibre/Leaflet
+    renders it beneath the GPS points/lines.
+
 ## Extend existing work (optional)
 
 - [ ] **Clan-ownership gating for the older modules** — MaFIA, QABB,

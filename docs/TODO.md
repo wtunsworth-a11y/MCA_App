@@ -84,10 +84,16 @@ is coordinator-defined and syncs down like the other registries.
       (serves as the meetings scheduler) with a zone-staff briefing flag.
       Includes a **compliance report** (planned vs done, % per activity). Synced
       via `_calendar.json`.
-  - [ ] **Grow it** — recurrence rules (auto-generate monthly/annual instances
-        rather than one-off dates), link meetings to the Meetings module
-        (agenda/quorum), let stewards mark their own survey/interview done
-        (or auto-complete from the linked record), and a day/agenda view.
+  - [x] **Recurrence / advance scheduling** — the Schedule form repeats an
+        activity Monthly or Annually for N occurrences, laying out all the dates
+        in advance (one instance per period, clamped to month length). Each
+        occurrence stands alone: a missed month is counted as missed and is
+        **never offered twice** the next month (monitoring already enforces one
+        reading per clan per month). Occurrences share a `series_uid`.
+  - [ ] **Grow it further** — link meetings to the Meetings module
+        (agenda/quorum), let stewards mark their own survey/interview done (or
+        auto-complete from the linked record), series editing/cancel, and a
+        day/agenda view.
 - [x] **In-app status page (home) — v1 built** — a calm, static traffic-light
       roll-up at the top of the opening page (dashboard): per module (Water,
       Service Delivery, Met, Phenology) it shows done/total and a green/amber/

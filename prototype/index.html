@@ -4418,8 +4418,21 @@ select.msel {
             <input type="text" id="calTitle" class="form-input" placeholder="e.g. Zone 7B Sub-Committee meeting">
           </div>
           <div class="form-group">
-            <label class="form-label">Date <span style="color:#B71C1C;">*</span></label>
+            <label class="form-label" id="calDateLabel">Date <span style="color:#B71C1C;">*</span></label>
             <input type="date" id="calDate" class="form-input" style="font-size:0.85rem;padding:7px 10px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Repeat</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="weather-pill active" id="calrep-none" onclick="calRepeat('none')">One-off</button>
+              <button class="weather-pill" id="calrep-monthly" onclick="calRepeat('monthly')">Monthly</button>
+              <button class="weather-pill" id="calrep-annually" onclick="calRepeat('annually')">Annually</button>
+            </div>
+          </div>
+          <div class="form-group" id="calOccWrap" style="display:none;">
+            <label class="form-label">Number of occurrences</label>
+            <input type="number" id="calOcc" class="form-input" value="12" min="1" max="60" style="font-size:0.85rem;padding:7px 10px;">
+            <div style="font-size:0.68rem;color:#888;margin-top:4px;">All the dates are laid out in advance from the start date. Each occurrence stands alone — if a month is missed it is <strong>not</strong> offered again, and never doubled up the next month.</div>
           </div>
           <div class="form-group">
             <label class="form-label">Responsible clan</label>
@@ -6962,7 +6975,7 @@ var CAL_TYPES = {
   other:{label:'Activity', icon:'calendar'}
 };
 function calTypeMeta(k){ return CAL_TYPES[k] || CAL_TYPES.other; }
-var _calWho='clan_steward', _calBrief=false;
+var _calWho='clan_steward', _calBrief=false, _calRepeat='none';
 var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 function initActivityCalendar(){
@@ -7066,23 +7079,57 @@ function renderActivityCalendar(){
 /* ── Schedule an event ── */
 function openCalAdd(){ nav('screen-cal-add'); }
 function initCalAdd(){
-  _calWho='clan_steward'; _calBrief=false;
+  _calWho='clan_steward'; _calBrief=false; _calRepeat='none';
   var t=document.getElementById('calType'); if(t) t.value='meeting';
   ['calTitle','calClan','calZone','calNotes'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
   var d=document.getElementById('calDate'); if(d) d.value=new Date().toISOString().slice(0,10);
   ['clan_steward','zone_staff','committee'].forEach(function(k){ var el=document.getElementById('calwho-'+k); if(el) el.classList.toggle('active',k==='clan_steward'); });
   document.getElementById('calbrief-y').classList.remove('active'); document.getElementById('calbrief-n').classList.add('active');
+  calRepeat('none');
 }
 function calWho(v){ _calWho=v; ['clan_steward','zone_staff','committee'].forEach(function(k){var el=document.getElementById('calwho-'+k);if(el)el.classList.toggle('active',k===v);}); }
 function calBrief(v){ _calBrief=v; document.getElementById('calbrief-y').classList.toggle('active',v); document.getElementById('calbrief-n').classList.toggle('active',!v); }
-function calTypeChanged(){ var t=document.getElementById('calType').value; if(t==='meeting'){ calWho('committee'); } else if(t==='hunter_interview'||t==='garden_survey'||t==='cashcrop_survey'||t==='conservation'){ calWho('clan_steward'); } }
+function calRepeat(v){
+  _calRepeat=v;
+  ['none','monthly','annually'].forEach(function(k){var el=document.getElementById('calrep-'+k);if(el)el.classList.toggle('active',k===v);});
+  var wrap=document.getElementById('calOccWrap'); if(wrap) wrap.style.display = (v==='none')?'none':'block';
+  var occ=document.getElementById('calOcc'); if(occ && v!=='none') occ.value = (v==='annually')?'5':'12';
+  var lbl=document.getElementById('calDateLabel'); if(lbl) lbl.innerHTML = (v==='none'?'Date':'Start date')+' <span style="color:#B71C1C;">*</span>';
+}
+function calTypeChanged(){
+  var t=document.getElementById('calType').value;
+  if(t==='meeting'){ calWho('committee'); }
+  else if(t==='hunter_interview'||t==='garden_survey'||t==='cashcrop_survey'||t==='conservation'){ calWho('clan_steward'); }
+  /* suggest a sensible cadence */
+  if(t==='hunter_interview') calRepeat('monthly');
+  else if(t==='garden_survey'||t==='cashcrop_survey') calRepeat('annually');
+}
+/* add N months/years to a yyyy-mm-dd, clamping the day to the target month's length */
+function _calAddPeriod(dateStr, n, unit){
+  var p=dateStr.split('-'); var y=+p[0], m=+p[1]-1, day=+p[2];
+  if(unit==='annually'){ y+=n; } else { m+=n; }
+  var ty=y+Math.floor(m/12); var tm=((m%12)+12)%12;
+  var lastDay=new Date(ty, tm+1, 0).getDate();
+  var d=Math.min(day,lastDay);
+  return ty+'-'+String(tm+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+}
 function submitCalEvent(){
   var title=(document.getElementById('calTitle').value||'').trim();
   var date=document.getElementById('calDate').value;
   if(!title){toast('Enter a title.');return;}
-  if(!date){toast('Pick a date.');return;}
-  var data={ survey_type:'calendar_event', uid:generateRecordId('CAL'), activity:document.getElementById('calType').value, title:title, date:date, clan:(document.getElementById('calClan').value||'').trim(), zone:(document.getElementById('calZone').value||'').trim(), responsible:_calWho, briefing_required:_calBrief, briefing_done:false, status:'planned', notes:(document.getElementById('calNotes').value||'').trim(), created_by:(window._cachedProfile&&window._cachedProfile.stewardId)||'coordinator' };
-  saveRecord('calendar', data, function(){ postCalEvent(data); _calMonth=new Date(date+'T00:00:00'); toast('Added to calendar ✓'); nav('screen-activity-calendar'); });
+  if(!date){toast('Pick a '+(_calRepeat==='none'?'date':'start date')+'.');return;}
+  var base={ survey_type:'calendar_event', activity:document.getElementById('calType').value, title:title, clan:(document.getElementById('calClan').value||'').trim(), zone:(document.getElementById('calZone').value||'').trim(), responsible:_calWho, briefing_required:_calBrief, briefing_done:false, status:'planned', notes:(document.getElementById('calNotes').value||'').trim(), created_by:(window._cachedProfile&&window._cachedProfile.stewardId)||'coordinator' };
+  var dates=[date];
+  if(_calRepeat!=='none'){
+    var occ=Math.max(1, Math.min(60, parseInt((document.getElementById('calOcc')||{}).value||'12')||12));
+    dates=[]; for(var i=0;i<occ;i++){ dates.push(i===0?date:_calAddPeriod(date,i,_calRepeat)); }
+  }
+  var seriesUid = (_calRepeat!=='none') ? generateRecordId('CALSER') : null;
+  var remaining=dates.length; var any=false;
+  dates.forEach(function(dt){
+    var rec=Object.assign({}, base, { uid:generateRecordId('CAL'), date:dt, cadence:_calRepeat, series_uid:seriesUid });
+    saveRecord('calendar', rec, function(){ postCalEvent(rec); remaining--; if(remaining===0){ pushCalendar(function(){}); _calMonth=new Date(date+'T00:00:00'); toast(dates.length>1?(dates.length+' dates added ✓'):'Added to calendar ✓'); nav('screen-activity-calendar'); } });
+  });
 }
 function markCalDone(id){
   getAllRecords('calendar', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r) return; r.status='done'; r.done_date=new Date().toISOString().slice(0,10); r.synced=false; updateRecord('calendar', r, function(){ pushCalendar(function(){}); toast('Marked done ✓'); renderActivityCalendar(); }); });
@@ -7129,10 +7176,10 @@ function complianceRow(ic,name,done,total,pct){
 }
 
 /* ── Central sync ── */
-function calRegistryRecord(r){ return { uid:r.uid, activity:r.activity, title:r.title, date:r.date, clan:r.clan||'', zone:r.zone||'', responsible:r.responsible||'', briefing_required:!!r.briefing_required, briefing_done:!!r.briefing_done, status:r.status||'planned', done_date:r.done_date||null, notes:r.notes||'', created_by:r.created_by||'' }; }
+function calRegistryRecord(r){ return { uid:r.uid, activity:r.activity, title:r.title, date:r.date, clan:r.clan||'', zone:r.zone||'', responsible:r.responsible||'', briefing_required:!!r.briefing_required, briefing_done:!!r.briefing_done, status:r.status||'planned', done_date:r.done_date||null, notes:r.notes||'', cadence:r.cadence||'none', series_uid:r.series_uid||null, created_by:r.created_by||'' }; }
 function postCalEvent(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'register_calendar_event',_secret:UPLOAD_SECRET,record:calRegistryRecord(rec)})}).catch(function(){}); }
 function pushCalendar(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('calendar',function(rows){ var list=rows.filter(function(r){return r.uid;}).map(calRegistryRecord); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'update_calendar',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,calendar:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
-function syncCalendarFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=calendar').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.calendar){if(cb)cb(false);return;} getAllRecords('calendar',function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pend=d.calendar.slice(); var next=function(){ if(pend.length===0){if(cb)cb(true);return;} var sr=pend.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['activity','title','date','clan','zone','responsible','briefing_required','briefing_done','status','done_date','notes'].forEach(function(k){local[k]=sr[k];}); updateRecord('calendar',local,function(){next();}); } else { sr.survey_type='calendar_event'; sr.synced=true; saveRecord('calendar',sr,function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
+function syncCalendarFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=calendar').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.calendar){if(cb)cb(false);return;} getAllRecords('calendar',function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pend=d.calendar.slice(); var next=function(){ if(pend.length===0){if(cb)cb(true);return;} var sr=pend.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['activity','title','date','clan','zone','responsible','briefing_required','briefing_done','status','done_date','notes','cadence','series_uid'].forEach(function(k){local[k]=sr[k];}); updateRecord('calendar',local,function(){next();}); } else { sr.survey_type='calendar_event'; sr.synced=true; saveRecord('calendar',sr,function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
 
 /* ── Map Layer Toggles ── */
 function toggleLayer(id) {

@@ -150,11 +150,23 @@ is coordinator-defined and syncs down like the other registries.
         (mode + category + title + GPS capture + photo + save/export), add the
         photo step to Garden/Tree, and bring the embedded GPS-capture steps in
         the Water/Facility/Met registrations into the same look.
-- [ ] **Offline background map (basemap)** — add a real map background under
-      the mapping tools. Approach for this offline PWA: pre-render tiles for the
-      MCA bounding box on a laptop, transfer once over WiFi/cable (size is not a
-      concern), bundle a map library (MapLibre GL or Leaflet) in the app, and
-      read the tiles from local storage so it works with no signal.
+- [x] **Real map screen (v1)** — Leaflet vendored locally; a pannable/zoomable
+      Map tab with zoom/locate/layers/scale controls, OpenTopoMap (topographic)
+      + OSM base layers, the **MCA boundary** (from the MCA_MLA repo) overlaid,
+      and all recorded sites plotted. Leaflet + boundary precached (SW v6).
+- [ ] **Offline basemap tiles** — base-map tiles are cross-origin so they load
+      on-device/online only. Make them work offline, two options:
+  - **Allowlist + pre-cache**: allow `*.tile.opentopomap.org` / OSM for the
+    environment, then add a "Download this area" button that caches the MCA
+    tile pyramid into CacheStorage/IndexedDB (and/or SW tile caching).
+  - **Self-rendered raster from MCA_MLA data** (no external tiles): derive a
+    hillshade/contours from the FABDEM DEM and/or a land-cover raster from the
+    `outputs/*/landuse_*.tif`, reproject to EPSG:4326, and ship as a tile pack
+    or image overlay. NB the present DEM tiles don't cover the southern half of
+    the MCA (the S10E148 tile is missing) — source it or use land-cover.
+- [ ] **Richer overlays from MCA_MLA** — optionally add rivers/watersheds
+      (HydroBASINS), Oro Province boundary, and land-use-year layers as
+      toggleable overlays.
   - **Free data sources:**
     - **OpenStreetMap** (ODbL) — roads, rivers, trails, place names; as raster
       tiles or vector tiles (PMTiles is a single file that renders client-side).

@@ -51,7 +51,7 @@ var REPORT_EMAILS     = ['w.unsworth@landscapealliance.org'];
  *
  * The key protects: update_zones, update_topics, grant_authorisation,
  * certify_trainer, update_water_sources, update_facilities, update_met_stations,
- * update_pheno_plots, update_calendar.
+ * update_pheno_plots, update_calendar, update_disturbances.
  * It is NEVER stored in the phone app — only held in memory during a session.
  */
 function setCoordinatorSecret() {
@@ -348,6 +348,217 @@ function registerCalendarEvent(record) {
 function updateCalendar(list) {
   saveCalendarList(list || []);
   return { status: 'ok', message: 'Calendar saved', count: (list || []).length };
+}
+
+/* ─── Disturbance registry (satellite-detected + manual) ───────────────
+ * _disturbances.json in Drive. Alerts are created by the satellite feed
+ * (fetchDisturbanceFeed, below) or by a coordinator, and routed to the
+ * owning clan. Stewards return a field verification keyed by uid
+ * (verify_disturbance — upload secret only); coordinators overwrite the
+ * registry for triage/assignment (update_disturbances — coordinator key).
+ * All phones GET ?action=disturbances and filter by clan. */
+function loadDisturbancesList() {
+  try {
+    var folder = getDataFolder();
+    var files  = folder.getFilesByName('_disturbances.json');
+    if (files.hasNext()) { return JSON.parse(files.next().getBlob().getDataAsString()) || []; }
+  } catch(e) { /* fall through */ }
+  return [];
+}
+function saveDisturbancesList(list) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_disturbances.json');
+  var json   = JSON.stringify(list || [], null, 2);
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_disturbances.json', json, MimeType.PLAIN_TEXT); }
+}
+function getDisturbances() {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', disturbances: loadDisturbancesList() }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+/* A steward's verification (upload secret only). Only the verify block,
+ * status and area are accepted — the alert facts/routing are server-owned
+ * and cannot be overwritten from the field. A verified alert is locked. */
+function verifyDisturbance(record) {
+  if (!record || !record.uid) { return { status: 'error', message: 'Missing disturbance uid' }; }
+  var list = loadDisturbancesList();
+  var idx = -1;
+  for (var i = 0; i < list.length; i++) { if (list[i].uid === record.uid) { idx = i; break; } }
+  if (idx === -1) {
+    /* Manual/ad-hoc disturbance raised in the field — accept as a new record. */
+    record.status = record.status || 'verified';
+    list.push(record);
+  } else {
+    if (list[idx].status === 'verified' || list[idx].status === 'closed') {
+      return { status: 'ok', uid: record.uid, note: 'already resolved — ignored' };
+    }
+    list[idx].verify = record.verify || list[idx].verify;
+    list[idx].status = 'verified';
+    if (record.verify && record.verify.area_measured_ha != null) list[idx].area_measured_ha = record.verify.area_measured_ha;
+  }
+  saveDisturbancesList(list);
+  return { status: 'ok', uid: record.uid, count: list.length };
+}
+/* Coordinator overwrite (triage/assignment/rejection). */
+function updateDisturbances(list) {
+  saveDisturbancesList(list || []);
+  return { status: 'ok', message: 'Disturbance registry saved', count: (list || []).length };
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+ * DISTURBANCE FEED — automated satellite detection
+ * ----------------------------------------------------------------------
+ * Runs server-side (Google's network can reach NASA / GFW; the phones and
+ * the offline app cannot). Install a daily time-driven trigger with
+ *   installDisturbanceFeedTrigger()
+ * once, after setting these Script Properties:
+ *   FIRMS_MAP_KEY        free key from https://firms.modaps.eosdis.nasa.gov/api/
+ *   MCA_BBOX             "minLon,minLat,maxLon,maxLat"  (defaults to Managalas)
+ *   FIRMS_DAYRANGE       1–10, days of history per run (default 2)
+ *   FIRMS_MIN_CONF       nominal|low|high — min VIIRS confidence (default nominal)
+ *   GFW_API_KEY          (optional) Global Forest Watch data-API key for RADD
+ *   CLEARANCE_MIN_HA     min forest-loss patch to raise (default 2)
+ * Clan routing reads an optional polygon file _clan_boundaries.json in the
+ * data folder (GeoJSON FeatureCollection; each feature's properties.clan /
+ * properties.zone name the owner). With no polygons, alerts route to the
+ * coordinator triage queue (owner_clan = null). The app writes this file as
+ * stewards map clan boundaries through the Field Mapping module. */
+function _prop(k, dflt) {
+  var v = PropertiesService.getScriptProperties().getProperty(k);
+  return (v === null || v === '') ? dflt : v;
+}
+function _mcaBbox() {
+  var s = _prop('MCA_BBOX', '148.20,-9.35,148.62,-9.00'); /* lon,lat,lon,lat */
+  var p = s.split(',').map(parseFloat);
+  return { minLon:p[0], minLat:p[1], maxLon:p[2], maxLat:p[3] };
+}
+function _inBbox(lat, lon, b) { return lon>=b.minLon && lon<=b.maxLon && lat>=b.minLat && lat<=b.maxLat; }
+
+function loadClanBoundaries() {
+  try {
+    var folder = getDataFolder();
+    var files  = folder.getFilesByName('_clan_boundaries.json');
+    if (!files.hasNext()) return [];
+    var gj = JSON.parse(files.next().getBlob().getDataAsString());
+    var feats = (gj && gj.features) ? gj.features : [];
+    var polys = [];
+    feats.forEach(function(f){
+      var props = f.properties || {};
+      var clan = props.clan || props.CLAN || props.name || '';
+      var zone = props.zone || props.ZONE || '';
+      if (!clan || !f.geometry) return;
+      var g = f.geometry;
+      var rings = (g.type === 'Polygon') ? [g.coordinates] : (g.type === 'MultiPolygon') ? g.coordinates : [];
+      rings.forEach(function(poly){ if (poly && poly[0]) polys.push({ clan:clan, zone:zone, ring:poly[0] }); });
+    });
+    return polys;
+  } catch(e) { return []; }
+}
+function _pointInRing(lat, lon, ring) {
+  var inside = false, n = ring.length;
+  for (var i = 0, j = n - 1; i < n; j = i++) {
+    var xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1]; /* GeoJSON [lon,lat] */
+    var hit = ((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / ((yj - yi) || 1e-12) + xi);
+    if (hit) inside = !inside;
+  }
+  return inside;
+}
+function routeToClan(lat, lon, polys) {
+  for (var i = 0; i < polys.length; i++) {
+    if (_pointInRing(lat, lon, polys[i].ring)) return { owner_clan: polys[i].clan, zone: polys[i].zone, routed_by: 'boundary' };
+  }
+  return { owner_clan: null, zone: '', routed_by: 'triage' };
+}
+
+/* NASA FIRMS active-fire detections (CSV area API). */
+function fetchFirmsFires(bbox) {
+  var key = _prop('FIRMS_MAP_KEY', '');
+  if (!key) return [];
+  var dayRange = Math.max(1, Math.min(10, parseInt(_prop('FIRMS_DAYRANGE', '2'), 10) || 2));
+  var minConf  = _prop('FIRMS_MIN_CONF', 'nominal'); /* low|nominal|high */
+  var confRank = { low:0, nominal:1, n:1, high:2, h:2, l:0 };
+  var area = bbox.minLon + ',' + bbox.minLat + ',' + bbox.maxLon + ',' + bbox.maxLat;
+  var out = [];
+  ['VIIRS_SNPP_NRT', 'VIIRS_NOAA20_NRT', 'MODIS_NRT'].forEach(function(src){
+    var url = 'https://firms.modaps.eosdis.nasa.gov/api/area/csv/' + key + '/' + src + '/' + area + '/' + dayRange;
+    try {
+      var resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+      if (resp.getResponseCode() !== 200) return;
+      var rows = Utilities.parseCsv(resp.getContentText());
+      if (!rows || rows.length < 2) return;
+      var head = rows[0];
+      var cLat = head.indexOf('latitude'), cLon = head.indexOf('longitude'),
+          cDate = head.indexOf('acq_date'), cConf = head.indexOf('confidence');
+      for (var r = 1; r < rows.length; r++) {
+        var row = rows[r]; if (!row || row.length < head.length) continue;
+        var lat = parseFloat(row[cLat]), lon = parseFloat(row[cLon]);
+        if (isNaN(lat) || isNaN(lon) || !_inBbox(lat, lon, bbox)) continue;
+        var confRaw = (row[cConf] || '').toString().toLowerCase();
+        var confNum = parseFloat(confRaw);
+        var rank = !isNaN(confNum) ? (confNum >= 80 ? 2 : confNum >= 50 ? 1 : 0) : (confRank[confRaw] != null ? confRank[confRaw] : 1);
+        if (rank < (confRank[minConf] != null ? confRank[minConf] : 1)) continue;
+        out.push({
+          source: 'FIRMS/' + src.split('_')[0], kind: 'fire',
+          lat: lat.toFixed(5), lng: lon.toFixed(5),
+          detected_date: row[cDate] || '', confidence: row[cConf] || '',
+          priority: rank >= 2 ? 'high' : 'normal',
+          detail: src.replace('_NRT','').replace('_',' ') + ' thermal detection',
+          /* round to ~500 m grid so the same fire over days de-duplicates */
+          uid: 'FIRMS-' + (row[cDate]||'').replace(/-/g,'') + '-' + Math.round(lat*200) + '-' + Math.round(lon*200)
+        });
+      }
+    } catch(e) { /* skip this source */ }
+  });
+  return out;
+}
+
+/* Global Forest Watch / RADD radar forest-loss alerts.
+ * Stubbed: returns [] unless GFW_API_KEY is set and the query below is
+ * completed for your Area of Interest. Kept as a clearly-marked second
+ * fetcher so the feed works with fire alone today and gains clearance
+ * detection when the key + AOI are provisioned. */
+function fetchGfwClearance(bbox) {
+  var key = _prop('GFW_API_KEY', '');
+  if (!key) return [];
+  // var minHa = parseFloat(_prop('CLEARANCE_MIN_HA', '2')) || 2;
+  // TODO: POST to the GFW data API (dataset: gfw_integrated_alerts / wur_radd_alerts)
+  //       with an AOI geometry, parse alert centroids + area, keep area >= minHa,
+  //       and emit records shaped exactly like the FIRMS ones with kind:'clearance'
+  //       and a stable uid 'GFW-<date>-<gridlat>-<gridlon>'.
+  return [];
+}
+
+/* Daily entry point — fetch, route, de-duplicate, upsert. */
+function fetchDisturbanceFeed() {
+  var bbox  = _mcaBbox();
+  var polys = loadClanBoundaries();
+  var minHa = parseFloat(_prop('CLEARANCE_MIN_HA', '2')) || 2;
+  var found = fetchFirmsFires(bbox).concat(fetchGfwClearance(bbox));
+
+  var list = loadDisturbancesList();
+  var byUid = {}; list.forEach(function(d){ if (d.uid) byUid[d.uid] = d; });
+  var added = 0;
+  found.forEach(function(f){
+    if (f.area_ha != null && f.kind === 'clearance' && f.area_ha < minHa) return; /* below the >2 ha bar */
+    if (byUid[f.uid]) return; /* already have it — never re-raise */
+    var route = routeToClan(parseFloat(f.lat), parseFloat(f.lng), polys);
+    f.owner_clan = route.owner_clan; f.zone = route.zone; f.routed_by = route.routed_by;
+    f.status = 'open'; f.verify = null;
+    f.created_date = new Date().toISOString().slice(0,10); f.created_by = 'feed';
+    list.push(f); byUid[f.uid] = f; added++;
+  });
+  if (added > 0) saveDisturbancesList(list);
+  Logger.log('Disturbance feed: ' + found.length + ' detections, ' + added + ' new alerts raised.');
+  return { status: 'ok', detections: found.length, added: added };
+}
+/* One-time: install the daily trigger (safe to re-run — clears duplicates first). */
+function installDisturbanceFeedTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'fetchDisturbanceFeed') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('fetchDisturbanceFeed').timeBased().everyDays(1).atHour(5).create();
+  return 'Disturbance feed trigger installed (daily ~05:00).';
 }
 
 /* ─── Training authorisation records ───────────────────────────────── */
@@ -808,7 +1019,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -927,6 +1138,22 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    /* Disturbance — steward field verification (upload secret only) */
+    if (body._action === 'verify_disturbance') {
+      var dzVerifyResult = verifyDisturbance(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(dzVerifyResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    /* Disturbance registry — coordinator triage/assignment (coordinator key required) */
+    if (body._action === 'update_disturbances') {
+      var dzUpResult = updateDisturbances(body.disturbances);
+      return ContentService
+        .createTextOutput(JSON.stringify(dzUpResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     /* Normal steward data upload */
     var folder = getDataFolder();
 
@@ -978,6 +1205,7 @@ function doGet(e) {
   if (action === 'met_stations') { return getMetStations(); }
   if (action === 'pheno_plots') { return getPhenoPlots(); }
   if (action === 'calendar') { return getCalendar(); }
+  if (action === 'disturbances') { return getDisturbances(); }
 
   if (action === 'authorisations') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';

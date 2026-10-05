@@ -250,8 +250,12 @@ is coordinator-defined and syncs down like the other registries.
       queue otherwise) → tasks load to stewards **on upload** → defensible
       on-site record (neutral outcome, cause recorded separately, geotagged
       photo, on-site fingerprint, area). Replaces the old static alerts mock.
-  - [ ] *follow-on*: complete the **GFW/RADD** clearance fetcher (needs a GFW
-        API key + AOI query) — fire works today, clearance is stubbed.
+  - [x] *done 2026-10-05*: **RADD clearance as single-event polygons > 2 ha** —
+        Earth Engine script (`tools/radd_clearance_events.js`) extracts one
+        polygon per contiguous clearing ≥ 200 pixels (10 m → 0.01 ha/px), one
+        monthly run over the whole MCA; the backend reads the exported GeoJSON
+        and the **split protocol** (`routeEventToClans`) tasks each overlapping
+        clan independently, triage otherwise. Fire (FIRMS) still needs the key.
   - [ ] *follow-on*: **clan-boundary polygon pipeline** — stewards map clan
         boundaries via Field Mapping; publish them to `_clan_boundaries.json`
         so auto-routing goes live (until then, everything routes to triage).

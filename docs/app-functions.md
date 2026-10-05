@@ -118,6 +118,11 @@ Reached behind the coordinator unlock (passcode + server key).
     tasked; the steward never decides whether something counts.
   - **Multi-clan events fan out** — a disturbance overlapping two or more clan
     boundaries raises one independent task per clan.
+  - **Clearance = single-event polygons > 2 ha** — a monthly Earth Engine run
+    (`tools/radd_clearance_events.js`) turns RADD alerts into one polygon per
+    contiguous clearing ≥ 200 pixels (10 m → 0.01 ha/px); the backend overlays
+    each polygon on the clan boundaries and tasks only the clan(s) it touches.
+    Not a sum of scattered small clearings.
 - **Help registry** — `_help.json` holds coordinator-edited per-field help,
   overlaying the app's baseline; synced down to all phones.
 - **Coordinator-key protection** — privileged approval actions require a server

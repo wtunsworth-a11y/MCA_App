@@ -449,12 +449,16 @@ function updateHelp(help) {
  *   FIRMS_DAYRANGE       1–10, days of history per run (default 2)
  *   FIRE_MIN_DETECTIONS  min detections in a ~1 km cell to task it (default 3)
  *   FIRE_MIN_FRP         OR min fire power in MW to task it (default 15)
- *   GFW_API_KEY          (optional) Global Forest Watch data-API key for RADD
- *   CLEARANCE_MIN_HA     min forest-loss patch to raise, in ha (default 2)
- * The size/area thresholds are applied in the feed, before any task is
- * created — only events big enough to need a check are ever sent, and a
- * steward never decides whether something "counts". An event that overlaps
- * two or more clan boundaries raises one independent task per clan.
+ *   CLEARANCE_MIN_HA     min single clearing to raise, in ha (default 2)
+ * Forest clearance comes from the monthly Earth Engine run
+ * (tools/radd_clearance_events.js), which turns RADD alerts into single-event
+ * polygons > CLEARANCE_MIN_HA (area-per-pixel × contiguous pixels) and exports
+ * _clearance_events.geojson into the data folder. One run covers the whole MCA
+ * — there is no per-clan querying.
+ * The size/area thresholds are applied before any task is created (in Earth
+ * Engine for clearance, in the fetcher for fire), so a steward never decides
+ * whether something "counts". An event overlapping two or more clan boundaries
+ * raises one independent task per clan.
  * Clan routing reads an optional polygon file _clan_boundaries.json in the
  * data folder (GeoJSON FeatureCollection; each feature's properties.clan /
  * properties.zone name the owner). With no polygons, alerts route to the
@@ -576,23 +580,55 @@ function fetchFirmsFires(bbox) {
   return out;
 }
 
-/* Global Forest Watch / RADD radar forest-loss alerts.
- * Stubbed: returns [] unless GFW_API_KEY is set and the query below is
- * completed for your Area of Interest. When implemented it must emit events
- * ALREADY FILTERED to area_ha >= CLEARANCE_MIN_HA (the threshold gate runs
- * here, before any task is created — never in the field), each with:
- *   { source:'GFW/RADD', kind:'clearance', lat, lng, area_ha, detected_date,
- *     detail, uid:'GFW-<gridlat>-<gridlon>',
- *     footprint:[[lon,lat],...] }   // the loss-patch ring, so a clearance
- *                                   // straddling 2+ clans tasks each of them. */
+/* Mean of a [lon,lat] ring (rough centroid, good enough for a cell uid). */
+function _ringCentroid(ring) {
+  var sx=0, sy=0, n=0;
+  for (var i=0;i<ring.length;i++){ sx+=ring[i][0]; sy+=ring[i][1]; n++; }
+  return n ? [sx/n, sy/n] : [0,0];
+}
+
+/* Forest-clearance EVENTS from RADD — single patches larger than the
+ * threshold, produced by the monthly Earth Engine run (tools/radd_clearance_
+ * events.js) and exported to _clearance_events.geojson in the data folder.
+ * Each GeoJSON feature is already ONE clearing > CLEARANCE_MIN_HA (the size
+ * test — area-per-pixel × contiguous pixels — is done in Earth Engine, before
+ * any task exists). Here we only read them in; routeEventToClans() then does
+ * the split: one independent task per clan whose boundary the patch overlaps. */
 function fetchGfwClearance(bbox) {
-  var key = _prop('GFW_API_KEY', '');
-  if (!key) return [];
   var minHa = parseFloat(_prop('CLEARANCE_MIN_HA', '2')) || 2;
-  // TODO: POST to the GFW data API (dataset: gfw_integrated_alerts / wur_radd_alerts)
-  //       with the MCA AOI, aggregate adjacent loss pixels into patches, compute
-  //       each patch's area_ha and footprint ring, and KEEP ONLY area_ha >= minHa.
-  return [];
+  var gj;
+  try {
+    var folder = getDataFolder();
+    var files  = folder.getFilesByName('_clearance_events.geojson');
+    if (!files.hasNext()) return [];
+    gj = JSON.parse(files.next().getBlob().getDataAsString());
+  } catch(e) { return []; }
+  var feats = (gj && gj.features) ? gj.features : [];
+  var out = [];
+  feats.forEach(function(f){
+    var g = f.geometry || {}, pr = f.properties || {};
+    var areaHa = parseFloat(pr.area_ha);
+    if (isNaN(areaHa) || areaHa < minHa) return;      /* backstop — never below the bar */
+    var polys = (g.type === 'Polygon') ? [g.coordinates]
+              : (g.type === 'MultiPolygon') ? g.coordinates : [];
+    polys.forEach(function(poly){
+      var ring = poly && poly[0];
+      if (!ring || ring.length < 3) return;
+      var c = _ringCentroid(ring);
+      var gl = Math.round(c[1]/0.009), gn = Math.round(c[0]/0.009); /* ~1 km cell */
+      out.push({
+        source:'GFW/RADD', kind:'clearance',
+        lat:c[1].toFixed(5), lng:c[0].toFixed(5),
+        area_ha: Math.round(areaHa*10)/10,
+        detected_date: pr.detected_date || pr.date || '',
+        confidence: 'RADD',
+        detail: 'Forest clearance — single patch ~' + (Math.round(areaHa*10)/10) + ' ha',
+        footprint: ring,                 /* [lon,lat] ring → drives the clan split */
+        uid: 'GFW-' + gl + '-' + gn
+      });
+    });
+  });
+  return out;
 }
 
 /* Daily entry point — fetch, apply the size/area gate, route to every

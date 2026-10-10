@@ -3018,6 +3018,14 @@ select.msel {
             <input type="file" id="estPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoFile(this)">
             <div id="estPhotoStatus" style="font-size:0.72rem;color:#888;">No photo taken</div>
           </div>
+          <div id="estMarkGuide" class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;font-size:0.75rem;margin-bottom:10px;">
+            <span data-icon="info" data-size="14"></span> <span id="estMarkGuideText">Mark this plant so the same one is found each visit.</span>
+          </div>
+          <div class="form-group" id="estDbhGroup" style="display:none;">
+            <label class="form-label"><span data-icon="tree" data-size="14"></span> DBH — trunk diameter at breast height (cm) <span style="color:#B71C1C;">*</span></label>
+            <input type="number" id="estDbh" class="form-input" inputmode="decimal" min="0" step="0.1" placeholder="e.g. 24.5">
+            <div style="font-size:0.7rem;color:#888;margin-top:3px;">Measure at 1.3 m up the trunk. This is the baseline; re-measure once a year.</div>
+          </div>
           <div class="form-group">
             <label class="form-label">Location Name <span style="color:#999;font-weight:400;">(optional)</span></label>
             <input type="text" id="estLocationName" class="form-input" placeholder="e.g. Near garden fence, uphill path…">
@@ -8016,7 +8024,12 @@ var HELP_MANUALS = {
      +'<li><strong>Water level meter</strong>: level at the marker (cm) and flow.</li>'
      +'<li><strong>Weather station</strong>: both of the above.</li></ul>' },
     { id:'phenology', num:'6', title:'Phenology (trees)', html:
-      '<p>Establish a plant under <strong>Manage Plots</strong>. Once approved and assigned to your clan, record each plant’s <strong>phenophase</strong> (vegetative / flowering / fruiting / ripe / dormant) and <strong>health</strong> (good / fair / poor). You only see your clan’s approved trees.</p>' },
+      '<p>Establish a plant under <strong>Manage Plots</strong>, then once it is approved and assigned to your clan it becomes a monthly task. You only see your clan’s approved trees.</p>'
+     +'<p><strong>Mark the plant so you find the same one each visit:</strong></p><ul>'
+     +'<li><strong>Okari &amp; Massoy (trees)</strong> — paint a band on the trunk (with a project staff member) and record the <strong>DBH</strong> (trunk diameter at 1.3 m). Re-measure the DBH once a year.</li>'
+     +'<li><strong>Vanilla, Cocoa, Coffee (cash crops)</strong> — attach a numbered <strong>metal tag</strong> (= the Plant #) that does not harm the plant.</li>'
+     +'<li>A <strong>photo is required</strong> when you establish any plant.</li></ul>'
+     +'<p>Each month, tap <strong>every phenophase present now</strong> (you can pick several) across <strong>Leaves</strong> (budburst, young, mature, colored/falling, bare), <strong>Flowers</strong> (buds, open) and <strong>Fruit</strong> (unripe, ripe, recent drop), set <strong>overall health</strong> (good / fair / poor), and add a <strong>photo only if there is something to report</strong>.</p>' },
     { id:'disturbance', num:'7', title:'Disturbance verification', html:
       '<p>A <strong>disturbance</strong> is a sudden change — fire, landslide or forest clearance — flagged from satellite or reported, and routed to your clan to check on the ground.</p><ul>'
      +'<li>Walk to the site (unlocks within 50 m, asks for a fingerprint).</li>'
@@ -8915,8 +8928,32 @@ var PHENO_CROPS = [
 ];
 var phenoEditCrop='', phenoEditPlantNum=0, phenoEditReplacesId=null;
 var phenoInactiveId=null, phenoInactiveReason='', phenoPhotoTaken=false;
-var PHENO_PHASES=['vegetative','flowering','fruiting','ripe','dormant'];
+/* NPN (Nature's Notebook)-style phenophases: each is scored present/absent,
+   grouped by structure, so budburst, leaf fall, and simultaneous phases are
+   all captured. Universal across all 5 crops. */
+var PHENO_PHASE_GROUPS=[
+  { group:'Leaves',  items:[
+    {k:'budburst',        label:'Budburst'},
+    {k:'young_leaves',    label:'Young leaves'},
+    {k:'mature_leaves',   label:'Mature leaves'},
+    {k:'colored_falling', label:'Colored / falling'},
+    {k:'bare',            label:'Bare (leafless)'} ]},
+  { group:'Flowers', items:[
+    {k:'flower_buds',     label:'Flower buds'},
+    {k:'open_flowers',    label:'Open flowers'} ]},
+  { group:'Fruit',   items:[
+    {k:'unripe_fruit',    label:'Unripe fruit'},
+    {k:'ripe_fruit',      label:'Ripe fruit'},
+    {k:'recent_drop',     label:'Recent fruit/seed drop'} ]}
+];
+function phenoPhaseLabel(k){ for(var g=0;g<PHENO_PHASE_GROUPS.length;g++){ var it=PHENO_PHASE_GROUPS[g].items; for(var i=0;i<it.length;i++){ if(it[i].k===k) return it[i].label; } } return k; }
 var PHENO_HEALTH=['good','fair','poor'];
+/* Okari & Massoy are trees → painted mark + DBH (baseline + annual).
+   Vanilla/cocoa/coffee are cash crops → a metal tag (= the Plant #). */
+var PHENO_TREES=['okari','massoy'];
+function _isPhenoTree(crop){ return PHENO_TREES.indexOf(crop)>=0; }
+window._phenoObsPhotos={}; /* plotId -> dataURL (optional monitoring photo) */
+window._phenoPhases={};    /* plotId -> {phaseKey:true} active set this visit */
 
 function captureGPS(callback) {
   /* Real GPS via navigator.geolocation; callback(gps, err) */
@@ -9032,13 +9069,25 @@ function openEstablishPlant(crop, plantNum, replacesId) {
 
 function initPhenoEstablish() {
   var cr=PHENO_CROPS.find(function(c){return c.key===phenoEditCrop;})||{label:'—',emoji:''+icon('leaf',13)+''};
-  var titleText=phenoEditReplacesId?'Establish Replacement — '+cr.label:('Establish '+cr.emoji+' '+cr.label);
+  var titleText=phenoEditReplacesId?('Establish Replacement — '+cr.label):('Establish '+cr.label);
   document.getElementById('phenoEstTitle').textContent=titleText;
   document.getElementById('phenoEstSubtitle').textContent='Plant #'+phenoEditPlantNum+' · GPS & Photo Required';
-  document.getElementById('estCropLabel').textContent=cr.emoji+' '+cr.label;
+  document.getElementById('estCropLabel').innerHTML=cr.emoji+' '+cr.label;
   document.getElementById('estPlantNum').textContent='Plant '+phenoEditPlantNum;
   document.getElementById('estLocationName').value='';
   document.getElementById('estNotes').value='';
+  var isTree=_isPhenoTree(phenoEditCrop);
+  var dbhGrp=document.getElementById('estDbhGroup');
+  if(dbhGrp) dbhGrp.style.display=isTree?'':'none';
+  var dbhIn=document.getElementById('estDbh'); if(dbhIn) dbhIn.value='';
+  var mg=document.getElementById('estMarkGuideText');
+  if(mg){
+    if(isTree){
+      mg.innerHTML='<strong>'+cr.label+' is a tree — leave a painted mark.</strong> With a project staff member present, paint a clear band at chest height on the trunk. Record the DBH below as the baseline. Re-measure the DBH once a year.';
+    } else {
+      mg.innerHTML='<strong>'+cr.label+' is a cash crop — fix a metal tag.</strong> Attach a numbered metal tag (= Plant #'+phenoEditPlantNum+') to the plant so it does not harm it (loose wire tie, not a nail). This is the physical marker you return to each month.';
+    }
+  }
   document.getElementById('estPhotoStatus').textContent='No photo taken';
   document.getElementById('estPhotoStatus').style.color='#888';
   document.getElementById('estPhotoBox').style.borderColor='#ccc';
@@ -9077,6 +9126,13 @@ function submitEstablish() {
   var gpsEl=document.getElementById('estGPS');
   if(!gpsEl||gpsEl.textContent==='Acquiring…'){toast('Wait for GPS before submitting.');return;}
   if(!phenoPhotoTaken){toast('Please capture a photo first.');return;}
+  var isTree=_isPhenoTree(phenoEditCrop);
+  var dbh=null;
+  if(isTree){
+    var dv=parseFloat((document.getElementById('estDbh')||{}).value);
+    if(!(dv>0)){toast('Enter the DBH (trunk diameter) for this tree.');return;}
+    dbh=dv;
+  }
   var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var now=new Date();
   var gpsText=gpsEl.textContent;
@@ -9088,6 +9144,8 @@ function submitEstablish() {
     lat:lat, lng:lng,
     location_name:(document.getElementById('estLocationName')||{}).value||'',
     notes:(document.getElementById('estNotes')||{}).value||'',
+    marker_type:(isTree?'paint':'metal_tag'),
+    dbh_cm:dbh, dbh_date:(dbh!=null?now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear():null),
     established_date:now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear(),
     status:'pending', inactive_reason:null, inactive_date:null,
     proposed_clan:myClan(), owner_clan:null, owner_clan_2:null,
@@ -9154,10 +9212,10 @@ function approvePhenoTree(id){
 function rejectPhenoTree(id){ getAllRecords('pheno_plots', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r) return; r.status='rejected'; r.synced=false; updateRecord('pheno_plots', r, function(){ pushPhenoRegistry(function(){}); toast('Tree rejected'); initPhenoApprove(); }); }); }
 function phenoOwnedByMyClan(p){ return isOversight() || !p.owner_clan || p.owner_clan===myClan() || p.owner_clan_2===myClan(); }
 
-function phenoRegistryRecord(r){ return { uid:r.uid, crop_type:r.crop_type, plant_num:r.plant_num, lat:r.lat, lng:r.lng, location_name:r.location_name, notes:r.notes, established_date:r.established_date, status:r.status, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, approved_date:r.approved_date||null, inactive_reason:r.inactive_reason||null }; }
+function phenoRegistryRecord(r){ return { uid:r.uid, crop_type:r.crop_type, plant_num:r.plant_num, lat:r.lat, lng:r.lng, location_name:r.location_name, notes:r.notes, marker_type:r.marker_type||null, dbh_cm:(r.dbh_cm!=null?r.dbh_cm:null), dbh_date:r.dbh_date||null, established_date:r.established_date, status:r.status, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, approved_date:r.approved_date||null, inactive_reason:r.inactive_reason||null }; }
 function postRegisterPheno(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'register_pheno_plot',_secret:UPLOAD_SECRET,record:phenoRegistryRecord(rec)})}).catch(function(){}); }
 function pushPhenoRegistry(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('pheno_plots', function(rows){ var list=rows.filter(function(r){return r.uid;}).map(phenoRegistryRecord); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'update_pheno_plots',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,pheno_plots:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
-function syncPhenoFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=pheno_plots').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.pheno_plots){if(cb)cb(false);return;} getAllRecords('pheno_plots', function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pending=d.pheno_plots.slice(); var next=function(){ if(pending.length===0){if(cb)cb(true);return;} var sr=pending.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['status','owner_clan','owner_clan_2','approved_date','proposed_clan'].forEach(function(k){local[k]=sr[k];}); updateRecord('pheno_plots', local, function(){next();}); } else { sr.survey_type='pheno_plot'; sr.synced=true; saveRecord('pheno_plots', sr, function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
+function syncPhenoFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=pheno_plots').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.pheno_plots){if(cb)cb(false);return;} getAllRecords('pheno_plots', function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pending=d.pheno_plots.slice(); var next=function(){ if(pending.length===0){if(cb)cb(true);return;} var sr=pending.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['status','owner_clan','owner_clan_2','approved_date','proposed_clan','marker_type','dbh_cm','dbh_date'].forEach(function(k){if(sr[k]!==undefined)local[k]=sr[k];}); updateRecord('pheno_plots', local, function(){next();}); } else { sr.survey_type='pheno_plot'; sr.synced=true; saveRecord('pheno_plots', sr, function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
 
 function openInactivePlot(id, cropLabel, plantNum, location) {
   phenoInactiveId=id; phenoInactiveReason='';
@@ -9202,6 +9260,7 @@ function initPhenoRecord() {
   if(document.getElementById('phenoDate')) document.getElementById('phenoDate').textContent=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
   var container=document.getElementById('phenoPlantCards');
   if(!container) return;
+  window._phenoPhases={}; window._phenoObsPhotos={};
   container.innerHTML='<div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>';
   getAllRecords('pheno_plots',function(plots){
     var approved=plots.filter(function(p){return p.status==='approved' && phenoOwnedByMyClan(p);});
@@ -9221,14 +9280,26 @@ function initPhenoRecord() {
         h+='<span style="font-size:0.82rem;font-weight:700;">Plant '+plot.plant_num+'</span>';
         h+='<span style="font-size:0.7rem;color:#888;">'+(plot.location_name||(plot.lat+'°S'))+'</span>';
         h+='</div>';
-        h+='<div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Phenophase</div>';
-        h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">';
-        PHENO_PHASES.forEach(function(p){h+='<button class="weather-pill" id="ph-'+pid+'-'+p+'" onclick="setPhenoPlot('+pid+',\''+p+'\')" style="font-size:0.68rem;padding:4px 8px;">'+p.charAt(0).toUpperCase()+p.slice(1)+'</button>';});
-        h+='</div>';
-        h+='<div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Health</div>';
+        h+='<div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:2px;">Phenophases present now <span style="font-weight:400;color:#999;">(tap all that apply)</span></div>';
+        PHENO_PHASE_GROUPS.forEach(function(grp){
+          h+='<div style="font-size:0.66rem;color:#999;margin:4px 0 2px;text-transform:uppercase;letter-spacing:0.03em;">'+grp.group+'</div>';
+          h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">';
+          grp.items.forEach(function(it){h+='<button class="weather-pill" id="ph-'+pid+'-'+it.k+'" onclick="togglePhenoPhase('+pid+',\''+it.k+'\')" style="font-size:0.68rem;padding:4px 8px;">'+it.label+'</button>';});
+          h+='</div>';
+        });
+        h+='<div style="font-size:0.72rem;font-weight:600;color:#555;margin:8px 0 4px;">Overall health</div>';
         h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">';
         PHENO_HEALTH.forEach(function(h2,hi){h+='<button class="weather-pill'+(hi===0?' active':'')+'" id="hp-'+pid+'-'+h2+'" onclick="setHealthPlot('+pid+',\''+h2+'\')" style="font-size:0.68rem;padding:4px 8px;">'+h2.charAt(0).toUpperCase()+h2.slice(1)+'</button>';});
         h+='</div>';
+        if(_isPhenoTree(cr.key)){
+          var lastDbh=(plot.dbh_cm!=null?plot.dbh_cm+' cm':'—')+(plot.dbh_date?(' · '+plot.dbh_date):'');
+          h+='<div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:2px;">DBH — annual re-measure <span style="font-weight:400;color:#999;">(cm, leave blank to skip)</span></div>';
+          h+='<div style="font-size:0.68rem;color:#888;margin-bottom:3px;">Baseline: '+lastDbh+'</div>';
+          h+='<input type="number" inputmode="decimal" min="0" step="0.1" id="dbh-'+pid+'" class="form-input" style="font-size:0.75rem;padding:6px 10px;margin-bottom:8px;" placeholder="New DBH at 1.3 m (once a year)">';
+        }
+        h+='<div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:4px;">Photo <span style="font-weight:400;color:#999;">(optional — only if something to report)</span></div>';
+        h+='<div id="pobsbox-'+pid+'" onclick="document.getElementById(\'pobsfile-'+pid+'\').click()" style="display:flex;align-items:center;gap:8px;cursor:pointer;background:#f5f5f5;border:1px dashed #ccc;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:0.72rem;color:#888;">'+icon('camera',16)+' <span id="pobslbl-'+pid+'">Add photo</span></div>';
+        h+='<input type="file" id="pobsfile-'+pid+'" accept="image/*" capture="environment" style="display:none;" onchange="phenoObsPhoto('+pid+',this)">';
         h+='<input type="text" id="pnotes-'+pid+'" class="form-input" style="font-size:0.75rem;padding:6px 10px;" placeholder="Notes…">';
         h+='</div>';
       });
@@ -9237,8 +9308,24 @@ function initPhenoRecord() {
   });
 }
 
-function setPhenoPlot(plotId,phase){
-  PHENO_PHASES.forEach(function(p){var el=document.getElementById('ph-'+plotId+'-'+p);if(el)el.classList.toggle('active',p===phase);});
+function togglePhenoPhase(plotId,phase){
+  if(!window._phenoPhases[plotId]) window._phenoPhases[plotId]={};
+  var set=window._phenoPhases[plotId];
+  set[phase]=!set[phase];
+  var el=document.getElementById('ph-'+plotId+'-'+phase);
+  if(el) el.classList.toggle('active',!!set[phase]);
+}
+function phenoObsPhoto(plotId,input){
+  var file=input.files&&input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    window._phenoObsPhotos[plotId]=e.target.result;
+    var box=document.getElementById('pobsbox-'+plotId);
+    var lbl=document.getElementById('pobslbl-'+plotId);
+    if(lbl) lbl.textContent='✓ Photo attached';
+    if(box){box.style.background='#E8F5E9';box.style.borderColor='#A5D6A7';box.style.color='#2E7D32';}
+  };
+  reader.readAsDataURL(file);
 }
 function setHealthPlot(plotId,val){
   PHENO_HEALTH.forEach(function(h){var el=document.getElementById('hp-'+plotId+'-'+h);if(el)el.classList.toggle('active',h===val);});
@@ -9258,16 +9345,31 @@ function submitAllPhenoObs() {
     var plotId=parseInt(card.getAttribute('data-plot-id'));
     var crop=card.getAttribute('data-crop');
     var plantNum=parseInt(card.getAttribute('data-plant-num'));
-    var phase='';
-    PHENO_PHASES.forEach(function(p){var el=document.getElementById('ph-'+plotId+'-'+p);if(el&&el.classList.contains('active'))phase=p;});
+    var set=(window._phenoPhases&&window._phenoPhases[plotId])||{};
+    var phases=Object.keys(set).filter(function(k){return set[k];});
     var health='';
     PHENO_HEALTH.forEach(function(h){var el=document.getElementById('hp-'+plotId+'-'+h);if(el&&el.classList.contains('active'))health=h;});
     var notes=(document.getElementById('pnotes-'+plotId)||{}).value||'';
-    saveRecord('phenology',{
+    var photo=(window._phenoObsPhotos&&window._phenoObsPhotos[plotId])||null;
+    var dbhEl=document.getElementById('dbh-'+plotId);
+    var dbh=(dbhEl&&dbhEl.value!=='')?parseFloat(dbhEl.value):null;
+    var rec={
       survey_type:'phenology',date:date,time:time,weather:weather,
       plot_id:plotId,crop_type:crop,plant_num:plantNum,
-      phase:phase,health:health,notes:notes,general_notes:genNotes
-    },function(){count++;if(count===total)toast('Saved '+count+' plant observation'+(count>1?'s':'')+' ✓');});
+      phenophases:phases, phase:(phases[0]||''), health:health,
+      notes:notes,general_notes:genNotes,
+      photo:photo, dbh_cm:(dbh!=null&&dbh>0?dbh:null)
+    };
+    saveRecord('phenology',rec,function(){
+      /* An annual DBH re-measure updates the tree's registry record too */
+      if(dbh!=null&&dbh>0&&_isPhenoTree(crop)){
+        getAllRecords('pheno_plots',function(plots){
+          var pl=plots.find(function(p){return p.id===plotId;});
+          if(pl){pl.dbh_cm=dbh;pl.dbh_date=date;pl.synced=false;updateRecord('pheno_plots',pl,function(){});}
+        });
+      }
+      count++;if(count===total)toast('Saved '+count+' plant observation'+(count>1?'s':'')+' ✓');
+    });
   });
 }
 
@@ -11663,28 +11765,6 @@ function collectWaterData() {
   }
   return data;
 }
-
-function collectPhenoData() {
-  var data = {
-    survey_type: 'phenology',
-    plot: 'P-7B-02',
-    date: document.getElementById('phenoDate') ? document.getElementById('phenoDate').textContent : '',
-    time: document.getElementById('phenoTime') ? document.getElementById('phenoTime').value : ''
-  };
-  ['vanilla','cocoa','coffee','okari','massoy'].forEach(function(sp) {
-    var phases = ['vegetative','flowering','fruiting','ripe','dormant'];
-    phases.forEach(function(p) {
-      var el = document.getElementById('ph-' + sp + '-' + p);
-      if (el && el.classList.contains('active')) data[sp + '_phase'] = p;
-    });
-    ['good','fair','poor'].forEach(function(h) {
-      var el = document.getElementById('hp-' + sp + '-' + h);
-      if (el && el.classList.contains('active')) data[sp + '_health'] = h;
-    });
-  });
-  return data;
-}
-
 
 /* ══════════════════════════════════════
    KML / GPX EXPORT

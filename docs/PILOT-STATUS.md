@@ -17,7 +17,7 @@ and the operational procedures worked out during pilot setup.*
   baked into `prototype/index.html`
   (`…/macros/s/AKfycbxqEnJ1…JZR8XRg/exec`). **Deployed and verified**
   (`{"status":"ready"}`). **Coordinator server key is set** in Script Properties.
-- **Service worker cache:** `mca-steward-v24` (bumped every deploy). The app now
+- **Service worker cache:** `mca-steward-v28` (bumped every deploy). The app now
   **auto-applies updates** on reopen (checks on launch + focus, reloads once when
   a new worker takes over) — no more "open twice".
 - **Uploads fixed (v24):** Send Data and all registry/approval syncs POST as
@@ -70,8 +70,9 @@ Save (writes `_zones.json`, overrides everything, syncs to all phones).
 ## 4. What's functional (real data → Drive)
 
 Enrolment + fingerprint login · Water Quality (natural + engineered) · Service
-Delivery (facilities) · Met instruments · Phenology · **Disturbance
-verification** · **Field Mapping (unified)** · Activity Calendar + compliance ·
+Delivery (facilities) · Met instruments · **Phenology (NPN phenophases +
+markers + DBH)** · **Disturbance verification** · **Field Mapping (unified)** ·
+Activity Calendar + compliance ·
 Training · Send Data / sync · Help centre · Coordinator approvals / Manage Zones
 / Grant Authorisation / reports.
 
@@ -95,6 +96,20 @@ task exists**. Each event is overlaid on clan boundaries (`_clan_boundaries.json
 and **tasks each overlapping clan independently**; none-match → coordinator
 triage. Stewards field-verify with neutral outcome, cause-separate-from-fact,
 geotagged photo, on-site fingerprint. See `tools/README.md`.
+
+### Phenology (NPN phenophases + physical markers + DBH)
+Phenophases now follow the **USA-NPN / Nature's Notebook** model: each visit the
+steward taps **all phases present now** (multi-select) across **Leaves**
+(budburst, young, mature, colored/falling, bare), **Flowers** (buds, open) and
+**Fruit** (unripe, ripe, recent drop) — so budburst/leaf fall and simultaneous
+phases are captured, not a single "stage". Each plant is **physically marked**
+at establishment: **okari & massoy (trees)** get a **painted trunk band** (with
+project staff) **+ a DBH baseline** (re-measured annually, which updates the
+registry); **vanilla/cocoa/coffee (cash crops)** get a **numbered metal tag**
+(= Plant #). A **photo is required at establishment** for all five; a
+**monitoring photo is optional** (only if something to report). Stored in
+`phenology` as a `phenophases` array (+ legacy `phase`), with `dbh_cm` and
+`photo`.
 
 ## 5. Not built / stub (show "Under Construction")
 

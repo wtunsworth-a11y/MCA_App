@@ -115,11 +115,27 @@ Add notes and a **photo**, then submit.
 
 Open **Phenology Monitoring**.
 
-- **Manage Plots** → establish a plant (crop, GPS, photo) → Pending Approval.
-- Once approved and assigned to your clan, approved plants appear under
-  **Begin Monthly Observations**.
-- For each plant record its **phenophase** (vegetative / flowering / fruiting /
-  ripe / dormant) and **health** (good / fair / poor).
+**Establish a plant** (**Manage Plots** → establish → crop, GPS, photo →
+Pending Approval). When you establish it you must **mark the plant** so the same
+one is found every month:
+
+- **Okari & Massoy (trees)** — with a project staff member present, **paint a
+  band** at chest height on the trunk, and record the **DBH** (trunk diameter at
+  1.3 m) as the baseline. **Re-measure the DBH once a year.**
+- **Vanilla, Cocoa, Coffee (cash crops)** — attach a **numbered metal tag**
+  (= the Plant #) that does not harm the plant (a loose tie, not a nail).
+- A **photo is required** at establishment for every plant.
+
+**Monthly observation.** Once approved and assigned to your clan, plants appear
+under **Begin Monthly Observations**. For each plant:
+
+- Tap **every phenophase present now** — you can select several at once —
+  across **Leaves** (budburst, young, mature, colored/falling, bare),
+  **Flowers** (buds, open) and **Fruit** (unripe, ripe, recent drop).
+- Set **overall health** (good / fair / poor).
+- **Trees:** enter a new **DBH** only on the annual re-measure (otherwise leave
+  it blank).
+- Add a **photo only if there is something to report**; add notes.
 
 As with everything else, you only see **your clan's** approved trees, so two
 clans don't both claim the same tree.

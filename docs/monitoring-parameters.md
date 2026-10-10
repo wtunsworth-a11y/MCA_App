@@ -41,7 +41,7 @@ the same catalogue fields, plus a type-specific set.
 | Water sources | `water_sources` | **Natural:** River, Creek, Spring · **Engineered:** Reservoir & pipes, Ram pump, Solar pump, Well/borehole |
 | Facilities | `facilities` | School, Health Centre, Aid Post |
 | Met instruments | `met_stations` | Rain gauge, Weather station, Water level meter |
-| Phenology plants | `pheno_plots` | Crop (vanilla, cocoa, coffee, okari, massoy) + plant number (1–5) |
+| Phenology plants | `pheno_plots` | Crop (vanilla, cocoa, coffee, okari, massoy) + plant number (1–5) · **marker_type** (trees → painted band; cash crops → numbered metal tag) · **DBH baseline (cm)** for okari/massoy, captured at establishment, re-measured annually |
 
 ---
 
@@ -105,13 +105,22 @@ Store `met_readings`. Centred on equipment function. Common: date, **photo**, no
 | **Flow condition** | Dry/No flow · Normal · High · Flood | Water level meter, Weather station |
 
 ### 2.5 Phenology — observations
-Store `phenology`. Per approved plant of each crop, each month.
+Store `phenology`. Per approved plant of each crop, each month. Phenophases
+follow the **USA-NPN (Nature's Notebook) model**: each is scored
+**present/absent** and **several can be true at once** (e.g. young leaves + open
+flowers + unripe fruit), so budburst and leaf fall are captured, not just a
+single "stage".
 
 | Parameter | Options |
 |---|---|
-| Phenophase | Vegetative · Flowering · Fruiting · Ripe · Dormant |
-| Health | Good · Fair · Poor |
+| Phenophases present now (multi-select) | **Leaves:** Budburst · Young leaves · Mature leaves · Colored/falling · Bare (leafless) · **Flowers:** Flower buds · Open flowers · **Fruit:** Unripe fruit · Ripe fruit · Recent fruit/seed drop |
+| Overall health | Good · Fair · Poor |
+| **DBH re-measure** | cm — **trees only (okari/massoy)**, entered once a year; updates the tree's registry baseline |
+| Photo | optional — only if there is something to report |
 | Notes | text |
+
+*Stored as `phenophases` (array of the keys above) plus a legacy `phase` (first
+selected) for back-compatibility.*
 
 ### 2.6 Disturbance verification — field check
 Store `disturbances`. One verification per routed alert (clan-owned). The alert

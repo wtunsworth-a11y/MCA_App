@@ -226,7 +226,33 @@ default is only used when no `_zones.json` exists).
   Zone staff), and clan stewards **authorised for a topic** via Grant
   Authorisation. Zone staff default to *Awareness* sessions unless authorised.
 
-## 11. Redeploying the backend
+## 11. Steward / Officer IDs — unique, offline-checked
+
+The **Steward ID** is the key identity for every person: it tags their records,
+names their Drive folder, holds their authorisations, and drives their
+**timesheet and pay**. A duplicate ID mixes two people's data and pay, so IDs
+**must be unique**.
+
+**Convention:** `MCA-<Zone>-<NN>` — e.g. `MCA-7B-01`, `MCA-7B-02`. Field
+officers (not tied to a zone) use a dedicated block, e.g. `MCA-FO-01`,
+`MCA-FO-02`. Because the zone/block is *in* the ID, two coordinators working
+different zones can never collide.
+
+**Offline duplicate check (built in).** The app **ships with the list of IDs
+already in use** (`KNOWN_IDS` in `prototype/index.html`). At enrolment it checks
+the typed ID against that list **with no internet** and **blocks a duplicate**,
+with live feedback as you type. Keep `KNOWN_IDS` current: before giving the app
+to new enrollers, paste every existing ID into that array (UPPERCASE), e.g.
+`var KNOWN_IDS = ['MCA-7A-001','MCA-7B-014', …];`, then redeploy to Pages.
+
+**The one residual risk — concurrent creation.** The offline check can't see an
+ID a *different* coordinator is inventing at the same moment on another phone.
+Avoid it simply: **one person issues each block** (e.g. whoever enrols the field
+officers owns `MCA-FO-01…`), or give each coordinator a distinct zone/number
+range. A synced people-roster that reconciles after the fact is a later
+enhancement; the shipped list + blocks cover the pilot.
+
+## 12. Redeploying the backend
 
 Re-paste `prototype/apps-script-upload.js` → **Save** → **Deploy → Manage
 deployments → ✏️ → New version → Deploy** (URL stays the same). **Do not run

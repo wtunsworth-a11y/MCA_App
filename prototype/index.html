@@ -1654,7 +1654,9 @@ select.msel {
           </div>
           <div class="form-group">
             <label class="form-label">Steward ID <span style="color:#B71C1C;">*</span></label>
-            <input type="text" id="enrollStewardId" class="form-input" placeholder="e.g. MCA-007" autocomplete="off" style="text-transform:uppercase;">
+            <input type="text" id="enrollStewardId" class="form-input" placeholder="e.g. MCA-7B-01" autocomplete="off" style="text-transform:uppercase;" oninput="enrollCheckId()">
+            <div style="font-size:0.68rem;color:#888;margin-top:4px;">Format <strong>MCA-&lt;Zone&gt;-&lt;NN&gt;</strong> (e.g. MCA-7B-01). Must be <strong>unique</strong> — never reuse an ID.</div>
+            <div id="enrollIdStatus" style="font-size:0.72rem;margin-top:3px;"></div>
           </div>
           <div class="form-group">
             <label class="form-label">Clan <span style="color:#B71C1C;">*</span></label>
@@ -6072,6 +6074,32 @@ function enrollRoleChanged() {
   tg.style.display = (role === 'field_officer') ? 'block' : 'none';
 }
 
+/* ── Known Steward/Officer IDs that already exist in the project ──
+   The app SHIPS with this list so a new enrolment can be checked for
+   duplicates fully OFFLINE (no sync needed). Paste every ID already in use
+   between the brackets, UPPERCASE, e.g. 'MCA-7B-014'. Keep it current when
+   you redistribute the app. (The only residual risk is two coordinators
+   inventing the SAME new ID at the same time — avoid that with per-zone /
+   per-coordinator number blocks; see the Administrator's Manual.) */
+var KNOWN_IDS = [
+  // 'MCA-7A-001', 'MCA-7B-014', ...  ← paste existing IDs here
+];
+function _idTaken(id){
+  id = (id||'').trim().toUpperCase();
+  for (var i=0;i<KNOWN_IDS.length;i++){ if ((KNOWN_IDS[i]||'').trim().toUpperCase() === id) return true; }
+  return false;
+}
+/* Live feedback as the coordinator types the ID. */
+function enrollCheckId(){
+  var el=document.getElementById('enrollStewardId'), st=document.getElementById('enrollIdStatus');
+  if(!el||!st) return;
+  var sid=(el.value||'').trim().toUpperCase();
+  if(!sid){ st.textContent=''; return; }
+  if(_idTaken(sid)){ st.textContent='✗ '+sid+' is already in use — choose a different ID.'; st.style.color='#B71C1C'; return; }
+  if(!/^MCA-[A-Z0-9]+-\d{1,3}$/.test(sid)){ st.textContent='△ Suggested format: MCA-<Zone>-<NN> (e.g. MCA-7B-01).'; st.style.color='#E65100'; return; }
+  st.textContent='✓ '+sid+' looks unique.'; st.style.color='#2E7D32';
+}
+
 function enrollSaveProfile() {
   var name    = (document.getElementById('enrollName').value || '').trim();
   var sid     = (document.getElementById('enrollStewardId').value || '').trim().toUpperCase();
@@ -6090,6 +6118,15 @@ function enrollSaveProfile() {
   }
   if (role !== 'mcf_staff' && !zoneId) {
     toast('Please select a Zone.');
+    return;
+  }
+  /* Duplicate-ID guard — the Steward ID is the key for records, Drive
+     folders, authorisations and PAY, so it must be unique. Checked offline
+     against the shipped known-ID list. */
+  if (_idTaken(sid)) {
+    var st = document.getElementById('enrollIdStatus');
+    if (st) { st.textContent = '✗ ' + sid + ' is already in use — choose a different, unique ID.'; st.style.color = '#B71C1C'; }
+    toast('ID ' + sid + ' already exists — pick a unique one.');
     return;
   }
   /* Collect authorised topics for field officers */

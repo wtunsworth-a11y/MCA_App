@@ -136,6 +136,13 @@ geotagged photo, on-site fingerprint. See `tools/README.md`.
 
 ## 8. Still open / next
 
+- [ ] **Populate `KNOWN_IDS`** (in `prototype/index.html`) with the existing
+      Steward/Officer IDs **before enrolling the field officers** — the offline
+      duplicate check at enrolment uses this shipped list to block clashes.
+      Convention `MCA-<Zone>-<NN>`; field officers use an `MCA-FO-NN` block,
+      issued by one person to avoid concurrent-creation clashes. (Mechanism +
+      live check are built; just needs the real IDs pasted in. A synced
+      people-roster is a later enhancement.) See Admin Manual §11.
 - [ ] **Redeploy backend** (zone fix) + Manage Zones save.
 - [ ] **FIRMS_MAP_KEY** + daily trigger (`installDisturbanceFeedTrigger`) to turn
       the fire feed on; **GFW/RADD** Earth Engine run on a schedule.

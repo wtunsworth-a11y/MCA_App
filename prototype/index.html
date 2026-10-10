@@ -10898,8 +10898,10 @@ function initReportScreen(profile) {
     if (sub)   sub.textContent   = 'Zone Staff View';
     if (back)  back.onclick = function() { showScreen('screen-dashboard'); };
   }
-  /* Restore last cached report immediately */
+  /* Show the last cached report instantly, then auto-refresh from the backend
+     when online so you always land on current data (and it's re-cached). */
   loadCachedReport(profile);
+  if (navigator.onLine && UPLOAD_ENDPOINT) { fetchReport(); }
 }
 
 function reportSetPeriod(period) {
@@ -10937,7 +10939,9 @@ function fetchReport() {
       if (d.status === 'ok' && d.report) {
         /* Cache it */
         var cacheKey = 'report_' + role + '_' + (_reportProfile.zone_id || 'mcf') + '_' + _reportPeriod;
-        saveRecord('auth', {id: cacheKey, report: d.report, cached_at: new Date().toISOString()}, function(){});
+        /* updateRecord = put (overwrite); saveRecord used add() which fails on
+           an existing key, so a refresh never replaced the cached report. */
+        updateRecord('auth', {id: cacheKey, report: d.report, cached_at: new Date().toISOString()}, function(){});
         renderReport(d.report, role);
         document.getElementById('reportCacheNote').textContent =
           'Updated ' + new Date().toLocaleTimeString();

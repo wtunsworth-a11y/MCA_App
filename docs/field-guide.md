@@ -26,6 +26,13 @@ wrong date. Open your phone's **Settings → Date & Time** and turn on
 **Automatic / Network-provided** date & time, then tap **"I've fixed it —
 re-check"**. Do this *before* collecting any data.
 
+**If the app ever stops you from working** — a warning won't clear, something is
+broken — don't lose your time. Tap **Report a Problem** (on your **Profile**, or
+on the warning itself), write what happened, and **attach a screenshot** (take
+one with power + volume-down first). It saves even with no signal and reaches the
+coordinator with your next **Send Data**, so they can help and your work isn't
+lost.
+
 ---
 
 ## 2. How monitoring works — register first, then monitor

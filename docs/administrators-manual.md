@@ -48,6 +48,8 @@ Once verified you get the coordinator actions:
 - 🏫 Approve Facilities
 - 🌧 Approve Met Stations
 - 🌳 Approve Trees
+- 📅 Date Review
+- ⚠ Issue Reports
 
 ---
 
@@ -258,3 +260,36 @@ Re-paste `prototype/apps-script-upload.js` → **Save** → **Deploy → Manage
 deployments → ✏️ → New version → Deploy** (URL stays the same). **Do not run
 `setCoordinatorSecret()`** — the key is already in Script Properties and running
 it would overwrite it. Redeploying **never** requires re-setting the key.
+
+## 13. Date Review (unverified-clock records)
+
+Every record's date comes from the **device clock** (a phone app can't read true
+GPS time). The app sanity-checks the clock at login and flags any record taken on
+an unverified clock (`clock_ok:false`). Because uploads happen **online**, the
+true capture time of a flagged record is bracketed by **[last time the phone was
+online … the upload moment]**:
+
+- If both ends fall in the **same month**, the month is **known** — enough for
+  monthly monitoring. The **Date Review** screen shows a green *Month known*
+  badge; accepting it in one tap confirms that month's date.
+- If they **straddle two months**, it's flagged **month-uncertain** (amber). Use
+  your field knowledge (the activity calendar, when you know the steward worked)
+  to set the correct date, then **Accept**. Or **Reject** a record you can't
+  trust.
+
+Open it via **Coordinator Tools → Date Review** (needs internet). Your decision
+(corrected date / accepted / rejected) is stored in `_date_review.json` keyed by
+the record's uid. **The underlying data is always kept — only the date is under
+review.**
+
+## 14. Issue Reports (field problem reports)
+
+If the app ever blocks a steward from working — a bug, a date warning that won't
+clear — they can **Report a Problem** (from their Profile, or from the warning
+itself) with a short description and a **screenshot**, which saves offline and
+uploads with their next Send Data. Open **Coordinator Tools → Issue Reports**
+(needs internet) to see each report with its screenshot and the auto-captured
+context (which screen, the phone's date, whether the clock was verified, online
+state, app build). Fix or follow up, then **Mark resolved**. This guarantees an
+honest app failure never means lost work — the steward's evidence still reaches
+you.

@@ -318,6 +318,57 @@ function updatePhenoPlots(list) {
   return { status: 'ok', message: 'Pheno plot registry saved', count: (list || []).length };
 }
 
+/* ─── Date review: records captured on an unverified device clock ───────
+ * _date_review.json: flagged reading records with a date bracket
+ * [earliest..latest] (the last verified-online time .. the upload time) for the
+ * coordinator to confirm/correct and accept. Keyed by record uid. */
+function loadDateReviewList() {
+  try { var f=getDataFolder(); var fs=f.getFilesByName('_date_review.json'); if(fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString())||[]; } catch(e){}
+  return [];
+}
+function saveDateReviewList(list) {
+  var f=getDataFolder(); var fs=f.getFilesByName('_date_review.json'); var j=JSON.stringify(list||[],null,2);
+  if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_date_review.json', j, MimeType.PLAIN_TEXT);
+}
+function getDateReview() {
+  return ContentService.createTextOutput(JSON.stringify({ status:'ok', date_review: loadDateReviewList() })).setMimeType(ContentService.MimeType.JSON);
+}
+/* Steward posts flagged records (array) at upload — merge by uid, never clobber
+ * a coordinator decision already made. */
+function registerDateReview(items) {
+  if(!items || !items.length) return { status:'ok', count:0 };
+  var list=loadDateReviewList(); var byUid={}; for(var i=0;i<list.length;i++){ if(list[i].uid) byUid[list[i].uid]=i; }
+  items.forEach(function(it){ if(!it||!it.uid) return; var idx=byUid[it.uid];
+    if(idx===undefined){ it.status=it.status||'pending'; list.push(it); byUid[it.uid]=list.length-1; }
+    else if(list[idx].status==='pending'){ it.status='pending'; list[idx]=it; } /* refresh pending, keep decided */ });
+  saveDateReviewList(list); return { status:'ok', count:list.length };
+}
+/* Coordinator overwrite — corrected dates / accept / reject (coordinator key). */
+function updateDateReview(list) { saveDateReviewList(list||[]); return { status:'ok', message:'Date review saved', count:(list||[]).length }; }
+
+/* ─── Issue / error reports from the field ─────────────────────────────
+ * _issues.json: steward-submitted problem reports (note + context + optional
+ * screenshot) so a steward blocked by a bug can still get work/evidence in. */
+function loadIssuesList() {
+  try { var f=getDataFolder(); var fs=f.getFilesByName('_issues.json'); if(fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString())||[]; } catch(e){}
+  return [];
+}
+function saveIssuesList(list) {
+  var f=getDataFolder(); var fs=f.getFilesByName('_issues.json'); var j=JSON.stringify(list||[],null,2);
+  if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_issues.json', j, MimeType.PLAIN_TEXT);
+}
+function getIssues() {
+  return ContentService.createTextOutput(JSON.stringify({ status:'ok', issues: loadIssuesList() })).setMimeType(ContentService.MimeType.JSON);
+}
+function registerIssue(rec) {
+  if(!rec || !rec.uid) return { status:'error', message:'Missing issue uid' };
+  var list=loadIssuesList();
+  for(var i=0;i<list.length;i++){ if(list[i].uid===rec.uid) return { status:'ok', uid:rec.uid, note:'duplicate ignored' }; }
+  rec.status=rec.status||'open'; list.push(rec); saveIssuesList(list);
+  return { status:'ok', uid:rec.uid, count:list.length };
+}
+function updateIssues(list) { saveIssuesList(list||[]); return { status:'ok', message:'Issues saved', count:(list||[]).length }; }
+
 /* ─── Activity calendar ────────────────────────────────────────────────
  * _calendar.json in Drive: scheduled activities/meetings, keyed by uid. */
 function loadCalendarList() {
@@ -1138,7 +1189,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1281,6 +1332,23 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    /* Date review — steward posts flagged records at upload (upload secret only) */
+    if (body._action === 'register_date_review') {
+      return ContentService.createTextOutput(JSON.stringify(registerDateReview(body.items))).setMimeType(ContentService.MimeType.JSON);
+    }
+    /* Date review — coordinator correct/accept/reject (coordinator key required) */
+    if (body._action === 'update_date_review') {
+      return ContentService.createTextOutput(JSON.stringify(updateDateReview(body.date_review))).setMimeType(ContentService.MimeType.JSON);
+    }
+    /* Issue report — steward submits a problem (upload secret only) */
+    if (body._action === 'register_issue') {
+      return ContentService.createTextOutput(JSON.stringify(registerIssue(body.record))).setMimeType(ContentService.MimeType.JSON);
+    }
+    /* Issues — coordinator mark resolved / overwrite (coordinator key required) */
+    if (body._action === 'update_issues') {
+      return ContentService.createTextOutput(JSON.stringify(updateIssues(body.issues))).setMimeType(ContentService.MimeType.JSON);
+    }
+
     /* Normal steward data upload */
     var folder = getDataFolder();
 
@@ -1334,6 +1402,8 @@ function doGet(e) {
   if (action === 'calendar') { return getCalendar(); }
   if (action === 'disturbances') { return getDisturbances(); }
   if (action === 'help') { return getHelp(); }
+  if (action === 'date_review') { return getDateReview(); }
+  if (action === 'issues') { return getIssues(); }
 
   if (action === 'authorisations') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';

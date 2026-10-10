@@ -136,6 +136,13 @@ is coordinator-defined and syncs down like the other registries.
       *same* web app in a **TWA (Bubblewrap) or Capacitor** shell: one codebase
       / one system, gains Android local-alarm scheduling (WorkManager/
       AlarmManager) for reliable offline reminders, plus Play Store install.
+  - [ ] **Add GNSS clock as a date-integrity check.** A web app cannot read true
+        satellite time, but the native shell can: read Android **`GnssClock`**
+        (`LocationManager`, raw GNSS measurements → `getTimeNanos` /
+        `getFullBiasNanos`) to get a device-independent UTC fix with no network,
+        and feed it into the existing clock-trust layer as a third, strongest
+        anchor (above the plausibility window and the server anchor). Would also
+        let the warning show the *true* date offline, not just "looks wrong".
 - **Roles:** zone staff do the human advance-warning layer (community
   briefings); the app's reminders back this up, they don't replace it.
 

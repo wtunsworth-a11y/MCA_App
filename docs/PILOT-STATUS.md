@@ -17,7 +17,7 @@ and the operational procedures worked out during pilot setup.*
   baked into `prototype/index.html`
   (`…/macros/s/AKfycbxqEnJ1…JZR8XRg/exec`). **Deployed and verified**
   (`{"status":"ready"}`). **Coordinator server key is set** in Script Properties.
-- **Service worker cache:** `mca-steward-v30` (bumped every deploy). The app now
+- **Service worker cache:** `mca-steward-v31` (bumped every deploy). The app now
   **auto-applies updates** on reopen (checks on launch + focus, reloads once when
   a new worker takes over) — no more "open twice".
 - **Uploads fixed (v24):** Send Data and all registry/approval syncs POST as
@@ -26,13 +26,14 @@ and the operational procedures worked out during pilot setup.*
   uploads silently fell back to the share sheet ("Share failed"). No backend
   change was needed. If data still won't send after updating, it's connectivity,
   not this.
-- **Local DB:** IndexedDB `MCA_StewardData`, **DB_VERSION 12**, ~27 stores
-  (adds `disturbances`).
+- **Local DB:** IndexedDB `MCA_StewardData`, **DB_VERSION 13**, ~28 stores
+  (adds `disturbances`, `issues`).
 
-### ⚠️ Backend needs a redeploy (zone fix + server-time clock anchor)
-The deployed Apps Script copy predates the zone-list correction **and** the new
-`server_time` field in the ping response (which the app uses to catch a wrong
-device date — see §6a). **Re-paste `prototype/apps-script-upload.js` → Save →
+### ⚠️ Backend needs a redeploy (zone fix + server-time + date-review/issues)
+The deployed Apps Script copy predates the zone-list correction, the new
+`server_time` field in the ping response (used to catch a wrong device date,
+§6a), **and** the `date_review` / `issues` endpoints (§6b). **Re-paste
+`prototype/apps-script-upload.js` → Save →
 Deploy → Manage deployments → ✏️ → New version → Deploy.** Do **not** run
 `setCoordinatorSecret()` (the key is already stored; running it would overwrite
 it). After redeploy, open **MCF Summary → Refresh**. (Redeploying never requires
@@ -76,8 +77,8 @@ Enrolment + fingerprint login · Water Quality (natural + engineered) · Service
 Delivery (facilities) · Met instruments · **Phenology (NPN phenophases +
 markers + DBH)** · **Disturbance verification** · **Field Mapping (unified)** ·
 Activity Calendar + compliance ·
-Training · Send Data / sync · Help centre · Coordinator approvals / Manage Zones
-/ Grant Authorisation / reports.
+Training · Send Data / sync · Help centre · **Date Review** · **Field problem
+reports** · Coordinator approvals / Manage Zones / Grant Authorisation / reports.
 
 ### Unified Field Mapping (Observations + Garden folded in)
 One module for all ad-hoc mapping. Modes **Point / Line / Area-garden**.
@@ -156,6 +157,30 @@ Automatic/Network*. They can re-check after fixing, or **Continue anyway**, whic
 flags every record with `clock_ok:false`. Each phenology record carries
 `device_time` + `clock_ok` so a coordinator can spot unverified dates. *(Stamping
 is on phenology now; extending to the other modules is a small follow-up.)*
+
+## 6b. Date review & field problem reports
+
+**Date Review (coordinator).** A record stamped `clock_ok:false` can still be
+dated at upload, because the upload happens online: the true capture instant is
+bracketed by **[last verified-online time … upload time]**. If both ends fall in
+the **same calendar month**, the month is **known** (all monthly monitoring
+needs); if they straddle, it's flagged **month-uncertain**. At each online **Send
+Data**, flagged records get this bracket (it also rides into the record on Drive)
+and are posted to `_date_review.json`. Coordinator Tools → **Date Review** lists
+them with the bracket and a month-known / month-uncertain badge; the coordinator
+**confirms or corrects the date and accepts** (or rejects) — the data is kept,
+only the date is reviewed. Decisions are keyed by record uid in the registry.
+
+**Report a Problem (steward → coordinator).** A steward blocked by a bug (e.g.
+the date warning won't clear) can **Report a Problem** from their Profile, from
+the clock warning itself, and anywhere via that screen. They write what happened
+and attach a **screenshot** (phone screenshot → attach); the app auto-captures
+context (screen, phone date, `clock_ok`, online state, build, steward). It saves
+to the `issues` store **offline** and uploads with the next Send Data (or
+immediately when online) to `_issues.json`. Coordinator Tools → **Issue Reports**
+shows open reports with their screenshot and context, and a **Mark resolved**
+action. So an honest app failure never means lost work — the evidence still gets
+in. *(Screenshots are the phone's own; the app doesn't auto-capture the screen.)*
 
 ## 7. Operational how-tos (worked out this session)
 

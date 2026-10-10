@@ -1642,6 +1642,8 @@ select.msel {
           <button class="btn-outline" id="enrollApproveFacBtn" style="display:none;margin-top:8px;width:100%;border-color:#283593;color:#283593;" onclick="showScreen('screen-facility-approve')"><span data-icon="school" data-size="14"></span> Approve Facilities</button>
           <button class="btn-outline" id="enrollApproveMetBtn" style="display:none;margin-top:8px;width:100%;border-color:#37474F;color:#37474F;" onclick="showScreen('screen-met-approve')"><span data-icon="cloudrain" data-size="14"></span> Approve Met Stations</button>
           <button class="btn-outline" id="enrollApproveTreeBtn" style="display:none;margin-top:8px;width:100%;border-color:#E65100;color:#E65100;" onclick="showScreen('screen-pheno-approve')"><span data-icon="tree" data-size="14"></span> Approve Trees</button>
+          <button class="btn-outline" id="enrollDateReviewBtn" style="display:none;margin-top:8px;width:100%;border-color:#00695C;color:#00695C;" onclick="showScreen('screen-date-review')"><span data-icon="calendar" data-size="14"></span> Date Review</button>
+          <button class="btn-outline" id="enrollIssuesBtn" style="display:none;margin-top:8px;width:100%;border-color:#AD1457;color:#AD1457;" onclick="showScreen('screen-issue-reports')"><span data-icon="warning" data-size="14"></span> Issue Reports</button>
         </div>
 
         <!-- STEP 2: Profile -->
@@ -3098,6 +3100,71 @@ select.msel {
     </div>
 
     <!-- ══════════════════════════════════════
+         SCREEN: DATE REVIEW (coordinator)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-date-review">
+      <div class="top-bar" style="background:#00695C;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Date Review</div><div class="bar-subtitle">Records with an unverified clock</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div id="dateReviewContent"><div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: REPORT A PROBLEM (steward)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-report-issue">
+      <div class="top-bar" style="background:#AD1457;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Report a Problem</div><div class="bar-subtitle">Tell the coordinator what went wrong</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div class="matrix-note" style="background:#FCE4EC;border-color:#F48FB1;color:#AD1457;font-size:0.76rem;">
+            <span data-icon="info" data-size="14"></span> If the app is stopping you from working, describe it here and attach a screenshot. This is saved even offline and uploads with your next <strong>Send Data</strong>, so the coordinator can help and your work isn't lost.
+          </div>
+          <div class="form-group">
+            <label class="form-label">What happened? <span style="color:#B71C1C;">*</span></label>
+            <textarea id="issueNote" class="form-input" style="min-height:90px;width:100%;font-size:0.82rem;" placeholder="e.g. The date warning won't clear even after I fixed my phone's clock, and I can't record my trees…"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span data-icon="camera" data-size="14"></span> Screenshot or photo <span style="color:#999;font-weight:400;">(recommended)</span></label>
+            <div id="issuePhotoBox" style="width:100%;min-height:90px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="document.getElementById('issuePhotoInput').click()">
+              <div style="text-align:center;color:#999;"><div style="font-size:1.8rem;"><span data-icon="camera" data-size="28"></span></div><div style="font-size:0.72rem;margin-top:2px;">Tap to attach a screenshot</div></div>
+            </div>
+            <input type="file" id="issuePhotoInput" accept="image/*" style="display:none;" onchange="issuePhotoPicked(this)">
+            <div style="font-size:0.68rem;color:#999;">Take a screenshot first (power + volume-down), then attach it here.</div>
+          </div>
+          <div class="card" style="padding:10px 14px;margin-bottom:12px;background:#fafafa;">
+            <div style="font-size:0.7rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">Attached automatically</div>
+            <div id="issueContext" style="font-size:0.72rem;color:#666;line-height:1.6;">—</div>
+          </div>
+          <button class="btn-primary" style="background:#AD1457;" onclick="submitIssue()">Submit report</button>
+          <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: ISSUE REPORTS (coordinator)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-issue-reports">
+      <div class="top-bar" style="background:#AD1457;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Issue Reports</div><div class="bar-subtitle">Problems reported from the field</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:20px;">
+          <div id="issueReportsContent"><div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
          SCREEN: SERVICE DELIVERY MONITORING
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-sdm">
@@ -3441,6 +3508,7 @@ select.msel {
             <div class="detail-row"><span class="dl">Steward ID</span><span class="dv">MCA-7B-042</span></div>
           </div>
           <button class="btn-outline" style="width:100%;margin:10px 0 4px;" onclick="nav('screen-timesheet')"><span data-icon="document" data-size="14"></span> My Timesheet</button>
+          <button class="btn-outline" style="width:100%;margin:6px 0 4px;border-color:#AD1457;color:#AD1457;" onclick="reportIssue('profile')"><span data-icon="warning" data-size="14"></span> Report a Problem</button>
           <!-- Oversight tools — shown only for Project/MCF & Zone staff -->
           <div id="profileOversightTools" style="display:none;">
             <button class="btn-outline" style="width:100%;margin:6px 0 4px;border-color:#1565C0;color:#1565C0;" onclick="openReports()"><span data-icon="barchart" data-size="14"></span> MCF Summary / Reports</button>
@@ -5663,7 +5731,7 @@ const ALL_SCREENS = [
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-qabb-setup','screen-qabb-matrix',
   'screen-water-setup','screen-water-record','screen-water-sources','screen-water-source-register','screen-water-approve',
-  'screen-pheno-setup','screen-pheno-plots','screen-pheno-establish','screen-pheno-inactive','screen-pheno-record','screen-pheno-approve',
+  'screen-pheno-setup','screen-pheno-plots','screen-pheno-establish','screen-pheno-inactive','screen-pheno-record','screen-pheno-approve','screen-date-review','screen-issue-reports','screen-report-issue',
   'screen-sdm','screen-facility','screen-facilities','screen-facility-register','screen-facility-approve',
   'screen-met-stations','screen-met-register','screen-met-approve','screen-met-record',
   'screen-activity-calendar','screen-cal-add','screen-cal-report','screen-freemap','screen-livemap',
@@ -5720,6 +5788,9 @@ function showScreen(id) {
   if (id === 'screen-facility-approve') initFacilityApprove();
   if (id === 'screen-met-approve') initMetApprove();
   if (id === 'screen-pheno-approve') initPhenoApprove();
+  if (id === 'screen-date-review') initDateReview();
+  if (id === 'screen-issue-reports') initIssueReports();
+  if (id === 'screen-report-issue') initReportIssue();
   if (id === 'screen-dashboard') renderDashboardStatus();
   if (id === 'screen-alerts') initDisturbances();
   if (id === 'screen-help') renderHelpCentre();
@@ -6054,6 +6125,8 @@ function enrollCheckPasscode() {
       document.getElementById('enrollApproveFacBtn').style.display = 'block';
       document.getElementById('enrollApproveMetBtn').style.display = 'block';
       document.getElementById('enrollApproveTreeBtn').style.display = 'block';
+      document.getElementById('enrollDateReviewBtn').style.display = 'block';
+      document.getElementById('enrollIssuesBtn').style.display = 'block';
       document.getElementById('enrollPassStatus').textContent = '✓ Coordinator verified. Choose an action.';
       document.getElementById('enrollPassStatus').style.color = '#2E7D32';
       /* Pre-load zones and topics ready for step 2 */
@@ -9218,6 +9291,164 @@ function approvePhenoTree(id){
   });
 }
 function rejectPhenoTree(id){ getAllRecords('pheno_plots', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r) return; r.status='rejected'; r.synced=false; updateRecord('pheno_plots', r, function(){ pushPhenoRegistry(function(){}); toast('Tree rejected'); initPhenoApprove(); }); }); }
+
+/* ── Coordinator: Date Review ──────────────────────────────────────────
+   Records captured on an unverified clock arrive with a date bracket. Where
+   the bracket pins the month, the coordinator can accept it in one tap; where
+   it doesn't, they set the correct date from field knowledge, then accept. */
+window._dateReviewRows=[];
+function initDateReview(){
+  var c=document.getElementById('dateReviewContent'); if(!c) return;
+  c.innerHTML='<div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>';
+  if(!navigator.onLine){ c.innerHTML='<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">Date Review needs internet to load flagged records.</div>'; return; }
+  fetch(UPLOAD_ENDPOINT+'?action=date_review').then(function(r){return r.json();}).then(function(d){
+    window._dateReviewRows=(d&&d.date_review)||[]; renderDateReview();
+  }).catch(function(){ c.innerHTML='<div class="matrix-note" style="background:#FFEBEE;border-color:#EF9A9A;color:#B71C1C;">Could not load Date Review.</div>'; });
+}
+function _drFmt(iso){ if(!iso) return '—'; var d=new Date(iso); if(isNaN(d)) return iso; return d.getUTCDate()+' '+_MONTHS_FULL[d.getUTCMonth()]+' '+d.getUTCFullYear(); }
+function renderDateReview(){
+  var c=document.getElementById('dateReviewContent'); if(!c) return;
+  var pending=(window._dateReviewRows||[]).filter(function(r){return (r.status||'pending')==='pending';});
+  if(pending.length===0){ c.innerHTML='<div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;">No records awaiting date review.</div>'; return; }
+  var h='<div class="matrix-note" style="background:#E0F2F1;border-color:#80CBC4;color:#00695C;">'+pending.length+' record'+(pending.length>1?'s':'')+' were captured on a phone whose clock was not verified. Confirm or correct the date, then accept — the data is kept, only the date is reviewed.</div>';
+  pending.forEach(function(r){
+    var defDate = r.month_known ? String(r.latest||'').slice(0,10) : (String(r.latest||'').slice(0,10)||'');
+    var monthBadge = r.month_known
+      ? '<span style="background:#E8F5E9;color:#2E7D32;font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:10px;">Month known: '+(r.month||'')+'</span>'
+      : '<span style="background:#FFF3E0;color:#E65100;font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:10px;">Month uncertain — set the date</span>';
+    h+='<div class="card" style="padding:12px 14px;margin-bottom:12px;">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;"><span style="font-size:0.9rem;font-weight:700;">'+icon('calendar',16)+' '+(r.summary||r.survey_type||'Record')+'</span>'+monthBadge+'</div>';
+    h+='<div style="font-size:0.74rem;color:#666;">'+(r.steward||'—')+(r.clan?(' · '+r.clan):'')+(r.steward_id?(' · '+r.steward_id):'')+'</div>';
+    h+='<div style="font-size:0.74rem;color:#666;margin:4px 0;">Phone said: <strong>'+(r.recorded_label||_drFmt(r.device_time))+'</strong></div>';
+    h+='<div style="font-size:0.72rem;color:#888;">Captured between <strong>'+_drFmt(r.earliest)+'</strong> and <strong>'+_drFmt(r.latest)+'</strong> (last online → upload).</div>';
+    h+='<div class="form-group" style="margin:8px 0;"><label class="form-label" style="font-size:0.72rem;">Correct date <span style="color:#B71C1C;">*</span></label><input type="date" id="dr-date-'+r.uid+'" class="form-input" style="padding:8px 11px;font-size:0.82rem;" value="'+defDate+'"></div>';
+    h+='<div style="display:flex;gap:8px;"><button class="btn-primary" style="background:#00695C;flex:2;padding:9px 6px;font-size:0.82rem;" onclick="acceptDateReview(\''+r.uid+'\')">✓ Accept date</button><button class="btn-outline" style="flex:1;color:#B71C1C;border-color:#FFCDD2;padding:9px 6px;font-size:0.82rem;" onclick="rejectDateReview(\''+r.uid+'\')">Reject</button></div>';
+    h+='</div>';
+  });
+  c.innerHTML=h;
+}
+function _pushDateReview(){
+  if(!UPLOAD_ENDPOINT||!navigator.onLine){ toast('Need internet to save.'); return; }
+  fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'update_date_review',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,date_review:window._dateReviewRows})})
+    .then(function(r){return r.json();}).then(function(d){ if(d&&d.status==='ok'){ renderDateReview(); } else { toast((d&&d.message)||'Save failed'); } }).catch(function(){ toast('Save failed — check signal'); });
+}
+function acceptDateReview(uid){
+  var inp=document.getElementById('dr-date-'+uid); var val=inp?inp.value:'';
+  if(!val){ toast('Set the correct date first.'); return; }
+  var r=(window._dateReviewRows||[]).find(function(x){return x.uid===uid;}); if(!r) return;
+  r.corrected_date=val; r.status='accepted'; r.reviewed_at=new Date().toISOString();
+  toast('Date accepted ✓'); _pushDateReview();
+}
+function rejectDateReview(uid){
+  var r=(window._dateReviewRows||[]).find(function(x){return x.uid===uid;}); if(!r) return;
+  r.status='rejected'; r.reviewed_at=new Date().toISOString();
+  toast('Record rejected'); _pushDateReview();
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ISSUE / ERROR REPORTS
+   A steward blocked by a bug (e.g. the date warning won't clear) can still
+   log the problem with a screenshot and keep working. Saved offline, uploaded
+   with the next Send Data, surfaced to the coordinator.
+══════════════════════════════════════════════════════════════════════ */
+function reportIssue(contextLabel){
+  window._issueContextLabel = contextLabel || '';
+  window._issueFromScreen = (typeof currentScreen==='string' ? currentScreen : '');
+  var ov=document.getElementById('clockWarnOverlay'); if(ov) ov.remove(); /* don't trap behind the modal */
+  showScreen('screen-report-issue');
+}
+function initReportIssue(){
+  window._issuePhoto=null;
+  var note=document.getElementById('issueNote'); if(note) note.value='';
+  var box=document.getElementById('issuePhotoBox');
+  if(box) box.innerHTML='<div style="text-align:center;color:#999;"><div style="font-size:1.8rem;">'+icon('camera',28)+'</div><div style="font-size:0.72rem;margin-top:2px;">Tap to attach a screenshot</div></div>';
+  var c=checkClock();
+  var p=window._cachedProfile||{};
+  var ctx=document.getElementById('issueContext');
+  if(ctx){
+    ctx.innerHTML=
+      'Phone date: <strong>'+_fmtClockDate(new Date())+'</strong> ('+(c.ok&&!window._clockOverride?'clock verified':'clock NOT verified')+')<br>'
+     +'Screen: <strong>'+((window._issueContextLabel||window._issueFromScreen||'—').replace('screen-',''))+'</strong><br>'
+     +'Connection: <strong>'+(navigator.onLine?'online':'offline')+'</strong> · Build: '+APP_BUILD+'<br>'
+     +'You: <strong>'+(p.name||'—')+'</strong>'+(p.stewardId?(' · '+p.stewardId):'')+(p.clan?(' · '+p.clan):'');
+  }
+}
+function issuePhotoPicked(input){
+  var f=input.files&&input.files[0]; if(!f) return;
+  var reader=new FileReader();
+  reader.onload=function(e){ window._issuePhoto=e.target.result; var box=document.getElementById('issuePhotoBox'); if(box) box.innerHTML='<img src="'+e.target.result+'" style="max-height:220px;max-width:100%;border-radius:8px;" alt="Attached screenshot">'; };
+  reader.readAsDataURL(f);
+}
+function submitIssue(){
+  var note=((document.getElementById('issueNote')||{}).value||'').trim();
+  if(!note){ toast('Please describe the problem.'); return; }
+  var c=checkClock(); var p=window._cachedProfile||{};
+  var rec={
+    survey_type:'issue', uid:generateRecordId('ISS'),
+    note:note, screenshot:window._issuePhoto||null,
+    context:{ screen:(window._issueContextLabel||window._issueFromScreen||''), online:navigator.onLine, build:APP_BUILD,
+      device_time:new Date().toISOString(), clock_ok:(!!c.ok && !window._clockOverride), clock_offset_ms:(window._clockOffsetMs||0) },
+    steward:(p.name||''), steward_id:(p.stewardId||''), clan:(p.clan||''), zone:(p.zone||''),
+    created_at:new Date().toISOString(), status:'open', synced:false
+  };
+  saveRecord('issues', rec, function(){
+    toast('Problem reported ✓');
+    if(navigator.onLine && UPLOAD_ENDPOINT){ flushIssues(function(){}); }
+    goBack();
+  });
+}
+/* Push any unsynced issue reports to the server (called at submit and at Send Data). */
+function flushIssues(cb){
+  if(!UPLOAD_ENDPOINT||!navigator.onLine){ if(cb)cb(); return; }
+  getAllRecords('issues', function(rows){
+    var pending=(rows||[]).filter(function(r){return !r.synced;});
+    if(pending.length===0){ if(cb)cb(); return; }
+    var left=pending.length;
+    pending.forEach(function(r){
+      fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'register_issue',_secret:UPLOAD_SECRET,record:r})})
+        .then(function(res){return res.json();}).then(function(d){ if(d&&d.status==='ok'){ r.synced=true; updateRecord('issues', r, function(){ if(--left===0&&cb)cb(); }); } else { if(--left===0&&cb)cb(); } })
+        .catch(function(){ if(--left===0&&cb)cb(); });
+    });
+  });
+}
+/* ── Coordinator: Issue Reports viewer ── */
+window._issueRows=[];
+function initIssueReports(){
+  var c=document.getElementById('issueReportsContent'); if(!c) return;
+  c.innerHTML='<div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>';
+  if(!navigator.onLine){ c.innerHTML='<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">Issue Reports need internet to load.</div>'; return; }
+  fetch(UPLOAD_ENDPOINT+'?action=issues').then(function(r){return r.json();}).then(function(d){ window._issueRows=(d&&d.issues)||[]; renderIssueReports(); })
+    .catch(function(){ c.innerHTML='<div class="matrix-note" style="background:#FFEBEE;border-color:#EF9A9A;color:#B71C1C;">Could not load Issue Reports.</div>'; });
+}
+function renderIssueReports(){
+  var c=document.getElementById('issueReportsContent'); if(!c) return;
+  var open=(window._issueRows||[]).filter(function(r){return (r.status||'open')==='open';});
+  var resolved=(window._issueRows||[]).filter(function(r){return (r.status||'open')==='resolved';});
+  if(open.length===0 && resolved.length===0){ c.innerHTML='<div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;">No problems reported.</div>'; return; }
+  var h='';
+  if(open.length) h+='<div class="matrix-note" style="background:#FCE4EC;border-color:#F48FB1;color:#AD1457;">'+open.length+' open problem'+(open.length>1?'s':'')+' reported from the field.</div>';
+  var card=function(r,isOpen){
+    var ctx=r.context||{};
+    var s='<div class="card" style="padding:12px 14px;margin-bottom:12px;'+(isOpen?'':'opacity:0.7;')+'">';
+    s+='<div style="display:flex;justify-content:space-between;gap:8px;"><span style="font-size:0.82rem;font-weight:700;">'+icon('warning',15)+' '+(r.steward||'Unknown')+(r.clan?(' · '+r.clan):'')+'</span><span style="font-size:0.66rem;color:#888;">'+_drFmt(r.created_at)+'</span></div>';
+    s+='<div style="font-size:0.8rem;color:#333;margin:6px 0;white-space:pre-wrap;">'+(r.note||'').replace(/</g,'&lt;')+'</div>';
+    s+='<div style="font-size:0.68rem;color:#999;">Screen '+((ctx.screen||'—')+'').replace('screen-','')+' · '+(ctx.online?'online':'offline')+' · clock '+(ctx.clock_ok?'verified':'UNVERIFIED')+' · '+(ctx.build||'')+'</div>';
+    if(r.screenshot) s+='<img src="'+r.screenshot+'" style="max-width:100%;border-radius:8px;margin-top:8px;" alt="Reported screenshot">';
+    if(isOpen) s+='<button class="btn-outline" style="margin-top:8px;width:100%;color:#1B5E20;border-color:#A5D6A7;font-size:0.8rem;" onclick="resolveIssue(\''+r.uid+'\')">Mark resolved</button>';
+    s+='</div>';
+    return s;
+  };
+  open.forEach(function(r){ h+=card(r,true); });
+  if(resolved.length){ h+='<div class="section-label" style="padding-left:0;margin-top:6px;">Resolved</div>'; resolved.forEach(function(r){ h+=card(r,false); }); }
+  c.innerHTML=h;
+}
+function resolveIssue(uid){
+  var r=(window._issueRows||[]).find(function(x){return x.uid===uid;}); if(!r) return;
+  r.status='resolved'; r.resolved_at=new Date().toISOString();
+  if(!UPLOAD_ENDPOINT||!navigator.onLine){ toast('Need internet to save.'); return; }
+  fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'update_issues',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,issues:window._issueRows})})
+    .then(function(res){return res.json();}).then(function(d){ if(d&&d.status==='ok'){ toast('Marked resolved ✓'); renderIssueReports(); } else { toast((d&&d.message)||'Save failed'); } }).catch(function(){ toast('Save failed — check signal'); });
+}
 function phenoOwnedByMyClan(p){ return isOversight() || !p.owner_clan || p.owner_clan===myClan() || p.owner_clan_2===myClan(); }
 
 function phenoRegistryRecord(r){ return { uid:r.uid, crop_type:r.crop_type, plant_num:r.plant_num, lat:r.lat, lng:r.lng, location_name:r.location_name, notes:r.notes, marker_type:r.marker_type||null, dbh_cm:(r.dbh_cm!=null?r.dbh_cm:null), dbh_date:r.dbh_date||null, established_date:r.established_date, device_time:r.device_time||null, clock_ok:(r.clock_ok!==undefined?r.clock_ok:null), status:r.status, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, approved_date:r.approved_date||null, inactive_reason:r.inactive_reason||null }; }
@@ -9363,7 +9594,7 @@ function submitAllPhenoObs() {
     var dbhEl=document.getElementById('dbh-'+plotId);
     var dbh=(dbhEl&&dbhEl.value!=='')?parseFloat(dbhEl.value):null;
     var rec={
-      survey_type:'phenology',date:date,time:time,weather:weather,
+      survey_type:'phenology',record_uid:generateRecordId('PHO'),date:date,time:time,weather:weather,
       plot_id:plotId,crop_type:crop,plant_num:plantNum,
       phenophases:phases, phase:(phases[0]||''), health:health,
       notes:notes,general_notes:genNotes,
@@ -10226,8 +10457,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 12;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances'];
+var DB_VERSION = 13;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -10268,6 +10499,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
+var APP_BUILD       = 'mca-steward-v31'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -10354,6 +10586,7 @@ function showClockWarning(c){
    +'<div style="font-size:0.78rem;color:#666;margin-top:12px;line-height:1.5;"><strong>How to fix:</strong> open your phone’s <strong>Settings → Date &amp; Time</strong> and turn on <strong>Automatic / Network-provided</strong> date &amp; time.</div>'
    +'<button class="btn-primary" style="margin-top:14px;width:100%;" onclick="clockRecheck()">I’ve fixed it — re-check</button>'
    +'<button class="btn-outline" style="margin-top:8px;width:100%;color:#999;border-color:#ccc;font-size:0.8rem;" onclick="clockContinueAnyway()">Continue anyway (record flagged)</button>'
+   +'<div style="text-align:center;margin-top:10px;"><a href="#" onclick="reportIssue(\'clock-warning\');return false;" style="font-size:0.78rem;color:#AD1457;text-decoration:underline;">Can’t fix it? Report a problem</a></div>'
    +'</div>';
   document.body.appendChild(ov);
 }
@@ -10362,6 +10595,39 @@ function clockRecheck(){
   if(navigator.onLine && UPLOAD_ENDPOINT){ pingServerTime(function(){ done(); }); } else { done(); }
 }
 function clockContinueAnyway(){ window._clockOverride=true; var ov=document.getElementById('clockWarnOverlay'); if(ov)ov.remove(); toast('Records will be flagged as unverified date'); }
+
+/* ── Date bracket for records captured on an unverified clock ──────────────
+   The true capture instant T sits in [earliest .. latest]:
+     latest   = the verified "now" at upload (server-corrected).
+     earliest = the last verified-online time before this upload (anchor).
+   If both ends fall in the same calendar month, the month is KNOWN even though
+   the exact date isn't — which is all monthly monitoring needs. Otherwise the
+   record goes to the coordinator's Date Review queue to confirm/correct. */
+var _MONTHS_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function _monthLabelUTC(d){ return _MONTHS_FULL[d.getUTCMonth()]+' '+d.getUTCFullYear(); }
+function _computeDateBracket(r){
+  var latestMs = (navigator.onLine ? trustedNow().getTime() : Date.now());
+  var earliestMs = (typeof window._uploadPrevEarliestMs==='number') ? window._uploadPrevEarliestMs : null;
+  var monthKnown=false, monthLabel='';
+  if(earliestMs!=null){
+    var e=new Date(earliestMs), l=new Date(latestMs);
+    if(e.getUTCFullYear()===l.getUTCFullYear() && e.getUTCMonth()===l.getUTCMonth()){ monthKnown=true; monthLabel=_monthLabelUTC(l); }
+  }
+  return { earliest:(earliestMs!=null?new Date(earliestMs).toISOString():null), latest:new Date(latestMs).toISOString(), device_time:r.device_time||null, month_known:monthKnown, month:monthLabel };
+}
+function _dateReviewSummary(store, r){
+  if(store==='phenology'){ var c=phenoCropLabel(r.crop_type); return 'Phenology — '+c+' Plant '+(r.plant_num||'?'); }
+  return (r.survey_type||store);
+}
+function _dateReviewEntry(store, r, br, profile){
+  var uid=r.record_uid || r.uid || (store+'-'+(r.id!=null?r.id:Math.random().toString(36).slice(2,8)));
+  return { uid:uid, store:store, survey_type:r.survey_type||store,
+    steward:(profile.name||''), steward_id:(profile.stewardId||''), clan:(profile.clan||''),
+    summary:_dateReviewSummary(store, r), recorded_label:(r.date||r.established_date||''),
+    device_time:br.device_time, earliest:br.earliest, latest:br.latest,
+    month_known:br.month_known, month:br.month, corrected_date:'', status:'pending',
+    flagged_at:new Date(br.latest).toISOString() };
+}
 
 /* Form screens that have autosave drafts */
 var DRAFT_SCREENS = [
@@ -11652,6 +11918,16 @@ function updateRecordCounts() {
 
 /* ── Bundle all unsynced records and share as JSON ── */
 function sendAllData() {
+  /* Capture the last verified-online time BEFORE we refresh it, so any
+     clock-flagged records get an accurate date bracket; then refresh from the
+     server and run the upload. */
+  var prevA=_loadTimeAnchor();
+  window._uploadPrevEarliestMs = prevA ? prevA.serverMs : null;
+  window._dateReviewQueue = [];
+  if(navigator.onLine && UPLOAD_ENDPOINT){ pingServerTime(function(){ _sendAllDataInner(); }); }
+  else { _sendAllDataInner(); }
+}
+function _sendAllDataInner() {
   var btn = document.getElementById('sendAllBtn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Preparing…'; }
 
@@ -11681,6 +11957,15 @@ function sendAllData() {
       getAllRecords(name, function(records) {
         var unsynced = (records || []).filter(function(r) { return !r.synced; });
         if (unsynced.length > 0) {
+          /* Clock-flagged records → attach a date bracket (rides to Drive) and
+             queue a Date Review item for the coordinator. */
+          unsynced.forEach(function(r){
+            if (r.clock_ok === false) {
+              var br = _computeDateBracket(r);
+              r.date_review = br;
+              window._dateReviewQueue.push(_dateReviewEntry(name, r, br, profile));
+            }
+          });
           bundle.modules[name] = unsynced;
           bundle.record_count += unsynced.length;
           syncTasks.push({ storeName: name, ids: unsynced.map(function(r){ return r.id; }) });
@@ -11725,6 +12010,12 @@ function sendAllData() {
                   /* Same moment they upload: push any held verifications and
                      pull down freshly detected disturbance tasks. */
                   flushUnsyncedVerifications(function(){ syncDisturbancesFromServer(function(){ renderDashDisturb(); }); });
+                  /* Flag any clock-uncertain records for coordinator date review,
+                     and push any queued issue reports. */
+                  if (window._dateReviewQueue && window._dateReviewQueue.length) {
+                    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ _action:'register_date_review', _secret:UPLOAD_SECRET, items: window._dateReviewQueue }) }).catch(function(){});
+                  }
+                  flushIssues(function(){});
                 } else {
                   toast('Upload error — falling back to share');
                   tryShare();

@@ -13,10 +13,13 @@ this repo (assets, decisions, accounts, field protocols) are grouped at the end.
       but nothing aggregates/trends/presents them. Current reports are
       activity/compliance only. Design + build. See
       [monitoring-parameters.md §5](monitoring-parameters.md).
-- [ ] **Coordinator key — one-time setup** — run `setCoordinatorSecret()` once
-      in the Apps Script editor, then redeploy the backend as a new version, so
-      approvals sync between the two pilot coordinators (option 2). See
-      [installation-guide.md §2](installation-guide.md).
+- [x] **Coordinator key — one-time setup** *(done 2026-10-10)* — current
+      backend pasted into the Apps Script project, `setCoordinatorSecret()` run
+      (key stored in Script Properties, blanked from source), redeployed as a
+      new version of the existing Web App. Endpoint verified live
+      (`{"status":"ready"}`) and matching the app's `UPLOAD_ENDPOINT`. Both
+      coordinators enter the same key in the **Server Key** field to sync
+      approvals. *(Live approve-and-sync test still to run on a phone.)*
 - [ ] **Real-device testing** — camera, GPS, fingerprint (WebAuthn) and PWA
       install can't be tested headlessly; run through the flows on an Android
       phone before/with the pilot. *In progress — enrolling Matilda & Mellie.*

@@ -131,3 +131,46 @@ Home Screen* steps, then re-check Storage Health.
 Check that `UPLOAD_ENDPOINT` is set in the app and the Apps Script is deployed
 as the current version. Test the endpoint URL directly in a browser — it
 should return `{"status":"ready", ...}`.
+
+---
+
+## 6. Removing and reinstalling the app (full reset)
+
+Sometimes you need a clean reinstall — a stuck old version, a phone being
+reassigned to a different steward, or enrolment to redo.
+
+> ⚠️ **Send Data first.** Removing the app (or clearing its site data) deletes
+> the phone's **local database** — any records not yet uploaded are lost, and
+> the enrolled **fingerprint is removed**, so the steward must be re-enrolled.
+> Open the app → **Send Data → Send All New Records** before you start.
+
+### Android (Chrome)
+
+1. **Send Data** (see the warning above).
+2. **Remove the app icon** — long-press the MCA app icon on the home screen →
+   **Uninstall** (or drag it to *Uninstall*). Alternatively: *Settings → Apps →
+   MCA Steward App → Uninstall*.
+3. **Clear the site's data** (this is the step that forces a truly clean
+   reinstall — it clears the cached app, the local database and the stored
+   fingerprint record):
+   *Chrome → ⋮ menu → Settings → Site settings → All sites* (or *On-device site
+   data*) → find **wtunsworth-a11y.github.io** → tap it → **Clear & reset**.
+4. **Reinstall** — open the app URL in Chrome → **Add to Home screen / Install**
+   → open it from the new icon.
+5. **Re-enrol** the steward (coordinator passcode + fingerprint, §4).
+
+### iPhone (Safari)
+
+1. **Send Data** first.
+2. Long-press the app icon → **Remove App → Delete App**.
+3. *Settings → Safari → Advanced → Website Data* → find the site → swipe to
+   **Delete** (or *Settings → Safari → Clear History and Website Data*).
+4. Reopen the URL in Safari → **Share → Add to Home Screen** → re-enrol.
+
+### Note — fingerprint is now required in the field
+
+On-site readings (water, met, disturbance, and the other verify-gated forms)
+**require a working fingerprint sensor**. A phone with no sensor, or where the
+steward's finger isn't enrolled, can no longer record those readings — the
+reading stays locked rather than being saved "unverified." Make sure each
+steward is enrolled on a phone that has a fingerprint (or face) sensor.

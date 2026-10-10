@@ -6203,11 +6203,13 @@ function verifyFp() {
 function webAuthnVerify(opts) {
   /* opts: { btnId, txtId, verifiedFlag, setVerified, onSuccess } */
   if (!navigator.credentials || !window.PublicKeyCredential) {
-    /* Device doesn't support WebAuthn — fail open with warning */
-    opts.setVerified(true);
-    if (opts.txtId) document.getElementById(opts.txtId).innerHTML = ''+icon('warning',13)+' Fingerprint not available — unverified';
-    if (opts.btnId) document.getElementById(opts.btnId).classList.add('verified');
-    opts.onSuccess();
+    /* Hard requirement: a device with no platform authenticator CANNOT verify,
+       so the gate stays locked — the reading cannot proceed. (Previously this
+       failed open and let the reading through marked "unverified".) */
+    opts.setVerified(false);
+    if (opts.btnId) document.getElementById(opts.btnId).classList.remove('verified');
+    if (opts.txtId) document.getElementById(opts.txtId).innerHTML = ''+icon('warning',13)+' No fingerprint on this phone — cannot verify';
+    toast('This phone has no fingerprint sensor — a reading can only be done on an enrolled phone.');
     return;
   }
   if (opts.txtId) document.getElementById(opts.txtId).textContent = 'Verifying…';

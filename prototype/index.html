@@ -9988,8 +9988,23 @@ function renderTreeLog() {
    PWA: Service Worker Registration
 ══════════════════════════════════════ */
 if ('serviceWorker' in navigator) {
+  /* Auto-apply updates: when a new service worker takes control (because a
+     deploy bumped the cache), reload once so the latest build shows without
+     the usual "open twice" dance. Only when a controller already existed at
+     load (i.e. this is an update, not the first install). */
+  if (navigator.serviceWorker.controller) {
+    var _mcaRefreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      if (_mcaRefreshing) return;
+      _mcaRefreshing = true;
+      window.location.reload();
+    });
+  }
   navigator.serviceWorker.register('sw.js').then(function(reg) {
     console.log('SW registered, scope:', reg.scope);
+    /* Check for a new version on every launch and whenever we regain focus. */
+    try { reg.update(); } catch(e) {}
+    document.addEventListener('visibilitychange', function(){ if (!document.hidden) { try { reg.update(); } catch(e) {} } });
   }).catch(function(err) {
     console.log('SW registration failed:', err);
   });

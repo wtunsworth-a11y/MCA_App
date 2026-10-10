@@ -5782,6 +5782,13 @@ window.addEventListener('popstate', function() {
 });
 try { window.history.pushState({ mcaBack: 1 }, ''); } catch (e) {}
 
+/* Meeting attendance present/absent toggle (was a dangling handler). */
+function atnd(btn, state){
+  var wrap = btn && btn.parentNode;
+  if(wrap){ var bs=wrap.querySelectorAll('.attend-btn'); for(var i=0;i<bs.length;i++){ bs[i].classList.remove('present','absent'); } }
+  if(btn) btn.classList.add(state);
+}
+
 /* Generic "Under Construction" page for modules not yet built. */
 function openUnderConstruction(name){
   var n=document.getElementById('ucName'); if(n) n.textContent = name || 'This feature';

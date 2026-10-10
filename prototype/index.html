@@ -10081,9 +10081,9 @@ function cacheStewardProfile() {
       var authTopics      = records[0].authorised_topics || [];
       var trainingTile    = document.getElementById('tile-training');
       if (trainingTile) {
-        /* Training visible to: field officers, zone staff,
-           and clan stewards who have been granted topic authorisations */
-        var canTrain = (role === 'field_officer' || role === 'zone_staff' ||
+        /* Training visible to: field officers, oversight (Project/MCF & Zone
+           staff), and clan stewards granted topic authorisations */
+        var canTrain = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' ||
                         (role === 'clan_steward' && authTopics.length > 0));
         trainingTile.style.display = canTrain ? '' : 'none';
       }
@@ -10662,7 +10662,7 @@ function syncAuthorisations(profile) {
         /* Re-run tile visibility */
         var role   = profile.role || 'clan_steward';
         var tile   = document.getElementById('tile-training');
-        var canTrain = (role === 'field_officer' || role === 'zone_staff' ||
+        var canTrain = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' ||
                         (role === 'clan_steward' && updated.length > 0));
         if (tile) tile.style.display = canTrain ? '' : 'none';
         /* Notify user if they now have new training access */
@@ -12033,11 +12033,12 @@ function initTrainingRecord() {
   var role    = profile.role || 'clan_steward';
 
   var authorisedTopics = profile.authorised_topics || [];
-  var isMcf = (role === 'mcf_staff');
   var isQualifiedSteward = (role === 'clan_steward' && authorisedTopics.length > 0);
-  var canTrain = (role === 'field_officer' || role === 'zone_staff' || isQualifiedSteward);
+  /* Field officers deliver training; oversight (Project/MCF & Zone staff) can
+     deliver and test it; clan stewards only when authorised for a topic. */
+  var canTrain = (isOversight() || role === 'field_officer' || isQualifiedSteward);
 
-  if (isMcf || !canTrain) {
+  if (!canTrain) {
     toast('Training delivery not authorised for this account.');
     goBack();
     return;

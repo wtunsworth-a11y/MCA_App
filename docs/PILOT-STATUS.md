@@ -1,0 +1,160 @@
+# MCA Steward App — Pilot Status & Handover
+
+*Last updated: 2026-10-10. This is the single source of truth for **where the
+project is right now** — deployment state, what works, what's stub, the roles,
+and the operational procedures worked out during pilot setup.*
+
+---
+
+## 1. Deployment state
+
+- **Live app (PWA):** `https://wtunsworth-a11y.github.io/MCA_App/prototype/index.html`
+  served from **GitHub Pages** (branch `main`). Pages is **on** and serving.
+- **Repo:** `wtunsworth-a11y/MCA_App`. Active dev branch
+  `claude/github-app-install-7irta9`; **merged to `main`** continuously, so
+  `main` is current and is what Pages serves.
+- **Backend:** Google Apps Script web app (one project) at the `UPLOAD_ENDPOINT`
+  baked into `prototype/index.html`
+  (`…/macros/s/AKfycbxqEnJ1…JZR8XRg/exec`). **Deployed and verified**
+  (`{"status":"ready"}`). **Coordinator server key is set** in Script Properties.
+- **Service worker cache:** `mca-steward-v24` (bumped every deploy). The app now
+  **auto-applies updates** on reopen (checks on launch + focus, reloads once when
+  a new worker takes over) — no more "open twice".
+- **Uploads fixed (v24):** Send Data and all registry/approval syncs POST as
+  `text/plain` with the secret in the body — the old `application/json` +
+  `X-Upload-Secret` header forced a CORS preflight Apps Script can't answer, so
+  uploads silently fell back to the share sheet ("Share failed"). No backend
+  change was needed. If data still won't send after updating, it's connectivity,
+  not this.
+- **Local DB:** IndexedDB `MCA_StewardData`, **DB_VERSION 12**, ~27 stores
+  (adds `disturbances`).
+
+### ⚠️ Backend needs a redeploy for the zone fix
+The deployed Apps Script copy predates the zone-list correction. **Re-paste
+`prototype/apps-script-upload.js` → Save → Deploy → Manage deployments → ✏️ →
+New version → Deploy.** Do **not** run `setCoordinatorSecret()` (the key is
+already stored; running it would overwrite it). After redeploy, open **MCF
+Summary → Refresh**. (Redeploying never requires re-running the secret.)
+
+---
+
+## 2. Roles (enrolment dropdown)
+
+| Value | Label | Sees | Notes |
+|---|---|---|---|
+| `clan_steward` | Clan Steward | **own clan only** | the paid fieldwork; needs clan + zone |
+| `zone_staff` | Zone Staff | **all clans** (oversight) | community briefings; training = Awareness unless authorised |
+| `field_officer` | Field Officer (Agric. Extension) | own clan + can **deliver training** | agronomy/extension |
+| `mcf_staff` | **Project / MCF Staff** | **all clans** (oversight) | you, Mellie, Matilda, Josh; no clan/zone; lands on MCF Summary |
+
+- **Oversight** = `mcf_staff`, `zone_staff`, or a coordinator-unlocked session
+  (`isOversight()`), and it means **see every clan's items** so staff can
+  supervise/test. Clan stewards stay restricted to their own clan.
+- **Coordinator powers** (approve, enrol, Manage Zones, triage) are gated by the
+  **server key**, *not* the role. Role shapes what you see; the key controls what
+  you can change.
+- **Training delivery:** field officers, oversight (Project/MCF & Zone staff),
+  and clan stewards *authorised for a topic*. MCF staff were unblocked this
+  session.
+
+## 3. Zones
+
+**11 zones: Zone 1, 2, 3, 4, 5, 6, 7A, 7B, 8, 9, 10.** Corrected in code
+(`DEFAULT_ZONES` / `DEFAULT_ZONE_LIST`). Reports now read the saved config
+(`loadZoneConfig` → `_zones.json`, else default). **Authoritative fix:**
+coordinator → Profile → Coordinator Tools → **Manage Zones** → set the 11 →
+Save (writes `_zones.json`, overrides everything, syncs to all phones).
+
+---
+
+## 4. What's functional (real data → Drive)
+
+Enrolment + fingerprint login · Water Quality (natural + engineered) · Service
+Delivery (facilities) · Met instruments · Phenology · **Disturbance
+verification** · **Field Mapping (unified)** · Activity Calendar + compliance ·
+Training · Send Data / sync · Help centre · Coordinator approvals / Manage Zones
+/ Grant Authorisation / reports.
+
+### Unified Field Mapping (Observations + Garden folded in)
+One module for all ad-hoc mapping. Modes **Point / Line / Area-garden**.
+Categories: road, infrastructure, clan boundary, crop pest/disease, hazard,
+forest fire, non-compliance, social unrest, wildlife, hunting, cultural,
+**cash-crop garden**, other. Area mode walks a closed boundary (≥3 pts) and
+gives **hectares**; cash-crop garden reveals the crop picker
+(vanilla/coffee/cocoa/okari/massoy). Saves to the `freemap` store (now in
+`DATA_STORES`, so it uploads with Send Data), carrying `garden_type`, `crops`,
+`area_ha` for EUDR. Button is **Save** only (no auto-KML; per-record Export
+remains). The dashboard "Observations" and "Garden Mapping" tiles both open it.
+
+### Disturbance verification (satellite → clan field-check)
+Server-side daily feed: **NASA FIRMS** big-fire clustering (needs a free
+`FIRMS_MAP_KEY`) + **RADD forest-clearance** as single-event polygons **> 2 ha**
+from an **Earth Engine** job (`tools/radd_clearance_events.js`, one run over all
+MCA → `_clearance_events.geojson`). Thresholds applied **server-side before any
+task exists**. Each event is overlaid on clan boundaries (`_clan_boundaries.json`)
+and **tasks each overlapping clan independently**; none-match → coordinator
+triage. Stewards field-verify with neutral outcome, cause-separate-from-fact,
+geotagged photo, on-site fingerprint. See `tools/README.md`.
+
+## 5. Not built / stub (show "Under Construction")
+
+- **Patrol** and **Community Data** → shared **Under Construction** page
+  (`openUnderConstruction(name)`).
+- **Meetings** — create/motion/voting partly real, but **Jitsi join / agenda /
+  attendees are toast mock-ups** (Jitsi is a deferred external service).
+- **Performance → Download Effort Report** — toast only.
+- Leftover **hardcoded "Zone 7B" demo labels** (~21) and demo GPS in the old
+  **MaFIA/QABB** screens — cosmetic cleanup still pending.
+
+## 6. Security model (unchanged, enforced)
+
+- **Fingerprint (WebAuthn)** is real and now **hard-required in the field** —
+  a device with no sensor is **blocked** from on-site readings (was fail-open).
+  Login was always hard-closed.
+- **Coordinator passcode** `T@nkF1y` (sha256 in app) gates enrolment — **keep it
+  out of the repo**. **Server key** lives only in Script Properties — never
+  committed, typed in per session.
+
+## 7. Operational how-tos (worked out this session)
+
+- **Install needs internet once** (download from the HTTPS URL + cache).
+  Enrolment itself (passcode, profile, **fingerprint**) works **offline**;
+  zones fall back to the built-in list offline. Do the first setup **with
+  signal** (install → enrol → one Send Data) then it runs offline. A **hotspot**
+  can serve the one-time install to many phones.
+- **You can't sideload the HTML to `file://`** — fingerprint (WebAuthn) and the
+  service worker both need **HTTPS**. True file-copy/offline distribution = a
+  **native APK wrapper** (TWA/Capacitor), a future build.
+- **PWA install gotchas:** turn **Desktop site** off; "already installed / can't
+  open" = an **orphaned WebAPK** → clear the site's data (Chrome → Site settings
+  → the site → Clear & reset) then reinstall (safe — MCF Hunt has no data). The
+  app has a distinct manifest `id` now so it no longer collides with MCA Hunt.
+- **Getting the latest build:** fully close & reopen (auto-update handles the
+  rest). Reports are separately cached — tap **Refresh**.
+- **Redeploy backend:** paste current `apps-script-upload.js` → Save → new
+  version. Key untouched.
+
+## 8. Still open / next
+
+- [ ] **Redeploy backend** (zone fix) + Manage Zones save.
+- [ ] **FIRMS_MAP_KEY** + daily trigger (`installDisturbanceFeedTrigger`) to turn
+      the fire feed on; **GFW/RADD** Earth Engine run on a schedule.
+- [ ] **Clan-boundary polygons** (`_clan_boundaries.json`, via Field Mapping
+      clan-boundary captures) so disturbance auto-routing goes live (triage
+      until then).
+- [ ] **Per-field help content** (framework in place; content to write).
+- [ ] **Offline basemap** for the mapping screens.
+- [ ] Cosmetic cleanup of the **Zone 7B / demo-GPS** labels in MaFIA/QABB.
+- [ ] Decide scope of **Patrol / Meetings (Jitsi) / Performance export**.
+- [ ] **Findings reporting** — monitoring *values* are stored but not yet
+      aggregated/presented (biggest unbuilt analytical piece).
+- [ ] Future: **native wrapper** for reliable offline reminders + file-copy
+      install; **hunter-interview audio capture**.
+
+## 9. Guides in `docs/`
+
+`installation-guide.md` (coordinator phone setup), `administrators-manual.md`
+(coordinator ops), `field-guide.md` (steward tasks), `monitoring-parameters.md`
+(what's captured), `app-functions.md` (what the app does), `TODO.md` (backlog),
+and this file. The in-app **Help centre** mirrors the Field Guide (everyone) and
+the Administrator's Manual (coordinator unlock only).

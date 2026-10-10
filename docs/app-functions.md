@@ -38,7 +38,11 @@ grouped by who uses it.
 - **MaFIA** forest-integrity survey, **QABB** butterfly survey.
 - **Conservation** activities (planting / weed removal) with auto-scheduled
   **follow-up visits**.
-- **Garden mapping** (GPS boundary polygons), **Tree mapping** (species, DBH).
+- **Field Mapping** (unified) — Point / Line / **Area-garden**; categories cover
+  ad-hoc observations (fire, landslide, pest/disease, non-compliance, wildlife…)
+  **and cash-crop gardens** (area in ha + crops). Observations & Garden Mapping
+  tiles both open it. Saves + uploads with Send Data (no auto-KML). **Tree
+  mapping** (species, DBH).
 - **Training records** (participants, outcomes, materials, photo).
 - **Observations** and **Patrols** (present as screens).
 

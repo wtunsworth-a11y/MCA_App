@@ -126,7 +126,43 @@ clans don't both claim the same tree.
 
 ---
 
-## 7. Sending your data
+## 7. Field Mapping & Observations
+
+Open **Field Mapping** (also reached from the **Observations** and **Garden
+Mapping** tiles — they all open the same screen). Use it to record **anything
+you see**: a problem, an event, or something to map.
+
+Pick what you're mapping:
+- **Point** — one spot (pest/disease, forest fire, landslide, fallen tree,
+  non-compliance, social unrest, wildlife, hunting, cultural event…).
+- **Line** — walk a route (a road/track).
+- **Area / garden** — walk a **closed boundary**; the app gives the **area in
+  hectares**. Choose the **Cash-crop garden** category and the crop picker
+  appears (vanilla / coffee / cocoa / okari / massoy).
+
+Choose a **category**, add a **title**, a short **description**, and a **photo**,
+then **Save**. Your GPS is captured automatically. It saves offline and **uploads
+with your next Send Data** — no separate file is made. (In the recent-maps list
+each record has an **Export** button if you ever need a KML to share.)
+
+---
+
+## 8. Disturbance verification
+
+Open **Disturbance Alerts**. A *disturbance* is a sudden change — a big **fire**,
+a **landslide**, or a **forest clearance over 2 ha** — flagged from satellite or
+reported, and routed to your clan to check on the ground.
+
+- Walk to the site (it unlocks within ~50 m and asks for your fingerprint).
+- Record what you found: **confirmed / not found / inconclusive / couldn't
+  reach** — and the likely **cause** separately (natural / human / unclear).
+  Report what you *see*; don't pre-judge.
+- Take a **photo** and add the area. You are only ever sent disturbances already
+  big enough to need checking — there's no "does it count" decision to make.
+
+---
+
+## 9. Sending your data
 
 Open **Send Data**.
 
@@ -144,7 +180,18 @@ Open **Send Data**.
 
 ---
 
-## 8. Quick reference
+## 10. Getting around
+
+- The phone's **back button** moves **back one screen** in the app (it no longer
+  jumps out and loses your place). The **←** at the top-left does the same.
+- Pulling down to refresh no longer reloads the app, so you won't be bounced to
+  the login screen by accident.
+- The **Home / Map / Alerts / Profile** bar is along the bottom. Coordinators/
+  project staff reach **MCF Summary** and **Coordinator Tools** from **Profile**.
+
+---
+
+## 11. Quick reference
 
 | Task | Where |
 |---|---|

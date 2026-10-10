@@ -177,9 +177,13 @@ Removal**.
 
 Planting activities auto-schedule **follow-up visits** (store `followups`).
 
-### 3.4 Garden mapping
-Store `gardens`. Garden type (food garden / cash crop), crops (list),
-boundary points (GPS polygon ≥3 points), owner, date, notes.
+### 3.4 Garden mapping — now part of Field Mapping
+Cash-crop gardens are mapped in the unified **Field Mapping** module (store
+`freemap`, `map_type:'area'`, `category:'cashcrop_garden'`): walk the boundary
+(GPS polygon ≥3 points → **area_ha** computed), pick crops (vanilla / coffee /
+cocoa / okari / massoy + other → `crops`), title, description, photo. EUDR
+cash-crop reporting filters the map records by category. *(The legacy `gardens`
+store holds any records made on the old standalone screen.)*
 
 ### 3.5 Tree mapping
 Store `trees`. Species (e.g. okari, massoy), latitude, longitude,

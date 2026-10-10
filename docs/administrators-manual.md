@@ -183,3 +183,52 @@ their next sync.
 > **Pilot scope.** This build is sized for a 2-coordinator pilot. The ownership
 > and approval controls are in place; wider rollout only needs the backend
 > redeployed and the coordinator key distributed.
+
+---
+
+## 8. Roles, oversight & access (current)
+
+**Roles** (set at enrolment): **Clan Steward** (own clan only — the paid
+fieldwork), **Zone Staff** (oversight within/across zones; briefings), **Field
+Officer** (own clan + can deliver training), **Project / MCF Staff** (project
+oversight — not tied to a clan/zone; you, Mellie, Matilda, Josh). Enrol project
+staff as **Project / MCF Staff**.
+
+- **Oversight** (Project/MCF Staff, Zone Staff, or any coordinator-unlocked
+  session) **sees every clan's items** so staff can supervise and test. Clan
+  stewards see only their own clan.
+- **Coordinator powers are gated by the server key, not the role.** The role
+  decides what you *see*; the key decides what you can *change*. A project-staff
+  member without the key can view but not approve.
+
+**Reaching coordinator tools after enrolment.** Once you're enrolled, open
+**Profile → Coordinator Tools** (visible to oversight roles) → enter the
+**passcode + server key** → you get Enrol New Person, the **Approve** screens,
+**Manage Zones**, Manage Topics, Grant Authorisation. **Profile → MCF Summary /
+Reports** opens the all-zones report. (Previously these were only on the
+first-run screen.)
+
+## 9. Zones
+
+The real list is **11 zones: 1–6, 7A, 7B, 8, 9, 10**. Edit it in **Manage
+Zones** — your saved list (`_zones.json`) **overrides the built-in default** and
+syncs to every phone **and** the reports. If a report still shows an old list,
+the Apps Script backend needs the **current code redeployed** (its built-in
+default is only used when no `_zones.json` exists).
+
+## 10. Disturbance triage & training
+
+- **Disturbance triage:** satellite-detected fires/clearances auto-route to the
+  owning clan by boundary; anything with **no boundary match lands in your triage
+  queue** (Disturbance Alerts) — assign the clan with one tap. Needs clan
+  boundaries loaded to auto-route (triage-only until then).
+- **Training delivery** is allowed for Field Officers, oversight (Project/MCF &
+  Zone staff), and clan stewards **authorised for a topic** via Grant
+  Authorisation. Zone staff default to *Awareness* sessions unless authorised.
+
+## 11. Redeploying the backend
+
+Re-paste `prototype/apps-script-upload.js` → **Save** → **Deploy → Manage
+deployments → ✏️ → New version → Deploy** (URL stays the same). **Do not run
+`setCoordinatorSecret()`** — the key is already in Script Properties and running
+it would overwrite it. Redeploying **never** requires re-setting the key.

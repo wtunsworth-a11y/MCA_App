@@ -231,6 +231,24 @@ is coordinator-defined and syncs down like the other registries.
 
 ## Done
 
+- [x] **Pilot hardening** (2026-10-10) — see **[PILOT-STATUS.md](PILOT-STATUS.md)**
+      for the full current-state handover. Highlights this round:
+  - **Upload fix** — Send Data / approvals POST as `text/plain` with the secret
+    in the body (the old JSON+header POST hit an Apps Script CORS preflight and
+    silently fell back to the share sheet). `freemap` added to `DATA_STORES` so
+    map records actually upload.
+  - **Garden Mapping folded into Field Mapping** — new Area/garden mode (walk a
+    boundary → hectares), Cash-crop garden category + crop picker; Observations
+    also folded in; "Save" only (no auto-KML).
+  - **Navigation** — phone back button steps back in-app; pull-to-refresh no
+    longer reloads; Map/MCF-Summary/Coordinator screens reachable (bottom nav +
+    Profile → Coordinator Tools / MCF Summary); mobile layout fills the screen;
+    **PWA auto-update** on reopen.
+  - **Roles** — "Project / MCF Staff" label; oversight (MCF/Zone staff) see all
+    clans; training opened to field officers + oversight.
+  - **Fingerprint hard-required** in the field; **Under Construction** page for
+    Patrol/Community Data; **banner** → "PILOT TESTING".
+  - **Zones** corrected to 1–6/7A/7B/8–10; reports read the saved config.
 - [x] **Deployed & live** (2026-10-10) — feature branch merged to `main`;
       the app is served from GitHub Pages at
       `https://wtunsworth-a11y.github.io/MCA_App/prototype/index.html` (Pages

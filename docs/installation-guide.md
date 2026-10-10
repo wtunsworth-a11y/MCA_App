@@ -174,3 +174,42 @@ On-site readings (water, met, disturbance, and the other verify-gated forms)
 steward's finger isn't enrolled, can no longer record those readings — the
 reading stays locked rather than being saved "unverified." Make sure each
 steward is enrolled on a phone that has a fingerprint (or face) sensor.
+
+---
+
+## 7. Connectivity, updates & install troubleshooting
+
+### What needs internet
+- **Only the one-time install** (downloading the app from the HTTPS URL and
+  caching it). After that it runs offline.
+- **Enrolment** (passcode, profile, **fingerprint**) works **offline**; the zone
+  list falls back to the built-in default with no signal.
+- **Do the first setup with signal:** install → enrol → one **Send Data** — so
+  the app fully caches, pulls the latest zones/registries, and you confirm the
+  backend works. A **phone hotspot** can serve the one-time install to several
+  phones.
+- **You cannot copy the HTML to the phone and run it from `file://`** —
+  fingerprint (WebAuthn) and the offline cache both require **HTTPS**. True
+  file-copy/offline distribution would need a **native APK wrapper** (a future
+  build).
+
+### Getting the latest build
+The app now **auto-updates**: it checks for a new version on launch and when you
+return to it, and reloads once when the update is ready. If you're stuck on an
+old build, **fully close the app** (swipe it from recent apps) and reopen. The
+**reports** are cached separately — tap **Refresh** on the report screen.
+
+### Install troubleshooting (Android/Chrome)
+- **Only "Create shortcut", no "Install"?** Turn **Desktop site** off in the ⋮
+  menu, reload, try again. (On recent Chrome the entry is "Install and create
+  shortcut" — that IS the install.)
+- **"This app is already installed / can't open it"** — an orphaned install
+  record. Fix: Chrome → **Settings → Site settings → All sites →
+  `wtunsworth-a11y.github.io` → Clear & reset**, then reinstall. (Safe — nothing
+  else is stored at that site.) Reboot the phone if it persists.
+
+### Backend redeploy (when the Apps Script code changes)
+Re-paste `prototype/apps-script-upload.js` → **Save** → **Deploy → Manage
+deployments → ✏️ → New version → Deploy**. The URL stays the same. **Do not run
+`setCoordinatorSecret()`** — the key already lives in Script Properties and
+redeploying never clears it; running that function would overwrite it.

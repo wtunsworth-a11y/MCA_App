@@ -13,6 +13,7 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { overscroll-behavior: none; }
 body {
   background: #e8f5e9;
   display: flex;
@@ -22,6 +23,9 @@ body {
   min-height: 100vh;
   font-family: 'Segoe UI', Roboto, Arial, sans-serif;
   padding: 24px 0 48px;
+  /* Stop pull-to-refresh / overscroll from reloading the app (which would
+     drop you back to the login screen and lose your place). */
+  overscroll-behavior: none;
 }
 
 .proto-banner {
@@ -95,6 +99,7 @@ body {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 .scroll-content::-webkit-scrollbar { width: 0; }
 
@@ -5729,6 +5734,19 @@ function goBack() {
   const prev = history.pop();
   showScreen(prev);
 }
+
+/* ── Android / gesture back button → move BACK through the app ──
+   The app navigates with its own screen stack, so without this the phone's
+   back button hits the browser and exits the PWA (losing your place). We
+   keep one browser-history "buffer" entry and re-arm it after every back
+   press, so the hardware back is always caught and routed to goBack()
+   (which is a no-op at a root screen, keeping the app open rather than
+   exiting). */
+window.addEventListener('popstate', function() {
+  try { goBack(); } catch (e) {}
+  try { window.history.pushState({ mcaBack: 1 }, ''); } catch (e) {}
+});
+try { window.history.pushState({ mcaBack: 1 }, ''); } catch (e) {}
 
 /* ══════════════════════════════════════
    INLINE SVG ICON SYSTEM

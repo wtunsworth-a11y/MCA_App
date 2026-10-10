@@ -1,8 +1,10 @@
 {
   "name": "MCA Clan Steward App",
-  "short_name": "MCA App",
+  "short_name": "MCA Steward",
   "description": "Managalas Conservation Area — Clan Steward field data collection",
+  "id": "/MCA_App/prototype/",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#e8f5e9",

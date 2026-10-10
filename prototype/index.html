@@ -1983,7 +1983,7 @@ select.msel {
             <span class="module-emoji" data-icon="tree" data-size="26"></span>
             <span class="module-name">Tree Mapping</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-garden-mapping')">
+          <div class="module-tile" onclick="openGardenInFieldMap()">
             <span class="module-emoji" data-icon="grain" data-size="26"></span>
             <span class="module-name">Garden Mapping</span>
           </div>
@@ -4423,21 +4423,22 @@ select.msel {
     <div class="screen" id="screen-freemap">
       <div class="top-bar" style="background:#00695C;">
         <button class="back-btn" onclick="goBack()">←</button>
-        <div><div class="bar-title">Field Mapping</div><div class="bar-subtitle">Mark a point or walk a line</div></div>
+        <div><div class="bar-title">Field Mapping</div><div class="bar-subtitle">Point, line or garden area</div></div>
       </div>
       <div class="scroll-content">
         <div class="p14" style="padding-bottom:20px;">
           <div class="matrix-note" style="background:#E0F2F1;border-color:#80CBC4;color:#004D40;font-size:0.76rem;">
             <strong>Record anything you see in the field</strong> — a problem, an event, or something to map.
-            Pick <strong>Point</strong> for one spot (pest/disease, fire, landslide, fallen tree, non-compliance, wildlife)
-            or <strong>Line</strong> to walk a route (road, boundary). Choose a category, add a short description and a photo,
-            then Save. It stores offline and uploads with your next Send Data. Tap <strong>?</strong> above for the full guide.
+            Pick <strong>Point</strong> for one spot (pest/disease, fire, landslide, fallen tree, non-compliance, wildlife),
+            <strong>Line</strong> to walk a route (road), or <strong>Area / garden</strong> to walk a boundary (cash-crop garden — gives the area in hectares).
+            Choose a category, add a short description and a photo, then Save. It stores offline and uploads with your next Send Data.
           </div>
           <div class="form-group">
             <label class="form-label">What are you mapping?</label>
-            <div style="display:flex;gap:8px;">
-              <button class="weather-pill active" id="fmmode-point" onclick="fmMode('point')" style="flex:1;"><span data-icon="pin" data-size="15"></span> Point</button>
-              <button class="weather-pill" id="fmmode-line" onclick="fmMode('line')" style="flex:1;"><span data-icon="map" data-size="15"></span> Line / track</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="weather-pill active" id="fmmode-point" onclick="fmMode('point')" style="flex:1;min-width:30%;"><span data-icon="pin" data-size="15"></span> Point</button>
+              <button class="weather-pill" id="fmmode-line" onclick="fmMode('line')" style="flex:1;min-width:30%;"><span data-icon="map" data-size="15"></span> Line</button>
+              <button class="weather-pill" id="fmmode-area" onclick="fmMode('area')" style="flex:1;min-width:30%;"><span data-icon="sprout" data-size="15"></span> Area / garden</button>
             </div>
           </div>
           <div class="form-group">
@@ -4454,8 +4455,21 @@ select.msel {
               <button class="weather-pill" id="fmcat-wildlife" onclick="fmCat('wildlife')">Wildlife sighting</button>
               <button class="weather-pill" id="fmcat-hunting" onclick="fmCat('hunting')">Hunting event</button>
               <button class="weather-pill" id="fmcat-cultural" onclick="fmCat('cultural')">Cultural event</button>
+              <button class="weather-pill" id="fmcat-cashcrop_garden" onclick="fmCat('cashcrop_garden')">Cash-crop garden</button>
               <button class="weather-pill" id="fmcat-other" onclick="fmCat('other')">Other</button>
             </div>
+          </div>
+          <!-- Cash-crop garden options — shown only for the garden category -->
+          <div class="form-group" id="fmCropsGroup" style="display:none;">
+            <label class="form-label">Cash crop(s) in this garden</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" class="weather-pill" id="fmcrop-vanilla" onclick="fmToggleCrop('vanilla')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="leaf" data-size="13"></span> Vanilla</button>
+              <button type="button" class="weather-pill" id="fmcrop-coffee" onclick="fmToggleCrop('coffee')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="coffee" data-size="13"></span> Coffee</button>
+              <button type="button" class="weather-pill" id="fmcrop-cocoa" onclick="fmToggleCrop('cocoa')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="cocoa" data-size="13"></span> Cocoa</button>
+              <button type="button" class="weather-pill" id="fmcrop-okari" onclick="fmToggleCrop('okari')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="nut" data-size="13"></span> Okari</button>
+              <button type="button" class="weather-pill" id="fmcrop-massoy" onclick="fmToggleCrop('massoy')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="leaf" data-size="13"></span> Massoy</button>
+            </div>
+            <input type="text" id="fmCropOther" class="form-input" style="margin-top:6px;font-size:0.78rem;" placeholder="Other crop (optional)">
           </div>
           <div class="form-group">
             <label class="form-label">Title <span style="color:#B71C1C;">*</span></label>
@@ -4479,7 +4493,7 @@ select.msel {
             <div class="card" style="padding:14px 16px;text-align:center;">
               <div style="display:flex;justify-content:space-around;margin-bottom:10px;">
                 <div><div id="fmPtCount" style="font-size:1.6rem;font-weight:800;color:#00695C;line-height:1;">0</div><div style="font-size:0.64rem;color:#999;text-transform:uppercase;">points</div></div>
-                <div><div id="fmLen" style="font-size:1.6rem;font-weight:800;color:#00695C;line-height:1;">0</div><div style="font-size:0.64rem;color:#999;text-transform:uppercase;">metres</div></div>
+                <div><div id="fmLen" style="font-size:1.6rem;font-weight:800;color:#00695C;line-height:1;">0</div><div id="fmLenLabel" style="font-size:0.64rem;color:#999;text-transform:uppercase;">metres</div></div>
               </div>
               <div id="fmRecStatus" style="font-size:0.74rem;color:#888;margin-bottom:10px;">Ready to record</div>
               <div style="display:flex;gap:8px;">
@@ -7313,16 +7327,30 @@ function syncCalendarFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(
 /* ══════════════════════════════════════
    FIELD MAPPING — freeform point / line capture + KML export
 ══════════════════════════════════════ */
-var _fmMode='point', _fmCat='road', _fmPhoto=null, _fmPoint=null;
+var _fmMode='point', _fmCat='road', _fmPhoto=null, _fmPoint=null, _fmCrops=[];
 var _fmLine=[], _fmWatchId=null, _fmRecording=false, _fmPaused=false;
-var FM_CATS={ road:'Road / track', infrastructure:'Infrastructure', boundary:'Clan boundary', pest:'Crop pest / disease', hazard:'Hazard / event', fire:'Forest fire', noncompliance:'Non-compliance', unrest:'Social unrest', wildlife:'Wildlife sighting', hunting:'Hunting event', cultural:'Cultural event', other:'Other' };
+var FM_CATS={ road:'Road / track', infrastructure:'Infrastructure', boundary:'Clan boundary', pest:'Crop pest / disease', hazard:'Hazard / event', fire:'Forest fire', noncompliance:'Non-compliance', unrest:'Social unrest', wildlife:'Wildlife sighting', hunting:'Hunting event', cultural:'Cultural event', cashcrop_garden:'Cash-crop garden', other:'Other' };
+var FM_CROPS={ vanilla:'Vanilla', coffee:'Coffee', cocoa:'Cocoa', okari:'Okari', massoy:'Massoy' };
+/* Polygon area in hectares from walked boundary points (equirectangular
+   planar approx — fine for garden-scale areas). */
+function _fmAreaHa(pts){
+  if(!pts || pts.length<3) return 0;
+  var R=6378137, toR=function(d){return d*Math.PI/180;}, lat0=toR(pts[0].lat);
+  var xy=pts.map(function(p){ return { x:toR(p.lon)*R*Math.cos(lat0), y:toR(p.lat)*R }; });
+  var a=0; for(var i=0,j=xy.length-1;i<xy.length;j=i++){ a+=(xy[j].x+xy[i].x)*(xy[j].y-xy[i].y); }
+  return Math.abs(a/2)/10000;
+}
 
 function initFreemap(){
   fmStopWatch();
-  _fmMode='point'; _fmCat='road'; _fmPhoto=null; _fmPoint=null; _fmLine=[]; _fmRecording=false; _fmPaused=false;
+  _fmMode='point'; _fmCat='road'; _fmPhoto=null; _fmPoint=null; _fmLine=[]; _fmRecording=false; _fmPaused=false; _fmCrops=[];
   ['fmTitle','fmDesc'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
-  ['point','line'].forEach(function(k){ var el=document.getElementById('fmmode-'+k); if(el) el.classList.toggle('active',k==='point'); });
+  ['point','line','area'].forEach(function(k){ var el=document.getElementById('fmmode-'+k); if(el) el.classList.toggle('active',k==='point'); });
   Object.keys(FM_CATS).forEach(function(k){ var el=document.getElementById('fmcat-'+k); if(el) el.classList.toggle('active',k==='road'); });
+  Object.keys(FM_CROPS).forEach(function(k){ var el=document.getElementById('fmcrop-'+k); if(el) el.classList.remove('active'); });
+  var co=document.getElementById('fmCropOther'); if(co) co.value='';
+  var cg=document.getElementById('fmCropsGroup'); if(cg) cg.style.display='none';
+  var lbl=document.getElementById('fmLenLabel'); if(lbl) lbl.textContent='metres';
   document.getElementById('fmPointBox').style.display='block';
   document.getElementById('fmLineBox').style.display='none';
   document.getElementById('fmPointCoords').textContent='No point captured yet';
@@ -7333,11 +7361,26 @@ function initFreemap(){
 }
 function fmMode(v){
   if(_fmRecording){ toast('Stop recording first.'); return; }
-  _fmMode=v; ['point','line'].forEach(function(k){var el=document.getElementById('fmmode-'+k);if(el)el.classList.toggle('active',k===v);});
+  _fmMode=v; ['point','line','area'].forEach(function(k){var el=document.getElementById('fmmode-'+k);if(el)el.classList.toggle('active',k===v);});
   document.getElementById('fmPointBox').style.display=(v==='point')?'block':'none';
-  document.getElementById('fmLineBox').style.display=(v==='line')?'block':'none';
+  document.getElementById('fmLineBox').style.display=(v==='point')?'none':'block'; /* line + area share the walk recorder */
+  var lbl=document.getElementById('fmLenLabel'); if(lbl) lbl.textContent=(v==='area')?'hectares':'metres';
+  fmUpdateLineUI();
 }
-function fmCat(v){ _fmCat=v; Object.keys(FM_CATS).forEach(function(k){var el=document.getElementById('fmcat-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function fmCat(v){
+  _fmCat=v;
+  Object.keys(FM_CATS).forEach(function(k){var el=document.getElementById('fmcat-'+k);if(el)el.classList.toggle('active',k===v);});
+  /* Garden = an area with crop options; selecting it switches to Area capture. */
+  var isGarden=(v==='cashcrop_garden');
+  var cg=document.getElementById('fmCropsGroup'); if(cg) cg.style.display=isGarden?'block':'none';
+  if(isGarden && _fmMode!=='area') fmMode('area');
+}
+function fmToggleCrop(c){
+  var i=_fmCrops.indexOf(c); if(i>=0) _fmCrops.splice(i,1); else _fmCrops.push(c);
+  var el=document.getElementById('fmcrop-'+c); if(el) el.classList.toggle('active', _fmCrops.indexOf(c)>=0);
+}
+/* Dashboard "Garden Mapping" tile → Field Mapping, pre-set to a cash-crop garden. */
+function openGardenInFieldMap(){ nav('screen-freemap'); try{ fmCat('cashcrop_garden'); }catch(e){} }
 function fmCapturePoint(){
   document.getElementById('fmPointCoords').textContent='📍 Acquiring GPS…';
   captureGPS(function(gps,err){
@@ -7348,7 +7391,7 @@ function fmCapturePoint(){
 function _haversine(a,b){ var R=6371000, toR=function(d){return d*Math.PI/180;}; var dLat=toR(b.lat-a.lat), dLon=toR(b.lon-a.lon); var s=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(toR(a.lat))*Math.cos(toR(b.lat))*Math.sin(dLon/2)*Math.sin(dLon/2); return 2*R*Math.asin(Math.sqrt(s)); }
 function _fmLen(){ var L=0; for(var i=1;i<_fmLine.length;i++) L+=_haversine(_fmLine[i-1],_fmLine[i]); return L; }
 function fmResetLineUI(){ document.getElementById('fmPtCount').textContent='0'; document.getElementById('fmLen').textContent='0'; document.getElementById('fmRecStatus').textContent='Ready to record'; document.getElementById('fmStartBtn').style.display='block'; document.getElementById('fmStartBtn').textContent='● Start'; document.getElementById('fmPauseBtn').style.display='none'; document.getElementById('fmStopBtn').style.display='none'; }
-function fmUpdateLineUI(){ document.getElementById('fmPtCount').textContent=_fmLine.length; document.getElementById('fmLen').textContent=Math.round(_fmLen()); }
+function fmUpdateLineUI(){ document.getElementById('fmPtCount').textContent=_fmLine.length; var el=document.getElementById('fmLen'); if(el){ el.textContent=(_fmMode==='area')?(Math.round(_fmAreaHa(_fmLine)*100)/100):Math.round(_fmLen()); } }
 function fmStopWatch(){ if(_fmWatchId!=null && navigator.geolocation){ navigator.geolocation.clearWatch(_fmWatchId); } _fmWatchId=null; }
 function fmStart(){
   if(!navigator.geolocation){ toast('GPS not available on this device.'); return; }
@@ -7357,7 +7400,7 @@ function fmStart(){
   document.getElementById('fmStartBtn').style.display='none';
   document.getElementById('fmPauseBtn').style.display='block'; document.getElementById('fmPauseBtn').textContent='❚❚ Pause';
   document.getElementById('fmStopBtn').style.display='block';
-  document.getElementById('fmRecStatus').textContent='● Recording — walk the line';
+  document.getElementById('fmRecStatus').textContent='● Recording — walk the '+(_fmMode==='area'?'garden boundary':'line');
   _fmWatchId=navigator.geolocation.watchPosition(function(pos){
     if(!_fmRecording||_fmPaused) return;
     var p={lat:pos.coords.latitude, lon:pos.coords.longitude, acc:Math.round(pos.coords.accuracy)};
@@ -7375,7 +7418,7 @@ function fmStop(){
   document.getElementById('fmPauseBtn').style.display='none';
   document.getElementById('fmStopBtn').style.display='none';
   document.getElementById('fmStartBtn').style.display='block'; document.getElementById('fmStartBtn').textContent='● Resume recording';
-  document.getElementById('fmRecStatus').textContent='■ Stopped — '+_fmLine.length+' points, '+Math.round(_fmLen())+' m';
+  document.getElementById('fmRecStatus').textContent='■ Stopped — '+_fmLine.length+' points'+(_fmMode==='area'?(', ~'+(Math.round(_fmAreaHa(_fmLine)*100)/100)+' ha'):(', '+Math.round(_fmLen())+' m'));
 }
 function fmTriggerPhoto(){ var inp=document.getElementById('fmPhotoInput'); if(inp) inp.click(); }
 function fmHandlePhoto(input){ var file=input.files&&input.files[0]; if(!file) return; var r=new FileReader(); r.onload=function(e){ _fmPhoto=e.target.result; var b=document.getElementById('fmPhotoBox'); if(b) b.innerHTML='<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;">'; var s=document.getElementById('fmPhotoStatus'); if(s){s.textContent='✓ Photo added';s.style.color='#2E7D32';} }; r.readAsDataURL(file); }
@@ -7386,9 +7429,17 @@ function saveFreemap(){
   if(_fmRecording){ toast('Stop recording first.'); return; }
   var pts;
   if(_fmMode==='point'){ if(!_fmPoint){ toast('Capture a point first.'); return; } pts=[_fmPoint]; }
+  else if(_fmMode==='area'){ if(_fmLine.length<3){ toast('Walk at least 3 boundary points for an area.'); return; } pts=_fmLine.slice(); }
   else { if(_fmLine.length<2){ toast('Record at least 2 points for a line.'); return; } pts=_fmLine.slice(); }
+  /* Garden crops (cash-crop garden category) */
+  var crops=null;
+  if(_fmCat==='cashcrop_garden'){
+    var list=_fmCrops.slice(); var other=(document.getElementById('fmCropOther').value||'').trim(); if(other) list.push(other);
+    if(list.length===0){ toast('Select at least one cash crop.'); return; }
+    crops=list.join(', ');
+  }
   var now=new Date();
-  var rec={ survey_type:'freemap', uid:generateRecordId('MAP'), map_type:_fmMode, category:_fmCat, category_label:FM_CATS[_fmCat], title:title, description:(document.getElementById('fmDesc').value||'').trim(), points:pts, length_m:(_fmMode==='line')?Math.round(_fmLen()):0, photo:_fmPhoto||null, clan:myClan(), steward:(window._cachedProfile&&window._cachedProfile.stewardId)||'', recorded_at:now.toISOString() };
+  var rec={ survey_type:'freemap', uid:generateRecordId('MAP'), map_type:_fmMode, category:_fmCat, category_label:FM_CATS[_fmCat], title:title, description:(document.getElementById('fmDesc').value||'').trim(), points:pts, length_m:(_fmMode==='line')?Math.round(_fmLen()):0, area_ha:(_fmMode==='area')?(Math.round(_fmAreaHa(pts)*100)/100):0, garden_type:(_fmCat==='cashcrop_garden')?'cash_crop':null, crops:crops, photo:_fmPhoto||null, clan:myClan(), steward:(window._cachedProfile&&window._cachedProfile.stewardId)||'', recorded_at:now.toISOString() };
   /* Save only — the record uploads with the normal Send Data sync. No KML is
      written to the phone; use the per-record "Export" button in the list below
      if you ever need a map file to share. */
@@ -7423,8 +7474,9 @@ function renderFreemapRecent(){
     if(rows.length===0){ el.innerHTML=''; return; }
     var h='<div style="font-size:0.8rem;font-weight:800;color:#00695C;margin:4px 2px 8px;">Recent maps ('+rows.length+')</div>';
     rows.slice(0,15).forEach(function(r){
-      var ic = r.map_type==='line'?'map':'pin';
-      var meta = (r.category_label||'')+' · '+(r.map_type==='line'?('~'+r.length_m+' m'):'point')+(r.synced?'':' · not sent');
+      var ic = r.map_type==='area'?'sprout':(r.map_type==='line'?'map':'pin');
+      var measure = r.map_type==='area'?('~'+(r.area_ha||0)+' ha'+(r.crops?(' · '+r.crops):'')):(r.map_type==='line'?('~'+r.length_m+' m'):'point');
+      var meta = (r.category_label||'')+' · '+measure+(r.synced?'':' · not sent');
       h+='<div class="card" style="padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">';
       h+='<span style="color:#00695C;display:flex;">'+icon(ic,18)+'</span>';
       h+='<div style="flex:1;"><div style="font-size:0.84rem;font-weight:700;color:#333;">'+(r.title||'(untitled)')+'</div><div style="font-size:0.7rem;color:#888;">'+meta+'</div></div>';
@@ -11131,7 +11183,7 @@ function markStoreSynced(storeName, ids, cb) {
 
 /* ── Update per-module sync status on export screen ── */
 var DATA_STORES = ['mafia','qabb','water','phenology','pheno_plots','observations',
-  'conservation','followups','patrols','gardens','trees','meteo','training','schedule','meetings'];
+  'conservation','followups','patrols','gardens','freemap','trees','meteo','training','schedule','meetings'];
 
 /* ── Offline / unsynced warning banner on dashboard ──────────────── */
 function updateSyncWarning() {

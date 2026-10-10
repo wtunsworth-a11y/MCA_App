@@ -87,19 +87,23 @@ function getOrCreateFolder(name, parent) {
 }
 
 /* ─── Zone configuration ────────────────────────────────────────────── */
-function getZoneList() {
+/* The authoritative zone list: the coordinator-saved _zones.json if present,
+   otherwise the built-in default. Used by the zones endpoint AND the reports
+   so they never disagree. */
+function loadZoneConfig() {
   try {
     var folder = getDataFolder();
     var files  = folder.getFilesByName('_zones.json');
     if (files.hasNext()) {
       var zones = JSON.parse(files.next().getBlob().getDataAsString());
-      return ContentService
-        .createTextOutput(JSON.stringify({ status: 'ok', zones: zones }))
-        .setMimeType(ContentService.MimeType.JSON);
+      if (zones && zones.length) return zones;
     }
   } catch(e) { /* fall through to defaults */ }
+  return DEFAULT_ZONES;
+}
+function getZoneList() {
   return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ok', zones: DEFAULT_ZONES }))
+    .createTextOutput(JSON.stringify({ status: 'ok', zones: loadZoneConfig() }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -1017,7 +1021,7 @@ function buildZoneReport(zoneId, period) {
   var activeStewards = stewards.filter(function(s) { return s.upload_count > 0; }).length;
 
   /* Find zone name from config */
-  var zones = DEFAULT_ZONES;
+  var zones = loadZoneConfig();
   try {
     var folder = getDataFolder();
     var zFiles = folder.getFilesByName('_zones.json');
@@ -1059,7 +1063,7 @@ function buildMCFReport(period) {
   }
 
   /* Load zone list */
-  var zones = DEFAULT_ZONES;
+  var zones = loadZoneConfig();
   try {
     var folder = getDataFolder();
     var zFiles = folder.getFilesByName('_zones.json');

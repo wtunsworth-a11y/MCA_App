@@ -1530,6 +1530,22 @@ select.msel {
   .tsp-footer { margin-top: 10pt; font-size: 7pt; color: #aaa; border-top: 0.5pt solid #ddd; padding-top: 4pt; }
 }
 
+/* ── Real phones: fill the screen (the 390×844 frame is a desktop mock-up).
+   Without this the fixed-height frame runs past the device viewport and the
+   bottom nav bar falls off the bottom. ── */
+@media (max-width: 500px) {
+  body { padding: 0; margin: 0; height: 100vh; height: 100dvh; min-height: 0; }
+  .phone-frame {
+    width: 100vw;
+    max-width: 100%;
+    height: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
 /* ── In-app Help system ── */
 .help-btn { margin-left:auto; flex-shrink:0; background:rgba(255,255,255,0.16); border:none; color:#fff; width:34px; height:34px; border-radius:50%; font-size:1.05rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
 .help-btn:active { background:rgba(255,255,255,0.30); }

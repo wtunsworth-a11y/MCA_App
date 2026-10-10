@@ -1915,7 +1915,7 @@ select.msel {
             <span class="module-emoji" data-icon="pin" data-size="26"></span>
             <span class="module-name">Field Mapping</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-patrol-stub')">
+          <div class="module-tile" onclick="openUnderConstruction('Patrol')">
             <span class="module-emoji" data-icon="walk" data-size="26"></span>
             <span class="module-name">Patrol</span>
           </div>
@@ -1939,7 +1939,7 @@ select.msel {
             <span class="module-emoji" data-icon="people" data-size="26"></span>
             <span class="module-name">Meetings</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-community-stub')">
+          <div class="module-tile" onclick="openUnderConstruction('Community Data')">
             <span class="module-emoji" data-icon="people" data-size="26"></span>
             <span class="module-name">Community Data</span>
           </div>
@@ -3486,12 +3486,12 @@ select.msel {
     <!-- ══════════════════════════════════════
          STUB SCREENS
     ══════════════════════════════════════ -->
-    <div class="screen" id="screen-patrol-stub">
-      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Patrol</div></div><div class="top-logos"><div class="logo-ph" title="Managalas Conservation Fund" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><ellipse cx="13" cy="9.5" rx="6.5" ry="6" fill="rgba(255,255,255,0.9)"/><ellipse cx="13" cy="13.5" rx="8" ry="5" fill="rgba(255,255,255,0.8)"/><rect x="12" y="18" width="2" height="5" rx="1" fill="rgba(255,255,255,0.7)"/></svg></div><div class="logo-ph" title="European Union" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" style="border-radius:5px;" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" fill="#003399"/><polygon points="13.00,1.43 13.42,2.55 14.61,2.60 13.68,3.34 13.99,4.49 13.00,3.83 12.01,4.49 12.32,3.34 11.39,2.60 12.58,2.55" fill="#FFD700"/><polygon points="17.94,2.75 18.36,3.87 19.55,3.92 18.62,4.66 18.93,5.81 17.94,5.15 16.95,5.81 17.26,4.66 16.33,3.92 17.52,3.87" fill="#FFD700"/><polygon points="21.56,6.37 21.97,7.49 23.16,7.54 22.23,8.28 22.55,9.43 21.56,8.77 20.56,9.43 20.88,8.28 19.95,7.54 21.14,7.49" fill="#FFD700"/><polygon points="22.88,11.31 23.30,12.43 24.49,12.48 23.56,13.22 23.87,14.37 22.88,13.71 21.89,14.37 22.20,13.22 21.27,12.48 22.46,12.43" fill="#FFD700"/><polygon points="21.56,16.25 21.97,17.37 23.16,17.42 22.23,18.16 22.55,19.31 21.56,18.65 20.56,19.31 20.88,18.16 19.95,17.42 21.14,17.37" fill="#FFD700"/><polygon points="17.94,19.87 18.36,20.98 19.55,21.03 18.62,21.78 18.93,22.92 17.94,22.27 16.95,22.92 17.26,21.78 16.33,21.03 17.52,20.98" fill="#FFD700"/><polygon points="13.00,21.19 13.42,22.31 14.61,22.36 13.68,23.10 13.99,24.25 13.00,23.59 12.01,24.25 12.32,23.10 11.39,22.36 12.58,22.31" fill="#FFD700"/><polygon points="8.06,19.87 8.48,20.98 9.67,21.03 8.74,21.78 9.05,22.92 8.06,22.27 7.07,22.92 7.38,21.78 6.45,21.03 7.64,20.98" fill="#FFD700"/><polygon points="4.44,16.25 4.86,17.37 6.05,17.42 5.12,18.16 5.44,19.31 4.44,18.65 3.45,19.31 3.77,18.16 2.84,17.42 4.03,17.37" fill="#FFD700"/><polygon points="3.12,11.31 3.54,12.43 4.73,12.48 3.80,13.22 4.11,14.37 3.12,13.71 2.13,14.37 2.44,13.22 1.51,12.48 2.70,12.43" fill="#FFD700"/><polygon points="4.44,6.37 4.86,7.49 6.05,7.54 5.12,8.28 5.44,9.43 4.44,8.77 3.45,9.43 3.77,8.28 2.84,7.54 4.03,7.49" fill="#FFD700"/><polygon points="8.06,2.75 8.48,3.87 9.67,3.92 8.74,4.66 9.05,5.81 8.06,5.15 7.07,5.81 7.38,4.66 6.45,3.92 7.64,3.87" fill="#FFD700"/></svg></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><path d="M13 4 C9 6 7 10 7 13 C7 17 9.5 20 13 21 C16.5 20 19 17 19 13 C19 10 17 6 13 4Z" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/><line x1="13" y1="4" x2="13" y2="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/><line x1="7" y1="13" x2="19" y2="13" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/></svg></div></div></div>
+    <div class="screen" id="screen-under-construction">
+      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title" id="ucBarTitle">Under Construction</div></div><div class="top-logos"><div class="logo-ph" title="Managalas Conservation Fund" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><ellipse cx="13" cy="9.5" rx="6.5" ry="6" fill="rgba(255,255,255,0.9)"/><ellipse cx="13" cy="13.5" rx="8" ry="5" fill="rgba(255,255,255,0.8)"/><rect x="12" y="18" width="2" height="5" rx="1" fill="rgba(255,255,255,0.7)"/></svg></div><div class="logo-ph" title="European Union" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" style="border-radius:5px;" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" fill="#003399"/><polygon points="13.00,1.43 13.42,2.55 14.61,2.60 13.68,3.34 13.99,4.49 13.00,3.83 12.01,4.49 12.32,3.34 11.39,2.60 12.58,2.55" fill="#FFD700"/><polygon points="17.94,2.75 18.36,3.87 19.55,3.92 18.62,4.66 18.93,5.81 17.94,5.15 16.95,5.81 17.26,4.66 16.33,3.92 17.52,3.87" fill="#FFD700"/><polygon points="21.56,6.37 21.97,7.49 23.16,7.54 22.23,8.28 22.55,9.43 21.56,8.77 20.56,9.43 20.88,8.28 19.95,7.54 21.14,7.49" fill="#FFD700"/><polygon points="22.88,11.31 23.30,12.43 24.49,12.48 23.56,13.22 23.87,14.37 22.88,13.71 21.89,14.37 22.20,13.22 21.27,12.48 22.46,12.43" fill="#FFD700"/><polygon points="21.56,16.25 21.97,17.37 23.16,17.42 22.23,18.16 22.55,19.31 21.56,18.65 20.56,19.31 20.88,18.16 19.95,17.42 21.14,17.37" fill="#FFD700"/><polygon points="17.94,19.87 18.36,20.98 19.55,21.03 18.62,21.78 18.93,22.92 17.94,22.27 16.95,22.92 17.26,21.78 16.33,21.03 17.52,20.98" fill="#FFD700"/><polygon points="13.00,21.19 13.42,22.31 14.61,22.36 13.68,23.10 13.99,24.25 13.00,23.59 12.01,24.25 12.32,23.10 11.39,22.36 12.58,22.31" fill="#FFD700"/><polygon points="8.06,19.87 8.48,20.98 9.67,21.03 8.74,21.78 9.05,22.92 8.06,22.27 7.07,22.92 7.38,21.78 6.45,21.03 7.64,20.98" fill="#FFD700"/><polygon points="4.44,16.25 4.86,17.37 6.05,17.42 5.12,18.16 5.44,19.31 4.44,18.65 3.45,19.31 3.77,18.16 2.84,17.42 4.03,17.37" fill="#FFD700"/><polygon points="3.12,11.31 3.54,12.43 4.73,12.48 3.80,13.22 4.11,14.37 3.12,13.71 2.13,14.37 2.44,13.22 1.51,12.48 2.70,12.43" fill="#FFD700"/><polygon points="4.44,6.37 4.86,7.49 6.05,7.54 5.12,8.28 5.44,9.43 4.44,8.77 3.45,9.43 3.77,8.28 2.84,7.54 4.03,7.49" fill="#FFD700"/><polygon points="8.06,2.75 8.48,3.87 9.67,3.92 8.74,4.66 9.05,5.81 8.06,5.15 7.07,5.81 7.38,4.66 6.45,3.92 7.64,3.87" fill="#FFD700"/></svg></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><path d="M13 4 C9 6 7 10 7 13 C7 17 9.5 20 13 21 C16.5 20 19 17 19 13 C19 10 17 6 13 4Z" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/><line x1="13" y1="4" x2="13" y2="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/><line x1="7" y1="13" x2="19" y2="13" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/></svg></div></div></div>
       <div class="scroll-content"><div class="stub-body">
-        <div class="stub-icon"><span data-icon="leaf" data-size="14"></span></div>
-        <div class="stub-title">Patrol Module</div>
-        <div class="stub-desc">GPS track recording, waypoint logging, and patrol report submission will be available here in the next sprint.</div>
+        <div class="stub-icon"><span data-icon="wrench" data-size="44"></span></div>
+        <div class="stub-title" id="ucName">This feature</div>
+        <div class="stub-desc" id="ucDesc">🚧 Under construction — this part of the app isn’t built yet. It’s on the list; thanks for your patience during the pilot.</div>
       </div></div>
     </div>
 
@@ -3752,14 +3752,6 @@ select.msel {
     <!-- ══════════════════════════════════════
          SCREEN: COMMUNITY DATA STUB
     ══════════════════════════════════════ -->
-    <div class="screen" id="screen-community-stub">
-      <div class="top-bar"><button class="back-btn" onclick="goBack()">←</button><div><div class="bar-title">Community Data</div></div><div class="top-logos"><div class="logo-ph" title="Managalas Conservation Fund" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><ellipse cx="13" cy="9.5" rx="6.5" ry="6" fill="rgba(255,255,255,0.9)"/><ellipse cx="13" cy="13.5" rx="8" ry="5" fill="rgba(255,255,255,0.8)"/><rect x="12" y="18" width="2" height="5" rx="1" fill="rgba(255,255,255,0.7)"/></svg></div><div class="logo-ph" title="European Union" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" style="border-radius:5px;" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" fill="#003399"/><polygon points="13.00,1.43 13.42,2.55 14.61,2.60 13.68,3.34 13.99,4.49 13.00,3.83 12.01,4.49 12.32,3.34 11.39,2.60 12.58,2.55" fill="#FFD700"/><polygon points="17.94,2.75 18.36,3.87 19.55,3.92 18.62,4.66 18.93,5.81 17.94,5.15 16.95,5.81 17.26,4.66 16.33,3.92 17.52,3.87" fill="#FFD700"/><polygon points="21.56,6.37 21.97,7.49 23.16,7.54 22.23,8.28 22.55,9.43 21.56,8.77 20.56,9.43 20.88,8.28 19.95,7.54 21.14,7.49" fill="#FFD700"/><polygon points="22.88,11.31 23.30,12.43 24.49,12.48 23.56,13.22 23.87,14.37 22.88,13.71 21.89,14.37 22.20,13.22 21.27,12.48 22.46,12.43" fill="#FFD700"/><polygon points="21.56,16.25 21.97,17.37 23.16,17.42 22.23,18.16 22.55,19.31 21.56,18.65 20.56,19.31 20.88,18.16 19.95,17.42 21.14,17.37" fill="#FFD700"/><polygon points="17.94,19.87 18.36,20.98 19.55,21.03 18.62,21.78 18.93,22.92 17.94,22.27 16.95,22.92 17.26,21.78 16.33,21.03 17.52,20.98" fill="#FFD700"/><polygon points="13.00,21.19 13.42,22.31 14.61,22.36 13.68,23.10 13.99,24.25 13.00,23.59 12.01,24.25 12.32,23.10 11.39,22.36 12.58,22.31" fill="#FFD700"/><polygon points="8.06,19.87 8.48,20.98 9.67,21.03 8.74,21.78 9.05,22.92 8.06,22.27 7.07,22.92 7.38,21.78 6.45,21.03 7.64,20.98" fill="#FFD700"/><polygon points="4.44,16.25 4.86,17.37 6.05,17.42 5.12,18.16 5.44,19.31 4.44,18.65 3.45,19.31 3.77,18.16 2.84,17.42 4.03,17.37" fill="#FFD700"/><polygon points="3.12,11.31 3.54,12.43 4.73,12.48 3.80,13.22 4.11,14.37 3.12,13.71 2.13,14.37 2.44,13.22 1.51,12.48 2.70,12.43" fill="#FFD700"/><polygon points="4.44,6.37 4.86,7.49 6.05,7.54 5.12,8.28 5.44,9.43 4.44,8.77 3.45,9.43 3.77,8.28 2.84,7.54 4.03,7.49" fill="#FFD700"/><polygon points="8.06,2.75 8.48,3.87 9.67,3.92 8.74,4.66 9.05,5.81 8.06,5.15 7.07,5.81 7.38,4.66 6.45,3.92 7.64,3.87" fill="#FFD700"/></svg></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><path d="M13 4 C9 6 7 10 7 13 C7 17 9.5 20 13 21 C16.5 20 19 17 19 13 C19 10 17 6 13 4Z" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/><line x1="13" y1="4" x2="13" y2="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/><line x1="7" y1="13" x2="19" y2="13" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/></svg></div></div></div>
-      <div class="scroll-content"><div class="stub-body">
-        <div class="stub-icon"><span data-icon="people" data-size="14"></span></div>
-        <div class="stub-title">Community Data</div>
-        <div class="stub-desc">Household survey tools, demographic data entry, and community mapping features will be available here.</div>
-      </div></div>
-    </div>
 
     <!-- ══ NEW MEETING STEP 1 ══ -->
     <div class="screen" id="screen-new-meeting-1">
@@ -5641,7 +5633,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-map','screen-performance','screen-recent-activity',
   'screen-ack','screen-profile','screen-timesheet',
-  'screen-patrol-stub','screen-community-stub','screen-meteo-setup','screen-meteo-record','screen-garden-mapping','screen-tree-mapping','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-data-export'
+  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-garden-mapping','screen-tree-mapping','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -5759,6 +5751,14 @@ window.addEventListener('popstate', function() {
   try { window.history.pushState({ mcaBack: 1 }, ''); } catch (e) {}
 });
 try { window.history.pushState({ mcaBack: 1 }, ''); } catch (e) {}
+
+/* Generic "Under Construction" page for modules not yet built. */
+function openUnderConstruction(name){
+  var n=document.getElementById('ucName'); if(n) n.textContent = name || 'This feature';
+  var b=document.getElementById('ucBarTitle'); if(b) b.textContent = name || 'Under Construction';
+  var d=document.getElementById('ucDesc'); if(d) d.innerHTML = '🚧 <strong>Under construction</strong> — the ' + (name || 'this') + ' module isn’t built yet. It’s on the list for a future update; thanks for your patience during the pilot.';
+  nav('screen-under-construction');
+}
 
 /* ══════════════════════════════════════
    INLINE SVG ICON SYSTEM

@@ -20,6 +20,12 @@ The app uses your **fingerprint** to identify you — no username or password.
 The app works **offline**. You can record everything with no signal; it saves
 to the phone and uploads later when you have internet.
 
+**If a "Check your phone's date" warning appears** when you log in, your phone's
+date or time is wrong, and every record you collect would be stamped with the
+wrong date. Open your phone's **Settings → Date & Time** and turn on
+**Automatic / Network-provided** date & time, then tap **"I've fixed it —
+re-check"**. Do this *before* collecting any data.
+
 ---
 
 ## 2. How monitoring works — register first, then monitor

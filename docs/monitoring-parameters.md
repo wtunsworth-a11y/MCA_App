@@ -221,6 +221,15 @@ The water / facility / met / phenology readings also carry:
 | `photo` | the visit photo |
 | `record_uid` | unique steward-prefixed ID (dedup on Drive) |
 | `timestamp`, `synced` | when captured; whether uploaded |
+| `device_time` | the raw device-clock time at capture (ISO) |
+| `clock_ok` | **true** only if the device clock passed the sanity check at capture (in a plausible window **and** not behind the last server-verified time, with no "continue anyway" override). A **false** here means the date on that record may be wrong — the phone's clock was unverified. Currently stamped on phenology records; extends to other modules as a follow-up. |
+
+> **Date integrity.** All dates come from the **device clock** (a web app cannot
+> read true GPS/GNSS time — the Geolocation API's timestamp is itself the device
+> clock). The app anchors to the server's UTC on every online contact, shows and
+> stamps the **server-corrected** date when it can, warns at login if the clock
+> looks wrong, and flags any record captured on an unverified clock via
+> `clock_ok`.
 
 ---
 

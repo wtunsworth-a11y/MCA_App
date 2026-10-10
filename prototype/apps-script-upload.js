@@ -1374,9 +1374,10 @@ function doGet(e) {
     }
   }
 
-  /* Ping / preflight */
+  /* Ping / preflight — server_time is the authoritative UTC clock the app
+     anchors to so it can detect a wrong device date offline. */
   return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ready', app: 'MCA Steward Upload v3' }))
+    .createTextOutput(JSON.stringify({ status: 'ready', app: 'MCA Steward Upload v3', server_time: new Date().toISOString() }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 

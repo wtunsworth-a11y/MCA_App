@@ -17,7 +17,7 @@ and the operational procedures worked out during pilot setup.*
   baked into `prototype/index.html`
   (`…/macros/s/AKfycbxqEnJ1…JZR8XRg/exec`). **Deployed and verified**
   (`{"status":"ready"}`). **Coordinator server key is set** in Script Properties.
-- **Service worker cache:** `mca-steward-v28` (bumped every deploy). The app now
+- **Service worker cache:** `mca-steward-v30` (bumped every deploy). The app now
   **auto-applies updates** on reopen (checks on launch + focus, reloads once when
   a new worker takes over) — no more "open twice".
 - **Uploads fixed (v24):** Send Data and all registry/approval syncs POST as
@@ -29,12 +29,15 @@ and the operational procedures worked out during pilot setup.*
 - **Local DB:** IndexedDB `MCA_StewardData`, **DB_VERSION 12**, ~27 stores
   (adds `disturbances`).
 
-### ⚠️ Backend needs a redeploy for the zone fix
-The deployed Apps Script copy predates the zone-list correction. **Re-paste
-`prototype/apps-script-upload.js` → Save → Deploy → Manage deployments → ✏️ →
-New version → Deploy.** Do **not** run `setCoordinatorSecret()` (the key is
-already stored; running it would overwrite it). After redeploy, open **MCF
-Summary → Refresh**. (Redeploying never requires re-running the secret.)
+### ⚠️ Backend needs a redeploy (zone fix + server-time clock anchor)
+The deployed Apps Script copy predates the zone-list correction **and** the new
+`server_time` field in the ping response (which the app uses to catch a wrong
+device date — see §6a). **Re-paste `prototype/apps-script-upload.js` → Save →
+Deploy → Manage deployments → ✏️ → New version → Deploy.** Do **not** run
+`setCoordinatorSecret()` (the key is already stored; running it would overwrite
+it). After redeploy, open **MCF Summary → Refresh**. (Redeploying never requires
+re-running the secret.) Until redeployed, the clock check still works offline
+via the plausibility window; it just has no server anchor to correct against.
 
 ---
 
@@ -130,6 +133,30 @@ registry); **vanilla/cocoa/coffee (cash crops)** get a **numbered metal tag**
   out of the repo**. **Server key** lives only in Script Properties — never
   committed, typed in per session.
 
+## 6a. Date integrity (clock trust)
+
+Records are only as trustworthy as their date, and a web app **cannot read true
+GPS/GNSS time** — `navigator.geolocation`'s timestamp is the *device clock*, not
+the satellite signal, so GPS can't independently verify the date offline (true
+GNSS time needs the native wrapper). Defence in three layers:
+
+1. **Plausibility window** — the date must sit in a believable range
+   (`2026-01-01 … 2031-01-01`); a clock reset to 1970/2016 or set far ahead is
+   caught **offline, with no anchor needed**.
+2. **Trusted anchor** — the latest server-verified UTC (`server_time` from the
+   ping) is stored on the phone. The clock must not run **before** it (time only
+   moves forward) nor ~1 yr **after** it. Refreshed on launch, on login, and
+   whenever the phone comes online.
+3. **Server-corrected display/stamp** — when online, the app computes an offset
+   and shows/stamps the **true** date even if the device clock has drifted.
+
+At **login** a blocking **"Check your phone's date"** warning appears if the
+clock fails, telling the steward to turn on *Settings → Date & Time →
+Automatic/Network*. They can re-check after fixing, or **Continue anyway**, which
+flags every record with `clock_ok:false`. Each phenology record carries
+`device_time` + `clock_ok` so a coordinator can spot unverified dates. *(Stamping
+is on phenology now; extending to the other modules is a small follow-up.)*
+
 ## 7. Operational how-tos (worked out this session)
 
 - **Install needs internet once** (download from the HTTPS URL + cache).
@@ -158,7 +185,8 @@ registry); **vanilla/cocoa/coffee (cash crops)** get a **numbered metal tag**
       issued by one person to avoid concurrent-creation clashes. (Mechanism +
       live check are built; just needs the real IDs pasted in. A synced
       people-roster is a later enhancement.) See Admin Manual §11.
-- [ ] **Redeploy backend** (zone fix) + Manage Zones save.
+- [ ] **Redeploy backend** (zone fix + `server_time` clock anchor) + Manage
+      Zones save.
 - [ ] **FIRMS_MAP_KEY** + daily trigger (`installDisturbanceFeedTrigger`) to turn
       the fire feed on; **GFW/RADD** Earth Engine run on a schedule.
 - [ ] **Clan-boundary polygons** (`_clan_boundaries.json`, via Field Mapping

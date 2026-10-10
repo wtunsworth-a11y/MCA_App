@@ -5948,6 +5948,10 @@ window.addEventListener('load', () => {
     });
   }
 
+  /* Refresh the trusted-time anchor from the server whenever we have signal. */
+  try { pingServerTime(function(){}); } catch(e) {}
+  window.addEventListener('online', function(){ try { pingServerTime(function(){}); } catch(e){} });
+
   setTimeout(() => {
     getAllRecords('auth', function(records) {
       if (records && records.length > 0) {
@@ -6296,6 +6300,7 @@ function verifyFp() {
           ? 'screen-reports' : 'screen-dashboard';
         if (dest === 'screen-reports') initReportScreen(profile);
         showScreen(dest);
+        try { clockCheckAtLogin(); } catch(e) {}
         setTimeout(function() {
           fpBusy = false;
           status.textContent = '';
@@ -9134,7 +9139,9 @@ function submitEstablish() {
     dbh=dv;
   }
   var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var now=new Date();
+  var now=trustedNow();
+  var stamp=clockStamp();
+  var dateStr=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
   var gpsText=gpsEl.textContent;
   var parts=gpsText.replace(/°/g,'').split(',');
   var lat=parts[0]?parts[0].trim().split(' ')[0]:'';
@@ -9145,8 +9152,9 @@ function submitEstablish() {
     location_name:(document.getElementById('estLocationName')||{}).value||'',
     notes:(document.getElementById('estNotes')||{}).value||'',
     marker_type:(isTree?'paint':'metal_tag'),
-    dbh_cm:dbh, dbh_date:(dbh!=null?now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear():null),
-    established_date:now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear(),
+    dbh_cm:dbh, dbh_date:(dbh!=null?dateStr:null),
+    established_date:dateStr,
+    device_time:stamp.device_time, clock_offset_ms:stamp.clock_offset_ms, clock_ok:stamp.clock_ok,
     status:'pending', inactive_reason:null, inactive_date:null,
     proposed_clan:myClan(), owner_clan:null, owner_clan_2:null,
     replaces_id:phenoEditReplacesId
@@ -9212,7 +9220,7 @@ function approvePhenoTree(id){
 function rejectPhenoTree(id){ getAllRecords('pheno_plots', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r) return; r.status='rejected'; r.synced=false; updateRecord('pheno_plots', r, function(){ pushPhenoRegistry(function(){}); toast('Tree rejected'); initPhenoApprove(); }); }); }
 function phenoOwnedByMyClan(p){ return isOversight() || !p.owner_clan || p.owner_clan===myClan() || p.owner_clan_2===myClan(); }
 
-function phenoRegistryRecord(r){ return { uid:r.uid, crop_type:r.crop_type, plant_num:r.plant_num, lat:r.lat, lng:r.lng, location_name:r.location_name, notes:r.notes, marker_type:r.marker_type||null, dbh_cm:(r.dbh_cm!=null?r.dbh_cm:null), dbh_date:r.dbh_date||null, established_date:r.established_date, status:r.status, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, approved_date:r.approved_date||null, inactive_reason:r.inactive_reason||null }; }
+function phenoRegistryRecord(r){ return { uid:r.uid, crop_type:r.crop_type, plant_num:r.plant_num, lat:r.lat, lng:r.lng, location_name:r.location_name, notes:r.notes, marker_type:r.marker_type||null, dbh_cm:(r.dbh_cm!=null?r.dbh_cm:null), dbh_date:r.dbh_date||null, established_date:r.established_date, device_time:r.device_time||null, clock_ok:(r.clock_ok!==undefined?r.clock_ok:null), status:r.status, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, approved_date:r.approved_date||null, inactive_reason:r.inactive_reason||null }; }
 function postRegisterPheno(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'register_pheno_plot',_secret:UPLOAD_SECRET,record:phenoRegistryRecord(rec)})}).catch(function(){}); }
 function pushPhenoRegistry(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('pheno_plots', function(rows){ var list=rows.filter(function(r){return r.uid;}).map(phenoRegistryRecord); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'update_pheno_plots',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,pheno_plots:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
 function syncPhenoFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=pheno_plots').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.pheno_plots){if(cb)cb(false);return;} getAllRecords('pheno_plots', function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pending=d.pheno_plots.slice(); var next=function(){ if(pending.length===0){if(cb)cb(true);return;} var sr=pending.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['status','owner_clan','owner_clan_2','approved_date','proposed_clan','marker_type','dbh_cm','dbh_date'].forEach(function(k){if(sr[k]!==undefined)local[k]=sr[k];}); updateRecord('pheno_plots', local, function(){next();}); } else { sr.survey_type='pheno_plot'; sr.synced=true; saveRecord('pheno_plots', sr, function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
@@ -9252,7 +9260,7 @@ function submitInactive() {
 }
 
 function initPhenoRecord() {
-  var now=new Date();
+  var now=trustedNow();
   var hh=String(now.getHours()).padStart(2,'0');
   var mm=String(now.getMinutes()).padStart(2,'0');
   if(document.getElementById('phenoTime')) document.getElementById('phenoTime').value=hh+':'+mm;
@@ -9332,9 +9340,10 @@ function setHealthPlot(plotId,val){
 }
 
 function submitAllPhenoObs() {
-  var now=new Date();
+  var now=trustedNow();
   var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var date=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+  var stamp=clockStamp();
   var time=(document.getElementById('phenoTime')||{}).value||'';
   var weather=(document.getElementById('pwx-sunny')&&document.getElementById('pwx-sunny').classList.contains('active'))?'sunny':'cloudy';
   var genNotes=(document.getElementById('phenoGeneralNotes')||{}).value||'';
@@ -9358,7 +9367,8 @@ function submitAllPhenoObs() {
       plot_id:plotId,crop_type:crop,plant_num:plantNum,
       phenophases:phases, phase:(phases[0]||''), health:health,
       notes:notes,general_notes:genNotes,
-      photo:photo, dbh_cm:(dbh!=null&&dbh>0?dbh:null)
+      photo:photo, dbh_cm:(dbh!=null&&dbh>0?dbh:null),
+      device_time:stamp.device_time, clock_offset_ms:stamp.clock_offset_ms, clock_ok:stamp.clock_ok
     };
     saveRecord('phenology',rec,function(){
       /* An annual DBH re-measure updates the tree's registry record too */
@@ -10258,6 +10268,100 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
+
+/* ══════════════════════════════════════════════════════════════════════
+   CLOCK TRUST / DATE SANITY
+   Offline-first apps have only the device clock, and a wrong device date
+   silently stamps every record wrong. A web app CANNOT read true GPS/GNSS
+   time — navigator.geolocation's timestamp is the device clock, not the
+   satellite signal — so we defend in three layers instead:
+     1. Plausibility window: the date must sit in a believable range.
+     2. Trusted anchor: the latest server-verified UTC we've ever seen
+        (localStorage). The clock must not run BEFORE it (time only moves
+        forward) nor wildly after it.
+     3. When online, refresh the anchor from the server and expose the true
+        "now" via an offset, so the app shows/stamps the correct date even
+        if the device clock has drifted.
+   A true independent offline clock (Android GnssClock) needs a native wrapper.
+══════════════════════════════════════════════════════════════════════ */
+var CLOCK_FLOOR_MS      = Date.UTC(2026, 0, 1);   /* before the pilot — clearly wrong if earlier */
+var CLOCK_CEIL_MS       = Date.UTC(2031, 0, 1);   /* implausibly far ahead */
+var CLOCK_BACK_SLACK_MS = 10 * 60 * 1000;         /* tolerate 10 min behind the anchor */
+var CLOCK_FWD_SLACK_MS  = 365 * 24 * 3600 * 1000; /* tolerate ~1 yr ahead of last contact */
+window._clockOffsetMs = 0;    /* trustedNow = Date.now() + offset (set from server) */
+window._clockOverride = false;/* steward chose "continue anyway" past a clock warning */
+
+function _loadTimeAnchor(){ try { var a=JSON.parse(localStorage.getItem('mca_time_anchor')||'null'); return (a&&a.serverMs)?a:null; } catch(e){ return null; } }
+function _saveTimeAnchor(serverMs, deviceMs){ try { localStorage.setItem('mca_time_anchor', JSON.stringify({serverMs:serverMs, deviceMs:deviceMs})); } catch(e){} }
+
+/* Record the server's authoritative time and set the display offset. */
+function setServerTime(serverIso){
+  var serverMs = Date.parse(serverIso); if(!serverMs) return;
+  var deviceMs = Date.now();
+  var prev = _loadTimeAnchor();
+  if(!prev || serverMs >= prev.serverMs) _saveTimeAnchor(serverMs, deviceMs); /* keep anchor monotonic */
+  window._clockOffsetMs = serverMs - deviceMs;
+}
+/* Best estimate of true now: server-corrected when we've synced this session,
+   otherwise the device clock. Use this for anything date-stamped. */
+function trustedNow(){ return new Date(Date.now() + (window._clockOffsetMs||0)); }
+
+/* GET the ping endpoint for server_time and update the anchor. */
+function pingServerTime(cb){
+  if(!UPLOAD_ENDPOINT || !navigator.onLine){ if(cb)cb(false); return; }
+  fetch(UPLOAD_ENDPOINT+'?action=ping')
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if(d && d.server_time){ setServerTime(d.server_time); if(cb)cb(true); } else { if(cb)cb(false); } })
+    .catch(function(){ if(cb)cb(false); });
+}
+
+/* Is the device clock believable? → {ok, reason, deviceDate, trueDate?, detail} */
+function checkClock(){
+  var dev = Date.now(), devDate = new Date(dev);
+  if(dev < CLOCK_FLOOR_MS) return {ok:false, reason:'behind', deviceDate:devDate, detail:'The date is set before the project started.'};
+  if(dev > CLOCK_CEIL_MS)  return {ok:false, reason:'ahead',  deviceDate:devDate, detail:'The date is set implausibly far in the future.'};
+  var a = _loadTimeAnchor();
+  if(a){
+    if(dev < a.serverMs - CLOCK_BACK_SLACK_MS) return {ok:false, reason:'behind', deviceDate:devDate, trueDate:new Date(a.serverMs), detail:'The phone’s date is earlier than the last time it was online.'};
+    if(dev > a.serverMs + CLOCK_FWD_SLACK_MS)  return {ok:false, reason:'ahead',  deviceDate:devDate, trueDate:new Date(a.serverMs), detail:'The phone’s date is far ahead of the last time it was online.'};
+  }
+  return {ok:true, deviceDate:devDate};
+}
+/* Stamp fields attached to every field record so a coordinator can tell whether
+   it was captured on a verified clock. */
+function clockStamp(){ var c=checkClock(); return { device_time:new Date().toISOString(), clock_offset_ms:(window._clockOffsetMs||0), clock_ok:(!!c.ok && !window._clockOverride) }; }
+
+/* Run at login (and when coming online): if online, refresh from server first. */
+function clockCheckAtLogin(){
+  var run=function(){ var c=checkClock(); if(!c.ok) showClockWarning(c); };
+  if(navigator.onLine && UPLOAD_ENDPOINT){ pingServerTime(function(){ run(); }); } else { run(); }
+}
+function _fmtClockDate(d){ try { return d.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'}); } catch(e){ return d.toDateString(); } }
+function showClockWarning(c){
+  var ex=document.getElementById('clockWarnOverlay'); if(ex) ex.remove();
+  var trueLine = c.trueDate ? ('<div style="font-size:0.8rem;color:#2E7D32;margin-top:8px;">Last verified while online: <strong>'+_fmtClockDate(c.trueDate)+'</strong></div>') : '';
+  var ov=document.createElement('div');
+  ov.id='clockWarnOverlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(20,10,0,0.72);display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML=
+    '<div style="background:#fff;border-radius:14px;max-width:340px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,0.4);">'
+   +'<div style="font-size:2.2rem;text-align:center;">⏰</div>'
+   +'<div style="font-size:1.05rem;font-weight:800;color:#B71C1C;text-align:center;margin-bottom:10px;">Check your phone’s date</div>'
+   +'<div style="font-size:0.83rem;color:#444;">Your phone says today is:</div>'
+   +'<div style="font-size:0.98rem;font-weight:700;color:#B71C1C;margin:4px 0 6px;">'+_fmtClockDate(c.deviceDate)+'</div>'
+   +'<div style="font-size:0.82rem;color:#666;line-height:1.5;">'+c.detail+' Every record you collect is stamped with this date, so please fix it before monitoring.</div>'
+   + trueLine
+   +'<div style="font-size:0.78rem;color:#666;margin-top:12px;line-height:1.5;"><strong>How to fix:</strong> open your phone’s <strong>Settings → Date &amp; Time</strong> and turn on <strong>Automatic / Network-provided</strong> date &amp; time.</div>'
+   +'<button class="btn-primary" style="margin-top:14px;width:100%;" onclick="clockRecheck()">I’ve fixed it — re-check</button>'
+   +'<button class="btn-outline" style="margin-top:8px;width:100%;color:#999;border-color:#ccc;font-size:0.8rem;" onclick="clockContinueAnyway()">Continue anyway (record flagged)</button>'
+   +'</div>';
+  document.body.appendChild(ov);
+}
+function clockRecheck(){
+  var done=function(){ var c=checkClock(); var ov=document.getElementById('clockWarnOverlay'); if(c.ok){ if(ov)ov.remove(); window._clockOverride=false; toast('Date looks correct ✓'); } else { showClockWarning(c); } };
+  if(navigator.onLine && UPLOAD_ENDPOINT){ pingServerTime(function(){ done(); }); } else { done(); }
+}
+function clockContinueAnyway(){ window._clockOverride=true; var ov=document.getElementById('clockWarnOverlay'); if(ov)ov.remove(); toast('Records will be flagged as unverified date'); }
 
 /* Form screens that have autosave drafts */
 var DRAFT_SCREENS = [

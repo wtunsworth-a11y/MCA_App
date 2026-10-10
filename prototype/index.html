@@ -1587,6 +1587,7 @@ select.msel {
          SCREEN: COORDINATOR ENROLLMENT
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-enroll">
+      <button class="back-btn" onclick="goBack()" style="position:absolute;top:10px;left:8px;z-index:30;color:#fff;font-size:1.6rem;" aria-label="Back to app">←</button>
       <div class="enroll-header">
         <div class="enroll-header-title">New Steward Setup</div>
         <div class="enroll-header-sub">Coordinator use only · Managalas Conservation Area</div>
@@ -3414,6 +3415,11 @@ select.msel {
             <div class="detail-row"><span class="dl">Steward ID</span><span class="dv">MCA-7B-042</span></div>
           </div>
           <button class="btn-outline" style="width:100%;margin:10px 0 4px;" onclick="nav('screen-timesheet')"><span data-icon="document" data-size="14"></span> My Timesheet</button>
+          <!-- Oversight tools — shown only for Project/MCF & Zone staff -->
+          <div id="profileOversightTools" style="display:none;">
+            <button class="btn-outline" style="width:100%;margin:6px 0 4px;border-color:#1565C0;color:#1565C0;" onclick="openReports()"><span data-icon="barchart" data-size="14"></span> MCF Summary / Reports</button>
+            <button class="btn-outline" style="width:100%;margin:6px 0 4px;border-color:#5C3D7A;color:#5C3D7A;" onclick="nav('screen-enroll')"><span data-icon="gear" data-size="14"></span> Coordinator Tools (enrol, approve, zones)</button>
+          </div>
           <!-- Trainer certifications — shown only when certs exist for this steward -->
           <div id="trainerCertSection" style="display:none;margin-bottom:4px;">
             <div class="section-label" style="padding-left:0;margin-bottom:6px;">Training Certifications</div>
@@ -4395,6 +4401,12 @@ select.msel {
         <div id="livemap" style="position:absolute;inset:0;background:#dfe6e9;"></div>
         <div id="liveMapNote" style="position:absolute;left:10px;right:10px;bottom:10px;z-index:500;background:rgba(255,255,255,0.92);border-radius:8px;padding:8px 10px;font-size:0.7rem;color:#555;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
       </div>
+      <nav class="bottom-nav">
+        <button class="nav-item" onclick="bottomNav('home')"><span class="nav-icon" data-icon="home" data-size="22"></span><span class="nav-label">Home</span></button>
+        <button class="nav-item active" onclick="bottomNav('map')"><span class="nav-icon" data-icon="map" data-size="22"></span><span class="nav-label">Map</span></button>
+        <button class="nav-item" onclick="bottomNav('alerts')"><span class="nav-icon" data-icon="bell" data-size="22"></span><span class="nav-label">Alerts</span></button>
+        <button class="nav-item" onclick="bottomNav('profile')"><span class="nav-icon" data-icon="user" data-size="22"></span><span class="nav-label">Profile</span></button>
+      </nav>
     </div>
 
     <!-- ══════════════════════════════════════
@@ -10668,6 +10680,13 @@ function syncAuthorisations(profile) {
 }
 
 /* ── Load Profile Screen ────────────────────────────────────────── */
+/* Open the MCF Summary / Reports screen from the Profile hub (oversight). */
+function openReports(){
+  var p = window._cachedProfile || null;
+  try { if (p && typeof initReportScreen === 'function') initReportScreen(p); } catch(e) {}
+  nav('screen-reports');
+}
+
 function loadProfileScreen() {
   getAllRecords('auth', function(authRecs) {
     var profile = authRecs ? authRecs.filter(function(r) { return r.id === 1 || r.id === 'profile'; })[0] : null;
@@ -10697,6 +10716,10 @@ function loadProfileScreen() {
           '<div class="detail-row"><span class="dl">Zone</span><span class="dv">' + (profile.zone || '—') + '</span></div>' +
           '<div class="detail-row"><span class="dl">Enrolled</span><span class="dv">' + (profile.enrolled ? profile.enrolled.slice(0,10) : '—') + '</span></div>';
       }
+
+      /* Oversight tools (MCF Summary + Coordinator) — only for oversight roles */
+      var ovTools = document.getElementById('profileOversightTools');
+      if (ovTools) { ovTools.style.display = isOversight() ? 'block' : 'none'; hydrateIcons(ovTools); }
 
       /* Trainer certifications section */
       getAllRecords('trainerCerts', function(certs) {

@@ -4499,7 +4499,7 @@ select.msel {
             <div id="fmPhotoStatus" style="font-size:0.72rem;color:#888;">No photo</div>
           </div>
 
-          <button class="btn-primary" style="background:#00695C;margin-top:14px;" onclick="saveFreemap()">Save &amp; Export</button>
+          <button class="btn-primary" style="background:#00695C;margin-top:14px;" onclick="saveFreemap()">Save</button>
 
           <div id="fmRecent" style="margin-top:18px;"></div>
         </div>
@@ -7389,7 +7389,10 @@ function saveFreemap(){
   else { if(_fmLine.length<2){ toast('Record at least 2 points for a line.'); return; } pts=_fmLine.slice(); }
   var now=new Date();
   var rec={ survey_type:'freemap', uid:generateRecordId('MAP'), map_type:_fmMode, category:_fmCat, category_label:FM_CATS[_fmCat], title:title, description:(document.getElementById('fmDesc').value||'').trim(), points:pts, length_m:(_fmMode==='line')?Math.round(_fmLen()):0, photo:_fmPhoto||null, clan:myClan(), steward:(window._cachedProfile&&window._cachedProfile.stewardId)||'', recorded_at:now.toISOString() };
-  saveRecord('freemap', rec, function(){ toast('Saved ✓ — exporting file'); exportFreemap(rec); initFreemap(); });
+  /* Save only — the record uploads with the normal Send Data sync. No KML is
+     written to the phone; use the per-record "Export" button in the list below
+     if you ever need a map file to share. */
+  saveRecord('freemap', rec, function(){ toast('Saved ✓'); initFreemap(); });
 }
 
 function _fmDescText(rec){

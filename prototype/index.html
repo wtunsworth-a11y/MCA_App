@@ -4511,6 +4511,13 @@ select.msel {
               <button class="weather-pill" id="fmcat-infrastructure" onclick="fmCat('infrastructure')">Infrastructure</button>
               <button class="weather-pill" id="fmcat-boundary" onclick="fmCat('boundary')">Clan boundary</button>
               <button class="weather-pill" id="fmcat-hazard" onclick="fmCat('hazard')">Hazard / event</button>
+              <button class="weather-pill" id="fmcat-pest" onclick="fmCat('pest')">Crop pest / disease</button>
+              <button class="weather-pill" id="fmcat-fire" onclick="fmCat('fire')">Forest fire</button>
+              <button class="weather-pill" id="fmcat-noncompliance" onclick="fmCat('noncompliance')">Non-compliance</button>
+              <button class="weather-pill" id="fmcat-unrest" onclick="fmCat('unrest')">Social unrest</button>
+              <button class="weather-pill" id="fmcat-wildlife" onclick="fmCat('wildlife')">Wildlife sighting</button>
+              <button class="weather-pill" id="fmcat-hunting" onclick="fmCat('hunting')">Hunting event</button>
+              <button class="weather-pill" id="fmcat-cultural" onclick="fmCat('cultural')">Cultural event</button>
               <button class="weather-pill" id="fmcat-other" onclick="fmCat('other')">Other</button>
             </div>
           </div>
@@ -7355,7 +7362,7 @@ function syncCalendarFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(
 ══════════════════════════════════════ */
 var _fmMode='point', _fmCat='road', _fmPhoto=null, _fmPoint=null;
 var _fmLine=[], _fmWatchId=null, _fmRecording=false, _fmPaused=false;
-var FM_CATS={ road:'Road / track', infrastructure:'Infrastructure', boundary:'Clan boundary', hazard:'Hazard / event', other:'Other' };
+var FM_CATS={ road:'Road / track', infrastructure:'Infrastructure', boundary:'Clan boundary', pest:'Crop pest / disease', hazard:'Hazard / event', fire:'Forest fire', noncompliance:'Non-compliance', unrest:'Social unrest', wildlife:'Wildlife sighting', hunting:'Hunting event', cultural:'Cultural event', other:'Other' };
 
 function initFreemap(){
   fmStopWatch();

@@ -1644,7 +1644,7 @@ select.msel {
               <option value="clan_steward">Clan Steward</option>
               <option value="zone_staff">Zone Staff</option>
               <option value="field_officer">Field Officer (Agricultural Extension)</option>
-              <option value="mcf_staff">MCF Staff</option>
+              <option value="mcf_staff">Project / MCF Staff</option>
             </select>
           </div>
           <div class="form-group" id="enrollZoneGroup">
@@ -10336,7 +10336,7 @@ function renderUpdateProfileScreen() {
           '<option value="clan_steward"' + (profile.role==='clan_steward'?' selected':'') + '>Clan Steward</option>' +
           '<option value="zone_staff"'   + (profile.role==='zone_staff'?' selected':'')   + '>Zone Staff</option>' +
           '<option value="field_officer"'+ (profile.role==='field_officer'?' selected':'')+'>Field Officer (Agri. Extension)</option>' +
-          '<option value="mcf_staff"'    + (profile.role==='mcf_staff'?' selected':'')    + '>MCF Staff</option>' +
+          '<option value="mcf_staff"'    + (profile.role==='mcf_staff'?' selected':'')    + '>Project / MCF Staff</option>' +
         '</select>' +
       '</div>' +
       '<div class="form-group" id="upZoneGroup">' +
@@ -10660,7 +10660,7 @@ function loadProfileScreen() {
         'clan_steward': 'Clan Steward',
         'field_officer': 'Field Officer',
         'zone_staff': 'Zone Staff',
-        'mcf_staff': 'MCF Staff'
+        'mcf_staff': 'Project / MCF Staff'
       })[profile.role] || profile.role || 'Clan Steward';
       /* Detail rows */
       var detailDiv = document.querySelector('#screen-profile .card');
@@ -12476,7 +12476,7 @@ function printTimesheet() {
 }
 
 function tsRoleLabel(role) {
-  var map = { clan_steward:'Clan Steward', zone_staff:'Zone Staff', field_officer:'Field Officer', mcf_staff:'MCF Staff' };
+  var map = { clan_steward:'Clan Steward', zone_staff:'Zone Staff', field_officer:'Field Officer', mcf_staff:'Project / MCF Staff' };
   return map[role] || (role || 'Staff');
 }
 

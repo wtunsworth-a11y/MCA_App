@@ -10499,7 +10499,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v31'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v32'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -10522,6 +10522,8 @@ var CLOCK_BACK_SLACK_MS = 10 * 60 * 1000;         /* tolerate 10 min behind the 
 var CLOCK_FWD_SLACK_MS  = 365 * 24 * 3600 * 1000; /* tolerate ~1 yr ahead of last contact */
 window._clockOffsetMs = 0;    /* trustedNow = Date.now() + offset (set from server) */
 window._clockOverride = false;/* steward chose "continue anyway" past a clock warning */
+/* Stores that are NOT field data — never clock-stamped (identity/UI/queues). */
+var CLOCK_STAMP_SKIP = ['auth','drafts','trainerCerts','issues'];
 
 function _loadTimeAnchor(){ try { var a=JSON.parse(localStorage.getItem('mca_time_anchor')||'null'); return (a&&a.serverMs)?a:null; } catch(e){ return null; } }
 function _saveTimeAnchor(serverMs, deviceMs){ try { localStorage.setItem('mca_time_anchor', JSON.stringify({serverMs:serverMs, deviceMs:deviceMs})); } catch(e){} }
@@ -10615,15 +10617,19 @@ function _computeDateBracket(r){
   }
   return { earliest:(earliestMs!=null?new Date(earliestMs).toISOString():null), latest:new Date(latestMs).toISOString(), device_time:r.device_time||null, month_known:monthKnown, month:monthLabel };
 }
+var _STORE_LABELS={ water:'Water quality', phenology:'Phenology', pheno_plots:'Tree establishment', mafia:'Forest integrity (MaFIA)', qabb:'Butterfly survey (QABB)', meteo:'Weather station', training:'Training session', conservation:'Conservation activity', followups:'Conservation follow-up', trees:'Tree mapping', gardens:'Garden mapping', freemap:'Field mapping', patrols:'Patrol', observations:'Observation', schedule:'Scheduled activity', meetings:'Meeting' };
 function _dateReviewSummary(store, r){
-  if(store==='phenology'){ var c=phenoCropLabel(r.crop_type); return 'Phenology — '+c+' Plant '+(r.plant_num||'?'); }
-  return (r.survey_type||store);
+  var base=_STORE_LABELS[store]||r.survey_type||store;
+  if(store==='phenology'||store==='pheno_plots'){ var c=phenoCropLabel(r.crop_type); return base+' — '+c+(r.plant_num?(' Plant '+r.plant_num):''); }
+  if(r.category) return base+' — '+r.category;
+  if(r.title) return base+' — '+r.title;
+  return base;
 }
 function _dateReviewEntry(store, r, br, profile){
   var uid=r.record_uid || r.uid || (store+'-'+(r.id!=null?r.id:Math.random().toString(36).slice(2,8)));
   return { uid:uid, store:store, survey_type:r.survey_type||store,
     steward:(profile.name||''), steward_id:(profile.stewardId||''), clan:(profile.clan||''),
-    summary:_dateReviewSummary(store, r), recorded_label:(r.date||r.established_date||''),
+    summary:_dateReviewSummary(store, r), recorded_label:(r.date||r.established_date||r.timestamp||''),
     device_time:br.device_time, earliest:br.earliest, latest:br.latest,
     month_known:br.month_known, month:br.month, corrected_date:'', status:'pending',
     flagged_at:new Date(br.latest).toISOString() };
@@ -11624,6 +11630,16 @@ function saveRecord(storeName, data, cb) {
     }
     data.timestamp = new Date().toISOString();
     data.synced = false;
+    /* Clock trust applies to ALL submitted data, not just phenology: stamp
+       device_time + clock_ok on every record unless it's a non-data store or
+       the caller already stamped it. Records taken on an unverified clock
+       (clock_ok:false) are flagged for coordinator Date Review at upload. */
+    if (CLOCK_STAMP_SKIP.indexOf(storeName) < 0 && data.clock_ok === undefined) {
+      var _cs = clockStamp();
+      data.device_time     = _cs.device_time;
+      data.clock_offset_ms = _cs.clock_offset_ms;
+      data.clock_ok        = _cs.clock_ok;
+    }
     var tx = db.transaction(storeName, 'readwrite');
     var store = tx.objectStore(storeName);
     var addReq = store.add(data);

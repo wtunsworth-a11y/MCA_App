@@ -17,7 +17,7 @@ and the operational procedures worked out during pilot setup.*
   baked into `prototype/index.html`
   (`…/macros/s/AKfycbxqEnJ1…JZR8XRg/exec`). **Deployed and verified**
   (`{"status":"ready"}`). **Coordinator server key is set** in Script Properties.
-- **Service worker cache:** `mca-steward-v31` (bumped every deploy). The app now
+- **Service worker cache:** `mca-steward-v32` (bumped every deploy). The app now
   **auto-applies updates** on reopen (checks on launch + focus, reloads once when
   a new worker takes over) — no more "open twice".
 - **Uploads fixed (v24):** Send Data and all registry/approval syncs POST as
@@ -154,9 +154,10 @@ GNSS time needs the native wrapper). Defence in three layers:
 At **login** a blocking **"Check your phone's date"** warning appears if the
 clock fails, telling the steward to turn on *Settings → Date & Time →
 Automatic/Network*. They can re-check after fixing, or **Continue anyway**, which
-flags every record with `clock_ok:false`. Each phenology record carries
-`device_time` + `clock_ok` so a coordinator can spot unverified dates. *(Stamping
-is on phenology now; extending to the other modules is a small follow-up.)*
+flags every record with `clock_ok:false`. **Every data record across all
+modules** carries `device_time` + `clock_ok` (stamped centrally in `saveRecord`),
+so any submission taken on an unverified clock — not just phenology — is caught
+and routed to Date Review.
 
 ## 6b. Date review & field problem reports
 

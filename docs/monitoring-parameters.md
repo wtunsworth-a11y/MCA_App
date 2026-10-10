@@ -222,7 +222,7 @@ The water / facility / met / phenology readings also carry:
 | `record_uid` | unique steward-prefixed ID (dedup on Drive) |
 | `timestamp`, `synced` | when captured; whether uploaded |
 | `device_time` | the raw device-clock time at capture (ISO) |
-| `clock_ok` | **true** only if the device clock passed the sanity check at capture (in a plausible window **and** not behind the last server-verified time, with no "continue anyway" override). A **false** here means the date on that record may be wrong — the phone's clock was unverified. Currently stamped on phenology records; extends to other modules as a follow-up. |
+| `clock_ok` | **true** only if the device clock passed the sanity check at capture (in a plausible window **and** not behind the last server-verified time, with no "continue anyway" override). A **false** here means the date on that record may be wrong — the phone's clock was unverified. **Stamped on every data record across all modules** (`saveRecord`), so any submission taken on a bad clock is flagged for Date Review. |
 
 > **Date integrity.** All dates come from the **device clock** (a web app cannot
 > read true GPS/GNSS time — the Geolocation API's timestamp is itself the device

@@ -233,4 +233,11 @@ in. *(Screenshots are the phone's own; the app doesn't auto-capture the screen.)
 (coordinator ops), `field-guide.md` (steward tasks), `monitoring-parameters.md`
 (what's captured), `app-functions.md` (what the app does), `TODO.md` (backlog),
 and this file. The in-app **Help centre** mirrors the Field Guide (everyone) and
-the Administrator's Manual (coordinator unlock only).
+the Administrator's Manual (coordinator unlock only) — on-screen, offline, in the
+app itself (no PDF needed on the phone).
+
+**Printable handout:** `docs/field-guide.pdf` (A4, 3 pp, logo-free) is a
+training-day handout generated from `docs/field-guide-print.html`. It is a
+standalone file (not bundled in the app). Regenerate after editing the guide:
+render `field-guide-print.html` to A4 via headless Chromium
+(`page.pdf({format:'A4', printBackground:true})`).

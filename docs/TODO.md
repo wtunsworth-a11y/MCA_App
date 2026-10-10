@@ -3,7 +3,7 @@
 Outstanding work and planned additions. Items that require action from outside
 this repo (assets, decisions, accounts, field protocols) are grouped at the end.
 
-*Last updated: 2026-10-04*
+*Last updated: 2026-10-10*
 
 ---
 
@@ -19,9 +19,7 @@ this repo (assets, decisions, accounts, field protocols) are grouped at the end.
       [installation-guide.md §2](installation-guide.md).
 - [ ] **Real-device testing** — camera, GPS, fingerprint (WebAuthn) and PWA
       install can't be tested headlessly; run through the flows on an Android
-      phone before/with the pilot.
-- [ ] **Open the pull request** for `claude/github-app-install-7irta9` when
-      ready for review/merge.
+      phone before/with the pilot. *In progress — enrolling Matilda & Mellie.*
 
 ---
 
@@ -230,6 +228,23 @@ is coordinator-defined and syncs down like the other registries.
 
 ## Done
 
+- [x] **Deployed & live** (2026-10-10) — feature branch merged to `main`;
+      the app is served from GitHub Pages at
+      `https://wtunsworth-a11y.github.io/MCA_App/prototype/index.html` (Pages
+      confirmed on). Service-worker cache bumped so devices pull the fresh
+      build.
+- [x] **Observations folded into Field Mapping** (2026-10-10) — the old
+      non-functional Observations mock-up is retired; its "Observations" tile
+      now opens the real Field Mapping module, which carries all its incident
+      types as working, syncing categories (Forest fire, Non-compliance, Social
+      unrest, Wildlife sighting, Hunting event, Cultural event) plus a new
+      **Crop pest / disease** category. Added an on-screen guide + a full Field
+      Mapping help section.
+- [x] **Fingerprint hard-required in the field** (2026-10-10) — the on-site
+      verify gates now **fail closed**: a phone with no fingerprint sensor can
+      no longer record a reading "unverified" — it is blocked. Login was
+      already hard-closed. Installation Guide §6 documents PWA removal /
+      full reinstall (Android + iPhone).
 - [x] **In-app help system** (built 2026-10-04) — offline Help centre with the
       **Field Guide** (everyone) and **Administrator's Manual** (coordinator
       unlock only); a **?** in every screen header deep-links the right
@@ -246,7 +261,7 @@ is coordinator-defined and syncs down like the other registries.
 - [x] **Disturbance verification** (built 2026-10-04) — satellite-detected
       fires, landslides and **>2 ha forest clearance** raised as clan-owned
       field-verification tasks. Server-side daily feed (NASA FIRMS live;
-      GFW/RADD stubbed) → point-in-polygon routing to the owning clan (triage
+      GFW/RADD clearance wired via Earth Engine) → point-in-polygon routing to the owning clan (triage
       queue otherwise) → tasks load to stewards **on upload** → defensible
       on-site record (neutral outcome, cause recorded separately, geotagged
       photo, on-site fingerprint, area). Replaces the old static alerts mock.

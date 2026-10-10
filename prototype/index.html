@@ -6728,14 +6728,14 @@ function facRegistryRecord(r) {
 }
 function postRegisterFacility(rec) {
   if (!UPLOAD_ENDPOINT || !navigator.onLine || !rec || !rec.uid) return;
-  fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
+  fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify({ _action:'register_facility', _secret: UPLOAD_SECRET, record: facRegistryRecord(rec) }) }).catch(function(){});
 }
 function pushFacilityRegistry(cb) {
   if (!UPLOAD_ENDPOINT || !navigator.onLine) { if (cb) cb(false); return; }
   getAllRecords('facilities', function(rows) {
     var list = rows.map(facRegistryRecord).filter(function(r){ return r.uid; });
-    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
+    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify({ _action:'update_facilities', _secret: UPLOAD_SECRET, _coordinator_secret: window._coordSecret, facilities: list }) })
       .then(function(r){ return r.json(); }).then(function(d){ if (cb) cb(d && d.status === 'ok'); }).catch(function(){ if (cb) cb(false); });
   });
@@ -6934,8 +6934,8 @@ function submitMetReading(){
 
 /* central sync */
 function metRegistryRecord(r){ return { uid:r.uid, name:r.name, met_type:r.met_type, lat:r.lat, lng:r.lng, gps_accuracy:r.gps_accuracy, description:r.description, photo:r.photo||null, status:r.status, proposed_by:r.proposed_by, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, registered_date:r.registered_date, approved_date:r.approved_date||null, approved_by:r.approved_by||null }; }
-function postRegisterMet(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'register_met_station',_secret:UPLOAD_SECRET,record:metRegistryRecord(rec)})}).catch(function(){}); }
-function pushMetRegistry(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('met_stations', function(rows){ var list=rows.map(metRegistryRecord).filter(function(r){return r.uid;}); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'update_met_stations',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,met_stations:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
+function postRegisterMet(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'register_met_station',_secret:UPLOAD_SECRET,record:metRegistryRecord(rec)})}).catch(function(){}); }
+function pushMetRegistry(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('met_stations', function(rows){ var list=rows.map(metRegistryRecord).filter(function(r){return r.uid;}); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'update_met_stations',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,met_stations:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
 function syncMetFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=met_stations').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.met_stations){if(cb)cb(false);return;} getAllRecords('met_stations', function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pending=d.met_stations.slice(); var next=function(){ if(pending.length===0){if(cb)cb(true);return;} var sr=pending.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['name','met_type','lat','lng','gps_accuracy','description','photo','status','owner_clan','owner_clan_2','approved_date','approved_by','proposed_by','proposed_clan','registered_date'].forEach(function(k){local[k]=sr[k];}); updateRecord('met_stations', local, function(){next();}); } else { sr.survey_type='met_station'; sr.synced=true; saveRecord('met_stations', sr, function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
 
 /* ══════════════════════════════════════
@@ -7320,8 +7320,8 @@ function complianceRow(ic,name,done,total,pct,sent){
 
 /* ── Central sync ── */
 function calRegistryRecord(r){ return { uid:r.uid, activity:r.activity, title:r.title, date:r.date, clan:r.clan||'', zone:r.zone||'', responsible:r.responsible||'', briefing_required:!!r.briefing_required, briefing_done:!!r.briefing_done, status:r.status||'planned', done_date:r.done_date||null, notes:r.notes||'', cadence:r.cadence||'none', series_uid:r.series_uid||null, created_by:r.created_by||'' }; }
-function postCalEvent(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'register_calendar_event',_secret:UPLOAD_SECRET,record:calRegistryRecord(rec)})}).catch(function(){}); }
-function pushCalendar(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('calendar',function(rows){ var list=rows.filter(function(r){return r.uid;}).map(calRegistryRecord); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'update_calendar',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,calendar:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
+function postCalEvent(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'register_calendar_event',_secret:UPLOAD_SECRET,record:calRegistryRecord(rec)})}).catch(function(){}); }
+function pushCalendar(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('calendar',function(rows){ var list=rows.filter(function(r){return r.uid;}).map(calRegistryRecord); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'update_calendar',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,calendar:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
 function syncCalendarFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=calendar').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.calendar){if(cb)cb(false);return;} getAllRecords('calendar',function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pend=d.calendar.slice(); var next=function(){ if(pend.length===0){if(cb)cb(true);return;} var sr=pend.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['activity','title','date','clan','zone','responsible','briefing_required','briefing_done','status','done_date','notes','cadence','series_uid'].forEach(function(k){local[k]=sr[k];}); updateRecord('calendar',local,function(){next();}); } else { sr.survey_type='calendar_event'; sr.synced=true; saveRecord('calendar',sr,function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
 
 /* ══════════════════════════════════════
@@ -7685,7 +7685,7 @@ function pushDisturbances(cb){
   if(!UPLOAD_ENDPOINT||!navigator.onLine){ if(cb)cb(false); return; }
   getAllRecords('disturbances', function(rows){
     var list=rows.filter(function(r){ return r.uid; }).map(distRegistryRecord);
-    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
+    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
       body:JSON.stringify({ _action:'update_disturbances', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret, disturbances:list }) })
       .then(function(r){ return r.json(); })
       .then(function(d){ if(cb)cb(d&&d.status==='ok'); })
@@ -7696,7 +7696,7 @@ function pushDisturbances(cb){
    coordinator key needed) so field officers can return results. */
 function postVerification(rec, cb){
   if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid){ if(cb)cb(false); return; }
-  fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
+  fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
     body:JSON.stringify({ _action:'verify_disturbance', _secret:UPLOAD_SECRET, record:distRegistryRecord(rec) }) })
     .then(function(r){ return r.json(); })
     .then(function(d){ if(cb)cb(d&&d.status==='ok'); })
@@ -8149,7 +8149,7 @@ function syncHelpFromServer(cb){
 }
 function pushHelp(cb){
   if(!UPLOAD_ENDPOINT||!navigator.onLine){ if(cb)cb(false); return; }
-  fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
+  fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
     body:JSON.stringify({ _action:'update_help', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret, help:helpRegistryPayload() }) })
     .then(function(r){ return r.json(); }).then(function(d){ if(cb)cb(d&&d.status==='ok'); }).catch(function(){ if(cb)cb(false); });
 }
@@ -8722,7 +8722,7 @@ function wsRegistryRecord(r) {
 function postRegisterWaterSource(rec) {
   if (!UPLOAD_ENDPOINT || !navigator.onLine || !rec || !rec.uid) return;
   fetch(UPLOAD_ENDPOINT, {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
+    method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'},
     body: JSON.stringify({ _action:'register_water_source', _secret: UPLOAD_SECRET, record: wsRegistryRecord(rec) })
   }).catch(function(){ /* stays local; re-syncs later */ });
 }
@@ -8732,7 +8732,7 @@ function pushWaterRegistry(cb) {
   getAllRecords('water_sources', function(rows) {
     var list = rows.map(wsRegistryRecord).filter(function(r){ return r.uid; });
     fetch(UPLOAD_ENDPOINT, {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
+      method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'},
       body: JSON.stringify({ _action:'update_water_sources', _secret: UPLOAD_SECRET, _coordinator_secret: window._coordSecret, water_sources: list })
     }).then(function(r){ return r.json(); })
       .then(function(d){ if (cb) cb(d && d.status === 'ok'); })
@@ -9111,8 +9111,8 @@ function rejectPhenoTree(id){ getAllRecords('pheno_plots', function(rows){ var r
 function phenoOwnedByMyClan(p){ return isOversight() || !p.owner_clan || p.owner_clan===myClan() || p.owner_clan_2===myClan(); }
 
 function phenoRegistryRecord(r){ return { uid:r.uid, crop_type:r.crop_type, plant_num:r.plant_num, lat:r.lat, lng:r.lng, location_name:r.location_name, notes:r.notes, established_date:r.established_date, status:r.status, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, approved_date:r.approved_date||null, inactive_reason:r.inactive_reason||null }; }
-function postRegisterPheno(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'register_pheno_plot',_secret:UPLOAD_SECRET,record:phenoRegistryRecord(rec)})}).catch(function(){}); }
-function pushPhenoRegistry(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('pheno_plots', function(rows){ var list=rows.filter(function(r){return r.uid;}).map(phenoRegistryRecord); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'update_pheno_plots',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,pheno_plots:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
+function postRegisterPheno(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'register_pheno_plot',_secret:UPLOAD_SECRET,record:phenoRegistryRecord(rec)})}).catch(function(){}); }
+function pushPhenoRegistry(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('pheno_plots', function(rows){ var list=rows.filter(function(r){return r.uid;}).map(phenoRegistryRecord); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'update_pheno_plots',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,pheno_plots:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
 function syncPhenoFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=pheno_plots').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.pheno_plots){if(cb)cb(false);return;} getAllRecords('pheno_plots', function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pending=d.pheno_plots.slice(); var next=function(){ if(pending.length===0){if(cb)cb(true);return;} var sr=pending.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['status','owner_clan','owner_clan_2','approved_date','proposed_clan'].forEach(function(k){local[k]=sr[k];}); updateRecord('pheno_plots', local, function(){next();}); } else { sr.survey_type='pheno_plot'; sr.synced=true; saveRecord('pheno_plots', sr, function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
 
 function openInactivePlot(id, cropLabel, plantNum, location) {
@@ -10271,7 +10271,7 @@ function zoneConfigSave() {
   if (UPLOAD_ENDPOINT) {
     fetch(UPLOAD_ENDPOINT, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
       body: JSON.stringify({_action:'update_zones', _secret: UPLOAD_SECRET, _coordinator_secret: window._coordSecret, zones: _editZones})
     }).then(function(r) { return r.json(); })
       .then(function(d) {
@@ -10412,7 +10412,7 @@ function topicsConfigSave() {
   if (UPLOAD_ENDPOINT) {
     fetch(UPLOAD_ENDPOINT, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
       body: JSON.stringify({_action:'update_topics', _secret: UPLOAD_SECRET, _coordinator_secret: window._coordSecret, topics: _editTopics})
     }).then(function(r) { return r.json(); })
       .then(function(d) {
@@ -10675,7 +10675,7 @@ function submitGrantAuth() {
   if (UPLOAD_ENDPOINT) {
     fetch(UPLOAD_ENDPOINT, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
       body: JSON.stringify(payload)
     }).then(function(r) { return r.json(); })
       .then(function(d) {
@@ -11404,6 +11404,7 @@ function sendAllData() {
   getAllRecords('auth', function(authRecs) {
     var profile = (authRecs && authRecs.length > 0) ? authRecs[0] : {};
     var bundle = {
+      _secret:        UPLOAD_SECRET,   /* checked in the request BODY by the backend */
       export_version: '1',
       exported_at:    new Date().toISOString(),
       steward: {
@@ -11449,7 +11450,10 @@ function sendAllData() {
           if (UPLOAD_ENDPOINT) {
             fetch(UPLOAD_ENDPOINT, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'X-Upload-Secret': UPLOAD_SECRET },
+              /* text/plain = a "simple" CORS request, so no preflight (Apps
+                 Script can't answer preflight). The backend reads the raw body
+                 regardless of content-type. Secret travels in the body. */
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
               body: json
             }).then(function(res) { return res.json(); })
               .then(function(result) {

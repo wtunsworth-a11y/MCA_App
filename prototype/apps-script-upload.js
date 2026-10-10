@@ -67,10 +67,10 @@ function getCoordinatorSecret() {
 }
 
 var DEFAULT_ZONES = [
-  {id:'Z01', name:'Zone 1'},  {id:'Z02', name:'Zone 2'},  {id:'Z03', name:'Zone 3'},
-  {id:'Z04', name:'Zone 4'},  {id:'Z05', name:'Zone 5'},  {id:'Z06', name:'Zone 6'},
-  {id:'Z07', name:'Zone 7'},  {id:'Z08', name:'Zone 8'},  {id:'Z09', name:'Zone 9'},
-  {id:'Z10', name:'Zone 10'}, {id:'Z11', name:'Zone 11'}
+  {id:'Z01', name:'Zone 1'},   {id:'Z02', name:'Zone 2'},  {id:'Z03', name:'Zone 3'},
+  {id:'Z04', name:'Zone 4'},   {id:'Z05', name:'Zone 5'},  {id:'Z06', name:'Zone 6'},
+  {id:'Z07A', name:'Zone 7A'}, {id:'Z07B', name:'Zone 7B'},
+  {id:'Z08', name:'Zone 8'},   {id:'Z09', name:'Zone 9'},  {id:'Z10', name:'Zone 10'}
 ];
 
 /* ─── Drive folder helper ───────────────────────────────────────────── */

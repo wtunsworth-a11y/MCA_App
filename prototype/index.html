@@ -6366,7 +6366,7 @@ function renderFacilitiesList() {
   var c = document.getElementById('facilitiesContent');
   if (!c) return;
   getAllRecords('facilities', function(rows) {
-    var mine = rows.filter(function(r){ return r.proposed_clan === myClan() || r.owner_clan === myClan() || r.owner_clan_2 === myClan(); });
+    var mine = rows.filter(function(r){ return isOversight() || r.proposed_clan === myClan() || r.owner_clan === myClan() || r.owner_clan_2 === myClan(); });
     if (mine.length === 0) {
       c.innerHTML = '<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No facilities registered yet for '+(myClan()||'your clan')+'. Tap “Register New Facility” to add the first one.</div>';
       return;
@@ -6555,7 +6555,7 @@ function renderFacilityTasks() {
   var clan = myClan();
   getAllRecords('facilities', function(facs) {
     getAllRecords('facility_visits', function(visits) {
-      var owned = facs.filter(function(s){ return s.status === 'approved' && (s.owner_clan === clan || s.owner_clan_2 === clan); });
+      var owned = facs.filter(function(s){ return s.status === 'approved' && (isOversight() || s.owner_clan === clan || s.owner_clan_2 === clan); });
       var h = '<div style="font-size:0.82rem;font-weight:700;color:#283593;margin:4px 2px 8px;">Your clan’s facilities — '+(clan||'your clan')+'</div>';
       if (owned.length === 0) {
         h += '<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No facilities are assigned to your clan yet. Register a facility and the coordinator will assign ownership before it appears here.</div>';
@@ -6821,7 +6821,7 @@ function metVisitsThisMonth(records, metId, clan){ var mk=monthKey(); return rec
 function renderMetTasks(){
   var tasks=document.getElementById('metTasks'); if(!tasks) return; var clan=myClan();
   getAllRecords('met_stations', function(stations){ getAllRecords('met_readings', function(readings){
-    var owned=stations.filter(function(s){ return s.status==='approved'&&(s.owner_clan===clan||s.owner_clan_2===clan); });
+    var owned=stations.filter(function(s){ return s.status==='approved'&&(isOversight() || s.owner_clan===clan||s.owner_clan_2===clan); });
     var h='<div style="font-size:0.82rem;font-weight:700;color:#37474F;margin:4px 2px 8px;">Your clan’s instruments — '+(clan||'your clan')+'</div>';
     if(owned.length===0){ h+='<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No instruments assigned to your clan yet. Register one and the coordinator will assign ownership before it appears here.</div>'; tasks.innerHTML=h; return; }
     owned.forEach(function(s){
@@ -6894,7 +6894,7 @@ function _linkedStatus(items, readings, idField, clan) {
   var lastMk = _prevMonthKey();
   var now = new Date();
   var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  var owned = items.filter(function(s){ return s.status==='approved' && (s.owner_clan===clan || s.owner_clan_2===clan); });
+  var owned = items.filter(function(s){ return s.status==='approved' && (isOversight() || s.owner_clan===clan || s.owner_clan_2===clan); });
   var done=0, due=0, overdue=0, sent=0;
   owned.forEach(function(it){
     var mRds = readings.filter(function(r){ return r[idField]===it.id && (!r.clan || r.clan===clan) && r.timestamp && monthKey(new Date(r.timestamp))===thisMk; });
@@ -6920,7 +6920,7 @@ function renderDashDisturb(){
   var el=document.getElementById('dashDisturb'); if(!el) return;
   var mine=myClan(), isCoord=!!window._coordSecret;
   getAllRecords('disturbances', function(rows){
-    var myOpen=rows.filter(function(r){ return r.status==='open' && r.owner_clan===mine && mine; });
+    var myOpen=rows.filter(function(r){ return r.status==='open' && (isOversight() || (r.owner_clan===mine && mine)); });
     var triage=rows.filter(function(r){ return r.status==='open' && !r.owner_clan; });
     var hiMine=myOpen.filter(function(r){ return r.priority==='high'; }).length;
     if(myOpen.length===0 && !(isCoord && triage.length)){ el.innerHTML=''; return; }
@@ -6955,7 +6955,7 @@ function renderDashboardStatus() {
       { name:'Met Stations',     icon:'raingauge', nav:'screen-meteo-setup', s:_linkedStatus(ms, mr, 'met_station_id', clan) }
     ];
     /* phenology: readings aren't per-plant, so status is "did I observe this month" */
-    var ownedPp = pp.filter(function(p){ return p.status==='approved' && (p.owner_clan===clan || p.owner_clan_2===clan || !p.owner_clan); });
+    var ownedPp = pp.filter(function(p){ return p.status==='approved' && (isOversight() || p.owner_clan===clan || p.owner_clan_2===clan || !p.owner_clan); });
     var phThis = ph.filter(function(r){ return r.timestamp && monthKey(new Date(r.timestamp))===monthKey(); });
     var phenoDone = phThis.length>0;
     var phenoSent = phThis.some(function(r){ return r.synced; });
@@ -7045,7 +7045,7 @@ function calShiftMonth(d){ _calMonth = new Date(_calMonth.getFullYear(), _calMon
 function _calMonitoring(mk, isFuture, isPast, data){
   var clan = myClan();
   function stat(items, readings, idField){
-    var owned = items.filter(function(s){ return s.status==='approved' && (s.owner_clan===clan||s.owner_clan_2===clan); });
+    var owned = items.filter(function(s){ return s.status==='approved' && (isOversight() || s.owner_clan===clan||s.owner_clan_2===clan); });
     var done=0, sent=0;
     owned.forEach(function(it){ var m=readings.filter(function(r){ return r[idField]===it.id && (!r.clan||r.clan===clan) && r.timestamp && monthKey(new Date(r.timestamp))===mk; }); if(m.length){ done++; if(m.some(function(r){return r.synced;})) sent++; } });
     return { total:owned.length, done:done, sent:sent };
@@ -7055,7 +7055,7 @@ function _calMonitoring(mk, isFuture, isPast, data){
     { name:'Service Delivery', icon:'clipboard', nav:'screen-sdm', s:stat(data.fc,data.fv,'facility_id') },
     { name:'Met Stations', icon:'raingauge', nav:'screen-meteo-setup', s:stat(data.ms,data.mr,'met_station_id') }
   ];
-  var ownedPp = data.pp.filter(function(p){ return p.status==='approved' && (p.owner_clan===clan||p.owner_clan_2===clan||!p.owner_clan); });
+  var ownedPp = data.pp.filter(function(p){ return p.status==='approved' && (isOversight() || p.owner_clan===clan||p.owner_clan_2===clan||!p.owner_clan); });
   var phThis = data.ph.filter(function(r){ return r.timestamp && monthKey(new Date(r.timestamp))===mk; });
   out.push({ name:'Phenology', icon:'flower', nav:'screen-pheno-setup', s:{ total:ownedPp.length, done: phThis.length?ownedPp.length:0, sent: phThis.some(function(r){return r.synced;})?ownedPp.length:0 } });
   return out;
@@ -7612,7 +7612,7 @@ function renderDisturbanceInbox(){
   var isCoord=!!window._coordSecret, mine=myClan();
   getAllRecords('disturbances', function(rows){
     var sub=document.getElementById('alertsSubtitle');
-    var myOpen=rows.filter(function(r){ return r.status==='open' && r.owner_clan===mine && mine; });
+    var myOpen=rows.filter(function(r){ return r.status==='open' && (isOversight() || (r.owner_clan===mine && mine)); });
     var triage=rows.filter(function(r){ return r.status==='open' && !r.owner_clan; });
     var done=rows.filter(function(r){ return r.status==='verified' || r.status==='closed'; });
     if(sub) sub.textContent = isCoord ? (triage.length+' to triage · '+rows.filter(function(r){return r.status==='open';}).length+' open') : (myOpen.length+' task'+(myOpen.length===1?'':'s')+' for '+(mine||'your clan'));
@@ -8288,7 +8288,7 @@ function renderWaterTasks() {
   getAllRecords('water_sources', function(sources) {
     getAllRecords('water', function(readings) {
       var owned = sources.filter(function(s){
-        return s.status === 'approved' && (s.owner_clan === clan || s.owner_clan_2 === clan);
+        return s.status === 'approved' && (isOversight() || s.owner_clan === clan || s.owner_clan_2 === clan);
       });
       var h = '<div style="font-size:0.82rem;font-weight:700;color:#0277BD;margin:4px 2px 8px;">Your clan’s water sources — '+(clan||'your clan')+'</div>';
       if (owned.length === 0) {
@@ -8484,6 +8484,13 @@ var wsSelectedType = '', wsPhotoData = null, wsGPSFix = null;
 
 function wsTypeMeta(key){ return WS_TYPES.find(function(t){return t.key===key;}) || {key:key, label:key||'—'}; }
 function myClan(){ return (window._cachedProfile && window._cachedProfile.clan) || ''; }
+/* Oversight roles (Project/MCF Staff, Zone Staff, or a coordinator-unlocked
+   session) see every clan's items so they can supervise and test, while clan
+   stewards stay restricted to their own clan. */
+function isOversight(){
+  var role = (window._cachedProfile && window._cachedProfile.role) || '';
+  return role === 'mcf_staff' || role === 'zone_staff' || !!window._coordSecret;
+}
 
 /* ── Registry list (steward view) ── */
 function initWaterSources() {
@@ -8495,7 +8502,7 @@ function renderWaterSourcesList() {
   if (!c) return;
   getAllRecords('water_sources', function(rows) {
     var mine = rows.filter(function(r){
-      return r.proposed_clan === myClan() || r.owner_clan === myClan() || r.owner_clan_2 === myClan();
+      return isOversight() || r.proposed_clan === myClan() || r.owner_clan === myClan() || r.owner_clan_2 === myClan();
     });
     if (mine.length === 0) {
       c.innerHTML = '<div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;">No water sources registered yet for '+(myClan()||'your clan')+'. Tap “Register New Water Source” to add the first one.</div>';
@@ -9000,7 +9007,7 @@ function approvePhenoTree(id){
   });
 }
 function rejectPhenoTree(id){ getAllRecords('pheno_plots', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r) return; r.status='rejected'; r.synced=false; updateRecord('pheno_plots', r, function(){ pushPhenoRegistry(function(){}); toast('Tree rejected'); initPhenoApprove(); }); }); }
-function phenoOwnedByMyClan(p){ return !p.owner_clan || p.owner_clan===myClan() || p.owner_clan_2===myClan(); }
+function phenoOwnedByMyClan(p){ return isOversight() || !p.owner_clan || p.owner_clan===myClan() || p.owner_clan_2===myClan(); }
 
 function phenoRegistryRecord(r){ return { uid:r.uid, crop_type:r.crop_type, plant_num:r.plant_num, lat:r.lat, lng:r.lng, location_name:r.location_name, notes:r.notes, established_date:r.established_date, status:r.status, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, approved_date:r.approved_date||null, inactive_reason:r.inactive_reason||null }; }
 function postRegisterPheno(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_action:'register_pheno_plot',_secret:UPLOAD_SECRET,record:phenoRegistryRecord(rec)})}).catch(function(){}); }
@@ -10041,10 +10048,10 @@ function cacheStewardProfile() {
 /* ── Zone list management ─────────────────────────────────────────── */
 /* Default zones — coordinator can override via Manage Zones screen */
 var DEFAULT_ZONE_LIST = [
-  {id:'Z01',name:'Zone 1'}, {id:'Z02',name:'Zone 2'}, {id:'Z03',name:'Zone 3'},
-  {id:'Z04',name:'Zone 4'}, {id:'Z05',name:'Zone 5'}, {id:'Z06',name:'Zone 6'},
-  {id:'Z07',name:'Zone 7'}, {id:'Z08',name:'Zone 8'}, {id:'Z09',name:'Zone 9'},
-  {id:'Z10',name:'Zone 10'}, {id:'Z11',name:'Zone 11'}
+  {id:'Z01',name:'Zone 1'},  {id:'Z02',name:'Zone 2'},  {id:'Z03',name:'Zone 3'},
+  {id:'Z04',name:'Zone 4'},  {id:'Z05',name:'Zone 5'},  {id:'Z06',name:'Zone 6'},
+  {id:'Z07A',name:'Zone 7A'},{id:'Z07B',name:'Zone 7B'},
+  {id:'Z08',name:'Zone 8'},  {id:'Z09',name:'Zone 9'},  {id:'Z10',name:'Zone 10'}
 ];
 
 /* Fetch zone list: try Drive (via Apps Script), fall back to IndexedDB, then defaults */

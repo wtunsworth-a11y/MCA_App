@@ -1937,9 +1937,13 @@ select.msel {
             <span class="module-emoji" data-icon="calendar" data-size="26"></span>
             <span class="module-name">Activity Calendar</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-freemap')">
+          <div class="module-tile" data-fo="1" onclick="nav('screen-freemap')">
             <span class="module-emoji" data-icon="pin" data-size="26"></span>
             <span class="module-name">Field Mapping</span>
+          </div>
+          <div class="module-tile" data-fo="1" onclick="openSocialDisturbanceInFieldMap()">
+            <span class="module-emoji" data-icon="megaphone" data-size="26"></span>
+            <span class="module-name">Social Disturbance</span>
           </div>
           <div class="module-tile" onclick="openUnderConstruction('Patrol')">
             <span class="module-emoji" data-icon="walk" data-size="26"></span>
@@ -1993,7 +1997,7 @@ select.msel {
             <span class="module-emoji" data-icon="tree" data-size="26"></span>
             <span class="module-name">Tree Mapping</span>
           </div>
-          <div class="module-tile" onclick="openGardenInFieldMap()">
+          <div class="module-tile" data-fo="1" onclick="openGardenInFieldMap()">
             <span class="module-emoji" data-icon="grain" data-size="26"></span>
             <span class="module-name">Garden Mapping</span>
           </div>
@@ -2001,11 +2005,11 @@ select.msel {
             <span class="module-emoji" data-icon="sprout" data-size="26"></span>
             <span class="module-name">Conservation Activities</span>
           </div>
-          <div class="module-tile" id="tile-training" onclick="nav('screen-training-setup')">
+          <div class="module-tile" id="tile-training" data-fo="1" onclick="nav('screen-training-setup')">
             <span class="module-emoji" data-icon="mortarboard" data-size="26"></span>
             <span class="module-name">Training Records</span>
           </div>
-          <div class="module-tile" id="tile-distribution" style="display:none;" onclick="nav('screen-distribution')">
+          <div class="module-tile" id="tile-distribution" data-fo="1" style="display:none;" onclick="nav('screen-distribution')">
             <span class="module-emoji" data-icon="box" data-size="26"></span>
             <span class="module-name">Handover &amp; Distribution</span>
           </div>
@@ -7581,6 +7585,9 @@ function fmToggleCrop(c){
 }
 /* Dashboard "Garden Mapping" tile → Field Mapping, pre-set to a cash-crop garden. */
 function openGardenInFieldMap(){ nav('screen-freemap'); try{ fmCat('cashcrop_garden'); }catch(e){} }
+/* Quick access (esp. field officers) to record a social disturbance that stops
+   them working — opens Field Mapping pre-set to the Social unrest category. */
+function openSocialDisturbanceInFieldMap(){ nav('screen-freemap'); try{ fmCat('unrest'); }catch(e){} }
 function fmCapturePoint(){
   document.getElementById('fmPointCoords').textContent='📍 Acquiring GPS…';
   captureGPS(function(gps,err){
@@ -10638,7 +10645,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v47'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v48'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -10825,6 +10832,14 @@ function cacheStewardProfile() {
         var canDist = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff');
         distTile.style.display = canDist ? '' : 'none';
       }
+      /* Focused dashboard for Field Officers — show only their tiles (marked
+         data-fo), hide the rest so they aren't sidetracked. Their uploads are
+         still reachable via the "not yet sent — tap to send" dashboard banner.
+         Other roles see the full dashboard. */
+      var tiles = document.querySelectorAll('#screen-dashboard .module-tile');
+      tiles.forEach(function(t){
+        if (role === 'field_officer') { if (t.getAttribute('data-fo') !== '1') t.style.display = 'none'; }
+      });
     }
   });
 }

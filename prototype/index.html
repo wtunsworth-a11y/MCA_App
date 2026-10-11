@@ -690,6 +690,7 @@ textarea.form-input:focus, input.form-input:focus {
 }
 .tally-btn:active { background: #e0e0e0; }
 .tally-count { min-width: 22px; text-align: center; font-size: 0.8rem; font-weight: 600; color: #333; }
+.tally-count.tc-unset { color: #bbb; font-weight: 400; }
 /* Conditional MaFIA cell that doesn't apply in this sub-transect (e.g. water
    module where there is no waterway): blocked so contradictory data can't be
    entered. */
@@ -3163,7 +3164,7 @@ select.msel {
           <div class="section-label" style="padding-left:0;">Your fingerprint <span style="color:#B71C1C;">*</span></div>
           <button type="button" class="btn-outline" id="distFpBtn" style="width:100%;border-color:#00838F;color:#00838F;" onclick="distVerifyFp()"><span data-icon="lock" data-size="14"></span> <span id="distFpTxt">Verify my fingerprint to submit</span></button>
 
-          <button class="btn-primary" style="background:#00838F;margin-top:12px;" id="distSubmitBtn" onclick="submitDistribution()" disabled>Record handover</button>
+          <button class="btn-primary" style="background:#00838F;margin-top:12px;" id="distSubmitBtn" onclick="submitDistribution()" disabled>Save and close</button>
           <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
         </div>
       </div>
@@ -9921,7 +9922,7 @@ function submitDistribution(){
   var sb=document.getElementById('distSubmitBtn'); if(sb){ sb.disabled=true; sb.textContent='Saving…'; }
   saveRecord('distributions', rec, function(){
     toast('Handover recorded ✓ — send data when you have signal');
-    if(sb){ sb.textContent='Record handover'; }
+    if(sb){ sb.textContent='Save and close'; }
     goBack();
   });
 }
@@ -10800,7 +10801,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v53'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v54'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12437,8 +12438,8 @@ var MAFIA_ST=5;
 function _mafiaCell(code, st, type, opts){
   var h='<td data-code="'+code+'" data-st="'+st+'">';
   if(type==='sel'){ h+='<select class="msel" onchange="mafiaRegate()"><option value="">—</option>'+opts.map(function(o){return '<option>'+o+'</option>';}).join('')+'</select>'; }
-  else if(type==='tally'){ h+='<div class="tally"><button type="button" class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button type="button" class="tally-btn" onclick="tc(this,1)">+</button></div>'; }
-  else if(type==='pa'){ h+='<div class="yn-toggle" style="margin-bottom:3px;"><button type="button" class="yn-btn" onclick="mPA(this,\'y\')">P</button><button type="button" class="yn-btn" onclick="mPA(this,\'n\')">A</button></div><div class="tally pa-tally off"><button type="button" class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button type="button" class="tally-btn" onclick="tc(this,1)">+</button></div>'; }
+  else if(type==='tally'){ h+='<div class="tally"><button type="button" class="tally-btn" onclick="mtc(this,-1)">−</button><span class="tally-count tc-unset">–</span><button type="button" class="tally-btn" onclick="mtc(this,1)">+</button></div>'; }
+  else if(type==='pa'){ h+='<div class="yn-toggle" style="margin-bottom:3px;"><button type="button" class="yn-btn" onclick="mPA(this,\'y\')">P</button><button type="button" class="yn-btn" onclick="mPA(this,\'n\')">A</button></div><div class="tally pa-tally off"><button type="button" class="tally-btn" onclick="mtcPA(this,-1)">−</button><span class="tally-count tc-unset">–</span><button type="button" class="tally-btn" onclick="mtcPA(this,1)">+</button></div>'; }
   else if(type==='ynsub'){ h+='<div class="yn-toggle"><button type="button" class="yn-btn" onclick="mYn(this,\'y\')">Y</button><button type="button" class="yn-btn" onclick="mYn(this,\'n\')">N</button></div><select class="msel sub-sel" onchange="mafiaRegate()" style="margin-top:3px;" disabled><option value="">—</option>'+opts.map(function(o){return '<option>'+o+'</option>';}).join('')+'</select>'; }
   else { h+='<div class="yn-toggle"><button type="button" class="yn-btn" onclick="mYn(this,\'y\')">Y</button><button type="button" class="yn-btn" onclick="mYn(this,\'n\')">N</button></div>'; }
   return h+'</td>';
@@ -12465,11 +12466,37 @@ function renderMafiaMatrix(){
 /* yn/present-absent handlers that also re-evaluate the conditional gating */
 function mYn(btn,t){ yn(btn,t); mafiaRegate(); }
 function mPA(btn,t){ yn(btn,t); mafiaRegate(); }
+/* MaFIA count controls. "–" is UNSET (never recorded); a numeric value,
+   INCLUDING an explicit 0, is a real answer and is recorded. This keeps a
+   skipped count distinct from a counted zero (CLAUDE.md: no default-on-skip,
+   but 0 is a valid count). */
+function _mSetTally(el,v){
+  if(v==null){ el.textContent='–'; el.classList.add('tc-unset'); }
+  else { el.textContent=String(v); el.classList.remove('tc-unset'); }
+}
+function mtc(btn,delta){
+  var el=btn.closest('.tally').querySelector('.tally-count'); if(!el) return;
+  var t=el.textContent.trim(); var set=(t!=='–'&&t!=='');
+  var v=set?(parseInt(t,10)||0):null;
+  if(delta>0){ v=(v==null)?1:v+1; }
+  else { if(v==null){ v=0; }          /* − from unset → explicit 0 (a counted zero) */
+         else if(v>0){ v=v-1; }
+         else { v=null; } }           /* − from 0 → clear back to unset */
+  _mSetTally(el,v);
+}
+/* Present/Absent count: only meaningful when Present, and floored at 1 —
+   "Present" always means at least one was seen/heard, so a 0 is not allowed. */
+function mtcPA(btn,delta){
+  var el=btn.closest('.tally').querySelector('.tally-count'); if(!el) return;
+  var t=el.textContent.trim(); var v=(t!=='–'&&t!=='')?(parseInt(t,10)||0):1;
+  v=v+delta; if(v<1)v=1;
+  _mSetTally(el,v);
+}
 function _mYes(code,st){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); return !!(td && td.querySelector('.yn-btn.ay')); }
 function _mGate(code,st,on){
   var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); if(!td) return;
   td.classList.toggle('cell-na', !on);
-  if(!on){ td.querySelectorAll('.yn-btn').forEach(function(b){b.classList.remove('ay','an');}); var c=td.querySelector('.tally-count'); if(c)c.textContent='0'; var s=td.querySelector('select'); if(s)s.value=''; }
+  if(!on){ td.querySelectorAll('.yn-btn').forEach(function(b){b.classList.remove('ay','an');}); var c=td.querySelector('.tally-count'); if(c){ c.textContent='–'; c.classList.add('tc-unset'); } var s=td.querySelector('select'); if(s)s.value=''; }
 }
 function _mShowRow(code,on){ var tr=document.querySelector('#mafiaMatrixBody tr[data-code="'+code+'"]'); if(tr) tr.style.display=on?'':'none'; }
 function _mShowHdr(mod,on){ var tr=document.querySelector('#mafiaMatrixBody tr[data-modhdr="'+mod+'"]'); if(tr) tr.style.display=on?'':'none'; var n=document.querySelector('#mafiaMatrixBody tr[data-note="'+mod+'"]'); if(n) n.style.display=on?'':'none'; }
@@ -12485,7 +12512,7 @@ function mafiaRegate(){
     /* E maintained/overgrown sub-select enabled only when Yes */
     ['E1','E2'].forEach(function(c){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+c+'"][data-st="'+st+'"]'); if(td){ var sub=td.querySelector('.sub-sel'); if(sub){ var on=_mYes(c,st); sub.disabled=!on; if(!on) sub.value=''; } } });
     /* F present → enable its count */
-    for(var f=1;f<=15;f++){ var fc='F'+f; var ftd=document.querySelector('#mafiaMatrixBody td[data-code="'+fc+'"][data-st="'+st+'"]'); if(ftd){ var pt=ftd.querySelector('.pa-tally'); if(pt){ var present=_mYes(fc,st); pt.classList.toggle('off',!present); if(!present){ var cc=pt.querySelector('.tally-count'); if(cc)cc.textContent='0'; } } } }
+    for(var f=1;f<=15;f++){ var fc='F'+f; var ftd=document.querySelector('#mafiaMatrixBody td[data-code="'+fc+'"][data-st="'+st+'"]'); if(ftd){ var pt=ftd.querySelector('.pa-tally'); if(pt){ var present=_mYes(fc,st); pt.classList.toggle('off',!present); var cc=pt.querySelector('.tally-count'); if(cc){ var ct=cc.textContent.trim(); if(!present){ cc.textContent='–'; cc.classList.add('tc-unset'); } else if(ct==='–'||ct==='0'||ct===''){ cc.textContent='1'; cc.classList.remove('tc-unset'); } } } } }
   }
   /* collapse whole conditional groups when no sub-transect triggers them */
   _mShowHdr('B', anyWater); ['B1','B2','B3','B4','B5','B6'].forEach(function(c){ _mShowRow(c, anyWater); });
@@ -12527,8 +12554,8 @@ function collectMafiaData(){
       if(!td || td.classList.contains('cell-na')) continue;  /* skip N/A */
       var key=code+'_ST'+st;
       if(type==='sel'){ var s=td.querySelector('select'); if(s&&s.value) data[key]=s.value; }
-      else if(type==='tally'){ var c=td.querySelector('.tally-count'); var n=c?parseInt(c.textContent)||0:0; if(n) data[key]=n; }
-      else if(type==='pa'){ var ay=td.querySelector('.yn-btn.ay'); var an=td.querySelector('.yn-btn.an'); if(ay){ data[key]='P'; var cn=td.querySelector('.tally-count'); data[key+'_n']=cn?parseInt(cn.textContent)||0:0; } else if(an){ data[key]='A'; } }
+      else if(type==='tally'){ var c=td.querySelector('.tally-count'); var tv=c?c.textContent.trim():''; if(tv!=='' && tv!=='–') data[key]=parseInt(tv,10)||0; }  /* explicit 0 recorded; "–" (unset) is not */
+      else if(type==='pa'){ var ay=td.querySelector('.yn-btn.ay'); var an=td.querySelector('.yn-btn.an'); if(ay){ data[key]='P'; var cn=td.querySelector('.tally-count'); var pn=cn?parseInt(cn.textContent,10)||0:0; if(pn<1)pn=1; data[key+'_n']=pn; } else if(an){ data[key]='A'; } }
       else if(type==='ynsub'){ var y=td.querySelector('.yn-btn.ay'), nn=td.querySelector('.yn-btn.an'); if(y){ data[key]='Y'; var sub=td.querySelector('.sub-sel'); if(sub&&sub.value) data[key+'_sub']=sub.value; } else if(nn){ data[key]='N'; } }
       else { var yy=td.querySelector('.yn-btn.ay'), nz=td.querySelector('.yn-btn.an'); if(yy) data[key]='Y'; else if(nz) data[key]='N'; }
     }

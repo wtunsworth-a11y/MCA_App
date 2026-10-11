@@ -199,12 +199,15 @@ The tile appears only for those roles.*
 Open **Handover & Distribution** and record each handover **as it happens**:
 
 - **Who received them** — name or group, recipient **type** (individual, clan
-  group, women's / youth group, school, cooperative…), and clan. If the
-  recipient is an **enrolled steward/officer**, add their **MCA ID** (it's
-  checked against the known list); for a group, record **who physically
-  received** them on the group's behalf.
+  group, women's / youth / church group, sports team, school, cooperative…),
+  and clan. If the recipient is an **enrolled steward/officer**, add their
+  **MCA ID** (it's checked against the known list); for a group, record **who
+  physically received** them on the group's behalf.
 - **Purpose** — pick a category (conservation planting, agroforestry,
   livelihood, training support, relief…) and describe it.
+- **Funded / donated by** — pick the **donor** (European Union, or another /
+  Other), and tick **"Donor recognised / acknowledged"** to confirm the donor
+  was named and thanked to the recipients at the handover.
 - **Items** — add each item with its **quantity and unit** (seeds, seedlings,
   tools, equipment, materials, PPE…). Tap **Add another item** for more.
 - **Evidence** — a **handover photo**, a **receipt photo**, and a **short video

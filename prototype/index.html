@@ -3194,6 +3194,8 @@ select.msel {
               <button type="button" class="weather-pill" data-rt="clan_group" onclick="distSetRecipType('clan_group')">Clan group</button>
               <button type="button" class="weather-pill" data-rt="womens_group" onclick="distSetRecipType('womens_group')">Women's group</button>
               <button type="button" class="weather-pill" data-rt="youth_group" onclick="distSetRecipType('youth_group')">Youth group</button>
+              <button type="button" class="weather-pill" data-rt="church_group" onclick="distSetRecipType('church_group')">Church group</button>
+              <button type="button" class="weather-pill" data-rt="sports_team" onclick="distSetRecipType('sports_team')">Sports team</button>
               <button type="button" class="weather-pill" data-rt="school" onclick="distSetRecipType('school')">School</button>
               <button type="button" class="weather-pill" data-rt="cooperative" onclick="distSetRecipType('cooperative')">Cooperative</button>
               <button type="button" class="weather-pill" data-rt="other" onclick="distSetRecipType('other')">Other</button>
@@ -3228,6 +3230,16 @@ select.msel {
               <button type="button" class="weather-pill" data-pp="other" onclick="distSetPurpose('other')">Other</button>
             </div>
             <textarea id="distPurposeNote" class="form-input" style="min-height:52px;width:100%;font-size:0.82rem;" placeholder="Describe the purpose (e.g. seedlings for the clan reforestation plot)…"></textarea>
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Funded / donated by</div>
+          <div class="form-group">
+            <div id="distDonorPills" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;"></div>
+            <input type="text" id="distDonorOther" class="form-input" style="display:none;" placeholder="Name of the donor / funder">
+            <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;cursor:pointer;margin-top:8px;">
+              <input type="checkbox" id="distDonorRecognised" style="margin-top:2px;width:16px;height:16px;">
+              <span>The <strong>donor was recognised / acknowledged</strong> at the handover (named &amp; thanked to the recipients).</span>
+            </label>
           </div>
 
           <div class="section-label" style="padding-left:0;">Items distributed <span style="color:#B71C1C;">*</span></div>
@@ -9584,15 +9596,20 @@ function resolveIssue(uid){
    clock-stamp + Date Review integrity).
 ══════════════════════════════════════════════════════════════════════ */
 var DIST_ITEM_CATS=['Seeds','Seedlings','Tools','Equipment','Materials','PPE / safety gear','Food / relief','Documents','Other'];
+/* Donors / funders — European Union is the current funder; add others here over
+   time (the last entry, "Other", reveals a free-text box). */
+var DIST_DONORS=['European Union','Managalas Conservation Fund','PNG Government','Other'];
 function initDistribution(){
   window._distPhotos={handover:null,receipt:null};
   window._distVideo=null; window._distVideoMeta='';
-  window._distRecipType='individual'; window._distPurpose='conservation_planting';
+  window._distRecipType='individual'; window._distPurpose='conservation_planting'; window._distDonor='European Union';
   window._distVerified=false; window._distItemSeq=0; window._distItemIds=[];
-  ['distRecipient','distRecipId','distReceivedBy','distClan','distContact','distPurposeNote','distNotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['distRecipient','distRecipId','distReceivedBy','distClan','distContact','distPurposeNote','distDonorOther','distNotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   var ris=document.getElementById('distRecipIdStatus'); if(ris) ris.textContent='';
   var cb=document.getElementById('distConfirmed'); if(cb) cb.checked=false;
+  var dr=document.getElementById('distDonorRecognised'); if(dr) dr.checked=false;
   distSetRecipType('individual'); distSetPurpose('conservation_planting');
+  distRenderDonors(); distSetDonor('European Union');
   ['handover','receipt'].forEach(function(s){ var b=document.getElementById('distPhoto'+(s==='handover'?'Handover':'Receipt')+'Box'); if(b){ b.innerHTML=(s==='handover'?'Items being<br>handed over':'Recipient<br>receiving them'); b.style.borderColor='#ccc'; b.style.color='#999'; } });
   var vb=document.getElementById('distVideoBox'); if(vb){ vb.innerHTML=icon('video',20)+'&nbsp; Tap to record a short video'; vb.style.borderColor='#ccc'; vb.style.color='#999'; }
   var fb=document.getElementById('distFpBtn'); if(fb) fb.classList.remove('verified');
@@ -9604,6 +9621,15 @@ function initDistribution(){
   captureGPS(function(gps,err){ var el=document.getElementById('distGPS'); if(!el) return; if(gps){ el.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'; el.style.color='#2E6B38'; window._distGps=gps; } else { el.innerHTML=icon('warning',13)+' '+err; el.style.color='#E65100'; window._distGps=null; } });
 }
 function distSetRecipType(v){ window._distRecipType=v; var box=document.getElementById('distRecipTypePills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-rt]'),function(b){ b.classList.toggle('active', b.getAttribute('data-rt')===v); }); }
+function distRenderDonors(){
+  var box=document.getElementById('distDonorPills'); if(!box) return;
+  box.innerHTML=DIST_DONORS.map(function(d){ return '<button type="button" class="weather-pill'+(d===window._distDonor?' active':'')+'" data-donor="'+d.replace(/"/g,'&quot;')+'" onclick="distSetDonor(this.getAttribute(\'data-donor\'))">'+d+'</button>'; }).join('');
+}
+function distSetDonor(v){
+  window._distDonor=v;
+  var box=document.getElementById('distDonorPills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-donor]'),function(b){ b.classList.toggle('active', b.getAttribute('data-donor')===v); });
+  var other=document.getElementById('distDonorOther'); if(other){ other.style.display=(v==='Other')?'' : 'none'; if(v!=='Other') other.value=''; }
+}
 /* Optional recipient ID: soft check against the shipped enrolled-ID list.
    Not a hard block — many recipients (community members, groups) aren't enrolled. */
 function distCheckRecipId(){
@@ -9677,6 +9703,8 @@ function submitDistribution(){
     officer:{ name:p.name||'', steward_id:p.stewardId||'', role:p.role||'' },
     recipient:{ name:recip.trim(), type:window._distRecipType||'', steward_id:((document.getElementById('distRecipId')||{}).value||'').trim().toUpperCase(), steward_id_known:_idTaken(((document.getElementById('distRecipId')||{}).value||'')), received_by:((document.getElementById('distReceivedBy')||{}).value||'').trim(), clan:((document.getElementById('distClan')||{}).value||'').trim(), contact:((document.getElementById('distContact')||{}).value||'').trim(), confirmed_receipt:!!(document.getElementById('distConfirmed')&&document.getElementById('distConfirmed').checked) },
     purpose_category:window._distPurpose||'', purpose:purposeNote.trim(),
+    donor:(window._distDonor==='Other' ? (((document.getElementById('distDonorOther')||{}).value||'').trim()||'Other') : (window._distDonor||'')),
+    donor_recognised:!!(document.getElementById('distDonorRecognised')&&document.getElementById('distDonorRecognised').checked),
     items:items,
     gps:window._distGps||null,
     date:now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear(),
@@ -10744,7 +10772,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v34'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v35'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

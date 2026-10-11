@@ -161,6 +161,21 @@ plot/column, across modules:
 Each cell is a dropdown rating, a tally count, or a yes/no, plus free-text
 comments. (Full indicator list: see `technical_specification.md`.)
 
+**Guided transect (training mode).** Without clan boundaries yet, the app
+generates a random **100 m transect** near the surveyor: a **start point ≤100 m**
+away on a random bearing, extended **100 m** along a random bearing to the end.
+The app navigates the surveyor to the start with a **live compass** — the phone's
+**magnetometer** (`DeviceOrientation`) when available, falling back to the GPS
+course — showing direction + distance. At the start (within ~10 m, or manual
+confirm under canopy) a **fingerprint** starts the survey and a **timer**. The
+surveyor is then guided through the tape workflow: walk to the end (lay the
+tape), survey back to the start, re-walk to the end to check, roll the tape back,
+and close at the start. A **no-tape variant** guides the same walk by GPS
+distance. The saved record adds: `transect_start`/`transect_end` (lat/lon),
+`transect_bearing`, `transect_length_m` (100), `had_tape`, `arrive_fix`,
+`duration_min`, **`duration_excessive`** (true if > 60 min — flagged for review;
+~30 min is normal), and `compass_source`.
+
 ### 3.2 QABB — Butterfly Survey
 Store `qabb`. Transect-based matrix: date, start/end time, and per-species
 counts/entries across the transect stations, plus habitat/threat notes.

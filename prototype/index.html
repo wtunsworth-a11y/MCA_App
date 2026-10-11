@@ -2044,65 +2044,38 @@ select.msel {
         </div>
         <div id="mafiaContent" style="display:none;">
           <div class="p14" style="padding-bottom:20px;">
+            <div class="matrix-note" id="mafiaGenNote" style="background:#E3F2FD;border-color:#90CAF9;color:#0D47A1;font-size:0.78rem;">Generating a training transect near you…</div>
 
-            <!-- Map placeholder with transect line -->
-            <div class="map-placeholder">
-              <svg viewBox="0 0 362 160" xmlns="http://www.w3.org/2000/svg">
-                <rect width="362" height="160" fill="#c9dce8"/>
-                <polygon points="-93.0,168.6 -80.2,149.9 -58.6,147.0 -27.9,127.7 -3.0,130.6 1.9,132.7 8.9,146.7" fill="#E6F1FB" fill-opacity="0.45" stroke="#0C447C" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="-88.2,12.9 -85.6,13.3 -68.9,35.0 -57.3,36.9 7.5,60.9 1.4,73.3 3.3,78.7 -16.1,88.5 -7.2,101.4 -11.0,108.2 -3.0,130.6 -27.9,127.7 -58.6,147.0 -80.2,149.9 -93.0,168.6" fill="#E1F5EE" fill-opacity="0.45" stroke="#085041" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="-18.2,69.4 -48.4,61.8 -40.9,78.0 -18.2,69.4" fill="#E1F5EE" fill-opacity="0.45" stroke="#085041" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="1.9,132.7 -3.0,130.6 -11.0,108.2 -7.2,101.4 -16.1,88.5 3.3,78.7 1.4,73.3 7.5,60.9 -57.3,36.9 -68.9,35.0 -85.6,13.3 -19.5,-11.1 11.7,-0.5 28.7,27.8 47.7,33.6 31.7,55.0 72.0,66.9 77.9,90.1 76.7,92.6 78.5,97.6 114.0,116.2 127.6,128.4 8.9,146.7 1.9,132.7" fill="#FAEEDA" fill-opacity="0.45" stroke="#633806" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="-40.9,78.0 -48.4,61.8 -18.2,69.4 -40.9,78.0" fill="#FAEEDA" fill-opacity="0.45" stroke="#633806" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="47.7,33.6 28.7,27.8 11.7,-0.5 37.4,0.8 86.2,-1.9 87.4,10.5 105.7,28.3 100.3,42.1 95.6,43.2 72.0,66.9 31.7,55.0 47.7,33.6" fill="#FAECE7" fill-opacity="0.45" stroke="#712B13" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="246.9,-52.9 246.9,-52.4 246.9,-48.3 246.9,-41.9 244.3,-38.2 244.7,-37.7 250.4,-34.2 283.4,-29.1 292.1,-26.0 302.4,-24.6 307.3,-22.5 254.5,24.9 205.7,35.8 160.8,39.8 136.8,48.0 100.3,42.1 105.7,28.3 87.4,10.5 86.2,-1.9 37.4,0.8 11.7,-0.5 -19.5,-11.1" fill="#EAF3DE" fill-opacity="0.45" stroke="#27500A" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="144.2,66.6 136.8,48.0 160.8,39.8 205.7,35.8 177.0,64.2 144.2,66.6" fill="#FBEAF0" fill-opacity="0.45" stroke="#72243E" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="320.2,-17.0 337.6,-12.9 338.2,-13.0 338.7,-13.3 341.2,-13.4 349.7,-14.5 353.9,-11.2 356.6,-13.5 360.0,-9.6 358.3,-9.3 359.6,-8.8 360.0,-8.6 362.2,-8.4 366.4,-5.9 383.9,-2.2 386.9,4.4 389.9,7.9 392.6,11.5 392.2,16.5 391.8,19.3 399.4,25.7 404.3,28.4 413.0,30.2 424.0,31.9 431.2,33.7 434.6,36.8 440.0,42.5 443.0,44.8 444.1,48.7 455.5,62.2 464.6,72.1 447.5,119.5 446.0,119.4 443.0,120.4 310.9,147.6 274.3,126.2 227.3,122.3 220.5,119.6 222.3,109.0 217.8,103.5 222.5,65.9 242.3,53.8 249.9,46.1 252.6,42.6 254.5,24.9 307.3,-22.5 320.2,-17.0" fill="#FAEEDA" fill-opacity="0.45" stroke="#854F0B" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="463.8,121.1 453.2,119.9 447.5,119.5" fill="#EEEDFE" fill-opacity="0.45" stroke="#534AB7" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="441.5,120.9 436.2,126.2 433.1,127.9 426.7,134.0 422.9,138.5 420.2,144.1 419.1,151.0 415.7,155.6 409.6,159.9 403.6,164.2 396.7,167.4 391.5,167.9 391.0,168.5 389.1,169.3 383.1,170.5 375.9,174.0 372.1,179.1 370.6,183.4 367.6,185.1 362.7,185.2 357.2,186.5 347.8,187.1 335.3,187.1 320.2,191.4 311.1,195.4 302.0,198.4 301.2,198.8 293.7,199.9 280.0,202.1 266.7,202.9 254.6,202.9 245.5,202.9 233.4,205.2 227.3,209.7 225.8,212.0 127.6,128.4 172.1,123.3 220.5,119.6 227.3,122.3 274.3,126.2 310.9,147.6 443.0,120.4 441.5,120.9" fill="#EEEDFE" fill-opacity="0.45" stroke="#534AB7" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="-19.5,-11.1 -85.6,13.3 -88.2,12.9" fill="#FCEBEB" fill-opacity="0.45" stroke="#A32D2D" stroke-width="1" stroke-dasharray="3,2"/>
-                <polygon points="217.8,103.5 222.3,109.0 220.5,119.6 172.1,123.3 127.6,128.4 114.0,116.2 78.5,97.6 76.7,92.6 77.9,90.1 72.0,66.9 95.6,43.2 100.3,42.1 136.8,48.0 144.2,66.6 177.0,64.2 205.7,35.8 254.5,24.9 252.6,42.6 249.9,46.1 242.3,53.8 222.5,65.9 217.8,103.5" fill="#E6F1FB" fill-opacity="0.6" stroke="#185FA5" stroke-width="2"/>
-                <polygon points="178.6,129.1 152.6,125.3 136.0,96.1 150.9,92.3 226.1,113.5 225.8,118.9 178.6,129.1" fill="#85B7EB" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
-                <polygon points="123.0,132.4 85.4,95.7 136.0,96.1 152.6,125.3 123.0,132.4" fill="#85B7EB" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
-                <polygon points="254.6,84.6 184.7,71.5 183.5,65.0 183.4,60.0 201.3,49.5 291.4,29.6 308.8,45.2 294.4,68.8 254.6,84.6" fill="#85B7EB" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
-                <polygon points="136.0,96.1 85.4,95.7 49.0,89.3 53.8,68.2 115.0,55.4 124.0,57.3 126.9,58.9 160.7,80.2 150.9,92.3 136.0,96.1" fill="#85B7EB" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
-                <polygon points="226.1,113.5 150.9,92.3 160.7,80.2 184.7,71.5 254.6,84.6 226.1,113.5" fill="#85B7EB" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
-                <line x1="175" y1="94" x2="185" y2="90" stroke="#1B5E20" stroke-width="3" stroke-dasharray="10,5"/>
-                <circle cx="175" cy="94" r="9" fill="#F57F17" opacity="0.92"/>
-                <line x1="165" y1="94" x2="185" y2="94" stroke="#fff" stroke-width="2"/>
-                <line x1="175" y1="84" x2="175" y2="104" stroke="#fff" stroke-width="2"/>
-                <circle cx="185" cy="90" r="9" fill="#c62828" opacity="0.92"/>
-                <line x1="175" y1="90" x2="195" y2="90" stroke="#fff" stroke-width="2"/>
-                <line x1="185" y1="80" x2="185" y2="100" stroke="#fff" stroke-width="2"/>
-                <text x="167" y="118" fill="#E65100" font-size="10" font-weight="bold" font-family="Arial">START</text>
-                <text x="177" y="114" fill="#c62828" font-size="10" font-weight="bold" font-family="Arial">END</text>
-                <text x="174" y="78" fill="#185FA5" font-size="11" font-weight="bold" font-family="Arial" text-anchor="middle">Zone 7B</text>
+            <!-- Transect schematic (the live heading is on the compass below) -->
+            <div class="card" style="padding:12px 16px;">
+              <svg viewBox="0 0 320 58" style="width:100%;height:50px;">
+                <line x1="30" y1="28" x2="290" y2="28" stroke="#1B5E20" stroke-width="3" stroke-dasharray="7,5"/>
+                <circle cx="30" cy="28" r="8" fill="#E65100"/><text x="30" y="50" fill="#E65100" font-size="11" font-weight="bold" text-anchor="middle" font-family="Arial">START</text>
+                <circle cx="290" cy="28" r="8" fill="#c62828"/><text x="290" y="50" fill="#c62828" font-size="11" font-weight="bold" text-anchor="middle" font-family="Arial">END</text>
+                <text x="160" y="20" fill="#555" font-size="11" text-anchor="middle" font-family="Arial">100 m transect</text>
               </svg>
             </div>
 
             <!-- Transect details -->
             <div class="card" style="padding:12px 16px;">
-              <div class="transect-row">
-                <span class="td-label"><span data-icon="pin" data-size="14"></span> Start</span>
-                <span>-9.1489° S, 148.3812° E</span>
-              </div>
-              <div class="transect-row">
-                <span class="td-label">🏁 End</span>
-                <span>-9.1534° S, 148.3891° E</span>
-              </div>
-              <div class="transect-row">
-                <span class="td-label"><span data-icon="compass" data-size="14"></span> Bearing</span>
-                <span>127° SE</span>
-              </div>
-              <div class="transect-row">
-                <span class="td-label"><span data-icon="ruler" data-size="14"></span> Length</span>
-                <span>500 m</span>
+              <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> Start</span><span id="mfStart">—</span></div>
+              <div class="transect-row"><span class="td-label">🏁 End</span><span id="mfEnd">—</span></div>
+              <div class="transect-row"><span class="td-label"><span data-icon="compass" data-size="14"></span> Bearing</span><span id="mfBearing">—</span></div>
+              <div class="transect-row"><span class="td-label"><span data-icon="ruler" data-size="14"></span> Length</span><span id="mfLength">100 m</span></div>
+            </div>
+
+            <!-- Tape question -->
+            <div class="card" style="padding:10px 14px;">
+              <div style="font-size:0.78rem;font-weight:600;margin-bottom:6px;">Do you have a 100 m tape measure?</div>
+              <div style="display:flex;gap:8px;">
+                <button type="button" class="weather-pill active" id="mafiaTapeYes" onclick="mafiaSetTape(true)" style="flex:1;">Yes — I have a tape</button>
+                <button type="button" class="weather-pill" id="mafiaTapeNo" onclick="mafiaSetTape(false)" style="flex:1;">No tape</button>
               </div>
             </div>
 
-            <!-- GPS navigation gate — always visible -->
-            <div class="nav-gate-card" id="navGateCard">
-              <div style="font-size:0.82rem;font-weight:700;color:#E65100;margin-bottom:8px;"><span data-icon="pin" data-size="14"></span> Navigate to Transect Start Point</div>
+            <!-- Shared live compass (points to the current target: start, then end/start through the walk) -->
+            <div class="card" style="padding:12px 16px;">
+              <div style="font-size:0.82rem;font-weight:700;color:#E65100;margin-bottom:8px;"><span data-icon="pin" data-size="14"></span> Navigate to <span id="mfNavLabel">Transect Start</span></div>
               <div class="compass-row">
                 <svg width="72" height="72" viewBox="0 0 72 72" style="flex-shrink:0;">
                   <circle cx="36" cy="36" r="34" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1.5"/>
@@ -2110,22 +2083,26 @@ select.msel {
                   <text x="33" y="68" fill="#aaa" font-size="9" font-family="Arial">S</text>
                   <text x="2" y="40" fill="#aaa" font-size="9" font-family="Arial">W</text>
                   <text x="61" y="40" fill="#aaa" font-size="9" font-family="Arial">E</text>
-                  <g transform="rotate(324, 36, 36)">
+                  <g id="mfArrowG" transform="rotate(0, 36, 36)">
                     <polygon points="36,8 32,42 36,38 40,42" fill="#2E7D32"/>
                     <polygon points="36,64 32,42 36,46 40,42" fill="#ccc"/>
                   </g>
                 </svg>
                 <div class="compass-info">
-                  <div class="c-bearing">Walk NNW · 324°</div>
-                  <div class="c-dist">~340 m away</div>
-                  <div class="c-dist" style="margin-top:4px;font-size:0.72rem;">GPS updates every 5 sec</div>
+                  <div class="c-bearing" id="mfBearingTxt">Acquiring GPS…</div>
+                  <div class="c-dist" id="mfDistTxt">—</div>
+                  <div class="c-dist" id="mfCompassSrc" style="margin-top:4px;font-size:0.72rem;">Point the top of the phone where you walk</div>
                 </div>
               </div>
-              <div class="gate-hint" id="navGateHint">Walk to start point — fingerprint verify unlocks when within 30 m</div>
-              <button class="btn-arrive" id="btnArrive" onclick="mafiaArrive()">I've Reached Start Point ✓</button>
             </div>
 
-            <!-- FP verify — shown after arriving -->
+            <!-- Arrival gate (navigating to the start, before fingerprint) -->
+            <div class="nav-gate-card" id="navGateCard">
+              <div class="gate-hint" id="navGateHint">Walk to the start point. You can confirm manually if the GPS is weak under canopy.</div>
+              <button class="btn-arrive" id="btnArrive" onclick="mafiaArrive()">I'm at the start point ✓</button>
+            </div>
+
+            <!-- Fingerprint verify (shown after arriving) -->
             <div id="mafiaFpSection" style="display:none;">
               <button class="fp-verify-btn" id="mafiaFpBtn" onclick="mafiaVerify()">
                 <svg width="28" height="28" viewBox="0 0 120 120" fill="none">
@@ -2138,7 +2115,20 @@ select.msel {
               </button>
             </div>
 
-            <button class="btn-primary" id="mafiaBeginBtn" disabled onclick="nav('screen-mafia-matrix')">Begin Survey</button>
+            <!-- Guided tape workflow (shown after fingerprint at the start) -->
+            <div id="mafiaWorkflow" style="display:none;">
+              <div class="card" style="padding:12px 16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                  <span style="font-weight:700;color:#1B5E20;font-size:0.84rem;" id="mfStepTitle">Step</span>
+                  <span style="font-size:0.95rem;font-weight:800;" id="mfTimer">0:00</span>
+                </div>
+                <div style="font-size:0.82rem;color:#444;line-height:1.5;" id="mfStepInstruction">…</div>
+                <div id="mfTimeWarn" style="display:none;background:#FFEBEE;border:1px solid #EF9A9A;color:#B71C1C;border-radius:8px;padding:6px 10px;margin-top:8px;font-size:0.75rem;">⚠ Over 60 minutes — longer than expected; this will be flagged for review.</div>
+              </div>
+              <button class="btn-primary" id="mfStepBtn" style="background:#1B5E20;" onclick="mafiaStepAction()">Next</button>
+            </div>
+
+            <button class="btn-primary" id="mafiaBeginBtn" style="display:none;" onclick="nav('screen-mafia-matrix')">Begin Survey</button>
           </div>
         </div>
       </div>
@@ -2152,7 +2142,7 @@ select.msel {
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
           <div class="bar-title">MaFIA Survey — ST1</div>
-          <div class="bar-subtitle">Transect 1 | Zone 7B</div>
+          <div class="bar-subtitle">100 m training transect</div>
         </div>
         <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Fund" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><ellipse cx="13" cy="9.5" rx="6.5" ry="6" fill="rgba(255,255,255,0.9)"/><ellipse cx="13" cy="13.5" rx="8" ry="5" fill="rgba(255,255,255,0.8)"/><rect x="12" y="18" width="2" height="5" rx="1" fill="rgba(255,255,255,0.7)"/></svg></div><div class="logo-ph" title="European Union" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" style="border-radius:5px;" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" fill="#003399"/><polygon points="13.00,1.43 13.42,2.55 14.61,2.60 13.68,3.34 13.99,4.49 13.00,3.83 12.01,4.49 12.32,3.34 11.39,2.60 12.58,2.55" fill="#FFD700"/><polygon points="17.94,2.75 18.36,3.87 19.55,3.92 18.62,4.66 18.93,5.81 17.94,5.15 16.95,5.81 17.26,4.66 16.33,3.92 17.52,3.87" fill="#FFD700"/><polygon points="21.56,6.37 21.97,7.49 23.16,7.54 22.23,8.28 22.55,9.43 21.56,8.77 20.56,9.43 20.88,8.28 19.95,7.54 21.14,7.49" fill="#FFD700"/><polygon points="22.88,11.31 23.30,12.43 24.49,12.48 23.56,13.22 23.87,14.37 22.88,13.71 21.89,14.37 22.20,13.22 21.27,12.48 22.46,12.43" fill="#FFD700"/><polygon points="21.56,16.25 21.97,17.37 23.16,17.42 22.23,18.16 22.55,19.31 21.56,18.65 20.56,19.31 20.88,18.16 19.95,17.42 21.14,17.37" fill="#FFD700"/><polygon points="17.94,19.87 18.36,20.98 19.55,21.03 18.62,21.78 18.93,22.92 17.94,22.27 16.95,22.92 17.26,21.78 16.33,21.03 17.52,20.98" fill="#FFD700"/><polygon points="13.00,21.19 13.42,22.31 14.61,22.36 13.68,23.10 13.99,24.25 13.00,23.59 12.01,24.25 12.32,23.10 11.39,22.36 12.58,22.31" fill="#FFD700"/><polygon points="8.06,19.87 8.48,20.98 9.67,21.03 8.74,21.78 9.05,22.92 8.06,22.27 7.07,22.92 7.38,21.78 6.45,21.03 7.64,20.98" fill="#FFD700"/><polygon points="4.44,16.25 4.86,17.37 6.05,17.42 5.12,18.16 5.44,19.31 4.44,18.65 3.45,19.31 3.77,18.16 2.84,17.42 4.03,17.37" fill="#FFD700"/><polygon points="3.12,11.31 3.54,12.43 4.73,12.48 3.80,13.22 4.11,14.37 3.12,13.71 2.13,14.37 2.44,13.22 1.51,12.48 2.70,12.43" fill="#FFD700"/><polygon points="4.44,6.37 4.86,7.49 6.05,7.54 5.12,8.28 5.44,9.43 4.44,8.77 3.45,9.43 3.77,8.28 2.84,7.54 4.03,7.49" fill="#FFD700"/><polygon points="8.06,2.75 8.48,3.87 9.67,3.92 8.74,4.66 9.05,5.81 8.06,5.15 7.07,5.81 7.38,4.66 6.45,3.92 7.64,3.87" fill="#FFD700"/></svg></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><path d="M13 4 C9 6 7 10 7 13 C7 17 9.5 20 13 21 C16.5 20 19 17 19 13 C19 10 17 6 13 4Z" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/><line x1="13" y1="4" x2="13" y2="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/><line x1="7" y1="13" x2="19" y2="13" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/></svg></div></div>
       </div>
@@ -2367,7 +2357,6 @@ select.msel {
                 <line x1="207.7" y1="67.9" x2="207.7" y2="87.9" stroke="#fff" stroke-width="2"/>
                 <text x="190.2" y="105.8" fill="#00695C" font-size="10" font-weight="bold" font-family="Arial">START</text>
                 <text x="199.7" y="65.9" fill="#c62828" font-size="10" font-weight="bold" font-family="Arial">END</text>
-                <text x="174.1" y="78.2" fill="#185FA5" font-size="11" font-weight="bold" font-family="Arial" text-anchor="middle">Zone 7B</text>
               </svg>
             </div>
 
@@ -5711,7 +5700,7 @@ function showScreen(id) {
 function nav(id) {
   history.push(currentScreen);
   // Side effects on enter
-  if (id === 'screen-mafia-setup') initMafia();
+  if (id === 'screen-mafia-setup' && !mafiaWorkflowActive) initMafia();
   if (id === 'screen-qabb-setup') initQabb();
   if (id === 'screen-qabb-matrix') initQabbMatrix();
   if (id === 'screen-water-setup') initWater();
@@ -6367,60 +6356,246 @@ function setNavActive(idx) {
   });
 }
 
-/* ── Observations ── */
-/* ── MaFIA Setup ── */
-let mafiaVerified = false;
-let mafiaArrived = false;
+/* ══════════════════════════════════════════════════════════════════════
+   GEO + DEVICE COMPASS (shared)
+   A magnetometer heading (DeviceOrientation) points to a target even while
+   standing still — more useful than the GPS course, which only exists while
+   moving. Falls back to the GPS course when no magnetometer/permission.
+══════════════════════════════════════════════════════════════════════ */
+function _toRad(d){ return d*Math.PI/180; }
+function _toDeg(r){ return r*180/Math.PI; }
+/* initial bearing a→b, degrees 0..360 */
+function geoBearing(a,b){
+  var y=Math.sin(_toRad(b.lon-a.lon))*Math.cos(_toRad(b.lat));
+  var x=Math.cos(_toRad(a.lat))*Math.sin(_toRad(b.lat))-Math.sin(_toRad(a.lat))*Math.cos(_toRad(b.lat))*Math.cos(_toRad(b.lon-a.lon));
+  return (_toDeg(Math.atan2(y,x))+360)%360;
+}
+/* destination point from a, given bearing(deg) + distance(m) */
+function geoDest(a,bearingDeg,distM){
+  var R=6371000, d=distM/R, br=_toRad(bearingDeg), lat1=_toRad(a.lat), lon1=_toRad(a.lon);
+  var lat2=Math.asin(Math.sin(lat1)*Math.cos(d)+Math.cos(lat1)*Math.sin(d)*Math.cos(br));
+  var lon2=lon1+Math.atan2(Math.sin(br)*Math.sin(d)*Math.cos(lat1), Math.cos(d)-Math.sin(lat1)*Math.sin(lat2));
+  return { lat:_toDeg(lat2), lon:((_toDeg(lon2)+540)%360)-180 };
+}
+function compass16(deg){ var dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW']; return dirs[Math.round(((deg%360)+360)%360/22.5)%16]; }
 
-function initMafia() {
-  mafiaVerified = false;
-  mafiaArrived = false;
-  document.getElementById('mafiaBeginBtn').disabled = true;
+window._devHeading=null;      /* device facing, 0..360 magnetic, or null */
+window._compassSource='';     /* 'magnetometer' | 'gps' | '' */
+window._compassOn=false;
+function _compassHandler(e){
+  var h=null;
+  if(e.webkitCompassHeading!=null && !isNaN(e.webkitCompassHeading)) h=e.webkitCompassHeading;     /* iOS: already magnetic-north */
+  else if(e.alpha!=null) h=(360-e.alpha)%360;                                                       /* Android absolute/relative */
+  if(h!=null){ window._devHeading=((h%360)+360)%360; window._compassSource='magnetometer'; }
+}
+function startCompass(){
+  if(window._compassOn) return;
+  try {
+    if('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', _compassHandler, true);
+    window.addEventListener('deviceorientation', _compassHandler, true);
+    window._compassOn=true;
+  } catch(e){}
+}
+function stopCompass(){
+  try { window.removeEventListener('deviceorientationabsolute', _compassHandler, true); window.removeEventListener('deviceorientation', _compassHandler, true); } catch(e){}
+  window._compassOn=false;
+}
+/* iOS 13+ needs a user-gesture permission; others start immediately. */
+function requestCompass(cb){
+  try {
+    if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
+      DeviceOrientationEvent.requestPermission().then(function(s){ if(s==='granted') startCompass(); if(cb) cb(s==='granted'); }).catch(function(){ if(cb) cb(false); });
+    } else { startCompass(); if(cb) cb(true); }
+  } catch(e){ if(cb) cb(false); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   MaFIA — real transect generation, live navigation, guided tape workflow
+══════════════════════════════════════════════════════════════════════ */
+var MAFIA_TRANSECT_M = 100;        /* transect length (one 100 m tape) */
+var MAFIA_ARRIVE_M   = 10;         /* "you're here" threshold (m) */
+var MAFIA_MAX_MIN    = 60;         /* survey longer than this is flagged */
+let mafiaVerified = false, mafiaArrived = false;
+var mafiaStart=null, mafiaEnd=null, mafiaTransectBearing=null, mafiaTrainerPos=null;
+var mafiaHasTape=true, mafiaArriveTime=null, mafiaStep=0, mafiaSurveyData=null;
+var mafiaWatchId=null, mafiaNavTarget=null, mafiaNavTimer=null, mafiaTimerInt=null;
+var mafiaWorkflowActive=false;  /* true between fingerprint-at-start and close — stops re-init on return from the matrix */
+
+function initMafia(){
+  mafiaWorkflowActive=false;
+  mafiaVerified=false; mafiaArrived=false; mafiaHasTape=true; mafiaArriveTime=null; mafiaStep=0; mafiaSurveyData=null;
+  mafiaStart=mafiaEnd=mafiaTransectBearing=mafiaTrainerPos=null;
+  _mafiaStopNav();
+  document.getElementById('mafiaBeginBtn').style.display='none';
   document.getElementById('mafiaFpBtn').classList.remove('verified');
-  document.getElementById('mafiaFpTxt').textContent = 'Tap to Verify Identity';
-  document.getElementById('mafiaFpSection').style.display = 'none';
-  document.getElementById('navGateCard').classList.remove('arrived');
-  document.getElementById('btnArrive').disabled = false;
-  document.getElementById('btnArrive').textContent = 'I\'ve Reached Start Point ✓';
-  document.getElementById('navGateHint').textContent = 'Walk to start point — fingerprint verify unlocks when within 30 m';
-  document.getElementById('mafiaLoading').style.display = 'block';
-  document.getElementById('mafiaContent').style.display = 'none';
-  setTimeout(() => {
-    document.getElementById('mafiaLoading').style.display = 'none';
-    document.getElementById('mafiaContent').style.display = 'block';
-  }, 1500);
-}
-
-function mafiaArrive() {
-  var btn = document.getElementById('btnArrive');
-  btn.disabled = true;
-  btn.innerHTML = ''+icon('pin',13)+' Getting GPS…';
-  captureGPS(function(gps, err) {
-    mafiaArrived = true;
-    document.getElementById('navGateCard').classList.add('arrived');
-    if (gps) {
-      document.getElementById('navGateHint').textContent = '✓ At start point ('+gps.lat+', '+gps.lng+' ±'+gps.accuracy+'m) — verify identity';
-      btn.textContent = '✓ Arrived — GPS recorded';
-    } else {
-      document.getElementById('navGateHint').textContent = '✓ At start point (GPS: '+err+') — verify identity';
-      btn.textContent = '✓ Arrived (no GPS)';
+  document.getElementById('mafiaFpTxt').textContent='Tap to Verify Identity';
+  document.getElementById('mafiaFpSection').style.display='none';
+  var wf=document.getElementById('mafiaWorkflow'); if(wf) wf.style.display='none';
+  var gate=document.getElementById('navGateCard'); if(gate){ gate.classList.remove('arrived'); gate.style.display='block'; }
+  document.getElementById('mafiaLoading').style.display='block';
+  document.getElementById('mafiaContent').style.display='none';
+  mafiaSetTape(true);
+  /* Request compass up front (needs the user gesture that opened this screen on iOS). */
+  requestCompass(function(){});
+  /* Get the trainer's position and generate a random transect near them. */
+  captureGPS(function(gps,err){
+    document.getElementById('mafiaLoading').style.display='none';
+    document.getElementById('mafiaContent').style.display='block';
+    if(!gps){
+      document.getElementById('mafiaGenNote').innerHTML=icon('warning',13)+' Could not get GPS to place a transect. Move to open sky and reopen.';
+      return;
     }
-    document.getElementById('mafiaFpSection').style.display = 'block';
-    checkMafiaReady();
+    mafiaTrainerPos={lat:parseFloat(gps.lat), lon:parseFloat(gps.lng)};
+    var startBearing=Math.random()*360, startDist=30+Math.random()*70;   /* 30..100 m from trainer */
+    mafiaStart=geoDest(mafiaTrainerPos, startBearing, startDist);
+    mafiaTransectBearing=Math.random()*360;
+    mafiaEnd=geoDest(mafiaStart, mafiaTransectBearing, MAFIA_TRANSECT_M);
+    _mafiaFill('mfStart', mafiaStart.lat.toFixed(5)+'°, '+mafiaStart.lon.toFixed(5)+'°');
+    _mafiaFill('mfEnd',   mafiaEnd.lat.toFixed(5)+'°, '+mafiaEnd.lon.toFixed(5)+'°');
+    _mafiaFill('mfBearing', Math.round(mafiaTransectBearing)+'° '+compass16(mafiaTransectBearing));
+    _mafiaFill('mfLength', MAFIA_TRANSECT_M+' m');
+    document.getElementById('mafiaGenNote').innerHTML=icon('info',13)+' Training transect generated '+Math.round(startDist)+' m from you. Walk to the <strong>start point</strong>.';
+    _mafiaNavTo(mafiaStart, 'Transect Start');
   });
 }
-
-function mafiaVerify() {
-  if (mafiaVerified) return;
-  webAuthnVerify({
-    btnId: 'mafiaFpBtn', txtId: 'mafiaFpTxt',
-    setVerified: function(v){ mafiaVerified = v; },
-    onSuccess: checkMafiaReady
-  });
+function _mafiaFill(id,txt){ var e=document.getElementById(id); if(e) e.textContent=txt; }
+function mafiaSetTape(has){
+  mafiaHasTape=has;
+  var y=document.getElementById('mafiaTapeYes'), n=document.getElementById('mafiaTapeNo');
+  if(y) y.classList.toggle('active', has); if(n) n.classList.toggle('active', !has);
 }
 
-function checkMafiaReady() {
-  document.getElementById('mafiaBeginBtn').disabled = !(mafiaVerified && mafiaArrived);
+/* ── Live navigation to a target (start or end) ── */
+function _mafiaNavTo(target, label){
+  mafiaNavTarget={ target:target, label:label };
+  var lab=document.getElementById('mfNavLabel'); if(lab) lab.textContent=label;
+  if(mafiaWatchId==null && navigator.geolocation){
+    mafiaWatchId=navigator.geolocation.watchPosition(function(pos){
+      window._mafiaPos={lat:pos.coords.latitude, lon:pos.coords.longitude, acc:Math.round(pos.coords.accuracy||0), heading:(pos.coords.heading!=null&&!isNaN(pos.coords.heading)?pos.coords.heading:null)};
+      _mafiaUpdateNav();
+    }, function(){}, {enableHighAccuracy:true, maximumAge:1000, timeout:20000});
+  }
+  if(mafiaNavTimer==null) mafiaNavTimer=setInterval(_mafiaUpdateNav, 250);  /* smooth compass redraw */
+}
+function _mafiaStopNav(){
+  if(mafiaWatchId!=null && navigator.geolocation){ try{ navigator.geolocation.clearWatch(mafiaWatchId); }catch(e){} mafiaWatchId=null; }
+  if(mafiaNavTimer!=null){ clearInterval(mafiaNavTimer); mafiaNavTimer=null; }
+  mafiaNavTarget=null;
+}
+function _mafiaUpdateNav(){
+  var pos=window._mafiaPos, nav=mafiaNavTarget; if(!pos||!nav) return;
+  var here={lat:pos.lat, lon:pos.lon};
+  var dist=_haversine(here, nav.target);
+  var brng=geoBearing(here, nav.target);
+  /* Prefer the magnetometer; else use GPS course while moving. */
+  var heading=window._devHeading;
+  if(heading==null && pos.heading!=null){ heading=pos.heading; window._compassSource='gps'; }
+  var arrowDeg=(heading!=null)?(((brng-heading)%360)+360)%360:brng;
+  var g=document.getElementById('mfArrowG'); if(g) g.setAttribute('transform','rotate('+arrowDeg.toFixed(0)+', 36, 36)');
+  _mafiaFill('mfBearingTxt', 'Head '+compass16(brng)+' · '+Math.round(brng)+'°');
+  _mafiaFill('mfDistTxt', dist<1000?(Math.round(dist)+' m away'):((dist/1000).toFixed(2)+' km away'));
+  var src=document.getElementById('mfCompassSrc');
+  if(src) src.textContent=(window._compassSource==='magnetometer')?'Compass: phone magnetometer':(window._compassSource==='gps'?'Compass: GPS course (keep moving)':'Point the top of the phone where you walk')+(pos.acc?(' · GPS ±'+pos.acc+'m'):'');
+  var within=dist<=MAFIA_ARRIVE_M;
+  var btn=document.getElementById('btnArrive');
+  if(btn && !mafiaArrived){ btn.classList.toggle('ready', within); }
+  var hint=document.getElementById('navGateHint');
+  if(hint && !mafiaArrived) hint.textContent = within ? '✓ You are at the start point — tap below, then verify your fingerprint.' : 'Walk to the start point. You can confirm manually if the GPS is weak under canopy.';
+}
+
+/* ── Arrival at the start → fingerprint → start the workflow timer ── */
+function mafiaArrive(){
+  var btn=document.getElementById('btnArrive');
+  btn.disabled=true; btn.innerHTML=icon('pin',13)+' Fixing GPS…';
+  captureGPS(function(gps){
+    mafiaArrived=true;
+    window._mafiaArriveFix = gps ? {lat:parseFloat(gps.lat), lon:parseFloat(gps.lng), acc:gps.accuracy} : null;
+    document.getElementById('navGateCard').classList.add('arrived');
+    document.getElementById('navGateHint').textContent = gps ? ('✓ At start ('+gps.lat+', '+gps.lng+' ±'+gps.accuracy+'m) — verify identity') : '✓ At start — verify identity';
+    btn.textContent='✓ Arrived';
+    document.getElementById('mafiaFpSection').style.display='block';
+  });
+}
+function mafiaVerify(){
+  if(mafiaVerified) return;
+  webAuthnVerify({ btnId:'mafiaFpBtn', txtId:'mafiaFpTxt', setVerified:function(v){ mafiaVerified=v; }, onSuccess:function(){
+    if(!mafiaVerified) return;
+    mafiaArriveTime=Date.now();
+    document.getElementById('navGateCard').style.display='none';
+    document.getElementById('mafiaFpSection').style.display='none';
+    mafiaStartWorkflow();
+  }});
+}
+
+/* ── Guided tape workflow ── */
+var MAFIA_STEPS=[
+  { title:'Lay out the tape', target:'end',   tapeText:'Walk to the END point, pulling your 100 m tape as you go.', noTapeText:'Walk to the END point — the app will tell you when you reach ~100 m. Pace it out as evenly as you can.', btn:'I’m at the end ✓' },
+  { title:'Survey back to the start', target:'start', tapeText:'Now walk back to the START along the tape, recording each indicator as you go.', noTapeText:'Now walk back to the START along your line, recording each indicator as you go.', btn:'Open the survey form', action:'survey' },
+  { title:'Check for anything missed', target:'end', tapeText:'Walk the transect to the END again and check nothing was missed.', noTapeText:'Walk back to the END again and check nothing was missed.', btn:'Checked — nothing missed ✓' },
+  { title:'Roll the tape back', target:'start', tapeText:'Roll your tape back to the START point.', noTapeText:'Return to the START point.', btn:'At the start ✓' },
+  { title:'Close the survey', target:'start', tapeText:'You are back at the start. Close and save the survey.', noTapeText:'You are back at the start. Close and save the survey.', btn:'Close & save survey ✓', action:'close' }
+];
+function mafiaStartWorkflow(){
+  mafiaWorkflowActive=true;
+  mafiaStep=0;
+  var wf=document.getElementById('mafiaWorkflow'); if(wf) wf.style.display='block';
+  if(mafiaTimerInt==null) mafiaTimerInt=setInterval(_mafiaTick, 1000);
+  _mafiaRenderStep();
+}
+function _mafiaTick(){
+  if(!mafiaArriveTime) return;
+  var mins=(Date.now()-mafiaArriveTime)/60000;
+  var el=document.getElementById('mfTimer'); if(!el) return;
+  var mm=Math.floor(mins), ss=Math.floor((mins-mm)*60);
+  el.textContent=mm+':'+String(ss).padStart(2,'0');
+  el.style.color = mins>MAFIA_MAX_MIN ? '#B71C1C' : (mins>30 ? '#E65100' : '#2E7D32');
+  var warn=document.getElementById('mfTimeWarn');
+  if(warn) warn.style.display = mins>MAFIA_MAX_MIN ? 'block' : 'none';
+}
+function _mafiaRenderStep(){
+  var s=MAFIA_STEPS[mafiaStep]; if(!s) return;
+  _mafiaFill('mfStepTitle', 'Step '+(mafiaStep+1)+' of '+MAFIA_STEPS.length+': '+s.title);
+  _mafiaFill('mfStepInstruction', mafiaHasTape ? s.tapeText : s.noTapeText);
+  var btn=document.getElementById('mfStepBtn'); if(btn) btn.textContent=s.btn;
+  /* live-navigate to this step's target */
+  _mafiaStopNav();
+  var tgt = s.target==='end' ? mafiaEnd : mafiaStart;
+  if(tgt) _mafiaNavTo(tgt, s.target==='end' ? 'Transect End' : 'Transect Start');
+  var navBox=document.getElementById('mfStepNav'); if(navBox) navBox.style.display = tgt ? 'block' : 'none';
+}
+function mafiaStepAction(){
+  var s=MAFIA_STEPS[mafiaStep]; if(!s) return;
+  if(s.action==='survey'){ nav('screen-mafia-matrix'); return; }
+  if(s.action==='close'){ mafiaCloseSurvey(); return; }
+  if(mafiaStep<MAFIA_STEPS.length-1){ mafiaStep++; _mafiaRenderStep(); }
+}
+/* matrix "Save" in workflow context stashes the indicators and returns here */
+function mafiaSurveyCollected(){
+  mafiaSurveyData=collectMafiaData();
+  if(mafiaStep===1){ mafiaStep=2; }
+  showScreen('screen-mafia-setup'); /* back to the workflow (guarded from re-init) */
+  setTimeout(_mafiaRenderStep, 50);
+  toast('Survey recorded — continue the walk');
+}
+function mafiaCloseSurvey(){
+  if(!mafiaSurveyData){ toast('Record the survey (step 2) before closing.'); mafiaStep=1; _mafiaRenderStep(); return; }
+  mafiaWorkflowActive=false;
+  _mafiaStopNav(); if(mafiaTimerInt!=null){ clearInterval(mafiaTimerInt); mafiaTimerInt=null; }
+  var mins=mafiaArriveTime?((Date.now()-mafiaArriveTime)/60000):null;
+  var rec=mafiaSurveyData;
+  rec.transect_start=mafiaStart; rec.transect_end=mafiaEnd;
+  rec.transect_bearing=mafiaTransectBearing!=null?Math.round(mafiaTransectBearing):null;
+  rec.transect_length_m=MAFIA_TRANSECT_M;
+  rec.had_tape=mafiaHasTape;
+  rec.arrive_fix=window._mafiaArriveFix||null;
+  rec.duration_min=mins!=null?Math.round(mins*10)/10:null;
+  rec.duration_excessive=(mins!=null && mins>MAFIA_MAX_MIN);
+  rec.compass_source=window._compassSource||'';
+  saveRecord('mafia', rec, function(){
+    clearDraft('screen-mafia-matrix');
+    toast('MaFIA survey saved ✓'+(rec.duration_excessive?' (time flagged)':''));
+    showScreen('screen-dashboard');
+  });
 }
 
 
@@ -10389,7 +10564,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v39'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v40'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11972,7 +12147,8 @@ function _sendAllDataInner() {
 function collectMafiaData() {
   var table = document.querySelector('#screen-mafia-matrix .matrix-table');
   if (!table) return {};
-  var data = { survey_type: 'mafia', zone: 'Zone 7B', clan: 'ST1' };
+  var p = window._cachedProfile || {};
+  var data = { survey_type: 'mafia', zone: p.zone || '', clan: p.clan || '', steward: p.stewardId || '' };
   var rows = table.querySelectorAll('tbody tr');
   rows.forEach(function(row) {
     var label = row.querySelector('td:first-child');
@@ -12189,12 +12365,9 @@ function installPWA() {
 }
 
 
-function saveMafia() {
-  saveRecord('mafia', collectMafiaData(), function() {
-    clearDraft('screen-mafia-matrix');
-    toast('MaFIA survey saved to device ✓');
-  });
-}
+/* In the guided workflow, the matrix "Save" stashes the indicators and returns
+   to the walk; the full record (with transect + timing) is written at close. */
+function saveMafia() { mafiaSurveyCollected(); }
 
 /* ── Training Records ── */
 var selectedTrainingType = '';

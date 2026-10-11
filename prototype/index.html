@@ -4648,7 +4648,8 @@ select.msel {
               <button class="weather-pill" id="fmcat-infrastructure" onclick="fmCat('infrastructure')">Infrastructure</button>
               <button class="weather-pill" id="fmcat-boundary" onclick="fmCat('boundary')">Clan boundary</button>
               <button class="weather-pill" id="fmcat-hazard" onclick="fmCat('hazard')">Hazard / event</button>
-              <button class="weather-pill" id="fmcat-pest" onclick="fmCat('pest')">Crop pest / disease</button>
+              <button class="weather-pill" id="fmcat-pest" onclick="fmCat('pest')">Plant problem</button>
+              <button class="weather-pill" id="fmcat-postharvest" onclick="fmCat('postharvest')">Processing / sale prep</button>
               <button class="weather-pill" id="fmcat-fire" onclick="fmCat('fire')">Forest fire</button>
               <button class="weather-pill" id="fmcat-noncompliance" onclick="fmCat('noncompliance')">Non-compliance</button>
               <button class="weather-pill" id="fmcat-unrest" onclick="fmCat('unrest')">Social unrest</button>
@@ -4670,6 +4671,35 @@ select.msel {
               <button type="button" class="weather-pill" id="fmcrop-massoy" onclick="fmToggleCrop('massoy')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="leaf" data-size="13"></span> Massoy</button>
             </div>
             <input type="text" id="fmCropOther" class="form-input" style="margin-top:6px;font-size:0.78rem;" placeholder="Other crop (optional)">
+          </div>
+          <!-- Plant problem options — shown only for the Plant problem category -->
+          <div class="form-group" id="fmPlantProblemGroup" style="display:none;">
+            <label class="form-label">Crop / plant <span style="color:#B71C1C;">*</span></label>
+            <select id="fmProblemCrop" class="form-input" style="font-size:0.8rem;" onchange="fmCropOtherToggle('Problem')"></select>
+            <input type="text" id="fmProblemCropOther" class="form-input" style="display:none;margin-top:6px;font-size:0.78rem;" placeholder="Name the crop / plant">
+            <label class="form-label" style="margin-top:10px;">Problem(s) <span style="color:#B71C1C;">*</span> <span style="color:#999;font-weight:400;">(tap all that apply)</span></label>
+            <div id="fmProblemPills" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <label class="form-label" style="margin-top:10px;">Severity</label>
+            <div id="fmProblemSevPills" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <label class="form-label" style="margin-top:10px;">How much is affected</label>
+            <div id="fmProblemExtentPills" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+          </div>
+          <!-- Processing / sale prep options — shown only for that category -->
+          <div class="form-group" id="fmProcessingGroup" style="display:none;">
+            <label class="form-label">Crop <span style="color:#B71C1C;">*</span></label>
+            <select id="fmProcessCrop" class="form-input" style="font-size:0.8rem;" onchange="fmCropOtherToggle('Process')"></select>
+            <input type="text" id="fmProcessCropOther" class="form-input" style="display:none;margin-top:6px;font-size:0.78rem;" placeholder="Name the crop">
+            <label class="form-label" style="margin-top:10px;">Stage</label>
+            <select id="fmProcessStage" class="form-input" style="font-size:0.8rem;"></select>
+            <label class="form-label" style="margin-top:10px;">Quality problem(s) <span style="color:#B71C1C;">*</span> <span style="color:#999;font-weight:400;">(tap all that apply)</span></label>
+            <div id="fmQualityPills" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <label class="form-label" style="margin-top:10px;">Severity</label>
+            <div id="fmProcessSevPills" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <label class="form-label" style="margin-top:10px;">Quantity affected <span style="color:#999;font-weight:400;">(optional)</span></label>
+            <div style="display:flex;gap:8px;">
+              <input type="number" id="fmProcessQty" inputmode="decimal" min="0" step="any" class="form-input" style="flex:1;font-size:0.8rem;" placeholder="Amount">
+              <input type="text" id="fmProcessUnit" class="form-input" style="flex:1;font-size:0.8rem;" placeholder="Unit (kg, bags)">
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Title <span style="color:#B71C1C;">*</span></label>
@@ -7584,8 +7614,24 @@ function syncCalendarFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(
 ══════════════════════════════════════ */
 var _fmMode='point', _fmCat='road', _fmPhoto=null, _fmPoint=null, _fmCrops=[];
 var _fmLine=[], _fmWatchId=null, _fmRecording=false, _fmPaused=false;
-var FM_CATS={ road:'Road / track', infrastructure:'Infrastructure', boundary:'Clan boundary', pest:'Crop pest / disease', hazard:'Hazard / event', fire:'Forest fire', noncompliance:'Non-compliance', unrest:'Social unrest', wildlife:'Wildlife sighting', hunting:'Hunting event', cultural:'Cultural event', cashcrop_garden:'Cash-crop garden', other:'Other' };
+var FM_CATS={ road:'Road / track', infrastructure:'Infrastructure', boundary:'Clan boundary', pest:'Plant problem', postharvest:'Processing / sale prep', hazard:'Hazard / event', fire:'Forest fire', noncompliance:'Non-compliance', unrest:'Social unrest', wildlife:'Wildlife sighting', hunting:'Hunting event', cultural:'Cultural event', cashcrop_garden:'Cash-crop garden', other:'Other' };
 var FM_CROPS={ vanilla:'Vanilla', coffee:'Coffee', cocoa:'Cocoa', okari:'Okari', massoy:'Massoy' };
+/* Structured "Plant problem" + "Processing / sale prep" option lists */
+var FM_PROBLEM_CROPS=['Vanilla','Coffee','Cocoa','Okari','Massoy','Taro','Banana','Sweet potato','Cassava','Yam','Greens / vegetables','Other'];
+var FM_PLANT_PROBLEMS=['Pest damage','Disease','Dried out / wilting','Poorly pruned','Unharvested / overripe','Weed-choked','Nutrient deficiency','Physical / storm damage','Poor spacing / crowding','Other'];
+var FM_EXTENT=['A few plants','Many plants','Most / whole block'];
+var FM_PROCESS_CROPS=['Vanilla','Coffee','Cocoa','Okari','Massoy','Other'];
+var FM_PROCESS_STAGES=['Harvesting','Drying','Fermenting','Sorting / cleaning','Packing','Storage','At market'];
+var FM_PROCESS_ISSUES=['Dirty / soil','Mixed with stones / debris','Fungal / mould','Smoke contamination','Under-dried','Over-dried','Poorly packed','Insect-damaged','Discoloured','Off-smell','Other'];
+var FM_SEVERITY=['Low','Medium','Severe'];
+var _fmProblemTypes=[], _fmQualityIssues=[], _fmSeverity='', _fmExtent='';
+function _fmFillSelect(id, arr, blankFirst){ var el=document.getElementById(id); if(!el) return; el.innerHTML=(blankFirst?'<option value="">—</option>':'')+arr.map(function(x){return '<option value="'+x+'">'+x+'</option>';}).join(''); }
+function _fmPillRow(containerId, arr, activeGetter, handler){ var box=document.getElementById(containerId); if(!box) return; box.innerHTML=arr.map(function(x){ return '<button type="button" class="weather-pill'+(activeGetter(x)?' active':'')+'" data-v="'+x.replace(/"/g,'&quot;')+'" onclick="'+handler+'(this.getAttribute(\'data-v\'))" style="font-size:0.74rem;padding:5px 9px;">'+x+'</button>'; }).join(''); }
+function fmCropOtherToggle(which){ var sel=document.getElementById('fm'+which+'Crop'), oth=document.getElementById('fm'+which+'CropOther'); if(sel&&oth){ oth.style.display=(sel.value==='Other')?'' : 'none'; if(sel.value!=='Other') oth.value=''; } }
+function fmToggleProblem(v){ var i=_fmProblemTypes.indexOf(v); if(i>=0)_fmProblemTypes.splice(i,1); else _fmProblemTypes.push(v); _fmPillRow('fmProblemPills',FM_PLANT_PROBLEMS,function(x){return _fmProblemTypes.indexOf(x)>=0;},'fmToggleProblem'); }
+function fmToggleQuality(v){ var i=_fmQualityIssues.indexOf(v); if(i>=0)_fmQualityIssues.splice(i,1); else _fmQualityIssues.push(v); _fmPillRow('fmQualityPills',FM_PROCESS_ISSUES,function(x){return _fmQualityIssues.indexOf(x)>=0;},'fmToggleQuality'); }
+function fmPickSeverity(v){ _fmSeverity=v; ['fmProblemSevPills','fmProcessSevPills'].forEach(function(c){ _fmPillRow(c,FM_SEVERITY,function(x){return x===_fmSeverity;},'fmPickSeverity'); }); }
+function fmPickExtent(v){ _fmExtent=v; _fmPillRow('fmProblemExtentPills',FM_EXTENT,function(x){return x===_fmExtent;},'fmPickExtent'); }
 /* Polygon area in hectares from walked boundary points (equirectangular
    planar approx — fine for garden-scale areas). */
 function _fmAreaHa(pts){
@@ -7605,6 +7651,19 @@ function initFreemap(){
   Object.keys(FM_CROPS).forEach(function(k){ var el=document.getElementById('fmcrop-'+k); if(el) el.classList.remove('active'); });
   var co=document.getElementById('fmCropOther'); if(co) co.value='';
   var cg=document.getElementById('fmCropsGroup'); if(cg) cg.style.display='none';
+  /* Structured plant-problem / processing sub-forms */
+  _fmProblemTypes=[]; _fmQualityIssues=[]; _fmSeverity=''; _fmExtent='';
+  _fmFillSelect('fmProblemCrop', FM_PROBLEM_CROPS, false);
+  _fmFillSelect('fmProcessCrop', FM_PROCESS_CROPS, false);
+  _fmFillSelect('fmProcessStage', FM_PROCESS_STAGES, true);
+  ['fmProblemCropOther','fmProcessCropOther','fmProcessQty','fmProcessUnit'].forEach(function(id){ var e=document.getElementById(id); if(e){ e.value=''; if(id.indexOf('Other')>=0) e.style.display='none'; } });
+  _fmPillRow('fmProblemPills', FM_PLANT_PROBLEMS, function(){return false;}, 'fmToggleProblem');
+  _fmPillRow('fmProblemSevPills', FM_SEVERITY, function(){return false;}, 'fmPickSeverity');
+  _fmPillRow('fmProblemExtentPills', FM_EXTENT, function(){return false;}, 'fmPickExtent');
+  _fmPillRow('fmQualityPills', FM_PROCESS_ISSUES, function(){return false;}, 'fmToggleQuality');
+  _fmPillRow('fmProcessSevPills', FM_SEVERITY, function(){return false;}, 'fmPickSeverity');
+  var pp=document.getElementById('fmPlantProblemGroup'); if(pp) pp.style.display='none';
+  var pr=document.getElementById('fmProcessingGroup'); if(pr) pr.style.display='none';
   var lbl=document.getElementById('fmLenLabel'); if(lbl) lbl.textContent='metres';
   document.getElementById('fmPointBox').style.display='block';
   document.getElementById('fmLineBox').style.display='none';
@@ -7629,6 +7688,8 @@ function fmCat(v){
   var isGarden=(v==='cashcrop_garden');
   var cg=document.getElementById('fmCropsGroup'); if(cg) cg.style.display=isGarden?'block':'none';
   if(isGarden && _fmMode!=='area') fmMode('area');
+  var pp=document.getElementById('fmPlantProblemGroup'); if(pp) pp.style.display=(v==='pest')?'block':'none';
+  var pr=document.getElementById('fmProcessingGroup'); if(pr) pr.style.display=(v==='postharvest')?'block':'none';
 }
 function fmToggleCrop(c){
   var i=_fmCrops.indexOf(c); if(i>=0) _fmCrops.splice(i,1); else _fmCrops.push(c);
@@ -7680,8 +7741,26 @@ function fmHandlePhoto(input){ var file=input.files&&input.files[0]; if(!file) r
 
 function saveFreemap(){
   var title=(document.getElementById('fmTitle').value||'').trim();
-  if(!title){ toast('Enter a title.'); return; }
   if(_fmRecording){ toast('Stop recording first.'); return; }
+  /* Structured sub-forms: Plant problem + Processing / sale prep */
+  var plantProblem=null, processing=null;
+  if(_fmCat==='pest'){
+    var pc=(document.getElementById('fmProblemCrop')||{}).value||'';
+    if(pc==='Other') pc=((document.getElementById('fmProblemCropOther')||{}).value||'').trim();
+    if(!pc){ toast('Choose the crop / plant.'); return; }
+    if(_fmProblemTypes.length===0){ toast('Select at least one problem.'); return; }
+    plantProblem={ crop:pc, problems:_fmProblemTypes.slice(), severity:_fmSeverity||'', extent:_fmExtent||'' };
+    if(!title) title=pc+' — '+_fmProblemTypes[0];
+  } else if(_fmCat==='postharvest'){
+    var qc=(document.getElementById('fmProcessCrop')||{}).value||'';
+    if(qc==='Other') qc=((document.getElementById('fmProcessCropOther')||{}).value||'').trim();
+    if(!qc){ toast('Choose the crop.'); return; }
+    if(_fmQualityIssues.length===0){ toast('Select at least one quality problem.'); return; }
+    var qty=(document.getElementById('fmProcessQty')||{}).value;
+    processing={ crop:qc, stage:(document.getElementById('fmProcessStage')||{}).value||'', issues:_fmQualityIssues.slice(), severity:_fmSeverity||'', quantity:(qty!==''&&qty!=null?parseFloat(qty):null), unit:((document.getElementById('fmProcessUnit')||{}).value||'').trim() };
+    if(!title) title=qc+' — '+_fmQualityIssues[0];
+  }
+  if(!title){ toast('Enter a title.'); return; }
   var pts;
   if(_fmMode==='point'){ if(!_fmPoint){ toast('Capture a point first.'); return; } pts=[_fmPoint]; }
   else if(_fmMode==='area'){ if(_fmLine.length<3){ toast('Walk at least 3 boundary points for an area.'); return; } pts=_fmLine.slice(); }
@@ -7694,7 +7773,7 @@ function saveFreemap(){
     crops=list.join(', ');
   }
   var now=new Date();
-  var rec={ survey_type:'freemap', uid:generateRecordId('MAP'), map_type:_fmMode, category:_fmCat, category_label:FM_CATS[_fmCat], title:title, description:(document.getElementById('fmDesc').value||'').trim(), points:pts, length_m:(_fmMode==='line')?Math.round(_fmLen()):0, area_ha:(_fmMode==='area')?(Math.round(_fmAreaHa(pts)*100)/100):0, garden_type:(_fmCat==='cashcrop_garden')?'cash_crop':null, crops:crops, photo:_fmPhoto||null, clan:myClan(), steward:(window._cachedProfile&&window._cachedProfile.stewardId)||'', recorded_at:now.toISOString() };
+  var rec={ survey_type:'freemap', uid:generateRecordId('MAP'), map_type:_fmMode, category:_fmCat, category_label:FM_CATS[_fmCat], title:title, description:(document.getElementById('fmDesc').value||'').trim(), points:pts, length_m:(_fmMode==='line')?Math.round(_fmLen()):0, area_ha:(_fmMode==='area')?(Math.round(_fmAreaHa(pts)*100)/100):0, garden_type:(_fmCat==='cashcrop_garden')?'cash_crop':null, crops:crops, plant_problem:plantProblem, processing:processing, photo:_fmPhoto||null, clan:myClan(), steward:(window._cachedProfile&&window._cachedProfile.stewardId)||'', recorded_at:now.toISOString() };
   /* Save only — the record uploads with the normal Send Data sync. No KML is
      written to the phone; use the per-record "Export" button in the list below
      if you ever need a map file to share. */
@@ -8245,7 +8324,8 @@ var HELP_MANUALS = {
       '<p>One place to record <strong>anything you see in the field</strong> — a problem, an event, or a feature to map. This is also where the old "Observations" button now takes you.</p>'
      +'<p><strong>Point or Line.</strong> Use <em>Point</em> for a single spot; use <em>Line / track</em> to walk a route (start, pause, stop) for a road or a boundary.</p>'
      +'<p><strong>Choose the category</strong> that fits:</p><ul>'
-     +'<li><strong>Crop pest / disease</strong> — pests or disease on food or cash crops (name the crop and what you see).</li>'
+     +'<li><strong>Plant problem</strong> — any issue on a crop or plant: pick the <strong>crop</strong>, tick the <strong>problem(s)</strong> (pest, disease, dried out, poorly pruned, unharvested, weed-choked, nutrient deficiency, storm damage…), set <strong>severity</strong> and <strong>how much is affected</strong>.</li>'
+     +'<li><strong>Processing / sale prep</strong> — a quality issue in harvested crop being prepared for sale: pick the <strong>crop</strong> and <strong>stage</strong>, tick the <strong>quality problem(s)</strong> (dirty, mixed with stones, fungal/mould, smoke contamination, under/over-dried, poorly packed…), set <strong>severity</strong> and the <strong>quantity</strong> affected.</li>'
      +'<li><strong>Hazard / event</strong> — landslide, flood, fallen tree, washout.</li>'
      +'<li><strong>Forest fire</strong> — a fire you see on the ground.</li>'
      +'<li><strong>Non-compliance</strong> — a rule being broken. <strong>Social unrest</strong> — a conflict.</li>'
@@ -10756,7 +10836,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v36'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v37'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

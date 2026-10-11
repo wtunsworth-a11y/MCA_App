@@ -162,17 +162,27 @@ Mapping** tiles — they all open the same screen). Use it to record **anything
 you see**: a problem, an event, or something to map.
 
 Pick what you're mapping:
-- **Point** — one spot (pest/disease, forest fire, landslide, fallen tree,
+- **Point** — one spot (plant problem, forest fire, landslide, fallen tree,
   non-compliance, social unrest, wildlife, hunting, cultural event…).
 - **Line** — walk a route (a road/track).
 - **Area / garden** — walk a **closed boundary**; the app gives the **area in
   hectares**. Choose the **Cash-crop garden** category and the crop picker
   appears (vanilla / coffee / cocoa / okari / massoy).
 
-Choose a **category**, add a **title**, a short **description**, and a **photo**,
-then **Save**. Your GPS is captured automatically. It saves offline and **uploads
-with your next Send Data** — no separate file is made. (In the recent-maps list
-each record has an **Export** button if you ever need a KML to share.)
+Two categories open a **structured form** so the data can be counted later:
+- **Plant problem** — pick the **crop/plant**, tick the **problem(s)** (pest,
+  disease, dried out, poorly pruned, unharvested, weed-choked, nutrient
+  deficiency, storm damage…), set **severity** and **how much is affected**.
+- **Processing / sale prep** — for harvested crop being prepared for sale: pick
+  the **crop** and **stage**, tick the **quality problem(s)** (dirty, mixed with
+  stones, fungal/mould, smoke contamination, under/over-dried, poorly packed…),
+  set **severity** and the **quantity**.
+
+Choose a **category**, add a **title** (auto-filled for the two forms above if
+left blank), a short **description**, and a **photo**, then **Save**. Your GPS is
+captured automatically. It saves offline and **uploads with your next Send
+Data** — no separate file is made. (In the recent-maps list each record has an
+**Export** button if you ever need a KML to share.)
 
 ---
 

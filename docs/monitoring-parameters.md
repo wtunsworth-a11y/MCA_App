@@ -194,6 +194,27 @@ cocoa / okari / massoy + other → `crops`), title, description, photo. EUDR
 cash-crop reporting filters the map records by category. *(The legacy `gardens`
 store holds any records made on the old standalone screen.)*
 
+**Structured categories (store `freemap`).** Two Field Mapping categories carry
+a structured sub-form in addition to the common title / description / photo /
+GPS:
+
+- **Plant problem** (`category:'pest'`) → `plant_problem{ crop, problems[], severity, extent }`.
+  `problems` is a multi-select of: Pest damage · Disease · Dried out / wilting ·
+  Poorly pruned · Unharvested / overripe · Weed-choked · Nutrient deficiency ·
+  Physical / storm damage · Poor spacing / crowding · Other. `severity` =
+  Low / Medium / Severe; `extent` = A few plants / Many plants / Most / whole
+  block. (Crop list includes food crops: taro, banana, sweet potato, cassava,
+  yam, greens… + the cash crops + Other.)
+- **Processing / sale prep** (`category:'postharvest'`) →
+  `processing{ crop, stage, issues[], severity, quantity, unit }`. `stage` =
+  Harvesting / Drying / Fermenting / Sorting-cleaning / Packing / Storage / At
+  market; `issues` multi-select: Dirty / soil · Mixed with stones / debris ·
+  Fungal / mould · Smoke contamination · Under-dried · Over-dried · Poorly
+  packed · Insect-damaged · Discoloured · Off-smell · Other.
+
+Both make crop-health and post-harvest-quality reports **countable** (vs. the
+old free-text). Title auto-fills from crop + first problem if left blank.
+
 ### 3.5 Tree mapping
 Store `trees`. Species (e.g. okari, massoy), latitude, longitude,
 **DBH (diameter at breast height, cm)**, notes.

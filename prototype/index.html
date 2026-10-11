@@ -1934,6 +1934,8 @@ select.msel {
       <div class="scroll-content" style="padding-bottom:8px;">
         <!-- Offline / unsynced data warning — updated on every dashboard visit -->
         <div id="syncWarningBanner" style="display:none;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;font-size:0.79rem;line-height:1.4;cursor:pointer;" onclick="nav('screen-data-export')"></div>
+        <!-- Low-storage warning — this is a work phone; storage must be kept free for the app -->
+        <div id="storageWarningBanner" style="display:none;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;font-size:0.79rem;line-height:1.4;cursor:pointer;" onclick="nav('screen-data-export')"></div>
         <!-- This-month monitoring status — calm, static, updated on each dashboard visit -->
         <div id="dashDisturb" style="margin:8px 12px 0;"></div>
         <div id="dashStatus" style="margin:8px 12px 2px;"></div>
@@ -5643,7 +5645,7 @@ function nav(id) {
   if (id === 'screen-conserv-schedule') initConservSchedule();
   if (id === 'screen-training-setup') initTraining();
   if (id === 'screen-data-export') { updateRecordCounts(); updateStorageInfo(); }
-  if (id === 'screen-dashboard')   { updateSyncWarning(); renderDashboardStatus(); }
+  if (id === 'screen-dashboard')   { updateSyncWarning(); updateStorageWarning(); renderDashboardStatus(); }
   if (id === 'screen-training-record') initTrainingRecord();
   if (id === 'screen-timesheet') loadTimesheetData();
   if (id === 'screen-meteo-record') initMeteoRecord();
@@ -9812,6 +9814,10 @@ function initDistribution(){
   var sb=document.getElementById('distSubmitBtn'); if(sb) sb.disabled=true;
   document.getElementById('distItemsList').innerHTML='';
   distAddItem();
+  /* Warn up-front if the phone is nearly full — a handover captures photos AND
+     a video, which are large. We never block the capture (the event can't be
+     repeated), but the officer should know to free space / sync first. */
+  checkStorageLevel(function(s){ if(s.level==='critical'){ toast('⚠ Storage critically low (~'+s.freeMB+' MB). Free space / send data — the video may not save.'); } });
   window._distGps=null;
   var g=document.getElementById('distGPS'); if(g){ g.textContent='Acquiring…'; g.style.color='#888'; }
   var rb=document.getElementById('distGpsRetry'); if(rb) rb.style.display='none';
@@ -10807,7 +10813,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v57'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v58'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12080,6 +12086,40 @@ function updateSyncWarning() {
         ' — last sync ' + daysText + '.' +
         '<span style="float:right;opacity:0.7;">Send →</span>';
     });
+  });
+}
+
+/* ── Free-space check — these are work phones; storage must stay free for
+   the app. Returns {level:'ok'|'low'|'critical'|'unknown', freeMB, usedMB,
+   quotaMB}. "free" is the origin's remaining quota, which shrinks as the whole
+   device fills, so it tracks device pressure too. ── */
+var MCA_STORAGE_CRITICAL_MB = 200;   /* ~13 handover videos — act now */
+var MCA_STORAGE_LOW_MB      = 600;   /* getting tight — plan to clear */
+function checkStorageLevel(cb) {
+  if (!(navigator.storage && navigator.storage.estimate)) { cb({ level:'unknown' }); return; }
+  navigator.storage.estimate().then(function(est) {
+    var quota = est.quota || 0, usage = est.usage || 0;
+    var freeMB = Math.max(0, (quota - usage) / 1048576);
+    var level = freeMB <= MCA_STORAGE_CRITICAL_MB ? 'critical'
+              : freeMB <= MCA_STORAGE_LOW_MB ? 'low' : 'ok';
+    cb({ level:level, freeMB:Math.round(freeMB), usedMB:Math.round(usage/1048576), quotaMB:Math.round(quota/1048576) });
+  }).catch(function(){ cb({ level:'unknown' }); });
+}
+/* Dashboard low-storage banner */
+function updateStorageWarning() {
+  var banner = document.getElementById('storageWarningBanner'); if (!banner) return;
+  checkStorageLevel(function(s) {
+    if (s.level !== 'low' && s.level !== 'critical') { banner.style.display = 'none'; return; }
+    var crit = s.level === 'critical';
+    var bg = crit ? '#FFEBEE' : '#FFF8E1', border = crit ? '#FFCDD2' : '#FFE082', color = crit ? '#B71C1C' : '#E65100';
+    banner.style.cssText =
+      'display:block;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;font-size:0.79rem;line-height:1.5;cursor:pointer;' +
+      'background:' + bg + ';border:1px solid ' + border + ';color:' + color + ';';
+    banner.innerHTML = icon('warning',13) + ' <strong>Storage ' + (crit ? 'critically low' : 'getting low') +
+      '</strong> — about <strong>' + s.freeMB + ' MB</strong> free. ' +
+      (crit ? 'Photos and video may fail to save. Send your data, then free space on the phone.'
+            : 'Send your data and clear space so records keep saving.') +
+      '<span style="float:right;opacity:0.7;">Manage →</span>';
   });
 }
 

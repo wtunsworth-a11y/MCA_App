@@ -208,6 +208,29 @@ Store `training`. Type, topic, date, duration, trainer name & org, location,
 participants (**female / male / youth** counts), materials, topics covered,
 outcomes, follow-up, challenges, notes, **photo**, session mode.
 
+### 3.8 Handover & Distribution
+Store `distributions`. Logged by **field officers / Project / Zone staff** when
+items are handed out. Uploads in the normal bundle (so it carries the standard
+clock-trust stamp and is eligible for Date Review).
+
+| Parameter | Options / type |
+|---|---|
+| Officer | name, steward ID, role (captured from profile) |
+| Recipient | name/group · **type** (individual, clan group, women's/youth group, school, cooperative, other) · clan · contact/village · **confirmed receipt** (yes/no) |
+| Purpose | **category** (conservation planting, agroforestry, livelihood, training support, relief, other) + free-text description |
+| Items (repeating) | **category** (Seeds, Seedlings, Tools, Equipment, Materials, PPE, Food/relief, Documents, Other) · description · **quantity** · **unit** |
+| GPS | latitude, longitude, accuracy (m) |
+| **Handover photo** | image (required) |
+| **Receipt photo** | image (required) |
+| **Video** | short clip of handover & receipt (required) + size |
+| Fingerprint | officer's on-device verification (required to submit) |
+| Notes | text |
+| Date / clock | `date`, `device_time`, `clock_ok` (standard stamp) |
+
+*Photos and the video are stored inline in the record and upload with Send Data.
+Keep clips short (10–20 s) so they upload on slow signal; a very large bundle
+falls back to the Android share sheet.*
+
 ---
 
 ## 4. Metadata on every new-module record

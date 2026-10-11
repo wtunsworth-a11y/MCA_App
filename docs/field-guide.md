@@ -191,7 +191,31 @@ reported, and routed to your clan to check on the ground.
 
 ---
 
-## 9. Sending your data
+## 9. Handover & Distribution (field officers & staff)
+
+*For **field officers** and **Project / MCF & Zone staff** who hand out items.
+The tile appears only for those roles.*
+
+Open **Handover & Distribution** and record each handover **as it happens**:
+
+- **Who received them** — name or group, recipient **type** (individual, clan
+  group, women's / youth group, school, cooperative…), and clan.
+- **Purpose** — pick a category (conservation planting, agroforestry,
+  livelihood, training support, relief…) and describe it.
+- **Items** — add each item with its **quantity and unit** (seeds, seedlings,
+  tools, equipment, materials, PPE…). Tap **Add another item** for more.
+- **Evidence** — a **handover photo**, a **receipt photo**, and a **short video
+  (10–20 seconds)** of the items and the recipient receiving them.
+- Tick **Recipient confirmed receipt**, then **verify your fingerprint** to
+  submit.
+
+GPS, the date and your identity are captured automatically as proof. It saves
+offline and uploads with **Send Data**. **Keep the video short** so it uploads
+on slow signal.
+
+---
+
+## 10. Sending your data
 
 Open **Send Data**.
 
@@ -209,7 +233,7 @@ Open **Send Data**.
 
 ---
 
-## 10. Getting around
+## 11. Getting around
 
 - The phone's **back button** moves **back one screen** in the app (it no longer
   jumps out and loses your place). The **←** at the top-left does the same.
@@ -220,7 +244,7 @@ Open **Send Data**.
 
 ---
 
-## 11. Quick reference
+## 12. Quick reference
 
 | Task | Where |
 |---|---|

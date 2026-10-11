@@ -1999,6 +1999,10 @@ select.msel {
             <span class="module-emoji" data-icon="mortarboard" data-size="26"></span>
             <span class="module-name">Training Records</span>
           </div>
+          <div class="module-tile" id="tile-distribution" style="display:none;" onclick="nav('screen-distribution')">
+            <span class="module-emoji" data-icon="box" data-size="26"></span>
+            <span class="module-name">Handover &amp; Distribution</span>
+          </div>
           <div class="module-tile" onclick="nav('screen-data-export')">
             <span class="module-emoji" data-icon="upload" data-size="26"></span>
             <span class="module-name">Export Data</span>
@@ -3160,6 +3164,108 @@ select.msel {
       <div class="scroll-content">
         <div class="p14" style="padding-bottom:20px;">
           <div id="issueReportsContent"><div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: HANDOVER & DISTRIBUTION
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-distribution">
+      <div class="top-bar" style="background:#00838F;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Handover &amp; Distribution</div><div class="bar-subtitle">Record what was given, to whom, and why</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:24px;">
+          <div class="matrix-note" style="background:#E0F7FA;border-color:#80DEEA;color:#006064;font-size:0.76rem;">
+            <span data-icon="info" data-size="14"></span> Record every handover with <strong>photos and a short video</strong> of the items and the recipient receiving them. GPS, date and your fingerprint are captured as proof.
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Who received the items</div>
+          <div class="form-group">
+            <label class="form-label">Recipient name / group <span style="color:#B71C1C;">*</span></label>
+            <input type="text" id="distRecipient" class="form-input" placeholder="e.g. John Tanko, or Afore Women's Group">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Recipient type</label>
+            <div id="distRecipTypePills" style="display:flex;flex-wrap:wrap;gap:6px;">
+              <button type="button" class="weather-pill active" data-rt="individual" onclick="distSetRecipType('individual')">Individual</button>
+              <button type="button" class="weather-pill" data-rt="clan_group" onclick="distSetRecipType('clan_group')">Clan group</button>
+              <button type="button" class="weather-pill" data-rt="womens_group" onclick="distSetRecipType('womens_group')">Women's group</button>
+              <button type="button" class="weather-pill" data-rt="youth_group" onclick="distSetRecipType('youth_group')">Youth group</button>
+              <button type="button" class="weather-pill" data-rt="school" onclick="distSetRecipType('school')">School</button>
+              <button type="button" class="weather-pill" data-rt="cooperative" onclick="distSetRecipType('cooperative')">Cooperative</button>
+              <button type="button" class="weather-pill" data-rt="other" onclick="distSetRecipType('other')">Other</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Clan</label>
+            <input type="text" id="distClan" class="form-input" placeholder="e.g. Afore">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact / village <span style="color:#999;font-weight:400;">(optional)</span></label>
+            <input type="text" id="distContact" class="form-input" placeholder="Phone or village">
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Purpose</div>
+          <div class="form-group">
+            <div id="distPurposePills" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+              <button type="button" class="weather-pill active" data-pp="conservation_planting" onclick="distSetPurpose('conservation_planting')">Conservation planting</button>
+              <button type="button" class="weather-pill" data-pp="agroforestry" onclick="distSetPurpose('agroforestry')">Agroforestry</button>
+              <button type="button" class="weather-pill" data-pp="livelihood" onclick="distSetPurpose('livelihood')">Livelihood</button>
+              <button type="button" class="weather-pill" data-pp="training_support" onclick="distSetPurpose('training_support')">Training support</button>
+              <button type="button" class="weather-pill" data-pp="relief" onclick="distSetPurpose('relief')">Relief</button>
+              <button type="button" class="weather-pill" data-pp="other" onclick="distSetPurpose('other')">Other</button>
+            </div>
+            <textarea id="distPurposeNote" class="form-input" style="min-height:52px;width:100%;font-size:0.82rem;" placeholder="Describe the purpose (e.g. seedlings for the clan reforestation plot)…"></textarea>
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Items distributed <span style="color:#B71C1C;">*</span></div>
+          <div id="distItemsList"></div>
+          <button type="button" class="btn-outline" style="width:100%;margin:4px 0 6px;color:#00838F;border-color:#80DEEA;font-size:0.82rem;" onclick="distAddItem()"><span data-icon="plus" data-size="13"></span> Add another item</button>
+
+          <div class="section-label" style="padding-left:0;">Location</div>
+          <div class="card" style="padding:10px 14px;margin-bottom:10px;">
+            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> GPS</span><span id="distGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Evidence</div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <div style="flex:1;">
+              <label class="form-label" style="font-size:0.72rem;"><span data-icon="camera" data-size="13"></span> Handover photo <span style="color:#B71C1C;">*</span></label>
+              <div id="distPhotoHandoverBox" onclick="document.getElementById('distPhotoHandover').click()" style="height:92px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#999;font-size:0.68rem;text-align:center;">Items being<br>handed over</div>
+              <input type="file" id="distPhotoHandover" accept="image/*" capture="environment" style="display:none;" onchange="distPhoto('handover',this)">
+            </div>
+            <div style="flex:1;">
+              <label class="form-label" style="font-size:0.72rem;"><span data-icon="camera" data-size="13"></span> Receipt photo <span style="color:#B71C1C;">*</span></label>
+              <div id="distPhotoReceiptBox" onclick="document.getElementById('distPhotoReceipt').click()" style="height:92px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#999;font-size:0.68rem;text-align:center;">Recipient<br>receiving them</div>
+              <input type="file" id="distPhotoReceipt" accept="image/*" capture="environment" style="display:none;" onchange="distPhoto('receipt',this)">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span data-icon="video" data-size="14"></span> Video of handover &amp; receipt <span style="color:#B71C1C;">*</span></label>
+            <div id="distVideoBox" onclick="document.getElementById('distVideoInput').click()" style="width:100%;min-height:72px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#999;font-size:0.72rem;text-align:center;padding:10px;"><span data-icon="video" data-size="20"></span>&nbsp; Tap to record a short video</div>
+            <input type="file" id="distVideoInput" accept="video/*" capture="environment" style="display:none;" onchange="distVideo(this)">
+            <div style="font-size:0.68rem;color:#999;margin-top:3px;">Keep it short — about <strong>10–20 seconds</strong> showing the items and the recipient receiving them. Long videos may be hard to upload on slow signal.</div>
+          </div>
+
+          <div class="form-group">
+            <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;cursor:pointer;">
+              <input type="checkbox" id="distConfirmed" style="margin-top:2px;width:16px;height:16px;">
+              <span>The recipient <strong>confirmed they received</strong> these items.</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes <span style="color:#999;font-weight:400;">(optional)</span></label>
+            <textarea id="distNotes" class="form-input" style="min-height:52px;width:100%;font-size:0.82rem;" placeholder="Condition, anything missing, follow-up needed…"></textarea>
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Your fingerprint <span style="color:#B71C1C;">*</span></div>
+          <button type="button" class="btn-outline" id="distFpBtn" style="width:100%;border-color:#00838F;color:#00838F;" onclick="distVerifyFp()"><span data-icon="lock" data-size="14"></span> <span id="distFpTxt">Verify my fingerprint to submit</span></button>
+
+          <button class="btn-primary" style="background:#00838F;margin-top:12px;" id="distSubmitBtn" onclick="submitDistribution()" disabled>Record handover</button>
+          <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
         </div>
       </div>
     </div>
@@ -5741,7 +5847,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-map','screen-performance','screen-recent-activity',
   'screen-ack','screen-profile','screen-timesheet',
-  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-garden-mapping','screen-tree-mapping','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-data-export'
+  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-garden-mapping','screen-tree-mapping','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-distribution','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -5791,6 +5897,7 @@ function showScreen(id) {
   if (id === 'screen-date-review') initDateReview();
   if (id === 'screen-issue-reports') initIssueReports();
   if (id === 'screen-report-issue') initReportIssue();
+  if (id === 'screen-distribution') initDistribution();
   if (id === 'screen-dashboard') renderDashboardStatus();
   if (id === 'screen-alerts') initDisturbances();
   if (id === 'screen-help') renderHelpCentre();
@@ -5905,6 +6012,8 @@ var ICON_PATHS = {
   waterlevel:'<path d="M7 3v18"/><path d="M7 7h4M7 11h3M7 15h4"/><path d="M13 16c2-1.5 4-1.5 6 0"/><path d="M13 20c2-1.5 4-1.5 6 0"/>',
   /* nature */
   tree:    '<path d="M12 3c-3 0-5 2.5-5 5 0 1.2.4 2 1 2.8C6.5 11.5 6 12.6 6 14a4 4 0 0 0 4 4h.5"/><path d="M12 3c3 0 5 2.5 5 5 0 1.2-.4 2-1 2.8 1.5.7 2 1.8 2 3.2a4 4 0 0 1-4 4h-1"/><path d="M12 10v11"/>',
+  box:     '<path d="M3 7l9-4 9 4v10l-9 4-9-4V7z"/><path d="M3 7l9 4 9-4"/><path d="M12 11v10"/>',
+  video:   '<rect x="3" y="6" width="12" height="12" rx="2"/><path d="M15 10l6-3v10l-6-3z"/>',
   /* ui */
   pin:     '<path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
   camera:  '<path d="M4 8h3l2-2h6l2 2h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
@@ -8129,7 +8238,14 @@ var HELP_MANUALS = {
      +'<p><strong>Every record:</strong> a short title, a description in your own words, and a <strong>photo</strong>. Your GPS is captured automatically. Save works offline; it uploads with <em>Send Data</em>, and can be exported as a map file (KML).</p>' },
     { id:'sending', num:'9', title:'Sending your data', html:
       '<p><strong>Send All New Records</strong> uploads everything not yet sent (needs signal). No signal? Use the share sheet to send the backup file to your coordinator (WhatsApp / USB). <strong>Storage Health</strong> should read “Data is protected” — if not, reinstall from the home-screen icon.</p>'
-     +'<p>Send whenever you find signal so nothing is lost if the phone is damaged.</p>' }
+     +'<p>Send whenever you find signal so nothing is lost if the phone is damaged.</p>' },
+    { id:'distribution', num:'10', title:'Handover &amp; Distribution', html:
+      '<p>For <strong>field officers and project / zone staff</strong> who hand out items (seeds, seedlings, tools, equipment, materials…). Open <strong>Handover &amp; Distribution</strong> from the dashboard and record each handover as it happens.</p><ul>'
+     +'<li><strong>Who</strong> received them (name or group, type, clan) and the <strong>purpose</strong>.</li>'
+     +'<li><strong>What</strong> — add each item with its <strong>quantity and unit</strong> (tap <em>Add another item</em> for more).</li>'
+     +'<li><strong>Evidence</strong> — a <strong>handover photo</strong>, a <strong>receipt photo</strong>, and a <strong>short video (10–20s)</strong> of the items and the recipient receiving them.</li>'
+     +'<li>Tick <strong>Recipient confirmed receipt</strong>, then <strong>verify your fingerprint</strong> to submit.</li></ul>'
+     +'<p>GPS, date and your identity are captured automatically. It saves offline and uploads with <em>Send Data</em>. Keep videos short so they upload on slow signal.</p>' }
   ]},
   admin: { title:"Administrator’s Manual", audience:'coordinator', sections: [
     { id:'a-overview', num:'1', title:'System overview', html:
@@ -9449,6 +9565,115 @@ function resolveIssue(uid){
   fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'update_issues',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,issues:window._issueRows})})
     .then(function(res){return res.json();}).then(function(d){ if(d&&d.status==='ok'){ toast('Marked resolved ✓'); renderIssueReports(); } else { toast((d&&d.message)||'Save failed'); } }).catch(function(){ toast('Save failed — check signal'); });
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   HANDOVER & DISTRIBUTION
+   Field officers / project / zone staff record items given out (seeds, tools,
+   equipment…), to whom and why, with photos + a short video of the handover
+   and receipt, GPS, date and the officer's fingerprint. Saved to the
+   `distributions` store; uploads in the normal bundle (so it inherits the
+   clock-stamp + Date Review integrity).
+══════════════════════════════════════════════════════════════════════ */
+var DIST_ITEM_CATS=['Seeds','Seedlings','Tools','Equipment','Materials','PPE / safety gear','Food / relief','Documents','Other'];
+function initDistribution(){
+  window._distPhotos={handover:null,receipt:null};
+  window._distVideo=null; window._distVideoMeta='';
+  window._distRecipType='individual'; window._distPurpose='conservation_planting';
+  window._distVerified=false; window._distItemSeq=0; window._distItemIds=[];
+  ['distRecipient','distClan','distContact','distPurposeNote','distNotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var cb=document.getElementById('distConfirmed'); if(cb) cb.checked=false;
+  distSetRecipType('individual'); distSetPurpose('conservation_planting');
+  ['handover','receipt'].forEach(function(s){ var b=document.getElementById('distPhoto'+(s==='handover'?'Handover':'Receipt')+'Box'); if(b){ b.innerHTML=(s==='handover'?'Items being<br>handed over':'Recipient<br>receiving them'); b.style.borderColor='#ccc'; b.style.color='#999'; } });
+  var vb=document.getElementById('distVideoBox'); if(vb){ vb.innerHTML=icon('video',20)+'&nbsp; Tap to record a short video'; vb.style.borderColor='#ccc'; vb.style.color='#999'; }
+  var fb=document.getElementById('distFpBtn'); if(fb) fb.classList.remove('verified');
+  var ft=document.getElementById('distFpTxt'); if(ft) ft.textContent='Verify my fingerprint to submit';
+  var sb=document.getElementById('distSubmitBtn'); if(sb) sb.disabled=true;
+  document.getElementById('distItemsList').innerHTML='';
+  distAddItem();
+  var g=document.getElementById('distGPS'); if(g){ g.textContent='Acquiring…'; g.style.color='#888'; }
+  captureGPS(function(gps,err){ var el=document.getElementById('distGPS'); if(!el) return; if(gps){ el.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'; el.style.color='#2E6B38'; window._distGps=gps; } else { el.innerHTML=icon('warning',13)+' '+err; el.style.color='#E65100'; window._distGps=null; } });
+}
+function distSetRecipType(v){ window._distRecipType=v; var box=document.getElementById('distRecipTypePills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-rt]'),function(b){ b.classList.toggle('active', b.getAttribute('data-rt')===v); }); }
+function distSetPurpose(v){ window._distPurpose=v; var box=document.getElementById('distPurposePills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-pp]'),function(b){ b.classList.toggle('active', b.getAttribute('data-pp')===v); }); }
+function distAddItem(){
+  var n=++window._distItemSeq; window._distItemIds.push(n);
+  var catOpts=DIST_ITEM_CATS.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
+  var row=document.createElement('div');
+  row.className='card'; row.id='dist-item-'+n; row.style.cssText='padding:10px 12px;margin-bottom:8px;';
+  row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:0.74rem;font-weight:700;color:#00838F;">Item '+n+'</span>'
+   +'<button type="button" onclick="distRemoveItem('+n+')" style="background:none;border:none;color:#B71C1C;font-size:0.72rem;cursor:pointer;">Remove</button></div>'
+   +'<select id="di-cat-'+n+'" class="form-input" style="padding:7px 10px;font-size:0.8rem;margin-bottom:6px;">'+catOpts+'</select>'
+   +'<input type="text" id="di-name-'+n+'" class="form-input" style="padding:7px 10px;font-size:0.8rem;margin-bottom:6px;" placeholder="Description (e.g. okari seedlings)">'
+   +'<div style="display:flex;gap:8px;"><input type="number" id="di-qty-'+n+'" inputmode="decimal" min="0" step="any" class="form-input" style="flex:1;padding:7px 10px;font-size:0.8rem;" placeholder="Qty"><input type="text" id="di-unit-'+n+'" class="form-input" style="flex:1;padding:7px 10px;font-size:0.8rem;" placeholder="Unit (kg, bags, pcs)"></div>';
+  document.getElementById('distItemsList').appendChild(row);
+}
+function distRemoveItem(n){
+  if(window._distItemIds.length<=1){ toast('At least one item is required.'); return; }
+  window._distItemIds=window._distItemIds.filter(function(x){return x!==n;});
+  var el=document.getElementById('dist-item-'+n); if(el) el.remove();
+}
+function distPhoto(slot,input){
+  var f=input.files&&input.files[0]; if(!f) return;
+  var reader=new FileReader();
+  reader.onload=function(e){ window._distPhotos[slot]=e.target.result; var box=document.getElementById('distPhoto'+(slot==='handover'?'Handover':'Receipt')+'Box'); if(box){ box.innerHTML='<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;" alt="'+slot+'">'; box.style.borderColor='#26A69A'; } };
+  reader.readAsDataURL(f);
+}
+function distVideo(input){
+  var f=input.files&&input.files[0]; if(!f) return;
+  var mb=f.size/1048576;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    window._distVideo=e.target.result; window._distVideoMeta=mb.toFixed(1)+' MB';
+    var box=document.getElementById('distVideoBox');
+    if(box){ box.innerHTML=icon('checkcircle',18)+'&nbsp; Video attached ('+window._distVideoMeta+')'; box.style.borderColor='#26A69A'; box.style.color='#00695C'; }
+    if(mb>35) toast('That video is large ('+window._distVideoMeta+') — it may be slow to upload. A 10–20s clip is best.');
+  };
+  reader.readAsDataURL(f);
+}
+function distVerifyFp(){
+  webAuthnVerify({ btnId:'distFpBtn', txtId:'distFpTxt', setVerified:function(v){ window._distVerified=v; var sb=document.getElementById('distSubmitBtn'); if(sb) sb.disabled=!v; }, onSuccess:function(){ var sb=document.getElementById('distSubmitBtn'); if(sb) sb.disabled=false; } });
+}
+function submitDistribution(){
+  var recip=(document.getElementById('distRecipient')||{}).value||'';
+  if(!recip.trim()){ toast('Enter the recipient name/group.'); return; }
+  var purposeNote=(document.getElementById('distPurposeNote')||{}).value||'';
+  if(!purposeNote.trim()){ toast('Describe the purpose of the handover.'); return; }
+  var items=[];
+  (window._distItemIds||[]).forEach(function(n){
+    var name=((document.getElementById('di-name-'+n)||{}).value||'').trim();
+    if(!name) return;
+    var qty=(document.getElementById('di-qty-'+n)||{}).value;
+    items.push({ category:(document.getElementById('di-cat-'+n)||{}).value||'', description:name, quantity:(qty!==''&&qty!=null?parseFloat(qty):null), unit:((document.getElementById('di-unit-'+n)||{}).value||'').trim() });
+  });
+  if(items.length===0){ toast('Add at least one item (with a description).'); return; }
+  if(!window._distPhotos || !window._distPhotos.handover || !window._distPhotos.receipt){ toast('Both the handover and receipt photos are required.'); return; }
+  if(!window._distVideo){ toast('A short video of the handover is required.'); return; }
+  if(!window._distVerified){ toast('Verify your fingerprint before submitting.'); return; }
+  var now=trustedNow();
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var p=window._cachedProfile||{};
+  var rec={
+    survey_type:'distribution', record_uid:generateRecordId('DIST'),
+    officer:{ name:p.name||'', steward_id:p.stewardId||'', role:p.role||'' },
+    recipient:{ name:recip.trim(), type:window._distRecipType||'', clan:((document.getElementById('distClan')||{}).value||'').trim(), contact:((document.getElementById('distContact')||{}).value||'').trim(), confirmed_receipt:!!(document.getElementById('distConfirmed')&&document.getElementById('distConfirmed').checked) },
+    purpose_category:window._distPurpose||'', purpose:purposeNote.trim(),
+    items:items,
+    gps:window._distGps||null,
+    date:now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear(),
+    photo_handover:window._distPhotos.handover, photo_receipt:window._distPhotos.receipt,
+    video:window._distVideo, video_size:window._distVideoMeta,
+    fingerprint_verified:true,
+    notes:((document.getElementById('distNotes')||{}).value||'').trim(),
+    clan:p.clan||''
+  };
+  var sb=document.getElementById('distSubmitBtn'); if(sb){ sb.disabled=true; sb.textContent='Saving…'; }
+  saveRecord('distributions', rec, function(){
+    toast('Handover recorded ✓ — send data when you have signal');
+    if(sb){ sb.textContent='Record handover'; }
+    goBack();
+  });
+}
+
 function phenoOwnedByMyClan(p){ return isOversight() || !p.owner_clan || p.owner_clan===myClan() || p.owner_clan_2===myClan(); }
 
 function phenoRegistryRecord(r){ return { uid:r.uid, crop_type:r.crop_type, plant_num:r.plant_num, lat:r.lat, lng:r.lng, location_name:r.location_name, notes:r.notes, marker_type:r.marker_type||null, dbh_cm:(r.dbh_cm!=null?r.dbh_cm:null), dbh_date:r.dbh_date||null, established_date:r.established_date, device_time:r.device_time||null, clock_ok:(r.clock_ok!==undefined?r.clock_ok:null), status:r.status, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, approved_date:r.approved_date||null, inactive_reason:r.inactive_reason||null }; }
@@ -10457,8 +10682,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 13;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues'];
+var DB_VERSION = 14;
+var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','gardens','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -10499,7 +10724,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v32'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v33'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -10678,6 +10903,13 @@ function cacheStewardProfile() {
         var canTrain = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' ||
                         (role === 'clan_steward' && authTopics.length > 0));
         trainingTile.style.display = canTrain ? '' : 'none';
+      }
+      /* Handover & Distribution: field officers + Project/MCF & Zone staff (not
+         plain clan stewards). */
+      var distTile = document.getElementById('tile-distribution');
+      if (distTile) {
+        var canDist = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff');
+        distTile.style.display = canDist ? '' : 'none';
       }
     }
   });
@@ -11719,7 +11951,7 @@ function markStoreSynced(storeName, ids, cb) {
 
 /* ── Update per-module sync status on export screen ── */
 var DATA_STORES = ['mafia','qabb','water','phenology','pheno_plots','observations',
-  'conservation','followups','patrols','gardens','freemap','trees','meteo','training','schedule','meetings'];
+  'conservation','followups','patrols','gardens','freemap','trees','meteo','training','schedule','meetings','distributions'];
 
 /* ── Offline / unsynced warning banner on dashboard ──────────────── */
 function updateSyncWarning() {

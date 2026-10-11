@@ -17,7 +17,7 @@ and the operational procedures worked out during pilot setup.*
   baked into `prototype/index.html`
   (`…/macros/s/AKfycbxqEnJ1…JZR8XRg/exec`). **Deployed and verified**
   (`{"status":"ready"}`). **Coordinator server key is set** in Script Properties.
-- **Service worker cache:** `mca-steward-v32` (bumped every deploy). The app now
+- **Service worker cache:** `mca-steward-v33` (bumped every deploy). The app now
   **auto-applies updates** on reopen (checks on launch + focus, reloads once when
   a new worker takes over) — no more "open twice".
 - **Uploads fixed (v24):** Send Data and all registry/approval syncs POST as
@@ -26,8 +26,8 @@ and the operational procedures worked out during pilot setup.*
   uploads silently fell back to the share sheet ("Share failed"). No backend
   change was needed. If data still won't send after updating, it's connectivity,
   not this.
-- **Local DB:** IndexedDB `MCA_StewardData`, **DB_VERSION 13**, ~28 stores
-  (adds `disturbances`, `issues`).
+- **Local DB:** IndexedDB `MCA_StewardData`, **DB_VERSION 14**, ~29 stores
+  (adds `disturbances`, `issues`, `distributions`).
 
 ### ⚠️ Backend needs a redeploy (zone fix + server-time + date-review/issues)
 The deployed Apps Script copy predates the zone-list correction, the new
@@ -77,8 +77,9 @@ Enrolment + fingerprint login · Water Quality (natural + engineered) · Service
 Delivery (facilities) · Met instruments · **Phenology (NPN phenophases +
 markers + DBH)** · **Disturbance verification** · **Field Mapping (unified)** ·
 Activity Calendar + compliance ·
-Training · Send Data / sync · Help centre · **Date Review** · **Field problem
-reports** · Coordinator approvals / Manage Zones / Grant Authorisation / reports.
+Training · **Handover & Distribution** · Send Data / sync · Help centre ·
+**Date Review** · **Field problem reports** · Coordinator approvals / Manage
+Zones / Grant Authorisation / reports.
 
 ### Unified Field Mapping (Observations + Garden folded in)
 One module for all ad-hoc mapping. Modes **Point / Line / Area-garden**.
@@ -114,6 +115,16 @@ registry); **vanilla/cocoa/coffee (cash crops)** get a **numbered metal tag**
 **monitoring photo is optional** (only if something to report). Stored in
 `phenology` as a `phenophases` array (+ legacy `phase`), with `dbh_cm` and
 `photo`.
+
+### Handover & Distribution
+A dashboard tile for **field officers + Project/MCF & Zone staff** (hidden for
+plain clan stewards) to log items given out — **who, why, what** (repeating
+items with quantity + unit), with a **handover photo, a receipt photo and a
+short video**, GPS, date and the officer's **fingerprint**. Saves to the
+`distributions` store and uploads in the normal bundle (no backend change — it
+rides the existing steward-upload path and inherits the clock-trust stamp /
+Date Review). Media is inline; keep videos short (10–20 s). See
+`monitoring-parameters.md §3.8`.
 
 ## 5. Not built / stub (show "Under Construction")
 

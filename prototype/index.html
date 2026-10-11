@@ -7683,10 +7683,37 @@ function saveFreemap(){
   }
   var now=new Date();
   var rec={ survey_type:'freemap', uid:generateRecordId('MAP'), map_type:_fmMode, category:_fmCat, category_label:FM_CATS[_fmCat], title:title, description:(document.getElementById('fmDesc').value||'').trim(), points:pts, length_m:(_fmMode==='line')?Math.round(_fmLen()):0, area_ha:(_fmMode==='area')?(Math.round(_fmAreaHa(pts)*10000)/10000):0, area_m2:(_fmMode==='area')?Math.round(_fmAreaM2(pts)):0, close_gap_m:(_fmMode==='area')?Math.round(_fmCloseGap(pts)||0):null, garden_type:(_fmCat==='cashcrop_garden')?'cash_crop':null, crops:crops, track_type:trackType, plant_problem:plantProblem, processing:processing, photo:_fmPhoto||null, clan:myClan(), steward:(window._cachedProfile&&window._cachedProfile.stewardId)||'', recorded_at:now.toISOString() };
-  /* Save only — the record uploads with the normal Send Data sync. No KML is
-     written to the phone; use the per-record "Export" button in the list below
-     if you ever need a map file to share. */
+  /* Area maps auto-close (last point → first). Review the closed shape before
+     saving so an accidental half-finished walk isn't saved cutting across the
+     field. Lines/points save directly. */
+  if(_fmMode==='area'){ _fmConfirmArea(rec); return; }
+  _fmDoSave(rec);
+}
+function _fmDoSave(rec){
+  var ov=document.getElementById('fmConfirmOverlay'); if(ov) ov.remove();
+  /* Save only — uploads with the normal Send Data sync. */
   saveRecord('freemap', rec, function(){ toast('Saved ✓'); initFreemap(); });
+}
+function _fmConfirmArea(rec){
+  var ov=document.getElementById('fmConfirmOverlay'); if(ov) ov.remove();
+  var gap=(rec.close_gap_m!=null)?rec.close_gap_m:0;
+  var big=gap>10;
+  var measure=(rec.area_ha<0.1?(rec.area_m2+' m²'):(rec.area_ha.toFixed(1)+' ha'));
+  ov=document.createElement('div'); ov.id='fmConfirmOverlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(10,20,10,0.72);display:flex;align-items:center;justify-content:center;padding:18px;';
+  var warn = big
+    ? '<div style="background:#FFEBEE;border:1px solid #EF9A9A;color:#B71C1C;border-radius:8px;padding:8px 11px;margin-top:10px;font-size:0.8rem;">⚠ Your last point is <strong>'+gap+' m</strong> from the start, so the area closes with the red dashed line cutting across. If you didn’t finish the walk, go back and keep mapping.</div>'
+    : '<div style="color:#2E7D32;font-size:0.8rem;margin-top:10px;">✓ The shape closes cleanly ('+gap+' m from the start).</div>';
+  ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:360px;width:100%;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,0.4);">'
+    +'<div style="font-size:1rem;font-weight:800;color:#1B5E20;">Review the area before saving</div>'
+    +'<div style="font-size:0.76rem;color:#777;margin-bottom:8px;">'+(rec.title||'(untitled)')+' · '+measure+' · '+(rec.points?rec.points.length:0)+' points</div>'
+    +'<div style="background:#f3f6f3;border:1px solid #d7e2d7;border-radius:10px;height:230px;overflow:hidden;"><svg viewBox="0 0 320 230" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;">'+_fmShapeSVG(rec.points||[], true, 320, 230)+'</svg></div>'
+    + warn
+    +'<button class="btn-primary" style="background:#00695C;margin-top:12px;width:100%;" onclick="_fmDoSave(window._fmPendingRec)">Save this area</button>'
+    +'<button class="btn-outline" style="margin-top:8px;width:100%;color:#E65100;border-color:#F0C389;" onclick="var o=document.getElementById(\'fmConfirmOverlay\');if(o)o.remove();">Keep mapping — go back</button>'
+    +'</div>';
+  window._fmPendingRec=rec;
+  document.body.appendChild(ov);
 }
 
 function _fmDescText(rec){
@@ -10587,7 +10614,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v44'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v45'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

@@ -690,6 +690,13 @@ textarea.form-input:focus, input.form-input:focus {
 }
 .tally-btn:active { background: #e0e0e0; }
 .tally-count { min-width: 22px; text-align: center; font-size: 0.8rem; font-weight: 600; color: #333; }
+/* Conditional MaFIA cell that doesn't apply in this sub-transect (e.g. water
+   module where there is no waterway): blocked so contradictory data can't be
+   entered. */
+.matrix-table td.cell-na { background: repeating-linear-gradient(45deg,#f1f1f1,#f1f1f1 5px,#e9e9e9 5px,#e9e9e9 10px); }
+.matrix-table td.cell-na::after { content: 'N/A'; display:block; font-size:0.62rem; color:#999; text-align:center; }
+.matrix-table td.cell-na > * { display:none !important; }
+.pa-tally.off { opacity: 0.35; pointer-events: none; }
 
 select.msel {
   font-size: 0.67rem;
@@ -2146,15 +2153,23 @@ select.msel {
         </div>
         <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Fund" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><ellipse cx="13" cy="9.5" rx="6.5" ry="6" fill="rgba(255,255,255,0.9)"/><ellipse cx="13" cy="13.5" rx="8" ry="5" fill="rgba(255,255,255,0.8)"/><rect x="12" y="18" width="2" height="5" rx="1" fill="rgba(255,255,255,0.7)"/></svg></div><div class="logo-ph" title="European Union" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" style="border-radius:5px;" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" fill="#003399"/><polygon points="13.00,1.43 13.42,2.55 14.61,2.60 13.68,3.34 13.99,4.49 13.00,3.83 12.01,4.49 12.32,3.34 11.39,2.60 12.58,2.55" fill="#FFD700"/><polygon points="17.94,2.75 18.36,3.87 19.55,3.92 18.62,4.66 18.93,5.81 17.94,5.15 16.95,5.81 17.26,4.66 16.33,3.92 17.52,3.87" fill="#FFD700"/><polygon points="21.56,6.37 21.97,7.49 23.16,7.54 22.23,8.28 22.55,9.43 21.56,8.77 20.56,9.43 20.88,8.28 19.95,7.54 21.14,7.49" fill="#FFD700"/><polygon points="22.88,11.31 23.30,12.43 24.49,12.48 23.56,13.22 23.87,14.37 22.88,13.71 21.89,14.37 22.20,13.22 21.27,12.48 22.46,12.43" fill="#FFD700"/><polygon points="21.56,16.25 21.97,17.37 23.16,17.42 22.23,18.16 22.55,19.31 21.56,18.65 20.56,19.31 20.88,18.16 19.95,17.42 21.14,17.37" fill="#FFD700"/><polygon points="17.94,19.87 18.36,20.98 19.55,21.03 18.62,21.78 18.93,22.92 17.94,22.27 16.95,22.92 17.26,21.78 16.33,21.03 17.52,20.98" fill="#FFD700"/><polygon points="13.00,21.19 13.42,22.31 14.61,22.36 13.68,23.10 13.99,24.25 13.00,23.59 12.01,24.25 12.32,23.10 11.39,22.36 12.58,22.31" fill="#FFD700"/><polygon points="8.06,19.87 8.48,20.98 9.67,21.03 8.74,21.78 9.05,22.92 8.06,22.27 7.07,22.92 7.38,21.78 6.45,21.03 7.64,20.98" fill="#FFD700"/><polygon points="4.44,16.25 4.86,17.37 6.05,17.42 5.12,18.16 5.44,19.31 4.44,18.65 3.45,19.31 3.77,18.16 2.84,17.42 4.03,17.37" fill="#FFD700"/><polygon points="3.12,11.31 3.54,12.43 4.73,12.48 3.80,13.22 4.11,14.37 3.12,13.71 2.13,14.37 2.44,13.22 1.51,12.48 2.70,12.43" fill="#FFD700"/><polygon points="4.44,6.37 4.86,7.49 6.05,7.54 5.12,8.28 5.44,9.43 4.44,8.77 3.45,9.43 3.77,8.28 2.84,7.54 4.03,7.49" fill="#FFD700"/><polygon points="8.06,2.75 8.48,3.87 9.67,3.92 8.74,4.66 9.05,5.81 8.06,5.15 7.07,5.81 7.38,4.66 6.45,3.92 7.64,3.87" fill="#FFD700"/></svg></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:none;padding:0;overflow:hidden;"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="26" height="26" rx="5" fill="rgba(255,255,255,0.18)"/><path d="M13 4 C9 6 7 10 7 13 C7 17 9.5 20 13 21 C16.5 20 19 17 19 13 C19 10 17 6 13 4Z" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/><line x1="13" y1="4" x2="13" y2="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/><line x1="7" y1="13" x2="19" y2="13" stroke="rgba(255,255,255,0.85)" stroke-width="1.2"/></svg></div></div>
       </div>
-      <div class="matrix-note"><span data-icon="clipboard" data-size="14"></span> Questions fixed left — scroll right for sub-transects ST1–ST5</div>
+      <div class="matrix-note"><span data-icon="clipboard" data-size="14"></span> Questions fixed left — scroll right for sub-transects ST1–ST5 (each a 20 m section)</div>
       <div class="st-progress">
-        <span class="st-chip done">ST1 ✓</span>
-        <span class="st-chip done">ST2 ✓</span>
-        <span class="st-chip current">ST3 ·</span>
-        <span class="st-chip">ST4 ·</span>
-        <span class="st-chip">ST5 ·</span>
+        <span class="st-chip">ST1</span><span class="st-chip">ST2</span><span class="st-chip">ST3</span><span class="st-chip">ST4</span><span class="st-chip">ST5</span>
       </div>
       <div class="scroll-content" style="padding-bottom:8px;">
+        <!-- Transect description: conditions for the whole transect -->
+        <div class="card" style="margin:10px 14px 4px;padding:10px 14px;">
+          <div style="font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:6px;">Transect conditions</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <button type="button" class="weather-pill active" id="mfwx-cloudy" onclick="mfWx('cloud','cloudy')">Cloudy</button>
+            <button type="button" class="weather-pill" id="mfwx-sunny" onclick="mfWx('cloud','sunny')">Sunny</button>
+            <button type="button" class="weather-pill" id="mfwx-dry" onclick="mfWx('rain','dry')">Dry</button>
+            <button type="button" class="weather-pill" id="mfwx-rainy" onclick="mfWx('rain','rainy')">Rainy</button>
+            <button type="button" class="weather-pill" id="mfwx-calm" onclick="mfWx('wind','calm')">Calm</button>
+            <button type="button" class="weather-pill" id="mfwx-windy" onclick="mfWx('wind','windy')">Windy</button>
+          </div>
+        </div>
         <div class="matrix-wrapper">
           <table class="matrix-table">
             <thead>
@@ -2163,143 +2178,13 @@ select.msel {
                 <th>ST1</th><th>ST2</th><th>ST3</th><th>ST4</th><th>ST5</th>
               </tr>
             </thead>
-            <tbody>
-              <tr class="mod-header"><td class="mod-a mod-a-s">MODULE A — Topography &amp; Physical Setting</td><td class="mod-a"></td><td class="mod-a"></td><td class="mod-a"></td><td class="mod-a"></td><td class="mod-a"></td></tr>
-              <!-- A1 Terrain -->
-              <tr>
-                <td>A1 — Terrain</td>
-                <td><select class="msel"><option>Flat</option><option>Slight slope</option><option selected>Very steep</option></select></td>
-                <td><select class="msel"><option selected>Flat</option><option>Slight slope</option><option>Very steep</option></select></td>
-                <td><select class="msel"><option>Flat</option><option selected>Slight slope</option><option>Very steep</option></select></td>
-                <td><select class="msel"><option>Flat</option><option>Slight slope</option><option>Very steep</option></select></td>
-                <td><select class="msel"><option>Flat</option><option>Slight slope</option><option>Very steep</option></select></td>
-              </tr>
-              <!-- A2 Canopy -->
-              <tr>
-                <td>A2 — Closed canopy</td>
-                <td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-              </tr>
-              <!-- A3 Logging -->
-              <tr>
-                <td>A3 — Logging evidence</td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-              </tr>
-              <!-- A4 Hunting -->
-              <tr>
-                <td>A4 — Hunting evidence</td>
-                <td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-              </tr>
-              <!-- A5 Water -->
-              <tr>
-                <td>A5 — Water source</td>
-                <td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-              </tr>
-              <!-- A6 Invasive -->
-              <tr>
-                <td>A6 — Invasive species</td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-                <td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td>
-              </tr>
-              <!-- Module D -->
-              <tr class="mod-header"><td class="mod-d mod-d-s">MODULE D — Vegetation &amp; Species Count</td><td class="mod-d"></td><td class="mod-d"></td><td class="mod-d"></td><td class="mod-d"></td><td class="mod-d"></td></tr>
-              <!-- D1 Large trees -->
-              <tr>
-                <td>D1 — Large trees (&gt;40cm DBH)</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">5</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-              </tr>
-              <!-- D2 Palms -->
-              <tr>
-                <td>D2 — Palms</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">2</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-              </tr>
-              <!-- D3 Birds -->
-              <tr>
-                <td>D3 — Bird spp. (heard)</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">7</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">4</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-              </tr>
-              <!-- D4 Mammals -->
-              <tr>
-                <td>D4 — Mammal signs</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
-              </tr>
-              <!-- MODULE E — Undergrowth -->
-              <tr class="mod-header" style="background:#f3e5f5;"><td style="position:sticky;left:0;z-index:3;background:#f3e5f5;font-weight:700;color:#4A148C;padding:6px 8px;">MODULE E — Undergrowth &amp; Cultivation</td><td style="background:#f3e5f5;"></td><td style="background:#f3e5f5;"></td><td style="background:#f3e5f5;"></td><td style="background:#f3e5f5;"></td><td style="background:#f3e5f5;"></td></tr>
-              <tr><td>E1 — Garden crops</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>E2 — Cash crops</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <!-- MODULE F — Wildlife -->
-              <tr class="mod-header" style="background:#e8f5e9;"><td style="position:sticky;left:0;z-index:3;background:#e8f5e9;font-weight:700;color:#1B5E20;padding:6px 8px;">MODULE F — Wildlife Indicators</td><td style="background:#e8f5e9;"></td><td style="background:#e8f5e9;"></td><td style="background:#e8f5e9;"></td><td style="background:#e8f5e9;"></td><td style="background:#e8f5e9;"></td></tr>
-              <tr><td>F1 — Mammals seen</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn an" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
-              <tr><td>F2 — Birds seen</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">2</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
-              <tr><td>F3 — Bird calls</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">7</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">4</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
-              <tr><td>F4 — Reptiles seen</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn an" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn an" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td></tr>
-              <tr><td>F5 — Frogs seen</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">2</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn an" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
-              <tr><td>F6 — Frogs heard</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">4</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
-              <tr><td>F7 — Insects seen</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">5</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
-              <tr><td>F8 — Insects heard</td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">8</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">6</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="yn-toggle" style="margin-bottom:2px;"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
-              <tr><td>F9 — Leeches</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn an" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">P</button><button class="yn-btn" onclick="yn(this,'n')">A</button></div></td></tr>
-              <tr><td>F10 — Bird feathers</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>F11 — Fur or skin</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>F12 — Bones / carcasses</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>F13 — Nests / burrows</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>F14 — Fruit eaten by animals</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>F15 — Footprints / dung</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <!-- MODULE G — Human Use -->
-              <tr class="mod-header" style="background:#fff9c4;"><td style="position:sticky;left:0;z-index:3;background:#fff9c4;font-weight:700;color:#827717;padding:6px 8px;">MODULE G — Human Use</td><td style="background:#fff9c4;"></td><td style="background:#fff9c4;"></td><td style="background:#fff9c4;"></td><td style="background:#fff9c4;"></td><td style="background:#fff9c4;"></td></tr>
-              <tr><td>G1 — Animal traps / hunting</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>G2 — Burnt patches</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>G3 — Fire / campfire signs</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>G4 — Forest food collection</td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>G5 — Trees cut / stumps</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>G6 — Stumps &lt; hands <span style="font-size:0.65rem;color:#888;">(if G5=Y)</span></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
-              <tr><td>G7 — Stumps &gt; hands &lt; arms <span style="font-size:0.65rem;color:#888;">(if G5=Y)</span></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
-              <tr><td>G8 — Stumps &gt; arms <span style="font-size:0.65rem;color:#888;">(if G5=Y)</span></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td></tr>
-              <tr><td>G9 — Old / abandoned garden</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>G10 — Riverbank digging</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>G11 — Pruned / ring-barked</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn ay" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>G12 — Roads / tracks</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-              <tr><td>G13 — Human voices / activity</td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn an" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td><td><div class="yn-toggle"><button class="yn-btn" onclick="yn(this,'y')">Y</button><button class="yn-btn" onclick="yn(this,'n')">N</button></div></td></tr>
-            </tbody>
+              <tbody id="mafiaMatrixBody"></tbody>
           </table>
         </div>
         <!-- Module H: Comments -->
         <div style="padding:10px 14px 4px;">
           <div style="font-size:0.8rem;font-weight:700;color:#333;margin-bottom:6px;">H — Comments (whole transect)</div>
-          <textarea class="form-input" style="min-height:80px;width:100%;" placeholder="Add any additional observations or notes for the whole transect…"></textarea>
+          <textarea id="mafiaComments" class="form-input" style="min-height:80px;width:100%;" placeholder="Add any additional observations or notes for the whole transect…"></textarea>
         </div>
         <div class="p14" style="padding-top:8px;">
           <button class="btn-primary" onclick="saveMafia()">Save &amp; Continue</button>
@@ -5701,6 +5586,7 @@ function nav(id) {
   history.push(currentScreen);
   // Side effects on enter
   if (id === 'screen-mafia-setup' && !mafiaWorkflowActive) initMafia();
+  if (id === 'screen-mafia-matrix') initMafiaMatrix();
   if (id === 'screen-qabb-setup') initQabb();
   if (id === 'screen-qabb-matrix') initQabbMatrix();
   if (id === 'screen-water-setup') initWater();
@@ -6423,6 +6309,10 @@ var mafiaWorkflowActive=false;  /* true between fingerprint-at-start and close �
 
 function initMafia(){
   mafiaWorkflowActive=false;
+  /* fresh survey: blank the matrix, comments and weather */
+  var _mb=document.getElementById('mafiaMatrixBody'); if(_mb) _mb.innerHTML='';
+  var _cm=document.getElementById('mafiaComments'); if(_cm) _cm.value='';
+  window._mafiaWx={cloud:'cloudy',rain:'dry',wind:'calm'};
   mafiaVerified=false; mafiaArrived=false; mafiaHasTape=true; mafiaArriveTime=null; mafiaStep=0; mafiaSurveyData=null;
   mafiaStart=mafiaEnd=mafiaTransectBearing=mafiaTrainerPos=null;
   _mafiaStopNav();
@@ -10582,7 +10472,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v42'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v43'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12162,29 +12052,141 @@ function _sendAllDataInner() {
    DATA COLLECTION: Harvest form values
 ══════════════════════════════════════ */
 
-function collectMafiaData() {
-  var table = document.querySelector('#screen-mafia-matrix .matrix-table');
-  if (!table) return {};
-  var p = window._cachedProfile || {};
-  var data = { survey_type: 'mafia', zone: p.zone || '', clan: p.clan || '', steward: p.stewardId || '' };
-  var rows = table.querySelectorAll('tbody tr');
-  rows.forEach(function(row) {
-    var label = row.querySelector('td:first-child');
-    if (!label || row.classList.contains('mod-header')) return;
-    var qName = label.textContent.trim().replace(/\s+/g, '_');
-    var cells = row.querySelectorAll('td');
-    for (var st = 1; st < cells.length; st++) {
-      var key = qName + '_ST' + st;
-      var sel = cells[st].querySelector('select');
-      if (sel) { data[key] = sel.value; continue; }
-      var tally = cells[st].querySelector('.tally-count');
-      if (tally) { data[key] = parseInt(tally.textContent) || 0; continue; }
-      var ynActive = cells[st].querySelector('.yn-btn.ay, .yn-btn.an');
-      if (ynActive) { data[key] = ynActive.textContent.trim(); }
-    }
+/* ══════════════════════════════════════════════════════════════════════
+   MaFIA survey matrix — full spec (technical_specification.md §8.10)
+   A–H questions × ST1–ST5 sub-transects, rendered from a schema. Conditional
+   cells are gated PER COLUMN so a sub-transect that has no waterway cannot also
+   record a riverbed, etc. Types: yn, pa (present/absent + count), tally, sel,
+   ynsub (yes/no + maintained/overgrown).
+══════════════════════════════════════════════════════════════════════ */
+var MAFIA_SCHEMA=[
+ {mod:'A',title:'Topography & Physical Setting',color:'#E3F2FD',ink:'#0D47A1',q:[
+   ['A1','Dominant landform','sel',['Flat','Slight slope','Very steep']],
+   ['A2','Rocky outcrops present','yn'],['A3','Caves or rock shelters','yn'],
+   ['A4','Flowing waterway','yn'],['A5','Still waterway','yn'],['A6','Dried-up channel','yn']]},
+ {mod:'B',title:'Water',color:'#E1F5FE',ink:'#01579B',cond:'water',q:[
+   ['B1','Water clear','yn','water'],['B2','Rocky riverbed','yn','water'],['B3','Sandy riverbed','yn','water'],
+   ['B4','Silty riverbed','yn','water'],['B5','Muddy riverbed','yn','water'],['B6','Stream on bedrock','yn','water']]},
+ {mod:'C',title:'Soil',color:'#EFEBE9',ink:'#4E342E',q:[
+   ['C1','Signs of ground instability','yn'],['C2','Soil soft','yn'],['C3','Leaf litter present','yn'],
+   ['C4','Bare soil visible','yn'],['C5','Fungi present','yn'],['C6','Soil moist','yn']]},
+ {mod:'D',title:'Vegetation Structure / Forest Condition',color:'#E8F5E9',ink:'#1B5E20',note:'Trees include palms and pandanus. Exclude bananas.',q:[
+   ['D1','Trees < thumb width','tally'],['D2','Trees > thumb, < hands around','tally'],
+   ['D3','Trees > hands, < arms around','tally'],['D4','Trees > arms around','tally'],
+   ['D5','Canopy cover','sel',['Closed','Partially closed','Open']],
+   ['D6','Canopy composition','sel',['Mixed forest','Single-species forest']],
+   ['D7','Tree spacing','sel',['Regular','Irregular']],
+   ['D8','Signs of extreme weather damage','yn'],
+   ['D9','Uprooted trees','yn','dmg'],['D10','Broken branches or trunks','yn','dmg'],
+   ['D11','Leaning trees, same direction','yn','dmg'],['D12','Crop damage','yn','dmg'],['D13','Canopy gaps','yn','dmg'],
+   ['D14','Epiphytes or climbers','yn'],['D15','Fallen logs','yn'],['D16','Dead standing trees / snags','yn'],
+   ['D17','Invasive plants or weeds','yn'],['D18','Kunai grass patches','yn'],['D19','Bamboo patches','yn'],
+   ['D20','Palms present','yn'],['D21','Rattan / Kanda','yn'],['D22','Shrubs','yn'],['D23','Herbs','yn']]},
+ {mod:'E',title:'Undergrowth & Cultivation',color:'#F3E5F5',ink:'#4A148C',q:[
+   ['E1','Garden crops present','ynsub',['Maintained','Overgrown']],
+   ['E2','Cash crops present','ynsub',['Maintained','Overgrown']]]},
+ {mod:'F',title:'Wildlife Indicators',color:'#E0F2F1',ink:'#004D40',note:'Present / Absent — add a count when present.',q:[
+   ['F1','Mammals seen','pa'],['F2','Birds seen','pa'],['F3','Bird calls','pa'],['F4','Reptiles seen','pa'],
+   ['F5','Frogs seen','pa'],['F6','Frogs heard','pa'],['F7','Insects seen','pa'],['F8','Insects heard','pa'],
+   ['F9','Leeches seen','pa'],['F10','Bird feathers','pa'],['F11','Fur or skin','pa'],['F12','Bones / carcasses','pa'],
+   ['F13','Nests / burrows / insect houses','pa'],['F14','Fruit eaten by animals','pa'],['F15','Footprints or dung','pa']]},
+ {mod:'G',title:'Use',color:'#FFF9C4',ink:'#827717',q:[
+   ['G1','Animal traps / platforms / nets','yn'],['G2','Burnt patches of land','yn'],
+   ['G3','Fire / campfire / ash / charcoal','yn'],['G4','Forest-food collection','yn'],['G5','Trees cut / stumps','yn'],
+   ['G6','Stumps < hands','tally','cut'],['G7','Stumps > hands, < arms','tally','cut'],['G8','Stumps > arms (big trees)','tally','cut'],
+   ['G9','Old / abandoned garden','yn'],['G10','Riverbank digging / gold panning','yn'],
+   ['G11','Pruned / ring-barked trees','yn'],['G12','Roads / tracks crossing','yn'],['G13','Human voices / activity','yn']]}
+];
+var MAFIA_ST=5;
+function _mafiaCell(code, st, type, opts){
+  var h='<td data-code="'+code+'" data-st="'+st+'">';
+  if(type==='sel'){ h+='<select class="msel" onchange="mafiaRegate()"><option value="">—</option>'+opts.map(function(o){return '<option>'+o+'</option>';}).join('')+'</select>'; }
+  else if(type==='tally'){ h+='<div class="tally"><button type="button" class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button type="button" class="tally-btn" onclick="tc(this,1)">+</button></div>'; }
+  else if(type==='pa'){ h+='<div class="yn-toggle" style="margin-bottom:3px;"><button type="button" class="yn-btn" onclick="mPA(this,\'y\')">P</button><button type="button" class="yn-btn" onclick="mPA(this,\'n\')">A</button></div><div class="tally pa-tally off"><button type="button" class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button type="button" class="tally-btn" onclick="tc(this,1)">+</button></div>'; }
+  else if(type==='ynsub'){ h+='<div class="yn-toggle"><button type="button" class="yn-btn" onclick="mYn(this,\'y\')">Y</button><button type="button" class="yn-btn" onclick="mYn(this,\'n\')">N</button></div><select class="msel sub-sel" onchange="mafiaRegate()" style="margin-top:3px;" disabled><option value="">—</option>'+opts.map(function(o){return '<option>'+o+'</option>';}).join('')+'</select>'; }
+  else { h+='<div class="yn-toggle"><button type="button" class="yn-btn" onclick="mYn(this,\'y\')">Y</button><button type="button" class="yn-btn" onclick="mYn(this,\'n\')">N</button></div>'; }
+  return h+'</td>';
+}
+function renderMafiaMatrix(){
+  var body=document.getElementById('mafiaMatrixBody'); if(!body) return;
+  var h='';
+  MAFIA_SCHEMA.forEach(function(m){
+    h+='<tr class="mod-header" data-modhdr="'+m.mod+'"><td style="position:sticky;left:0;z-index:3;background:'+m.color+';font-weight:700;color:'+m.ink+';padding:6px 8px;">MODULE '+m.mod+' — '+m.title+'</td>';
+    for(var s=0;s<MAFIA_ST;s++) h+='<td style="background:'+m.color+';"></td>';
+    h+='</tr>';
+    if(m.note){ h+='<tr data-note="'+m.mod+'"><td colspan="'+(MAFIA_ST+1)+'" style="font-size:0.68rem;color:#777;font-style:italic;padding:3px 10px;background:#fafafa;">'+m.note+'</td></tr>'; }
+    m.q.forEach(function(q){
+      var code=q[0], label=q[1], type=q[2], opts=q[3], cond=(type==='tally'||type==='yn')?q[3]:null;
+      /* cond trigger lives in position 3 for yn/tally conditional rows */
+      var condKey=(typeof q[3]==='string')?q[3]:null;
+      h+='<tr data-code="'+code+'"'+(condKey?(' data-cond="'+condKey+'"'):'')+'><td>'+code+' — '+label+'</td>';
+      for(var st=1;st<=MAFIA_ST;st++) h+=_mafiaCell(code, st, type, (Array.isArray(opts)?opts:[]));
+      h+='</tr>';
+    });
   });
-  var comments = document.querySelector('#screen-mafia-matrix textarea');
-  if (comments) data.comments = comments.value;
+  body.innerHTML=h;
+}
+/* yn/present-absent handlers that also re-evaluate the conditional gating */
+function mYn(btn,t){ yn(btn,t); mafiaRegate(); }
+function mPA(btn,t){ yn(btn,t); mafiaRegate(); }
+function _mYes(code,st){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); return !!(td && td.querySelector('.yn-btn.ay')); }
+function _mGate(code,st,on){
+  var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); if(!td) return;
+  td.classList.toggle('cell-na', !on);
+  if(!on){ td.querySelectorAll('.yn-btn').forEach(function(b){b.classList.remove('ay','an');}); var c=td.querySelector('.tally-count'); if(c)c.textContent='0'; var s=td.querySelector('select'); if(s)s.value=''; }
+}
+function _mShowRow(code,on){ var tr=document.querySelector('#mafiaMatrixBody tr[data-code="'+code+'"]'); if(tr) tr.style.display=on?'':'none'; }
+function _mShowHdr(mod,on){ var tr=document.querySelector('#mafiaMatrixBody tr[data-modhdr="'+mod+'"]'); if(tr) tr.style.display=on?'':'none'; var n=document.querySelector('#mafiaMatrixBody tr[data-note="'+mod+'"]'); if(n) n.style.display=on?'':'none'; }
+function mafiaRegate(){
+  var anyWater=false, anyDmg=false, anyCut=false;
+  for(var st=1;st<=MAFIA_ST;st++){
+    var water=_mYes('A4',st)||_mYes('A5',st)||_mYes('A6',st); if(water)anyWater=true;
+    ['B1','B2','B3','B4','B5','B6'].forEach(function(c){ _mGate(c,st,water); });
+    var dmg=_mYes('D8',st); if(dmg)anyDmg=true;
+    ['D9','D10','D11','D12','D13'].forEach(function(c){ _mGate(c,st,dmg); });
+    var cut=_mYes('G5',st); if(cut)anyCut=true;
+    ['G6','G7','G8'].forEach(function(c){ _mGate(c,st,cut); });
+    /* E maintained/overgrown sub-select enabled only when Yes */
+    ['E1','E2'].forEach(function(c){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+c+'"][data-st="'+st+'"]'); if(td){ var sub=td.querySelector('.sub-sel'); if(sub){ var on=_mYes(c,st); sub.disabled=!on; if(!on) sub.value=''; } } });
+    /* F present → enable its count */
+    for(var f=1;f<=15;f++){ var fc='F'+f; var ftd=document.querySelector('#mafiaMatrixBody td[data-code="'+fc+'"][data-st="'+st+'"]'); if(ftd){ var pt=ftd.querySelector('.pa-tally'); if(pt){ var present=_mYes(fc,st); pt.classList.toggle('off',!present); if(!present){ var cc=pt.querySelector('.tally-count'); if(cc)cc.textContent='0'; } } } }
+  }
+  /* collapse whole conditional groups when no sub-transect triggers them */
+  _mShowHdr('B', anyWater); ['B1','B2','B3','B4','B5','B6'].forEach(function(c){ _mShowRow(c, anyWater); });
+  ['D9','D10','D11','D12','D13'].forEach(function(c){ _mShowRow(c, anyDmg); });
+  ['G6','G7','G8'].forEach(function(c){ _mShowRow(c, anyCut); });
+}
+/* Weather toggles (transect description) */
+window._mafiaWx={cloud:'cloudy',rain:'dry',wind:'calm'};
+function _mafiaRenderWx(){ ['cloudy','sunny','dry','rainy','calm','windy'].forEach(function(k){ var el=document.getElementById('mfwx-'+k); if(el) el.classList.remove('active'); });
+  var on=function(id){var e=document.getElementById(id); if(e) e.classList.add('active');};
+  on('mfwx-'+(window._mafiaWx.cloud==='sunny'?'sunny':'cloudy')); on('mfwx-'+(window._mafiaWx.rain==='rainy'?'rainy':'dry')); on('mfwx-'+(window._mafiaWx.wind==='windy'?'windy':'calm')); }
+function mfWx(group,val){ window._mafiaWx[group]=val; _mafiaRenderWx(); }
+function initMafiaMatrix(){
+  var body=document.getElementById('mafiaMatrixBody');
+  if(body && body.children.length===0) renderMafiaMatrix();
+  _mafiaRenderWx();
+  mafiaRegate();
+}
+
+function collectMafiaData(){
+  var p=window._cachedProfile||{};
+  var data={ survey_type:'mafia', zone:p.zone||'', clan:p.clan||'', steward:p.stewardId||'',
+    weather_cloud:(window._mafiaWx||{}).cloud||'', weather_rain:(window._mafiaWx||{}).rain||'', weather_wind:(window._mafiaWx||{}).wind||'' };
+  MAFIA_SCHEMA.forEach(function(m){ m.q.forEach(function(q){
+    var code=q[0], type=q[2];
+    for(var st=1;st<=MAFIA_ST;st++){
+      var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]');
+      if(!td || td.classList.contains('cell-na')) continue;  /* skip N/A */
+      var key=code+'_ST'+st;
+      if(type==='sel'){ var s=td.querySelector('select'); if(s&&s.value) data[key]=s.value; }
+      else if(type==='tally'){ var c=td.querySelector('.tally-count'); var n=c?parseInt(c.textContent)||0:0; if(n) data[key]=n; }
+      else if(type==='pa'){ var ay=td.querySelector('.yn-btn.ay'); var an=td.querySelector('.yn-btn.an'); if(ay){ data[key]='P'; var cn=td.querySelector('.tally-count'); data[key+'_n']=cn?parseInt(cn.textContent)||0:0; } else if(an){ data[key]='A'; } }
+      else if(type==='ynsub'){ var y=td.querySelector('.yn-btn.ay'), nn=td.querySelector('.yn-btn.an'); if(y){ data[key]='Y'; var sub=td.querySelector('.sub-sel'); if(sub&&sub.value) data[key+'_sub']=sub.value; } else if(nn){ data[key]='N'; } }
+      else { var yy=td.querySelector('.yn-btn.ay'), nz=td.querySelector('.yn-btn.an'); if(yy) data[key]='Y'; else if(nz) data[key]='N'; }
+    }
+  }); });
+  var comments=document.getElementById('mafiaComments'); if(comments) data.comments=comments.value;
   return data;
 }
 

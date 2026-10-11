@@ -158,8 +158,16 @@ plot/column, across modules:
 - **Module F** — Wildlife Indicators
 - **Module G** — Human Use
 
-Each cell is a dropdown rating, a tally count, or a yes/no, plus free-text
-comments. (Full indicator list: see `technical_specification.md`.)
+The matrix is the **full spec set** (`technical_specification.md §8.10`): Module
+A (A1–A6 topography), B (B1–B6 water), C (C1–C6 soil), D (D1–D23 vegetation),
+E (E1–E2 undergrowth + maintained/overgrown), F (F1–F15 wildlife present/absent
++ count), G (G1–G13 use), H comments, plus transect weather (cloud/rain/wind).
+Rendered from a schema across ST1–ST5. **Conditional cells are gated per
+sub-transect column** — e.g. the water module (B) is blocked (N/A) in any ST
+column whose A4/A5/A6 is not Yes, and collapses entirely when no column has a
+waterway; likewise D9–D13 need D8=Yes and G6–G8 need G5=Yes, each per column —
+so a sub-transect can't record a riverbed where it reported no waterway. Cells
+are a dropdown, tally, yes/no, or present/absent+count.
 
 **Guided transect (training mode).** Without clan boundaries yet, the app
 generates a random **100 m transect** near the surveyor: a **start point ≤100 m**

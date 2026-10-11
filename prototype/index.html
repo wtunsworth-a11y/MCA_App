@@ -6526,7 +6526,11 @@ function mafiaCloseSurvey(){
   rec.had_tape=mafiaHasTape;
   rec.arrive_fix=window._mafiaArriveFix||null;
   rec.arrive_dist_m=(typeof window._mafiaArriveDist==='number')?window._mafiaArriveDist:null;
-  rec.location_flagged=(window._mafiaWithinRadius===false);  /* confirmed start was outside 30 m — for Zone-Staff review (not shown to the surveyor) */
+  /* Flag only if the CONFIRMED arrival fix was actually outside the 30 m gate
+     (or GPS couldn't place it) — based on the real arrival distance, not the
+     live-nav flag which can be stale at the moment of tapping. For Zone-Staff
+     review; not shown to the surveyor. */
+  rec.location_flagged=!(typeof window._mafiaArriveDist==='number' && window._mafiaArriveDist<=MAFIA_ARRIVE_M);
   rec.duration_min=mins!=null?Math.round(mins*10)/10:null;
   rec.duration_excessive=(mins!=null && mins>MAFIA_MAX_MIN);
   rec.compass_source=window._compassSource||'';
@@ -10634,7 +10638,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v46'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v47'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

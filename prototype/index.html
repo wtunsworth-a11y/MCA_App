@@ -3616,17 +3616,15 @@ select.msel {
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-profile">
       <div class="profile-header">
-        <div class="avatar">JK</div>
-        <div class="profile-name">John Kapari</div>
-        <div class="role-badge">Clan Steward</div>
+        <div class="avatar">—</div>
+        <div class="profile-name">—</div>
+        <div class="role-badge">&nbsp;</div>
       </div>
       <div class="scroll-content" style="background:#f0f4f0;padding-bottom:6px;">
         <div class="p14">
           <div class="card" style="padding:8px 16px;">
-            <div class="detail-row"><span class="dl">Clan</span><span class="dv">Afore</span></div>
-            <div class="detail-row"><span class="dl">Zone</span><span class="dv">7B</span></div>
-            <div class="detail-row"><span class="dl">Enrolled</span><span class="dv">14 March 2024</span></div>
-            <div class="detail-row"><span class="dl">Steward ID</span><span class="dv">MCA-7B-042</span></div>
+            <!-- Populated at runtime from the enrolled profile (see showScreen → screen-profile). -->
+            <div class="detail-row"><span class="dl">Name</span><span class="dv">—</span></div>
           </div>
           <button class="btn-outline" style="width:100%;margin:10px 0 4px;" onclick="nav('screen-timesheet')"><span data-icon="document" data-size="14"></span> My Timesheet</button>
           <button class="btn-outline" style="width:100%;margin:6px 0 4px;border-color:#AD1457;color:#AD1457;" onclick="reportIssue('profile')"><span data-icon="warning" data-size="14"></span> Report a Problem</button>
@@ -5542,13 +5540,6 @@ select.msel {
                   <span class="sync-badge-sent" id="sync-sent-pheno_plots" style="display:none;"></span>
                 </div>
               </div>
-              <div class="sync-row" id="sync-row-observations">
-                <div class="sync-row-label"><span class="sync-emoji" data-icon="eye" data-size="16"></span><span class="sync-name">Observations</span></div>
-                <div class="sync-row-counts">
-                  <span class="sync-badge-new" id="sync-new-observations" style="display:none;"></span>
-                  <span class="sync-badge-sent" id="sync-sent-observations" style="display:none;"></span>
-                </div>
-              </div>
               <div class="sync-row" id="sync-row-conservation">
                 <div class="sync-row-label"><span class="sync-emoji" data-icon="tree" data-size="16"></span><span class="sync-name">Conservation Activities</span></div>
                 <div class="sync-row-counts">
@@ -5561,13 +5552,6 @@ select.msel {
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-followups" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-followups" style="display:none;"></span>
-                </div>
-              </div>
-              <div class="sync-row" id="sync-row-patrols">
-                <div class="sync-row-label"><span class="sync-emoji" data-icon="walk" data-size="16"></span><span class="sync-name">Patrols</span></div>
-                <div class="sync-row-counts">
-                  <span class="sync-badge-new" id="sync-new-patrols" style="display:none;"></span>
-                  <span class="sync-badge-sent" id="sync-sent-patrols" style="display:none;"></span>
                 </div>
               </div>
               <div class="sync-row" id="sync-row-trees">
@@ -5596,13 +5580,6 @@ select.msel {
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-schedule" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-schedule" style="display:none;"></span>
-                </div>
-              </div>
-              <div class="sync-row" id="sync-row-meetings">
-                <div class="sync-row-label"><span class="sync-emoji" data-icon="people" data-size="16"></span><span class="sync-name">Meetings</span></div>
-                <div class="sync-row-counts">
-                  <span class="sync-badge-new" id="sync-new-meetings" style="display:none;"></span>
-                  <span class="sync-badge-sent" id="sync-sent-meetings" style="display:none;"></span>
                 </div>
               </div>
             </div>
@@ -6446,10 +6423,6 @@ function checkMafiaReady() {
   document.getElementById('mafiaBeginBtn').disabled = !(mafiaVerified && mafiaArrived);
 }
 
-function wx(group, onId, offId) {
-  document.getElementById('wp-' + onId).classList.add('active');
-  document.getElementById('wp-' + offId).classList.remove('active');
-}
 
 /* ── Matrix: Yes/No toggles ── */
 function yn(btn, type) {
@@ -7743,15 +7716,6 @@ function loadClanPolygons(cb){
     cb(polys);
   });
 }
-function routeDisturbance(lat, lng, cb){
-  lat=parseFloat(lat); lng=parseFloat(lng);
-  loadClanPolygons(function(polys){
-    for(var i=0;i<polys.length;i++){
-      if(_pointInRing(lat, lng, polys[i].ring)){ cb({ clan:polys[i].clan, zone:polys[i].zone, routed_by:'boundary' }); return; }
-    }
-    cb({ clan:null, zone:'', routed_by:'triage' }); /* no polygon matched → coordinator triage */
-  });
-}
 
 /* ── Registry record + sync (mirrors the water-source pattern) ── */
 function distRegistryRecord(r){
@@ -8281,14 +8245,6 @@ function pushHelp(cb){
 }
 
 /* ── Map Layer Toggles ── */
-function toggleLayer(id) {
-  const pill = document.getElementById('lp-' + id);
-  if (!pill) return;
-  const isActive = pill.classList.contains('active');
-  pill.classList.toggle('active', !isActive);
-  const layer = document.getElementById('map-layer-' + id);
-  if (layer) layer.style.display = isActive ? 'none' : '';
-}
 
 /* ── Meetings Tabs ── */
 function switchTab(tab) {
@@ -9010,7 +8966,6 @@ var PHENO_PHASE_GROUPS=[
     {k:'ripe_fruit',      label:'Ripe fruit'},
     {k:'recent_drop',     label:'Recent fruit/seed drop'} ]}
 ];
-function phenoPhaseLabel(k){ for(var g=0;g<PHENO_PHASE_GROUPS.length;g++){ var it=PHENO_PHASE_GROUPS[g].items; for(var i=0;i<it.length;i++){ if(it[i].k===k) return it[i].label; } } return k; }
 var PHENO_HEALTH=['good','fair','poor'];
 /* Okari & Massoy are trees → painted mark + DBH (baseline + annual).
    Vanilla/cocoa/coffee are cash crops → a metal tag (= the Plant #). */
@@ -10183,23 +10138,6 @@ function saveFollowup() {
 ══════════════════════════════════════ */
 var meteoVerifiedFlag = false, meteoArrivedFlag = false;
 
-function initMeteoLegacy() {
-  meteoVerifiedFlag = false; meteoArrivedFlag = false;
-  document.getElementById('meteoBeginBtn').disabled = true;
-  document.getElementById('meteoFpBtn').classList.remove('verified');
-  document.getElementById('meteoFpTxt').textContent = 'Tap to Verify Identity';
-  document.getElementById('meteoFpSection').style.display = 'none';
-  document.getElementById('meteoNavGateCard').classList.remove('arrived');
-  document.getElementById('meteoBtnArrive').disabled = false;
-  document.getElementById('meteoBtnArrive').textContent = "I've Reached the Station ✓";
-  document.getElementById('meteoNavHint').textContent = 'Walk to station — unlock within 30 m';
-  document.getElementById('meteoLoading').style.display = 'block';
-  document.getElementById('meteoContent').style.display = 'none';
-  setTimeout(function() {
-    document.getElementById('meteoLoading').style.display = 'none';
-    document.getElementById('meteoContent').style.display = 'block';
-  }, 1000);
-}
 
 function meteoArrive() {
   var btn = document.getElementById('meteoBtnArrive');
@@ -10410,7 +10348,7 @@ if ('serviceWorker' in navigator) {
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
 var DB_VERSION = 14;
-var STORES = ['mafia','qabb','water','phenology','observations','patrols','trees','meteo','conservation','followups','schedule','pheno_plots','training','auth','drafts','meetings','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions'];
+var STORES = ['mafia','qabb','water','phenology','trees','meteo','conservation','followups','schedule','pheno_plots','training','auth','drafts','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -10451,7 +10389,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v38'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v39'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -10695,13 +10633,6 @@ function loadZonesForEnrollment() {
 /* ── Zone Config Screen ─────────────────────────────────────────── */
 var _editZones = [];  /* working copy while editing */
 
-function showScreen_zoneConfig() {
-  showScreen('screen-zone-config');
-  getZoneList(function(zones) {
-    _editZones = JSON.parse(JSON.stringify(zones));
-    renderZoneConfigList();
-  });
-}
 
 function renderZoneConfigList() {
   var list = document.getElementById('zoneConfigList');
@@ -11637,15 +11568,6 @@ function getAllRecords(storeName, cb) {
   });
 }
 
-function countRecords(storeName, cb) {
-  openDB(function(db) {
-    if (!db) { cb(0); return; }
-    var tx = db.transaction(storeName, 'readonly');
-    var req = tx.objectStore(storeName).count();
-    req.onsuccess = function() { cb(req.result); };
-    req.onerror = function() { cb(0); };
-  });
-}
 
 /* ── Count unsynced (synced !== true) records in a store ── */
 function countUnsyncedRecords(storeName, cb) {
@@ -11677,8 +11599,8 @@ function markStoreSynced(storeName, ids, cb) {
 }
 
 /* ── Update per-module sync status on export screen ── */
-var DATA_STORES = ['mafia','qabb','water','phenology','pheno_plots','observations',
-  'conservation','followups','patrols','freemap','trees','meteo','training','schedule','meetings','distributions'];
+var DATA_STORES = ['mafia','qabb','water','phenology','pheno_plots',
+  'conservation','followups','freemap','trees','meteo','training','schedule','distributions'];
 
 /* ── Offline / unsynced warning banner on dashboard ──────────────── */
 function updateSyncWarning() {
@@ -12167,15 +12089,6 @@ function kmlPoint(name, lon, lat, desc) {
     '<Point><coordinates>' + lon + ',' + lat + ',0</coordinates></Point></Placemark>';
 }
 
-function kmlPolygon(name, points, desc) {
-  if (!points || points.length < 3) return '';
-  var coords = points.map(function(p){ return p.lon+','+p.lat+',0'; }).join('\n');
-  coords += '\n' + points[0].lon + ',' + points[0].lat + ',0'; // close ring
-  return '<Placemark><name>' + kmlEscape(name) + '</name>' +
-    '<description>' + kmlEscape(desc||'') + '</description>' +
-    '<Polygon><outerBoundaryIs><LinearRing><coordinates>' + coords +
-    '</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>';
-}
 
 function kmlLine(name, points, desc) {
   if (!points || points.length < 2) return '';
@@ -12208,143 +12121,7 @@ function gpxTrack(name, points) {
 
 /* ── Store-specific exporters ── */
 
-function exportKML(storeName) {
-  getAllRecords(storeName, function(records) {
-    if (!records.length) { toast('No ' + storeName + ' records to export'); return; }
-    var placemarks = [];
-    var date = new Date().toISOString().slice(0,10);
 
-    if (storeName === 'trees') {
-      records.forEach(function(r, i) {
-        var name = (r.species||'tree') + '_' + (i+1);
-        var desc = 'Species: ' + (r.species||'') + '\nDBH: ' + (r.dbh_cm||'') + ' cm\nDate: ' + (r.timestamp||'') + '\nNotes: ' + (r.notes||'');
-        placemarks.push(kmlPoint(name, r.longitude, r.latitude, desc));
-      });
-      downloadFile(buildKML('MCA Tree Mapping', placemarks), 'mca_trees_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
-
-    } else if (storeName === 'qabb') {
-      records.forEach(function(r, i) {
-        // Transect as a line — use start/end coords from the survey (defaults to T14 for now)
-        var pts = [{lat:-9.1320,lon:148.4050},{lat:-9.1276,lon:148.4105}];
-        var desc = 'Transect: ' + (r.transect||'') + '\nDate: ' + (r.date||'') + '\nStart: ' + (r.start_time||'') + ' End: ' + (r.end_time||'');
-        placemarks.push(kmlLine(r.transect||('QABB_'+(i+1)), pts, desc));
-      });
-      downloadFile(buildKML('MCA QABB Surveys', placemarks), 'mca_qabb_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
-
-    } else if (storeName === 'water') {
-      records.forEach(function(r, i) {
-        var desc = 'Station: ' + (r.station||'') + '\nDate: ' + (r.date||'') + '\nSecchi: ' + (r.secchi_depth_cm||'') + ' cm';
-        placemarks.push(kmlPoint(r.station||('WQ_'+(i+1)), 148.3750, -9.1550, desc));
-      });
-      downloadFile(buildKML('MCA Water Quality', placemarks), 'mca_water_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
-
-    } else if (storeName === 'phenology') {
-      records.forEach(function(r, i) {
-        var desc = 'Plot: ' + (r.plot||'') + '\nDate: ' + (r.date||'');
-        placemarks.push(kmlPoint(r.plot||('Pheno_'+(i+1)), 148.4000, -9.1400, desc));
-      });
-      downloadFile(buildKML('MCA Phenology', placemarks), 'mca_phenology_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
-
-    } else if (storeName === 'meteo') {
-      records.forEach(function(r, i) {
-        var desc = 'Station: ' + (r.station||'') + '\nDate: ' + (r.date||'') + '\nRainfall: ' + (r.rainfall_mm||0) + ' mm\nLevel: ' + (r.water_level_cm||0) + ' cm';
-        placemarks.push(kmlPoint(r.station||('MET_'+(i+1)), 148.3900, -9.1350, desc));
-      });
-      downloadFile(buildKML('MCA Weather Stations', placemarks), 'mca_meteo_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
-
-    } else if (storeName === 'conservation') {
-      records.forEach(function(r, i) {
-        if (r.latitude && r.longitude) {
-          var desc = (r.activity_type||'') + '\n' + (r.notes||'') + '\nDate: ' + (r.date||'') + '\nPeople: ' + (r.num_people||'');
-          placemarks.push(kmlPoint(r.site||('CA_'+(i+1)), r.longitude, r.latitude, desc));
-        }
-      });
-      if (!placemarks.length) { toast('No geo-tagged conservation records to export'); return; }
-      downloadFile(buildKML('MCA Conservation Activities', placemarks), 'mca_conservation_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
-
-    } else if (storeName === 'observations') {
-      records.forEach(function(r, i) {
-        if (r.latitude && r.longitude) {
-          var desc = (r.type||'Observation') + '\n' + (r.notes||'') + '\nDate: ' + (r.timestamp||'');
-          placemarks.push(kmlPoint(r.type||('Obs_'+(i+1)), r.longitude, r.latitude, desc));
-        }
-      });
-      if (placemarks.length === 0) { toast('No geo-tagged observations to export'); return; }
-      downloadFile(buildKML('MCA Observations', placemarks), 'mca_observations_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
-    }
-
-    toast(records.length + ' records exported as KML');
-  });
-}
-
-function exportGPX(storeName) {
-  getAllRecords(storeName, function(records) {
-    if (!records.length) { toast('No ' + storeName + ' records to export'); return; }
-    var waypoints = [], tracks = [];
-    var date = new Date().toISOString().slice(0,10);
-
-    if (storeName === 'trees') {
-      records.forEach(function(r, i) {
-        var name = (r.species||'tree') + '_' + (i+1);
-        var desc = 'DBH: ' + (r.dbh_cm||'') + ' cm | ' + (r.notes||'');
-        waypoints.push(gpxWpt(r.latitude, r.longitude, name, desc));
-      });
-
-    } else if (storeName === 'qabb') {
-      records.forEach(function(r, i) {
-        var pts = [{lat:-9.1320,lon:148.4050},{lat:-9.1276,lon:148.4105}];
-        tracks.push(gpxTrack(r.transect||('QABB_'+(i+1)), pts));
-      });
-
-    } else if (storeName === 'water') {
-      records.forEach(function(r, i) {
-        var desc = 'Secchi: ' + (r.secchi_depth_cm||'') + ' cm | ' + (r.date||'');
-        waypoints.push(gpxWpt(-9.1550, 148.3750, r.station||('WQ_'+(i+1)), desc));
-      });
-
-    } else if (storeName === 'phenology') {
-      records.forEach(function(r, i) {
-        waypoints.push(gpxWpt(-9.1400, 148.4000, r.plot||('Pheno_'+(i+1)), 'Date: '+(r.date||'')));
-      });
-
-    } else if (storeName === 'meteo') {
-      records.forEach(function(r, i) {
-        var desc = 'Rain: ' + (r.rainfall_mm||0) + 'mm | Level: ' + (r.water_level_cm||0) + 'cm';
-        waypoints.push(gpxWpt(-9.1350, 148.3900, r.station||('MET_'+(i+1)), desc));
-      });
-
-    } else if (storeName === 'conservation') {
-      records.forEach(function(r, i) {
-        if (r.latitude && r.longitude) {
-          var desc = (r.activity_type||'') + '\n' + (r.notes||'') + '\nDate: ' + (r.date||'') + '\nPeople: ' + (r.num_people||'');
-          placemarks.push(kmlPoint(r.site||('CA_'+(i+1)), r.longitude, r.latitude, desc));
-        }
-      });
-      if (!placemarks.length) { toast('No geo-tagged conservation records to export'); return; }
-      downloadFile(buildKML('MCA Conservation Activities', placemarks), 'mca_conservation_' + date + '.kml', 'application/vnd.google-earth.kml+xml');
-
-    } else if (storeName === 'conservation') {
-      records.forEach(function(r, i) {
-        if (r.latitude && r.longitude) {
-          waypoints.push(gpxWpt(r.latitude, r.longitude, r.site||('CA_'+(i+1)), (r.activity_type||'')+'|'+(r.notes||'')));
-        }
-      });
-      if (!waypoints.length) { toast('No geo-tagged conservation records'); return; }
-
-    } else if (storeName === 'observations') {
-      records.forEach(function(r, i) {
-        if (r.latitude && r.longitude) {
-          waypoints.push(gpxWpt(r.latitude, r.longitude, r.type||('Obs_'+(i+1)), r.notes||''));
-        }
-      });
-      if (!waypoints.length) { toast('No geo-tagged observations to export'); return; }
-    }
-
-    downloadFile(buildGPX('MCA Clan Steward App', waypoints, tracks),
-      'mca_' + storeName + '_' + date + '.gpx', 'application/gpx+xml');
-    toast(records.length + ' records exported as GPX');
-  });
-}
 
 /* ══════════════════════════════════════
    CSV EXPORT
@@ -12806,18 +12583,6 @@ var TIMESHEET_STORES = [
     dateFn: function(r){ return r.recorded_at || r.timestamp; },
     descFn: function(r){ return (r.type||'') + (r.topic ? ' — '+r.topic : ''); },
     durFn:  function(r){ return r.duration ? r.duration+' hrs' : ''; } },
-  { store:'meetings',     label:'Community Meeting',
-    dateFn: function(r){ return r.recorded_at || r.timestamp; },
-    descFn: function(r){ return r.agenda_title || r.meeting_type || ''; },
-    durFn:  null },
-  { store:'observations', label:'Field Observation',
-    dateFn: function(r){ return r.recorded_at || r.date || r.timestamp; },
-    descFn: function(r){ return r.category || r.obs_type || ''; },
-    durFn:  null },
-  { store:'patrols',      label:'Patrol',
-    dateFn: function(r){ return r.recorded_at || r.date || r.timestamp; },
-    descFn: function(r){ return r.patrol_type || r.area || ''; },
-    durFn:  null },
   { store:'water',        label:'Water Monitoring',
     dateFn: function(r){ return r.recorded_at || r.date || r.timestamp; },
     descFn: function(r){ return r.source_name || r.site || ''; },

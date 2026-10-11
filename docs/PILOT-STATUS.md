@@ -26,8 +26,10 @@ and the operational procedures worked out during pilot setup.*
   uploads silently fell back to the share sheet ("Share failed"). No backend
   change was needed. If data still won't send after updating, it's connectivity,
   not this.
-- **Local DB:** IndexedDB `MCA_StewardData`, **DB_VERSION 14**, ~29 stores
-  (adds `disturbances`, `issues`, `distributions`).
+- **Local DB:** IndexedDB `MCA_StewardData`, **DB_VERSION 14**, 24 stores
+  (a cleanup pass dropped the unused `observations`, `patrols`, `meetings`
+  stores — all were dead; `gardens` was removed earlier. Garden/observation
+  data lives in `freemap`).
 
 ### ⚠️ Backend needs a redeploy (zone fix + server-time + date-review/issues)
 The deployed Apps Script copy predates the zone-list correction, the new

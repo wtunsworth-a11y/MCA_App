@@ -2134,6 +2134,7 @@ select.msel {
                   <span style="font-size:0.95rem;font-weight:800;" id="mfTimer">0:00</span>
                 </div>
                 <div style="font-size:0.82rem;color:#444;line-height:1.5;" id="mfStepInstruction">…</div>
+                <div id="mfStepHint" style="display:none;font-size:0.74rem;color:#777;margin-top:7px;"></div>
                 <div id="mfTimeWarn" style="display:none;background:#FFEBEE;border:1px solid #EF9A9A;color:#B71C1C;border-radius:8px;padding:6px 10px;margin-top:8px;font-size:0.75rem;">⚠ Over 60 minutes — longer than expected; this will be flagged for review.</div>
               </div>
               <button class="btn-primary" id="mfStepBtn" style="background:#1B5E20;" onclick="mafiaStepAction()">Next</button>
@@ -2191,7 +2192,7 @@ select.msel {
           <textarea id="mafiaComments" class="form-input" style="min-height:80px;width:100%;" placeholder="Add any additional observations or notes for the whole transect…"></textarea>
         </div>
         <div id="mafiaReviewNote" style="display:none;margin:4px 14px 2px;padding:10px 12px;background:#FFF8E1;border:1px solid #FFE082;border-radius:10px;font-size:0.78rem;color:#6D4C00;line-height:1.4;">
-          <strong>Review before you finish.</strong> This is everything you recorded for this transect. Scroll up and check each sub-transect (ST1–ST5). Fix anything that's wrong, then tap <em>Finish</em>.
+          <strong>Review before you finish.</strong> This is everything you recorded for this transect. Scroll up and check each sub-transect (ST1–ST5). Fix anything that's wrong. If the site was unusual — e.g. burned grassland you could read in one look, or nothing to record — note why in <em>Comments (H)</em>. Then tap <em>Finish</em>.
         </div>
         <div class="p14" style="padding-top:8px;">
           <button class="btn-primary" id="mafiaSaveBtn" onclick="saveMafia()">Save &amp; Continue</button>
@@ -6249,6 +6250,7 @@ function webAuthnVerify(opts) {
       opts.onSuccess();
     }).catch(function(err) {
       if (opts.txtId) document.getElementById(opts.txtId).textContent = '✗ Not recognised — try again';
+      if (opts.onFail) opts.onFail(err);
     });
   });
 }
@@ -6367,6 +6369,7 @@ function initMafia(){
   var gate=document.getElementById('navGateCard'); if(gate){ gate.classList.remove('arrived'); gate.style.display='block'; }
   var ba=document.getElementById('btnArrive'); if(ba){ ba.disabled=true; ba.classList.remove('ready'); ba.textContent='I’m at the start point ✓'; }
   window._mafiaWithinRadius=false; window._mafiaArriveDist=null; window._mafiaArriveFix=null;
+  window._mafiaEndDist=null; window._mafiaEndFix=null; window._mafiaCloseDist=null; window._mafiaCloseFix=null; window._mafiaCloseVerified=false;
   document.getElementById('mafiaLoading').style.display='block';
   document.getElementById('mafiaContent').style.display='none';
   mafiaSetTape(true);
@@ -6464,6 +6467,9 @@ function _mafiaUpdateNav(){
       : (gpsCoarse ? ('GPS is weak here (±'+pos.acc+' m). You may confirm — the location will be flagged for review.')
       : 'Keep walking to the start point. The button unlocks within 30 m (GPS).');
   }
+  /* During the guided workflow, gate the step confirm button on reaching the
+     step's target (the end-point gate). */
+  if(mafiaWorkflowActive) _mafiaStepGate(dist, pos.acc);
 }
 
 /* ── Arrival at the start → fingerprint → start the workflow timer ── */
@@ -6494,11 +6500,11 @@ function mafiaVerify(){
 
 /* ── Guided tape workflow ── */
 var MAFIA_STEPS=[
-  { title:'Lay out the tape', target:'end',   tapeText:'Walk to the END point, pulling your 100 m tape as you go.', noTapeText:'Walk to the END point — the app will tell you when you reach ~100 m. Pace it out as evenly as you can.', btn:'I’m at the end ✓' },
+  { title:'Lay out the tape', target:'end',   gate:true, tapeText:'Walk to the END point, pulling your 100 m tape as you go.', noTapeText:'Walk to the END point — the app will tell you when you reach ~100 m. Pace it out as evenly as you can.', btn:'I’m at the end ✓' },
   { title:'Survey back to the start', target:'start', tapeText:'Now walk back to the START along the tape, recording each indicator as you go.', noTapeText:'Now walk back to the START along your line, recording each indicator as you go.', btn:'Open the survey form', action:'survey' },
-  { title:'Check for anything missed', target:'end', tapeText:'Walk the transect to the END again and check nothing was missed.', noTapeText:'Walk back to the END again and check nothing was missed.', btn:'Checked — nothing missed ✓' },
-  { title:'Roll the tape back', target:'start', tapeText:'Roll your tape back to the START point.', noTapeText:'Return to the START point.', btn:'At the start ✓' },
-  { title:'Review & close the survey', target:'start', tapeText:'You are back at the start. Review everything you recorded, then finish.', noTapeText:'You are back at the start. Review everything you recorded, then finish.', btn:'Review my answers ✓', action:'close' }
+  { title:'Check for anything missed', target:'end', gate:true, tapeText:'Walk the transect to the END again and check nothing was missed.', noTapeText:'Walk back to the END again and check nothing was missed.', btn:'Checked — nothing missed ✓' },
+  { title:'Roll the tape back', target:'start', gate:true, tapeText:'Roll your tape back to the START point.', noTapeText:'Return to the START point.', btn:'At the start ✓' },
+  { title:'Review & close the survey', target:'start', gate:true, tapeText:'You are back at the start. Review everything you recorded, then finish.', noTapeText:'You are back at the start. Review everything you recorded, then finish.', btn:'Review my answers ✓', action:'close' }
 ];
 function mafiaStartWorkflow(){
   mafiaWorkflowActive=true;
@@ -6522,14 +6528,49 @@ function _mafiaRenderStep(){
   _mafiaFill('mfStepTitle', 'Step '+(mafiaStep+1)+' of '+MAFIA_STEPS.length+': '+s.title);
   _mafiaFill('mfStepInstruction', mafiaHasTape ? s.tapeText : s.noTapeText);
   var btn=document.getElementById('mfStepBtn'); if(btn) btn.textContent=s.btn;
+  var hint=document.getElementById('mfStepHint');
+  /* A gated step can't be confirmed until GPS puts the surveyor at the target
+     (end or start). This is the end-point gate — it stops "I'm at the end"
+     being tapped 20 m from the start. */
+  if(btn && s.gate){ btn.disabled=true; }
+  else if(btn){ btn.disabled=false; }
+  if(hint){ hint.style.display = s.gate ? 'block' : 'none'; hint.textContent = s.gate ? ('Walk to the '+(s.target==='end'?'END':'START')+' — the button unlocks within '+MAFIA_ARRIVE_M+' m (by GPS).') : ''; }
   /* live-navigate to this step's target */
   _mafiaStopNav();
   var tgt = s.target==='end' ? mafiaEnd : mafiaStart;
   if(tgt) _mafiaNavTo(tgt, s.target==='end' ? 'Transect End' : 'Transect Start');
   var navBox=document.getElementById('mfStepNav'); if(navBox) navBox.style.display = tgt ? 'block' : 'none';
 }
+/* Live gate for the current workflow step: enable the confirm button only once
+   GPS puts the surveyor within range of the step's target (coarse GPS is let
+   through but flagged, same as the start gate). Called from _mafiaUpdateNav. */
+function _mafiaStepGate(dist, acc){
+  var s=MAFIA_STEPS[mafiaStep]; if(!s||!s.gate) return;
+  var btn=document.getElementById('mfStepBtn'); var hint=document.getElementById('mfStepHint');
+  var within=(dist!=null && dist<=MAFIA_ARRIVE_M);
+  var coarse=(acc!=null && acc>MAFIA_ARRIVE_M);
+  var ok=within||coarse;
+  if(btn) btn.disabled=!ok;
+  if(hint){
+    hint.style.display='block';
+    hint.textContent = within ? ('✓ Within '+MAFIA_ARRIVE_M+' m of the '+(s.target==='end'?'END':'START')+' — tap to confirm.')
+      : (coarse ? ('GPS is weak (±'+acc+' m). You may confirm — it will be flagged for review.')
+      : ('Keep walking to the '+(s.target==='end'?'END':'START')+' — '+(dist!=null?Math.round(dist)+' m away':'getting GPS')+'. Unlocks within '+MAFIA_ARRIVE_M+' m.'));
+  }
+}
 function mafiaStepAction(){
   var s=MAFIA_STEPS[mafiaStep]; if(!s) return;
+  /* Capture the GPS fix at the moment of confirming a gated step, so the end
+     and close positions are recorded against the generated targets. */
+  if(s.gate){
+    var pos=window._mafiaPos, tgt=(s.target==='end'?mafiaEnd:mafiaStart);
+    if(pos && tgt){
+      var d=Math.round(_haversine({lat:pos.lat,lon:pos.lon}, tgt));
+      var fix={lat:pos.lat, lon:pos.lon, acc:(pos.acc!=null?pos.acc:null)};
+      if(s.target==='end'){ if(window._mafiaEndDist==null || d<window._mafiaEndDist){ window._mafiaEndDist=d; window._mafiaEndFix=fix; } }
+      else { if(window._mafiaCloseDist==null || d<window._mafiaCloseDist){ window._mafiaCloseDist=d; window._mafiaCloseFix=fix; } }
+    }
+  }
   if(s.action==='survey'){ nav('screen-mafia-matrix'); return; }
   if(s.action==='close'){ mafiaBeginReview(); return; }
   if(mafiaStep<MAFIA_STEPS.length-1){ mafiaStep++; _mafiaRenderStep(); }
@@ -6569,6 +6610,18 @@ function mafiaCloseSurvey(){
      live-nav flag which can be stale at the moment of tapping. For Zone-Staff
      review; not shown to the surveyor. */
   rec.location_flagged=!(typeof window._mafiaArriveDist==='number' && window._mafiaArriveDist<=MAFIA_ARRIVE_M);
+  /* End-point gate: the GPS fix captured when the surveyor confirmed reaching
+     the generated END (closest of the two end steps). Flagged if that fix never
+     landed within 30 m of the end — i.e. they claimed the end without being there. */
+  rec.end_fix=window._mafiaEndFix||null;
+  rec.end_dist_m=(typeof window._mafiaEndDist==='number')?window._mafiaEndDist:null;
+  rec.end_gate_flagged=!(typeof window._mafiaEndDist==='number' && window._mafiaEndDist<=MAFIA_ARRIVE_M);
+  /* Close gate: the GPS fix captured on returning to the START before closing. */
+  rec.close_fix=window._mafiaCloseFix||null;
+  rec.close_dist_m=(typeof window._mafiaCloseDist==='number')?window._mafiaCloseDist:null;
+  rec.close_gate_flagged=!(typeof window._mafiaCloseDist==='number' && window._mafiaCloseDist<=MAFIA_ARRIVE_M);
+  /* Re-fingerprint at close — true when identity was re-verified before saving. */
+  rec.reverified_at_close=!!window._mafiaCloseVerified;
   rec.duration_min=mins!=null?Math.round(mins*10)/10:null;
   rec.duration_excessive=(mins!=null && mins>MAFIA_MAX_MIN);
   rec.compass_source=window._compassSource||'';
@@ -6594,7 +6647,7 @@ function mafiaCloseSurvey(){
      transect from the start, or there were too few points to judge movement. */
   rec.movement_flagged=( mafiaTrack.length<3 || !rec.reached_end || rec.max_from_start_m < (MAFIA_TRANSECT_M*0.5) );
   rec.time_fast_flagged=(mins!=null && mins<MAFIA_MIN_MIN);
-  rec.review_flagged=!!(rec.location_flagged || rec.duration_excessive || rec.time_fast_flagged || rec.movement_flagged);
+  rec.review_flagged=!!(rec.location_flagged || rec.end_gate_flagged || rec.close_gate_flagged || rec.duration_excessive || rec.time_fast_flagged || rec.movement_flagged);
   saveRecord('mafia', rec, function(){
     clearDraft('screen-mafia-matrix');
     var notes=[]; if(rec.time_fast_flagged)notes.push('time'); if(rec.movement_flagged)notes.push('movement'); if(rec.duration_excessive)notes.push('too slow');
@@ -10703,7 +10756,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v50'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v51'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12633,10 +12686,19 @@ function installPWA() {
    to the walk; the full record (with transect + timing) is written at close. */
 function saveMafia() {
   if(mafiaReviewing){
-    /* finishing from the review screen — re-collect in case answers were
-       corrected during review, then close and write the full record */
-    mafiaSurveyData=collectMafiaData();
-    mafiaCloseSurvey();
+    /* finishing from the review screen — re-verify identity at close, then
+       re-collect (in case answers were corrected during review) and write the
+       full record. The re-fingerprint confirms the same enrolled surveyor is
+       the one closing the survey. */
+    var b=document.getElementById('mafiaSaveBtn'); if(b){ b.disabled=true; b.textContent='Verify your fingerprint to finish…'; }
+    webAuthnVerify({ btnId:null, txtId:null, setVerified:function(){}, onSuccess:function(){
+      window._mafiaCloseVerified=true;
+      mafiaSurveyData=collectMafiaData();
+      mafiaCloseSurvey();
+    }, onFail:function(){
+      var bb=document.getElementById('mafiaSaveBtn'); if(bb){ bb.disabled=false; bb.textContent='Finish & save survey ✓'; }
+      toast('Fingerprint not recognised — tap to try again.');
+    }});
   } else {
     mafiaSurveyCollected();
   }

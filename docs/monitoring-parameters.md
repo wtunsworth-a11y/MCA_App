@@ -185,11 +185,26 @@ tape), survey back to the start, re-walk to the end to check, roll the tape back
 and close at the start. A **no-tape variant** guides the same walk by GPS
 distance.
 
+**End-point & close GPS gates.** Each step that requires physical arrival is
+GPS-gated the same way the start is: the confirm button stays locked until the
+phone is within 30 m of that step's target (coarse GPS is let through but
+flagged). This closes the "I'm at the end" loophole — the button won't unlock
+20 m from the start. The fix captured when the END is confirmed gives
+`end_fix`/`end_dist_m` and **`end_gate_flagged`**; the fix on returning to the
+START gives `close_fix`/`close_dist_m` and **`close_gate_flagged`**.
+
+**Re-fingerprint at close.** Finishing the survey re-runs the WebAuthn
+fingerprint check — the same enrolled surveyor must confirm the close.
+`reverified_at_close` records that it passed; a save cannot complete without it.
+
 **Review before finish.** The final step re-opens the filled matrix in a
 read-back **review mode** (yellow banner, "Finish & save survey") so the surveyor
 sees every answer — buttons and pills exactly as they left them — and can correct
-anything before committing. Finishing re-collects from the form, so review edits
-are kept.
+anything before committing. The banner asks the surveyor to note unusual sites
+(e.g. burned grassland read in one look, nothing to record) in **Comments (H)**,
+so a legitimately fast/low-movement survey carries its explanation for the
+coordinator. Finishing re-collects from the form (review edits kept) and requires
+the re-fingerprint above.
 
 **Breadcrumb / anti-gaming flags.** From arrival to close the app logs a throttled
 **GPS breadcrumb trail** (points ≥ 4 m apart, coarse fixes dropped). At close it
@@ -206,7 +221,9 @@ slow / movement for the coordinator's queue.
 
 The saved record adds: `transect_start`/`transect_end` (lat/lon),
 `transect_bearing`, `transect_length_m` (100), `had_tape`, `arrive_fix`,
-`arrive_dist_m`, **`location_flagged`**, `duration_min`,
+`arrive_dist_m`, **`location_flagged`**, `end_fix`, `end_dist_m`,
+**`end_gate_flagged`**, `close_fix`, `close_dist_m`, **`close_gate_flagged`**,
+**`reverified_at_close`**, `duration_min`,
 **`duration_excessive`** (true if > 60 min — too slow; ~30 min is normal),
 **`time_fast_flagged`** (< 12 min — too fast), the breadcrumb fields above with
 **`movement_flagged`**, **`review_flagged`**, and `compass_source`.

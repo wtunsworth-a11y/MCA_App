@@ -198,7 +198,7 @@ store holds any records made on the old standalone screen.)*
 a structured sub-form in addition to the common title / description / photo /
 GPS:
 
-- **Plant problem** (`category:'pest'`) → `plant_problem{ crop, problems[], severity, extent }`.
+- **Plant problem** (`category:'plant_problem'`) → `plant_problem{ crop, problems[], severity, extent }`.
   `problems` is a multi-select of: Pest damage · Disease · Dried out / wilting ·
   Poorly pruned · Unharvested / overripe · Weed-choked · Nutrient deficiency ·
   Physical / storm damage · Poor spacing / crowding · Other. `severity` =

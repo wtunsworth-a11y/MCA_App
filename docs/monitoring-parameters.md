@@ -216,7 +216,7 @@ clock-trust stamp and is eligible for Date Review).
 | Parameter | Options / type |
 |---|---|
 | Officer | name, steward ID, role (captured from profile) |
-| Recipient | name/group · **type** (individual, clan group, women's/youth/church group, sports team, school, cooperative, other) · **MCA ID** if an enrolled steward/officer (soft-checked against `KNOWN_IDS`, with a `steward_id_known` flag) · **received_by** (who physically took them, e.g. a group's representative) · clan · contact/village · **confirmed receipt** (yes/no) |
+| Recipient | name/group · **type** (individual, clan group, women's/youth/church group, sports team, school, cooperative, other) · **received_by** (who physically took them, e.g. a group's representative) · clan · contact/village · **confirmed receipt** (yes/no) |
 | Purpose | **category** (conservation planting, agroforestry, livelihood, training support, relief, other) + free-text description |
 | Donor | **donor / funder** (European Union by default; list extensible, with free-text *Other*) · **donor_recognised** — the donor was named &amp; thanked to the recipients at the handover (yes/no) |
 | Items (repeating) | **category** (Seeds, Seedlings, Tools, Equipment, Materials, PPE, Food/relief, Documents, Other) · description · **quantity** · **unit** |

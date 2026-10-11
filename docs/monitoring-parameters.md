@@ -166,9 +166,12 @@ generates a random **100 m transect** near the surveyor: a **start point ≤100 
 away on a random bearing, extended **100 m** along a random bearing to the end.
 The app navigates the surveyor to the start with a **live compass** — the phone's
 **magnetometer** (`DeviceOrientation`) when available, falling back to the GPS
-course — showing direction + distance. At the start (within ~30 m — the same
-radius as the water/facility gates — or a manual confirm when canopy GPS is
-weak) a **fingerprint** starts the survey and a **timer**. The
+course — showing direction + distance. Per `technical_specification.md §8.10`
+the data-entry gate is **locked until the surveyor is within 30 m** of the start
+(GPS-verified) and **cannot be bypassed**; the one allowance (per §6) is when the
+GPS fix itself is coarser than 30 m, when a confirm is allowed but the record is
+**`location_flagged`** for Zone-Staff review (the surveyor is not blocked). A
+**fingerprint** then starts the survey and a **timer**. The
 surveyor is then guided through the tape workflow: walk to the end (lay the
 tape), survey back to the start, re-walk to the end to check, roll the tape back,
 and close at the start. A **no-tape variant** guides the same walk by GPS

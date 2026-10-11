@@ -2098,8 +2098,8 @@ select.msel {
 
             <!-- Arrival gate (navigating to the start, before fingerprint) -->
             <div class="nav-gate-card" id="navGateCard">
-              <div class="gate-hint" id="navGateHint">Walk to the start point. You can confirm manually if the GPS is weak under canopy.</div>
-              <button class="btn-arrive" id="btnArrive" onclick="mafiaArrive()">I'm at the start point ✓</button>
+              <div class="gate-hint" id="navGateHint">Walk to the start point — the button unlocks within 30 m (by GPS).</div>
+              <button class="btn-arrive" id="btnArrive" onclick="mafiaArrive()" disabled>I'm at the start point ✓</button>
             </div>
 
             <!-- Fingerprint verify (shown after arriving) -->
@@ -6432,6 +6432,8 @@ function initMafia(){
   document.getElementById('mafiaFpSection').style.display='none';
   var wf=document.getElementById('mafiaWorkflow'); if(wf) wf.style.display='none';
   var gate=document.getElementById('navGateCard'); if(gate){ gate.classList.remove('arrived'); gate.style.display='block'; }
+  var ba=document.getElementById('btnArrive'); if(ba){ ba.disabled=true; ba.classList.remove('ready'); ba.textContent='I’m at the start point ✓'; }
+  window._mafiaWithinRadius=false; window._mafiaArriveDist=null; window._mafiaArriveFix=null;
   document.getElementById('mafiaLoading').style.display='block';
   document.getElementById('mafiaContent').style.display='none';
   mafiaSetTape(true);
@@ -6496,11 +6498,23 @@ function _mafiaUpdateNav(){
   _mafiaFill('mfDistTxt', dist<1000?(Math.round(dist)+' m away'):((dist/1000).toFixed(2)+' km away'));
   var src=document.getElementById('mfCompassSrc');
   if(src) src.textContent=(window._compassSource==='magnetometer')?'Compass: phone magnetometer':(window._compassSource==='gps'?'Compass: GPS course (keep moving)':'Point the top of the phone where you walk')+(pos.acc?(' · GPS ±'+pos.acc+'m'):'');
+  /* Spec (technical_specification.md §8.10): the form is locked until the
+     surveyor is within 30 m of the start, verified by GPS — this gate cannot be
+     bypassed. The one allowance is when the GPS fix itself is coarser than the
+     radius (acc > 30 m), so the gate cannot be resolved: then a confirm is
+     allowed but the record is location-flagged for Zone-Staff review (§6). */
   var within=dist<=MAFIA_ARRIVE_M;
+  var gpsCoarse=(pos.acc!=null && pos.acc>MAFIA_ARRIVE_M);
+  var canArrive=within || gpsCoarse;
+  window._mafiaWithinRadius=within;
   var btn=document.getElementById('btnArrive');
-  if(btn && !mafiaArrived){ btn.classList.toggle('ready', within); }
+  if(btn && !mafiaArrived){ btn.disabled=!canArrive; btn.classList.toggle('ready', within); }
   var hint=document.getElementById('navGateHint');
-  if(hint && !mafiaArrived) hint.textContent = within ? '✓ You are at the start point — tap below, then verify your fingerprint.' : 'Walk to the start point. You can confirm manually if the GPS is weak under canopy.';
+  if(hint && !mafiaArrived){
+    hint.textContent = within ? '✓ Within 30 m of the start — confirm, then verify your fingerprint.'
+      : (gpsCoarse ? ('GPS is weak here (±'+pos.acc+' m). You may confirm — the location will be flagged for review.')
+      : 'Keep walking to the start point. The button unlocks within 30 m (GPS).');
+  }
 }
 
 /* ── Arrival at the start → fingerprint → start the workflow timer ── */
@@ -6510,6 +6524,8 @@ function mafiaArrive(){
   captureGPS(function(gps){
     mafiaArrived=true;
     window._mafiaArriveFix = gps ? {lat:parseFloat(gps.lat), lon:parseFloat(gps.lng), acc:gps.accuracy} : null;
+    /* distance of the confirmed fix from the generated start, for the location flag */
+    window._mafiaArriveDist = (window._mafiaArriveFix && mafiaStart) ? Math.round(_haversine({lat:window._mafiaArriveFix.lat, lon:window._mafiaArriveFix.lon}, mafiaStart)) : null;
     document.getElementById('navGateCard').classList.add('arrived');
     document.getElementById('navGateHint').textContent = gps ? ('✓ At start ('+gps.lat+', '+gps.lng+' ±'+gps.accuracy+'m) — verify identity') : '✓ At start — verify identity';
     btn.textContent='✓ Arrived';
@@ -6588,6 +6604,8 @@ function mafiaCloseSurvey(){
   rec.transect_length_m=MAFIA_TRANSECT_M;
   rec.had_tape=mafiaHasTape;
   rec.arrive_fix=window._mafiaArriveFix||null;
+  rec.arrive_dist_m=(typeof window._mafiaArriveDist==='number')?window._mafiaArriveDist:null;
+  rec.location_flagged=(window._mafiaWithinRadius===false);  /* confirmed start was outside 30 m — for Zone-Staff review (not shown to the surveyor) */
   rec.duration_min=mins!=null?Math.round(mins*10)/10:null;
   rec.duration_excessive=(mins!=null && mins>MAFIA_MAX_MIN);
   rec.compass_source=window._compassSource||'';
@@ -10564,7 +10582,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v41'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v42'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

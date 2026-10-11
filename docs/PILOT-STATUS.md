@@ -17,7 +17,7 @@ and the operational procedures worked out during pilot setup.*
   baked into `prototype/index.html`
   (`…/macros/s/AKfycbxqEnJ1…JZR8XRg/exec`). **Deployed and verified**
   (`{"status":"ready"}`). **Coordinator server key is set** in Script Properties.
-- **Service worker cache:** `mca-steward-v33` (bumped every deploy). The app now
+- **Service worker cache:** `mca-steward-v51` (bumped every deploy). The app now
   **auto-applies updates** on reopen (checks on launch + focus, reloads once when
   a new worker takes over) — no more "open twice".
 - **Uploads fixed (v24):** Send Data and all registry/approval syncs POST as
@@ -52,6 +52,7 @@ via the plausibility window; it just has no server anchor to correct against.
 | `zone_staff` | Zone Staff | **all clans** (oversight) | community briefings; training = Awareness unless authorised |
 | `field_officer` | Field Officer (Agric. Extension) | own clan + can **deliver training** | agronomy/extension |
 | `mcf_staff` | **Project / MCF Staff** | **all clans** (oversight) | you, Mellie, Matilda, Josh; no clan/zone; lands on MCF Summary |
+| `consultant` | **Visiting Consultant** | **focused dashboard**: Field Mapping + Training Records + Handover & Distribution + Export Data | external/visiting; no clan or zone required; can **record training given**, **map sites visited**, and **log handovers**; **not** oversight (no approve/enrol/coordinator powers) |
 
 - **Oversight** = `mcf_staff`, `zone_staff`, or a coordinator-unlocked session
   (`isOversight()`), and it means **see every clan's items** so staff can

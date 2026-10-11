@@ -690,6 +690,13 @@ textarea.form-input:focus, input.form-input:focus {
 }
 .tally-btn:active { background: #e0e0e0; }
 .tally-count { min-width: 22px; text-align: center; font-size: 0.8rem; font-weight: 600; color: #333; }
+.tally-count.tc-unset { color: #bbb; font-weight: 400; }
+.tally-count.pa-need { color: #E65100; font-weight: 700; }   /* Present chosen but count still 0 — must be set */
+.tally-count.pa-lock { color: #bbb; font-weight: 600; }      /* Absent — counter locked at 0 */
+.tally-btn:disabled { opacity: 0.35; cursor: default; }
+/* Review mode — an applicable cell still without an answer (gap to chase) */
+#mafiaMatrixBody td.mafia-gap { box-shadow: inset 0 0 0 2px #E65100; background: #FFF3E0; }
+#mafiaMatrixBody td.mafia-gap-flash { box-shadow: inset 0 0 0 3px #B71C1C; background: #FFE0B2; }
 /* Conditional MaFIA cell that doesn't apply in this sub-transect (e.g. water
    module where there is no waterway): blocked so contradictory data can't be
    entered. */
@@ -1677,6 +1684,7 @@ select.msel {
               <option value="zone_staff">Zone Staff</option>
               <option value="field_officer">Field Officer (Agricultural Extension)</option>
               <option value="mcf_staff">Project / MCF Staff</option>
+              <option value="consultant">Visiting Consultant</option>
             </select>
           </div>
           <div class="form-group" id="enrollZoneGroup">
@@ -1929,6 +1937,8 @@ select.msel {
       <div class="scroll-content" style="padding-bottom:8px;">
         <!-- Offline / unsynced data warning — updated on every dashboard visit -->
         <div id="syncWarningBanner" style="display:none;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;font-size:0.79rem;line-height:1.4;cursor:pointer;" onclick="nav('screen-data-export')"></div>
+        <!-- Low-storage warning — this is a work phone; storage must be kept free for the app -->
+        <div id="storageWarningBanner" style="display:none;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;font-size:0.79rem;line-height:1.4;cursor:pointer;" onclick="nav('screen-data-export')"></div>
         <!-- This-month monitoring status — calm, static, updated on each dashboard visit -->
         <div id="dashDisturb" style="margin:8px 12px 0;"></div>
         <div id="dashStatus" style="margin:8px 12px 2px;"></div>
@@ -1937,7 +1947,7 @@ select.msel {
             <span class="module-emoji" data-icon="calendar" data-size="26"></span>
             <span class="module-name">Activity Calendar</span>
           </div>
-          <div class="module-tile" data-fo="1" onclick="nav('screen-freemap')">
+          <div class="module-tile" data-fo="1" data-vc="1" onclick="nav('screen-freemap')">
             <span class="module-emoji" data-icon="pin" data-size="26"></span>
             <span class="module-name">Field Mapping</span>
           </div>
@@ -2005,15 +2015,15 @@ select.msel {
             <span class="module-emoji" data-icon="sprout" data-size="26"></span>
             <span class="module-name">Conservation Activities</span>
           </div>
-          <div class="module-tile" id="tile-training" data-fo="1" onclick="nav('screen-training-setup')">
+          <div class="module-tile" id="tile-training" data-fo="1" data-vc="1" onclick="nav('screen-training-setup')">
             <span class="module-emoji" data-icon="mortarboard" data-size="26"></span>
             <span class="module-name">Training Records</span>
           </div>
-          <div class="module-tile" id="tile-distribution" data-fo="1" style="display:none;" onclick="nav('screen-distribution')">
+          <div class="module-tile" id="tile-distribution" data-fo="1" data-vc="1" style="display:none;" onclick="nav('screen-distribution')">
             <span class="module-emoji" data-icon="box" data-size="26"></span>
             <span class="module-name">Handover &amp; Distribution</span>
           </div>
-          <div class="module-tile" data-fo="1" onclick="nav('screen-data-export')">
+          <div class="module-tile" data-fo="1" data-vc="1" onclick="nav('screen-data-export')">
             <span class="module-emoji" data-icon="upload" data-size="26"></span>
             <span class="module-name">Export Data</span>
           </div>
@@ -2134,6 +2144,7 @@ select.msel {
                   <span style="font-size:0.95rem;font-weight:800;" id="mfTimer">0:00</span>
                 </div>
                 <div style="font-size:0.82rem;color:#444;line-height:1.5;" id="mfStepInstruction">…</div>
+                <div id="mfStepHint" style="display:none;font-size:0.74rem;color:#777;margin-top:7px;"></div>
                 <div id="mfTimeWarn" style="display:none;background:#FFEBEE;border:1px solid #EF9A9A;color:#B71C1C;border-radius:8px;padding:6px 10px;margin-top:8px;font-size:0.75rem;">⚠ Over 60 minutes — longer than expected; this will be flagged for review.</div>
               </div>
               <button class="btn-primary" id="mfStepBtn" style="background:#1B5E20;" onclick="mafiaStepAction()">Next</button>
@@ -2165,8 +2176,9 @@ select.msel {
         <!-- Transect description: conditions for the whole transect -->
         <div class="card" style="margin:10px 14px 4px;padding:10px 14px;">
           <div style="font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:6px;">Transect conditions</div>
+          <div style="font-size:0.68rem;color:#999;margin-bottom:5px;">Tap to set — left blank if not recorded.</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            <button type="button" class="weather-pill active" id="mfwx-cloudy" onclick="mfWx('cloud','cloudy')">Cloudy</button>
+            <button type="button" class="weather-pill" id="mfwx-cloudy" onclick="mfWx('cloud','cloudy')">Cloudy</button>
             <button type="button" class="weather-pill" id="mfwx-sunny" onclick="mfWx('cloud','sunny')">Sunny</button>
             <button type="button" class="weather-pill" id="mfwx-dry" onclick="mfWx('rain','dry')">Dry</button>
             <button type="button" class="weather-pill" id="mfwx-rainy" onclick="mfWx('rain','rainy')">Rainy</button>
@@ -2190,8 +2202,11 @@ select.msel {
           <div style="font-size:0.8rem;font-weight:700;color:#333;margin-bottom:6px;">H — Comments (whole transect)</div>
           <textarea id="mafiaComments" class="form-input" style="min-height:80px;width:100%;" placeholder="Add any additional observations or notes for the whole transect…"></textarea>
         </div>
+        <div id="mafiaReviewNote" style="display:none;margin:4px 14px 2px;padding:10px 12px;background:#FFF8E1;border:1px solid #FFE082;border-radius:10px;font-size:0.78rem;color:#6D4C00;line-height:1.4;">
+          <strong>Review before you finish.</strong> This is everything you recorded for this transect. Scroll up and check each sub-transect (ST1–ST5). Fix anything that's wrong. If the site was unusual — e.g. burned grassland you could read in one look, or nothing to record — note why in <em>Comments (H)</em>. Then tap <em>Finish</em>.
+        </div>
         <div class="p14" style="padding-top:8px;">
-          <button class="btn-primary" onclick="saveMafia()">Save &amp; Continue</button>
+          <button class="btn-primary" id="mafiaSaveBtn" onclick="saveMafia()">Save &amp; Continue</button>
         </div>
       </div>
     </div>
@@ -3120,7 +3135,8 @@ select.msel {
 
           <div class="section-label" style="padding-left:0;">Location</div>
           <div class="card" style="padding:10px 14px;margin-bottom:10px;">
-            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> GPS</span><span id="distGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> Location <span style="color:#999;font-weight:400;">(optional)</span></span><span id="distGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+            <button type="button" id="distGpsRetry" onclick="distRetryGPS()" style="display:none;margin-top:5px;width:100%;background:#fff;border:1px solid #00838F;color:#00838F;border-radius:8px;padding:8px;font-size:0.78rem;font-weight:600;cursor:pointer;"><span data-icon="pin" data-size="13"></span> Retry location</button>
           </div>
 
           <div class="section-label" style="padding-left:0;">Evidence</div>
@@ -3157,7 +3173,7 @@ select.msel {
           <div class="section-label" style="padding-left:0;">Your fingerprint <span style="color:#B71C1C;">*</span></div>
           <button type="button" class="btn-outline" id="distFpBtn" style="width:100%;border-color:#00838F;color:#00838F;" onclick="distVerifyFp()"><span data-icon="lock" data-size="14"></span> <span id="distFpTxt">Verify my fingerprint to submit</span></button>
 
-          <button class="btn-primary" style="background:#00838F;margin-top:12px;" id="distSubmitBtn" onclick="submitDistribution()" disabled>Record handover</button>
+          <button class="btn-primary" style="background:#00838F;margin-top:12px;" id="distSubmitBtn" onclick="submitDistribution()" disabled>Save and close</button>
           <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
         </div>
       </div>
@@ -5632,7 +5648,7 @@ function nav(id) {
   if (id === 'screen-conserv-schedule') initConservSchedule();
   if (id === 'screen-training-setup') initTraining();
   if (id === 'screen-data-export') { updateRecordCounts(); updateStorageInfo(); }
-  if (id === 'screen-dashboard')   { updateSyncWarning(); renderDashboardStatus(); }
+  if (id === 'screen-dashboard')   { updateSyncWarning(); updateStorageWarning(); renderDashboardStatus(); }
   if (id === 'screen-training-record') initTrainingRecord();
   if (id === 'screen-timesheet') loadTimesheetData();
   if (id === 'screen-meteo-record') initMeteoRecord();
@@ -5976,7 +5992,7 @@ function enrollRoleChanged() {
   var role = document.getElementById('enrollRole').value;
   var zg   = document.getElementById('enrollZoneGroup');
   var tg   = document.getElementById('enrollTopicsGroup');
-  zg.style.display = (role === 'mcf_staff') ? 'none' : 'block';
+  zg.style.display = (role === 'mcf_staff' || role === 'consultant') ? 'none' : 'block';
   tg.style.display = (role === 'field_officer') ? 'block' : 'none';
 }
 
@@ -6018,11 +6034,13 @@ function enrollSaveProfile() {
   var zone    = zoneOpt ? (zoneOpt.options[zoneOpt.selectedIndex] ? zoneOpt.options[zoneOpt.selectedIndex].text : '') : '';
   var zoneId  = zoneOpt ? (zoneOpt.value || '') : '';
 
-  if (!name || !sid || !clan) {
-    toast('Please fill all required fields (Name, ID, Clan).');
+  /* Visiting consultants are external — no clan/zone required (they record
+     training given and map the sites they visit, nothing clan-gated). */
+  if (!name || !sid || (!clan && role !== 'consultant')) {
+    toast('Please fill all required fields (Name, ID' + (role !== 'consultant' ? ', Clan' : '') + ').');
     return;
   }
-  if (role !== 'mcf_staff' && !zoneId) {
+  if (role !== 'mcf_staff' && role !== 'consultant' && !zoneId) {
     toast('Please select a Zone.');
     return;
   }
@@ -6246,6 +6264,7 @@ function webAuthnVerify(opts) {
       opts.onSuccess();
     }).catch(function(err) {
       if (opts.txtId) document.getElementById(opts.txtId).textContent = '✗ Not recognised — try again';
+      if (opts.onFail) opts.onFail(err);
     });
   });
 }
@@ -6335,20 +6354,25 @@ function requestCompass(cb){
 ══════════════════════════════════════════════════════════════════════ */
 var MAFIA_TRANSECT_M = 100;        /* transect length (one 100 m tape) */
 var MAFIA_ARRIVE_M   = 30;         /* "you're here" threshold (m) — matches the water/facility field gates (disturbances use 50 m) */
-var MAFIA_MAX_MIN    = 60;         /* survey longer than this is flagged */
+var MAFIA_MAX_MIN    = 60;         /* survey longer than this is flagged (too slow) */
+var MAFIA_MIN_MIN    = 12;         /* survey shorter than this is flagged (implausibly fast — a real 100 m walk-and-record can't be done this quickly) */
 let mafiaVerified = false, mafiaArrived = false;
 var mafiaStart=null, mafiaEnd=null, mafiaTransectBearing=null, mafiaTrainerPos=null;
 var mafiaHasTape=true, mafiaArriveTime=null, mafiaStep=0, mafiaSurveyData=null;
 var mafiaWatchId=null, mafiaNavTarget=null, mafiaNavTimer=null, mafiaTimerInt=null;
 var mafiaWorkflowActive=false;  /* true between fingerprint-at-start and close — stops re-init on return from the matrix */
+var mafiaReviewing=false;       /* true while the matrix is shown in "review before finish" mode */
+var mafiaTrack=[];              /* GPS breadcrumb trail from arrival to close (Zone-Staff anti-gaming check) */
+var mafiaTrackLast=null;
 
 function initMafia(){
   mafiaWorkflowActive=false;
   /* fresh survey: blank the matrix, comments and weather */
   var _mb=document.getElementById('mafiaMatrixBody'); if(_mb) _mb.innerHTML='';
   var _cm=document.getElementById('mafiaComments'); if(_cm) _cm.value='';
-  window._mafiaWx={cloud:'cloudy',rain:'dry',wind:'calm'};
+  window._mafiaWx={cloud:'',rain:'',wind:''};  /* unset until the surveyor taps a condition */
   mafiaVerified=false; mafiaArrived=false; mafiaHasTape=true; mafiaArriveTime=null; mafiaStep=0; mafiaSurveyData=null;
+  mafiaReviewing=false; mafiaTrack=[]; mafiaTrackLast=null;
   mafiaStart=mafiaEnd=mafiaTransectBearing=mafiaTrainerPos=null;
   _mafiaStopNav();
   document.getElementById('mafiaBeginBtn').style.display='none';
@@ -6359,6 +6383,7 @@ function initMafia(){
   var gate=document.getElementById('navGateCard'); if(gate){ gate.classList.remove('arrived'); gate.style.display='block'; }
   var ba=document.getElementById('btnArrive'); if(ba){ ba.disabled=true; ba.classList.remove('ready'); ba.textContent='I’m at the start point ✓'; }
   window._mafiaWithinRadius=false; window._mafiaArriveDist=null; window._mafiaArriveFix=null;
+  window._mafiaEndDist=null; window._mafiaEndFix=null; window._mafiaCloseDist=null; window._mafiaCloseFix=null; window._mafiaCloseVerified=false;
   document.getElementById('mafiaLoading').style.display='block';
   document.getElementById('mafiaContent').style.display='none';
   mafiaSetTape(true);
@@ -6399,6 +6424,7 @@ function _mafiaNavTo(target, label){
   if(mafiaWatchId==null && navigator.geolocation){
     mafiaWatchId=navigator.geolocation.watchPosition(function(pos){
       window._mafiaPos={lat:pos.coords.latitude, lon:pos.coords.longitude, acc:Math.round(pos.coords.accuracy||0), heading:(pos.coords.heading!=null&&!isNaN(pos.coords.heading)?pos.coords.heading:null)};
+      _mafiaTrackAppend(window._mafiaPos);
       _mafiaUpdateNav();
     }, function(){}, {enableHighAccuracy:true, maximumAge:1000, timeout:20000});
   }
@@ -6408,6 +6434,21 @@ function _mafiaStopNav(){
   if(mafiaWatchId!=null && navigator.geolocation){ try{ navigator.geolocation.clearWatch(mafiaWatchId); }catch(e){} mafiaWatchId=null; }
   if(mafiaNavTimer!=null){ clearInterval(mafiaNavTimer); mafiaNavTimer=null; }
   mafiaNavTarget=null;
+}
+/* Breadcrumb trail — log a point only once the surveyor has arrived and the
+   workflow is live, throttled to real movement (≥4 m) and good-ish fixes.
+   Used at close to prove the transect was actually walked (anti-gaming); it is
+   never shown to the surveyor and never blocks a save. */
+function _mafiaTrackAppend(pos){
+  if(!mafiaWorkflowActive || !mafiaArriveTime || !pos) return;
+  if(pos.acc!=null && pos.acc>50) return;   /* ignore very coarse fixes — noise, not movement */
+  var pt={lat:pos.lat, lon:pos.lon, t:Date.now(), acc:(pos.acc!=null?pos.acc:null)};
+  if(mafiaTrackLast){
+    var d=_haversine({lat:mafiaTrackLast.lat, lon:mafiaTrackLast.lon}, {lat:pt.lat, lon:pt.lon});
+    if(d<4) return;   /* throttle: only record a point after ~4 m of travel */
+  }
+  if(mafiaTrack.length>2000) return;   /* safety cap */
+  mafiaTrack.push(pt); mafiaTrackLast=pt;
 }
 function _mafiaUpdateNav(){
   var pos=window._mafiaPos, nav=mafiaNavTarget; if(!pos||!nav) return;
@@ -6440,6 +6481,9 @@ function _mafiaUpdateNav(){
       : (gpsCoarse ? ('GPS is weak here (±'+pos.acc+' m). You may confirm — the location will be flagged for review.')
       : 'Keep walking to the start point. The button unlocks within 30 m (GPS).');
   }
+  /* During the guided workflow, gate the step confirm button on reaching the
+     step's target (the end-point gate). */
+  if(mafiaWorkflowActive) _mafiaStepGate(dist, pos.acc);
 }
 
 /* ── Arrival at the start → fingerprint → start the workflow timer ── */
@@ -6469,12 +6513,14 @@ function mafiaVerify(){
 }
 
 /* ── Guided tape workflow ── */
+/* Close happens at the END, with the tape still laid out: the breadcrumb then
+   confirms the surveyor was genuinely at the end when the data was locked in,
+   and the tape is only rolled up AFTER the survey is saved — once it's up, no
+   answer can be generated from the ground. */
 var MAFIA_STEPS=[
-  { title:'Lay out the tape', target:'end',   tapeText:'Walk to the END point, pulling your 100 m tape as you go.', noTapeText:'Walk to the END point — the app will tell you when you reach ~100 m. Pace it out as evenly as you can.', btn:'I’m at the end ✓' },
-  { title:'Survey back to the start', target:'start', tapeText:'Now walk back to the START along the tape, recording each indicator as you go.', noTapeText:'Now walk back to the START along your line, recording each indicator as you go.', btn:'Open the survey form', action:'survey' },
-  { title:'Check for anything missed', target:'end', tapeText:'Walk the transect to the END again and check nothing was missed.', noTapeText:'Walk back to the END again and check nothing was missed.', btn:'Checked — nothing missed ✓' },
-  { title:'Roll the tape back', target:'start', tapeText:'Roll your tape back to the START point.', noTapeText:'Return to the START point.', btn:'At the start ✓' },
-  { title:'Close the survey', target:'start', tapeText:'You are back at the start. Close and save the survey.', noTapeText:'You are back at the start. Close and save the survey.', btn:'Close & save survey ✓', action:'close' }
+  { title:'Lay out the tape', target:'end',   gate:true, tapeText:'Walk to the END point, pulling your 100 m tape as you go.', noTapeText:'Walk to the END point — the app will tell you when you reach ~100 m. Pace it out as evenly as you can.', btn:'I’m at the end ✓' },
+  { title:'Survey back to the start', target:'start', action:'survey', tapeText:'Now walk back to the START along the tape, recording each indicator as you go.', noTapeText:'Now walk back to the START along your line, recording each indicator as you go.', btn:'Open the survey form' },
+  { title:'Return to the end, review & close', target:'end', gate:true, action:'close', tapeText:'Walk the transect back to the END, checking as you go. At the END — tape still out — review every answer and fill anything missed, then close. Roll the tape up only AFTER it’s saved.', noTapeText:'Walk back to the END, checking as you go. At the END, review every answer and fill anything missed, then close.', btn:'Review & close at the end ✓' }
 ];
 function mafiaStartWorkflow(){
   mafiaWorkflowActive=true;
@@ -6498,16 +6544,51 @@ function _mafiaRenderStep(){
   _mafiaFill('mfStepTitle', 'Step '+(mafiaStep+1)+' of '+MAFIA_STEPS.length+': '+s.title);
   _mafiaFill('mfStepInstruction', mafiaHasTape ? s.tapeText : s.noTapeText);
   var btn=document.getElementById('mfStepBtn'); if(btn) btn.textContent=s.btn;
+  var hint=document.getElementById('mfStepHint');
+  /* A gated step can't be confirmed until GPS puts the surveyor at the target
+     (end or start). This is the end-point gate — it stops "I'm at the end"
+     being tapped 20 m from the start. */
+  if(btn && s.gate){ btn.disabled=true; }
+  else if(btn){ btn.disabled=false; }
+  if(hint){ hint.style.display = s.gate ? 'block' : 'none'; hint.textContent = s.gate ? ('Walk to the '+(s.target==='end'?'END':'START')+' — the button unlocks within '+MAFIA_ARRIVE_M+' m (by GPS).') : ''; }
   /* live-navigate to this step's target */
   _mafiaStopNav();
   var tgt = s.target==='end' ? mafiaEnd : mafiaStart;
   if(tgt) _mafiaNavTo(tgt, s.target==='end' ? 'Transect End' : 'Transect Start');
   var navBox=document.getElementById('mfStepNav'); if(navBox) navBox.style.display = tgt ? 'block' : 'none';
 }
+/* Live gate for the current workflow step: enable the confirm button only once
+   GPS puts the surveyor within range of the step's target (coarse GPS is let
+   through but flagged, same as the start gate). Called from _mafiaUpdateNav. */
+function _mafiaStepGate(dist, acc){
+  var s=MAFIA_STEPS[mafiaStep]; if(!s||!s.gate) return;
+  var btn=document.getElementById('mfStepBtn'); var hint=document.getElementById('mfStepHint');
+  var within=(dist!=null && dist<=MAFIA_ARRIVE_M);
+  var coarse=(acc!=null && acc>MAFIA_ARRIVE_M);
+  var ok=within||coarse;
+  if(btn) btn.disabled=!ok;
+  if(hint){
+    hint.style.display='block';
+    hint.textContent = within ? ('✓ Within '+MAFIA_ARRIVE_M+' m of the '+(s.target==='end'?'END':'START')+' — tap to confirm.')
+      : (coarse ? ('GPS is weak (±'+acc+' m). You may confirm — it will be flagged for review.')
+      : ('Keep walking to the '+(s.target==='end'?'END':'START')+' — '+(dist!=null?Math.round(dist)+' m away':'getting GPS')+'. Unlocks within '+MAFIA_ARRIVE_M+' m.'));
+  }
+}
 function mafiaStepAction(){
   var s=MAFIA_STEPS[mafiaStep]; if(!s) return;
+  /* Capture the GPS fix at the moment of confirming a gated step, so the end
+     and close positions are recorded against the generated targets. */
+  if(s.gate){
+    var pos=window._mafiaPos, tgt=(s.target==='end'?mafiaEnd:mafiaStart);
+    if(pos && tgt){
+      var d=Math.round(_haversine({lat:pos.lat,lon:pos.lon}, tgt));
+      var fix={lat:pos.lat, lon:pos.lon, acc:(pos.acc!=null?pos.acc:null)};
+      if(s.target==='end'){ if(window._mafiaEndDist==null || d<window._mafiaEndDist){ window._mafiaEndDist=d; window._mafiaEndFix=fix; } }
+      else { if(window._mafiaCloseDist==null || d<window._mafiaCloseDist){ window._mafiaCloseDist=d; window._mafiaCloseFix=fix; } }
+    }
+  }
   if(s.action==='survey'){ nav('screen-mafia-matrix'); return; }
-  if(s.action==='close'){ mafiaCloseSurvey(); return; }
+  if(s.action==='close'){ mafiaBeginReview(); return; }
   if(mafiaStep<MAFIA_STEPS.length-1){ mafiaStep++; _mafiaRenderStep(); }
 }
 /* matrix "Save" in workflow context stashes the indicators and returns here */
@@ -6518,9 +6599,20 @@ function mafiaSurveyCollected(){
   setTimeout(_mafiaRenderStep, 50);
   toast('Survey recorded — continue the walk');
 }
+/* The final step re-opens the filled matrix in review mode (completeness gate)
+   so the surveyor fills any gaps while standing AT THE END with the tape still
+   out, then closes there. The GPS watch is deliberately LEFT RUNNING so the
+   breadcrumb keeps confirming they're at the end through to the close, and the
+   close fix is live. The matrix DOM still holds their answers — never cleared
+   after the survey step. Finishing from there calls mafiaCloseSurvey(). */
+function mafiaBeginReview(){
+  if(!mafiaSurveyData){ toast('Record the survey before closing.'); mafiaStep=1; _mafiaRenderStep(); return; }
+  mafiaReviewing=true;
+  nav('screen-mafia-matrix');
+}
 function mafiaCloseSurvey(){
   if(!mafiaSurveyData){ toast('Record the survey (step 2) before closing.'); mafiaStep=1; _mafiaRenderStep(); return; }
-  mafiaWorkflowActive=false;
+  mafiaWorkflowActive=false; mafiaReviewing=false;
   _mafiaStopNav(); if(mafiaTimerInt!=null){ clearInterval(mafiaTimerInt); mafiaTimerInt=null; }
   var mins=mafiaArriveTime?((Date.now()-mafiaArriveTime)/60000):null;
   var rec=mafiaSurveyData;
@@ -6535,12 +6627,58 @@ function mafiaCloseSurvey(){
      live-nav flag which can be stale at the moment of tapping. For Zone-Staff
      review; not shown to the surveyor. */
   rec.location_flagged=!(typeof window._mafiaArriveDist==='number' && window._mafiaArriveDist<=MAFIA_ARRIVE_M);
+  /* End-point gate: the GPS fix captured when the surveyor confirmed reaching
+     the generated END (closest of the two end steps). Flagged if that fix never
+     landed within 30 m of the end — i.e. they claimed the end without being there. */
+  rec.end_fix=window._mafiaEndFix||null;
+  rec.end_dist_m=(typeof window._mafiaEndDist==='number')?window._mafiaEndDist:null;
+  rec.end_gate_flagged=!(typeof window._mafiaEndDist==='number' && window._mafiaEndDist<=MAFIA_ARRIVE_M);
+  /* Close gate: the survey is closed AT THE END with the tape still laid out.
+     Record where the surveyor was at close (last GPS fix) relative to the
+     generated END; flagged if it wasn't within 30 m — i.e. they closed away
+     from the end. The breadcrumb's reached_end corroborates this. */
+  var _cp = window._mafiaPos || null;
+  var _cfix = _cp ? { lat:_cp.lat, lon:_cp.lon, acc:(_cp.acc!=null?_cp.acc:null) } : (window._mafiaEndFix||null);
+  var _cdist = (_cfix && mafiaEnd) ? Math.round(_haversine({lat:_cfix.lat, lon:_cfix.lon}, mafiaEnd))
+             : ((typeof window._mafiaEndDist==='number') ? window._mafiaEndDist : null);
+  rec.close_at='end';
+  rec.close_fix=_cfix;
+  rec.close_dist_m=_cdist;
+  rec.close_gate_flagged=!(typeof _cdist==='number' && _cdist<=MAFIA_ARRIVE_M);
+  /* Re-fingerprint at close — true when identity was re-verified before saving. */
+  rec.reverified_at_close=!!window._mafiaCloseVerified;
   rec.duration_min=mins!=null?Math.round(mins*10)/10:null;
   rec.duration_excessive=(mins!=null && mins>MAFIA_MAX_MIN);
   rec.compass_source=window._compassSource||'';
+  /* ── Breadcrumb analysis (anti-gaming) ──────────────────────────────────
+     Walk the recorded trail: total distance walked, farthest the surveyor got
+     from the start, closest they came to the end. A genuine 100 m transect
+     reaches the end and ranges the full length; someone who drifts 20 m and
+     stops never does. These are review flags for Zone Staff — they do not
+     block the save and the surveyor is not told. */
+  var trackDist=0, maxFromStart=0, minToEnd=null;
+  for(var i=0;i<mafiaTrack.length;i++){
+    var p=mafiaTrack[i];
+    if(i>0) trackDist+=_haversine({lat:mafiaTrack[i-1].lat, lon:mafiaTrack[i-1].lon}, {lat:p.lat, lon:p.lon});
+    if(mafiaStart){ var dS=_haversine({lat:p.lat, lon:p.lon}, mafiaStart); if(dS>maxFromStart) maxFromStart=dS; }
+    if(mafiaEnd){ var dE=_haversine({lat:p.lat, lon:p.lon}, mafiaEnd); if(minToEnd==null||dE<minToEnd) minToEnd=dE; }
+  }
+  rec.track_points=mafiaTrack.length;
+  rec.track_distance_m=Math.round(trackDist);
+  rec.max_from_start_m=Math.round(maxFromStart);
+  rec.min_to_end_m=(minToEnd!=null)?Math.round(minToEnd):null;
+  rec.reached_end=(minToEnd!=null && minToEnd<=MAFIA_ARRIVE_M);
+  /* Flagged if the trail never reached the end, or never ranged even half the
+     transect from the start, or there were too few points to judge movement. */
+  rec.movement_flagged=( mafiaTrack.length<3 || !rec.reached_end || rec.max_from_start_m < (MAFIA_TRANSECT_M*0.5) );
+  rec.time_fast_flagged=(mins!=null && mins<MAFIA_MIN_MIN);
+  rec.review_flagged=!!(rec.location_flagged || rec.end_gate_flagged || rec.close_gate_flagged || rec.duration_excessive || rec.time_fast_flagged || rec.movement_flagged);
   saveRecord('mafia', rec, function(){
     clearDraft('screen-mafia-matrix');
-    toast('MaFIA survey saved ✓'+(rec.duration_excessive?' (time flagged)':''));
+    var notes=[]; if(rec.time_fast_flagged)notes.push('time'); if(rec.movement_flagged)notes.push('movement'); if(rec.duration_excessive)notes.push('too slow');
+    toast('MaFIA survey saved ✓'+(notes.length?(' ('+notes.join(', ')+' flagged for review)'):''));
+    /* Saved at the end — the tape can now be rolled up (nothing changes the record). */
+    if(mafiaHasTape) setTimeout(function(){ toast('Now roll your tape back to the start.'); }, 1400);
     showScreen('screen-dashboard');
   });
 }
@@ -9230,27 +9368,43 @@ function _isPhenoTree(crop){ return PHENO_TREES.indexOf(crop)>=0; }
 window._phenoObsPhotos={}; /* plotId -> dataURL (optional monitoring photo) */
 window._phenoPhases={};    /* plotId -> {phaseKey:true} active set this visit */
 
-function captureGPS(callback) {
-  /* Real GPS via navigator.geolocation; callback(gps, err) */
+function captureGPS(callback, opts) {
+  /* Real GPS via navigator.geolocation; callback(gps, err).
+     Degrades gracefully: if high-accuracy GNSS can't fix (indoors, under
+     canopy, timed out), it retries with a coarser network/last-known fix
+     rather than returning nothing. gps.source is 'gps' or 'coarse'. */
+  opts = opts || {};
   if (!navigator.geolocation) {
-    callback(null, 'GPS not supported on this device');
+    callback(null, 'Location not supported on this device');
     return;
   }
+  var msgs = {1:'Location permission denied — allow it in the browser/app settings',
+              2:'No signal here — move outside / to open sky, then retry',
+              3:'Location timed out — retry, or move to open sky'};
+  var hi = (opts.highAccuracy !== false);
+  function ok(pos, src){
+    callback({
+      lat: pos.coords.latitude.toFixed(5),
+      lng: pos.coords.longitude.toFixed(5),
+      accuracy: Math.round(pos.coords.accuracy),
+      source: src
+    }, null);
+  }
   navigator.geolocation.getCurrentPosition(
-    function(pos) {
-      callback({
-        lat: pos.coords.latitude.toFixed(5),
-        lng: pos.coords.longitude.toFixed(5),
-        accuracy: Math.round(pos.coords.accuracy)
-      }, null);
+    function(pos){ ok(pos, hi ? 'gps' : 'coarse'); },
+    function(err){
+      /* fall back to a coarse fix (network / cached) before giving up */
+      if (hi && (err.code === 2 || err.code === 3) && !opts._noFallback) {
+        navigator.geolocation.getCurrentPosition(
+          function(pos){ ok(pos, 'coarse'); },
+          function(err2){ callback(null, msgs[err2.code] || 'Location unavailable'); },
+          {enableHighAccuracy:false, timeout:(opts.coarseTimeout||15000), maximumAge:(opts.coarseMaxAge||600000)}
+        );
+        return;
+      }
+      callback(null, msgs[err.code] || 'Location unavailable');
     },
-    function(err) {
-      var msgs = {1:'GPS permission denied — check browser settings',
-                  2:'GPS signal unavailable — move outside',
-                  3:'GPS timed out — try again'};
-      callback(null, msgs[err.code] || 'GPS error');
-    },
-    {enableHighAccuracy: true, timeout: 20000, maximumAge: 0}
+    {enableHighAccuracy: hi, timeout:(opts.timeout||20000), maximumAge:(opts.maximumAge||0)}
   );
 }
 
@@ -9676,8 +9830,36 @@ function initDistribution(){
   var sb=document.getElementById('distSubmitBtn'); if(sb) sb.disabled=true;
   document.getElementById('distItemsList').innerHTML='';
   distAddItem();
+  /* Warn up-front if the phone is nearly full — a handover captures photos AND
+     a video, which are large. We never block the capture (the event can't be
+     repeated), but the officer should know to free space / sync first. */
+  checkStorageLevel(function(s){ if(s.level==='critical'){ toast('⚠ Storage critically low (~'+s.freeMB+' MB). Free space / send data — the video may not save.'); } });
+  window._distGps=null;
   var g=document.getElementById('distGPS'); if(g){ g.textContent='Acquiring…'; g.style.color='#888'; }
-  captureGPS(function(gps,err){ var el=document.getElementById('distGPS'); if(!el) return; if(gps){ el.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'; el.style.color='#2E6B38'; window._distGps=gps; } else { el.innerHTML=icon('warning',13)+' '+err; el.style.color='#E65100'; window._distGps=null; } });
+  var rb=document.getElementById('distGpsRetry'); if(rb) rb.style.display='none';
+  captureGPS(_distApplyGps);
+}
+/* Apply a GPS result to the distribution form. Location is OPTIONAL — a failed
+   fix never blocks the handover (you may be indoors, or need to step outside),
+   and retrying only re-acquires location: it never clears the photos/video. */
+function _distApplyGps(gps,err){
+  var el=document.getElementById('distGPS'); var btn=document.getElementById('distGpsRetry');
+  if(!el) return;
+  if(gps){
+    el.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'+(gps.source==='coarse'?' (approx)':'');
+    el.style.color='#2E6B38'; window._distGps=gps;
+    if(btn){ btn.style.display='none'; btn.disabled=false; }
+  } else {
+    el.innerHTML=icon('warning',13)+' '+err+' — you can still record this handover.';
+    el.style.color='#E65100'; window._distGps=null;
+    if(btn){ btn.style.display='block'; btn.disabled=false; btn.innerHTML='<span data-icon="pin" data-size="13"></span> Retry location'; try{ hydrateIcons(btn); }catch(e){} }
+  }
+}
+function distRetryGPS(){
+  var el=document.getElementById('distGPS'); var btn=document.getElementById('distGpsRetry');
+  if(el){ el.textContent='Acquiring…'; el.style.color='#888'; }
+  if(btn){ btn.disabled=true; btn.textContent='Acquiring…'; }
+  captureGPS(_distApplyGps);
 }
 function distSetRecipType(v){ window._distRecipType=v; var box=document.getElementById('distRecipTypePills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-rt]'),function(b){ b.classList.toggle('active', b.getAttribute('data-rt')===v); }); }
 function distRenderDonors(){
@@ -9756,6 +9938,8 @@ function submitDistribution(){
     donor_recognised:!!(document.getElementById('distDonorRecognised')&&document.getElementById('distDonorRecognised').checked),
     items:items,
     gps:window._distGps||null,
+    gps_source:(window._distGps&&window._distGps.source)||null,
+    location_missing:!window._distGps,
     date:now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear(),
     photo_handover:window._distPhotos.handover, photo_receipt:window._distPhotos.receipt,
     video:window._distVideo, video_size:window._distVideoMeta,
@@ -9766,7 +9950,7 @@ function submitDistribution(){
   var sb=document.getElementById('distSubmitBtn'); if(sb){ sb.disabled=true; sb.textContent='Saving…'; }
   saveRecord('distributions', rec, function(){
     toast('Handover recorded ✓ — send data when you have signal');
-    if(sb){ sb.textContent='Record handover'; }
+    if(sb){ sb.textContent='Save and close'; }
     goBack();
   });
 }
@@ -10645,7 +10829,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v49'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v62'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -10821,7 +11005,7 @@ function cacheStewardProfile() {
       if (trainingTile) {
         /* Training visible to: field officers, oversight (Project/MCF & Zone
            staff), and clan stewards granted topic authorisations */
-        var canTrain = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' ||
+        var canTrain = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' || role === 'consultant' ||
                         (role === 'clan_steward' && authTopics.length > 0));
         trainingTile.style.display = canTrain ? '' : 'none';
       }
@@ -10829,7 +11013,7 @@ function cacheStewardProfile() {
          plain clan stewards). */
       var distTile = document.getElementById('tile-distribution');
       if (distTile) {
-        var canDist = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff');
+        var canDist = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' || role === 'consultant');
         distTile.style.display = canDist ? '' : 'none';
       }
       /* Focused dashboard for Field Officers — show only their tiles (marked
@@ -10839,6 +11023,9 @@ function cacheStewardProfile() {
       var tiles = document.querySelectorAll('#screen-dashboard .module-tile');
       tiles.forEach(function(t){
         if (role === 'field_officer') { if (t.getAttribute('data-fo') !== '1') t.style.display = 'none'; }
+        /* Visiting consultants see only what they use: record training given and
+           map the sites they visit (plus Export Data to get records off-phone). */
+        else if (role === 'consultant') { if (t.getAttribute('data-vc') !== '1') t.style.display = 'none'; }
       });
     }
   });
@@ -11136,6 +11323,7 @@ function renderUpdateProfileScreen() {
           '<option value="zone_staff"'   + (profile.role==='zone_staff'?' selected':'')   + '>Zone Staff</option>' +
           '<option value="field_officer"'+ (profile.role==='field_officer'?' selected':'')+'>Field Officer (Agri. Extension)</option>' +
           '<option value="mcf_staff"'    + (profile.role==='mcf_staff'?' selected':'')    + '>Project / MCF Staff</option>' +
+          '<option value="consultant"'   + (profile.role==='consultant'?' selected':'')   + '>Visiting Consultant</option>' +
         '</select>' +
       '</div>' +
       '<div class="form-group" id="upZoneGroup">' +
@@ -11408,7 +11596,7 @@ function syncAuthorisations(profile) {
         /* Re-run tile visibility */
         var role   = profile.role || 'clan_steward';
         var tile   = document.getElementById('tile-training');
-        var canTrain = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' ||
+        var canTrain = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' || role === 'consultant' ||
                         (role === 'clan_steward' && updated.length > 0));
         if (tile) tile.style.display = canTrain ? '' : 'none';
         /* Notify user if they now have new training access */
@@ -11466,7 +11654,8 @@ function loadProfileScreen() {
         'clan_steward': 'Clan Steward',
         'field_officer': 'Field Officer',
         'zone_staff': 'Zone Staff',
-        'mcf_staff': 'Project / MCF Staff'
+        'mcf_staff': 'Project / MCF Staff',
+        'consultant': 'Visiting Consultant'
       })[profile.role] || profile.role || 'Clan Steward';
       /* Detail rows */
       var detailDiv = document.querySelector('#screen-profile .card');
@@ -11916,6 +12105,78 @@ function updateSyncWarning() {
   });
 }
 
+/* ── Free-space check — these are work phones; storage must stay free for
+   the app. Returns {level:'ok'|'low'|'critical'|'unknown', freeMB, usedMB,
+   quotaMB}. "free" is the origin's remaining quota, which shrinks as the whole
+   device fills, so it tracks device pressure too. ── */
+var MCA_STORAGE_CRITICAL_MB = 200;   /* ~13 handover videos — act now */
+var MCA_STORAGE_LOW_MB      = 600;   /* getting tight — plan to clear */
+function checkStorageLevel(cb) {
+  if (!(navigator.storage && navigator.storage.estimate)) { cb({ level:'unknown' }); return; }
+  navigator.storage.estimate().then(function(est) {
+    var quota = est.quota || 0, usage = est.usage || 0;
+    var freeMB = Math.max(0, (quota - usage) / 1048576);
+    var level = freeMB <= MCA_STORAGE_CRITICAL_MB ? 'critical'
+              : freeMB <= MCA_STORAGE_LOW_MB ? 'low' : 'ok';
+    cb({ level:level, freeMB:Math.round(freeMB), usedMB:Math.round(usage/1048576), quotaMB:Math.round(quota/1048576) });
+  }).catch(function(){ cb({ level:'unknown' }); });
+}
+/* Dashboard low-storage banner */
+function updateStorageWarning() {
+  var banner = document.getElementById('storageWarningBanner'); if (!banner) return;
+  checkStorageLevel(function(s) {
+    if (s.level !== 'low' && s.level !== 'critical') { banner.style.display = 'none'; return; }
+    var crit = s.level === 'critical';
+    var bg = crit ? '#FFEBEE' : '#FFF8E1', border = crit ? '#FFCDD2' : '#FFE082', color = crit ? '#B71C1C' : '#E65100';
+    banner.style.cssText =
+      'display:block;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;font-size:0.79rem;line-height:1.5;cursor:pointer;' +
+      'background:' + bg + ';border:1px solid ' + border + ';color:' + color + ';';
+    banner.innerHTML = icon('warning',13) + ' <strong>Storage ' + (crit ? 'critically low' : 'getting low') +
+      '</strong> — about <strong>' + s.freeMB + ' MB</strong> free. ' +
+      (crit ? 'Photos and video may fail to save. Send your data, then free space on the phone.'
+            : 'Send your data and clear space so records keep saving.') +
+      '<span style="float:right;opacity:0.7;">Manage →</span>';
+  });
+}
+
+/* ── Retention: keep each record (incl. its photos/video) on the phone for a
+   month after it synced, as a local fallback if anything happens to Drive.
+   After that window, strip only the heavy media (data: URLs) and keep the
+   record's metadata. Runs after a CONFIRMED Drive upload (we know the data is
+   safely on Drive before freeing anything). Registries/ownership fields are
+   never touched — only large image/video data URLs. ── */
+var MCA_RETAIN_DAYS = 30;
+function purgeOldSyncedMedia(cb) {
+  var cutoff = Date.now() - MCA_RETAIN_DAYS * 86400000;
+  var stores = DATA_STORES.slice();
+  var i = 0, purgedRecords = 0, freedBytes = 0;
+  function nextStore() {
+    if (i >= stores.length) { if (cb) cb({ records: purgedRecords, mb: Math.round(freedBytes / 1048576) }); return; }
+    var store = stores[i++];
+    getAllRecords(store, function(rows) {
+      var toUpdate = [];
+      (rows || []).forEach(function(r) {
+        if (!r || !r.synced) return;                 /* never touch unsynced — it isn't on Drive yet */
+        if (!r.synced_at) { r.synced_at = new Date().toISOString(); toUpdate.push(r); return; } /* unknown sync time → start the clock now */
+        if (r.media_purged) return;
+        if (new Date(r.synced_at).getTime() > cutoff) return;  /* still inside the 1-month fallback window */
+        var changed = false;
+        Object.keys(r).forEach(function(k) {
+          var v = r[k];
+          if (typeof v === 'string' && v.length > 500 && v.slice(0, 5) === 'data:') { freedBytes += v.length; r[k] = ''; changed = true; }
+        });
+        if (changed) { r.media_purged = true; r.media_purged_at = new Date().toISOString(); purgedRecords++; toUpdate.push(r); }
+      });
+      var j = 0;
+      (function nextRec() {
+        if (j >= toUpdate.length) { nextStore(); return; }
+        updateRecord(store, toUpdate[j++], function() { nextRec(); });  /* put() preserves synced:true → no re-upload */
+      })();
+    });
+  }
+  nextStore();
+}
+
 /* ── Storage health in Data Export screen ────────────────────────── */
 function updateStorageInfo() {
   /* Quota / usage bar */
@@ -12159,7 +12420,12 @@ function _sendAllDataInner() {
               .then(function(result) {
                 if (result && result.status === 'ok') {
                   var pending = syncTasks.length || 1;
-                  function doneSync() { pending--; if (pending === 0) updateRecordCounts(); }
+                  function doneSync() { pending--; if (pending === 0) {
+                    updateRecordCounts();
+                    /* Data is confirmed on Drive — now free the media from records
+                       that have been synced longer than the 1-month fallback window. */
+                    purgeOldSyncedMedia(function(res){ if (res && res.records > 0) { try { localStorage.setItem('mcaLastPurge', new Date().toISOString()); } catch(e){} } });
+                  } }
                   if (syncTasks.length === 0) { doneSync(); return; }
                   syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, doneSync); });
                   var nowTs = new Date().toISOString();
@@ -12282,8 +12548,8 @@ var MAFIA_ST=5;
 function _mafiaCell(code, st, type, opts){
   var h='<td data-code="'+code+'" data-st="'+st+'">';
   if(type==='sel'){ h+='<select class="msel" onchange="mafiaRegate()"><option value="">—</option>'+opts.map(function(o){return '<option>'+o+'</option>';}).join('')+'</select>'; }
-  else if(type==='tally'){ h+='<div class="tally"><button type="button" class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button type="button" class="tally-btn" onclick="tc(this,1)">+</button></div>'; }
-  else if(type==='pa'){ h+='<div class="yn-toggle" style="margin-bottom:3px;"><button type="button" class="yn-btn" onclick="mPA(this,\'y\')">P</button><button type="button" class="yn-btn" onclick="mPA(this,\'n\')">A</button></div><div class="tally pa-tally off"><button type="button" class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button type="button" class="tally-btn" onclick="tc(this,1)">+</button></div>'; }
+  else if(type==='tally'){ h+='<div class="tally"><button type="button" class="tally-btn" onclick="mtc(this,-1)">−</button><span class="tally-count tc-unset">–</span><button type="button" class="tally-btn" onclick="mtc(this,1)">+</button></div>'; }
+  else if(type==='pa'){ h+='<div class="yn-toggle" style="margin-bottom:3px;"><button type="button" class="yn-btn" onclick="mPA(this,\'y\')">P</button><button type="button" class="yn-btn" onclick="mPA(this,\'n\')">A</button></div><div class="tally pa-tally off"><button type="button" class="tally-btn" onclick="mtcPA(this,-1)">−</button><span class="tally-count tc-unset">–</span><button type="button" class="tally-btn" onclick="mtcPA(this,1)">+</button></div>'; }
   else if(type==='ynsub'){ h+='<div class="yn-toggle"><button type="button" class="yn-btn" onclick="mYn(this,\'y\')">Y</button><button type="button" class="yn-btn" onclick="mYn(this,\'n\')">N</button></div><select class="msel sub-sel" onchange="mafiaRegate()" style="margin-top:3px;" disabled><option value="">—</option>'+opts.map(function(o){return '<option>'+o+'</option>';}).join('')+'</select>'; }
   else { h+='<div class="yn-toggle"><button type="button" class="yn-btn" onclick="mYn(this,\'y\')">Y</button><button type="button" class="yn-btn" onclick="mYn(this,\'n\')">N</button></div>'; }
   return h+'</td>';
@@ -12310,11 +12576,46 @@ function renderMafiaMatrix(){
 /* yn/present-absent handlers that also re-evaluate the conditional gating */
 function mYn(btn,t){ yn(btn,t); mafiaRegate(); }
 function mPA(btn,t){ yn(btn,t); mafiaRegate(); }
+/* MaFIA count controls. "–" is UNSET (never recorded); a numeric value,
+   INCLUDING an explicit 0, is a real answer and is recorded. This keeps a
+   skipped count distinct from a counted zero (CLAUDE.md: no default-on-skip,
+   but 0 is a valid count). */
+function _mSetTally(el,v){
+  if(v==null){ el.textContent='–'; el.classList.add('tc-unset'); }
+  else { el.textContent=String(v); el.classList.remove('tc-unset'); }
+}
+function mtc(btn,delta){
+  var el=btn.closest('.tally').querySelector('.tally-count'); if(!el) return;
+  var t=el.textContent.trim(); var set=(t!=='–'&&t!=='');
+  var v=set?(parseInt(t,10)||0):null;
+  if(delta>0){ v=(v==null)?1:v+1; }
+  else { if(v==null){ v=0; }          /* − from unset → explicit 0 (a counted zero) */
+         else if(v>0){ v=v-1; }
+         else { v=null; } }           /* − from 0 → clear back to unset */
+  _mSetTally(el,v);
+  if(mafiaReviewing) mafiaRenderGapState();
+}
+/* Present/Absent count: only meaningful when Present, and floored at 1 —
+   "Present" always means at least one was seen/heard, so a 0 is not allowed. */
+/* Present/Absent count. Absent locks the counter at 0 (buttons disabled). When
+   Present, the surveyor MUST use the counter — it starts at 0 shown in amber
+   ("needs a count") and a count of 0 is not a valid Present answer. No auto 1
+   (that would be a default-on-skip); they press + to enter the real number. */
+function mtcPA(btn,delta){
+  if(btn.disabled) return;
+  var el=btn.closest('.tally').querySelector('.tally-count'); if(!el) return;
+  var t=el.textContent.trim(); var v=(t==='–'||t==='')?0:(parseInt(t,10)||0);
+  v=v+delta; if(v<0)v=0;
+  el.textContent=String(v); el.classList.remove('tc-unset','pa-lock');
+  el.classList.toggle('pa-need', v<1);
+  if(mafiaReviewing) mafiaRenderGapState();
+}
 function _mYes(code,st){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); return !!(td && td.querySelector('.yn-btn.ay')); }
+function _mAbs(code,st){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); return !!(td && td.querySelector('.yn-btn.an')); }
 function _mGate(code,st,on){
   var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); if(!td) return;
   td.classList.toggle('cell-na', !on);
-  if(!on){ td.querySelectorAll('.yn-btn').forEach(function(b){b.classList.remove('ay','an');}); var c=td.querySelector('.tally-count'); if(c)c.textContent='0'; var s=td.querySelector('select'); if(s)s.value=''; }
+  if(!on){ td.querySelectorAll('.yn-btn').forEach(function(b){b.classList.remove('ay','an');}); var c=td.querySelector('.tally-count'); if(c){ c.textContent='–'; c.classList.add('tc-unset'); } var s=td.querySelector('select'); if(s)s.value=''; }
 }
 function _mShowRow(code,on){ var tr=document.querySelector('#mafiaMatrixBody tr[data-code="'+code+'"]'); if(tr) tr.style.display=on?'':'none'; }
 function _mShowHdr(mod,on){ var tr=document.querySelector('#mafiaMatrixBody tr[data-modhdr="'+mod+'"]'); if(tr) tr.style.display=on?'':'none'; var n=document.querySelector('#mafiaMatrixBody tr[data-note="'+mod+'"]'); if(n) n.style.display=on?'':'none'; }
@@ -12330,30 +12631,139 @@ function mafiaRegate(){
     /* E maintained/overgrown sub-select enabled only when Yes */
     ['E1','E2'].forEach(function(c){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+c+'"][data-st="'+st+'"]'); if(td){ var sub=td.querySelector('.sub-sel'); if(sub){ var on=_mYes(c,st); sub.disabled=!on; if(!on) sub.value=''; } } });
     /* F present → enable its count */
-    for(var f=1;f<=15;f++){ var fc='F'+f; var ftd=document.querySelector('#mafiaMatrixBody td[data-code="'+fc+'"][data-st="'+st+'"]'); if(ftd){ var pt=ftd.querySelector('.pa-tally'); if(pt){ var present=_mYes(fc,st); pt.classList.toggle('off',!present); if(!present){ var cc=pt.querySelector('.tally-count'); if(cc)cc.textContent='0'; } } } }
+    for(var f=1;f<=15;f++){ var fc='F'+f; var ftd=document.querySelector('#mafiaMatrixBody td[data-code="'+fc+'"][data-st="'+st+'"]'); if(!ftd) continue; var pt=ftd.querySelector('.pa-tally'); if(!pt) continue;
+      var present=_mYes(fc,st), absent=_mAbs(fc,st);
+      var cc=pt.querySelector('.tally-count'); var fbtns=pt.querySelectorAll('.tally-btn');
+      pt.classList.toggle('off', !(present||absent));   /* counter hidden until P or A chosen */
+      if(absent){
+        if(cc){ cc.textContent='0'; cc.classList.remove('tc-unset','pa-need'); cc.classList.add('pa-lock'); }
+        Array.prototype.forEach.call(fbtns,function(b){ b.disabled=true; });     /* locked at zero */
+      } else if(present){
+        Array.prototype.forEach.call(fbtns,function(b){ b.disabled=false; });
+        if(cc){ var t=cc.textContent.trim(); var n=(t==='–'||t===''||t==='0')?0:(parseInt(t,10)||0); cc.textContent=String(n); cc.classList.remove('tc-unset','pa-lock'); cc.classList.toggle('pa-need', n<1); }
+      } else {
+        Array.prototype.forEach.call(fbtns,function(b){ b.disabled=false; });
+        if(cc){ cc.textContent='–'; cc.classList.add('tc-unset'); cc.classList.remove('pa-need','pa-lock'); }
+      }
+    }
   }
   /* collapse whole conditional groups when no sub-transect triggers them */
   _mShowHdr('B', anyWater); ['B1','B2','B3','B4','B5','B6'].forEach(function(c){ _mShowRow(c, anyWater); });
   ['D9','D10','D11','D12','D13'].forEach(function(c){ _mShowRow(c, anyDmg); });
   ['G6','G7','G8'].forEach(function(c){ _mShowRow(c, anyCut); });
+  if(mafiaReviewing) mafiaRenderGapState();   /* live completeness while reviewing */
+}
+
+/* ── Review completeness (every applicable cell must be answered) ──────────
+   A whole 100 m transect = ST1–ST5 all walked, so every applicable cell needs an
+   explicit answer. "Applicable" excludes gated n/a cells. Absence IS data. ── */
+function _mafiaCellAnswered(td, type){
+  if(type==='sel'){ var s=td.querySelector('select'); return !!(s && s.value); }
+  if(type==='tally'){ var c=td.querySelector('.tally-count'); var t=c?c.textContent.trim():''; return t!=='' && t!=='–'; }
+  if(type==='pa'){ var ay=td.querySelector('.yn-btn.ay'), an=td.querySelector('.yn-btn.an');
+    if(an) return true;
+    if(ay){ var cc=td.querySelector('.tally-count'); var n=cc?parseInt(cc.textContent,10)||0:0; return n>=1; }  /* Present needs a count */
+    return false; }
+  if(type==='ynsub'){ var y=td.querySelector('.yn-btn.ay'), nn=td.querySelector('.yn-btn.an');
+    if(nn) return true;
+    if(y){ var sub=td.querySelector('.sub-sel'); return !!(sub && sub.value); }  /* Yes needs the detail */
+    return false; }
+  return !!(td.querySelector('.yn-btn.ay')||td.querySelector('.yn-btn.an'));   /* yn */
+}
+function mafiaComputeGaps(){
+  var gaps=[];
+  MAFIA_SCHEMA.forEach(function(m){ m.q.forEach(function(q){
+    var code=q[0], type=q[2];
+    for(var st=1;st<=MAFIA_ST;st++){
+      var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]');
+      if(!td || td.classList.contains('cell-na')) continue;   /* gated / not applicable */
+      if(!_mafiaCellAnswered(td,type)) gaps.push({td:td, code:code, st:st, type:type});
+    }
+  }); });
+  return gaps;
+}
+var _mafiaGapIdx=0;
+function mafiaRenderGapState(){
+  var gaps=mafiaComputeGaps();
+  document.querySelectorAll('#mafiaMatrixBody td.mafia-gap').forEach(function(td){ td.classList.remove('mafia-gap'); });
+  gaps.forEach(function(g){ g.td.classList.add('mafia-gap'); });
+  var note=document.getElementById('mafiaReviewNote'), btn=document.getElementById('mafiaSaveBtn');
+  var jbtn='<button type="button" onclick="mafiaJumpToGap()" style="margin-top:6px;margin-right:6px;background:#E65100;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:0.74rem;font-weight:700;cursor:pointer;">Jump to next gap →</button>';
+  var abtn='<button type="button" onclick="mafiaBulkAbsent()" style="margin-top:6px;background:#fff;color:#1B5E20;border:1px solid #1B5E20;border-radius:8px;padding:6px 10px;font-size:0.74rem;font-weight:700;cursor:pointer;">Mark remaining Yes/No as “No / Absent”</button>';
+  if(gaps.length===0){
+    if(note){ note.style.background='#E8F5E9'; note.style.border='1px solid #C8E6C9'; note.style.color='#1B5E20';
+      note.innerHTML='<strong>All answered ✓</strong> Every indicator on this transect has an answer. Note anything unusual in <em>Comments (H)</em>, then finish.'; }
+    if(btn){ btn.disabled=false; btn.textContent='Finish & save survey ✓'; }
+  } else {
+    if(note){ note.style.background='#FFF8E1'; note.style.border='1px solid #FFE082'; note.style.color='#6D4C00';
+      note.innerHTML='<strong>'+gaps.length+' answer'+(gaps.length!==1?'s':'')+' still needed.</strong> Every indicator you walked needs Yes/No, a count, or a selection — absence is data too.<br>'+jbtn+abtn; }
+    if(btn){ btn.disabled=true; btn.textContent='Answer the '+gaps.length+' remaining'; }
+  }
+  return gaps;
+}
+function mafiaJumpToGap(){
+  var gaps=mafiaComputeGaps(); if(!gaps.length) return;
+  if(_mafiaGapIdx>=gaps.length) _mafiaGapIdx=0;
+  var g=gaps[_mafiaGapIdx++];
+  try{ g.td.scrollIntoView({block:'center', inline:'center', behavior:'smooth'}); }catch(e){ g.td.scrollIntoView(); }
+  g.td.classList.add('mafia-gap-flash');
+  setTimeout(function(){ g.td.classList.remove('mafia-gap-flash'); }, 1300);
+}
+/* Bulk: fill the remaining applicable Yes/No and Present/Absent cells as
+   No / Absent — an explicit one-tap choice ("everything else I didn't see"),
+   not a silent default. Counts and selections still need real values. */
+function mafiaBulkAbsent(){
+  var filled=0;
+  MAFIA_SCHEMA.forEach(function(m){ m.q.forEach(function(q){
+    var code=q[0], type=q[2];
+    if(type!=='yn' && type!=='pa' && type!=='ynsub') return;
+    for(var st=1;st<=MAFIA_ST;st++){
+      var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]');
+      if(!td || td.classList.contains('cell-na')) continue;
+      if(_mafiaCellAnswered(td,type)) continue;
+      var btns=td.querySelectorAll('.yn-toggle .yn-btn');
+      if(btns && btns[1]){ yn(btns[1],'n'); filled++; }   /* second button = No / Absent */
+    }
+  }); });
+  mafiaRegate();
+  var remaining=mafiaComputeGaps().length;
+  toast(filled+' set to No/Absent'+(remaining?(' — '+remaining+' count'+(remaining!==1?'s':'')+'/selection'+(remaining!==1?'s':'')+' still need a value'):' — all answered ✓'));
 }
 /* Weather toggles (transect description) */
-window._mafiaWx={cloud:'cloudy',rain:'dry',wind:'calm'};
+window._mafiaWx={cloud:'',rain:'',wind:''};  /* unset — a value is recorded only if the surveyor taps it */
 function _mafiaRenderWx(){ ['cloudy','sunny','dry','rainy','calm','windy'].forEach(function(k){ var el=document.getElementById('mfwx-'+k); if(el) el.classList.remove('active'); });
   var on=function(id){var e=document.getElementById(id); if(e) e.classList.add('active');};
-  on('mfwx-'+(window._mafiaWx.cloud==='sunny'?'sunny':'cloudy')); on('mfwx-'+(window._mafiaWx.rain==='rainy'?'rainy':'dry')); on('mfwx-'+(window._mafiaWx.wind==='windy'?'windy':'calm')); }
+  var w=window._mafiaWx||{};
+  if(w.cloud) on('mfwx-'+w.cloud); if(w.rain) on('mfwx-'+w.rain); if(w.wind) on('mfwx-'+w.wind); }
 function mfWx(group,val){ window._mafiaWx[group]=val; _mafiaRenderWx(); }
 function initMafiaMatrix(){
   var body=document.getElementById('mafiaMatrixBody');
   if(body && body.children.length===0) renderMafiaMatrix();
   _mafiaRenderWx();
   mafiaRegate();
+  /* review mode (step 5) vs first pass (step 2): swap the footer button + note */
+  var b=document.getElementById('mafiaSaveBtn');
+  var n=document.getElementById('mafiaReviewNote'); if(n) n.style.display=mafiaReviewing?'block':'none';
+  var sub=document.querySelector('#screen-mafia-matrix .bar-subtitle'); if(sub) sub.textContent=mafiaReviewing?'Review your answers':'100 m training transect';
+  if(mafiaReviewing){
+    var sc=document.querySelector('#screen-mafia-matrix .scroll-content'); if(sc) sc.scrollTop=0;
+    _mafiaGapIdx=0;
+    mafiaRenderGapState();   /* computes gaps, highlights, sets the note + finish button */
+  } else {
+    if(b){ b.disabled=false; b.textContent='Save & Continue'; }
+    document.querySelectorAll('#mafiaMatrixBody td.mafia-gap').forEach(function(td){ td.classList.remove('mafia-gap'); });
+  }
 }
 
 function collectMafiaData(){
   var p=window._cachedProfile||{};
-  var data={ survey_type:'mafia', zone:p.zone||'', clan:p.clan||'', steward:p.stewardId||'',
-    weather_cloud:(window._mafiaWx||{}).cloud||'', weather_rain:(window._mafiaWx||{}).rain||'', weather_wind:(window._mafiaWx||{}).wind||'' };
+  var data={ survey_type:'mafia', zone:p.zone||'', clan:p.clan||'', steward:p.stewardId||'' };
+  /* Weather is recorded ONLY if the surveyor set it — a skipped question must not
+     become recorded data by default (see CLAUDE.md: no default-on-skip). */
+  var _wx=window._mafiaWx||{};
+  if(_wx.cloud) data.weather_cloud=_wx.cloud;
+  if(_wx.rain)  data.weather_rain=_wx.rain;
+  if(_wx.wind)  data.weather_wind=_wx.wind;
   MAFIA_SCHEMA.forEach(function(m){ m.q.forEach(function(q){
     var code=q[0], type=q[2];
     for(var st=1;st<=MAFIA_ST;st++){
@@ -12361,8 +12771,8 @@ function collectMafiaData(){
       if(!td || td.classList.contains('cell-na')) continue;  /* skip N/A */
       var key=code+'_ST'+st;
       if(type==='sel'){ var s=td.querySelector('select'); if(s&&s.value) data[key]=s.value; }
-      else if(type==='tally'){ var c=td.querySelector('.tally-count'); var n=c?parseInt(c.textContent)||0:0; if(n) data[key]=n; }
-      else if(type==='pa'){ var ay=td.querySelector('.yn-btn.ay'); var an=td.querySelector('.yn-btn.an'); if(ay){ data[key]='P'; var cn=td.querySelector('.tally-count'); data[key+'_n']=cn?parseInt(cn.textContent)||0:0; } else if(an){ data[key]='A'; } }
+      else if(type==='tally'){ var c=td.querySelector('.tally-count'); var tv=c?c.textContent.trim():''; if(tv!=='' && tv!=='–') data[key]=parseInt(tv,10)||0; }  /* explicit 0 recorded; "–" (unset) is not */
+      else if(type==='pa'){ var ay=td.querySelector('.yn-btn.ay'); var an=td.querySelector('.yn-btn.an'); if(ay){ data[key]='P'; var cn=td.querySelector('.tally-count'); var pn=cn?parseInt(cn.textContent,10)||0:0; data[key+'_n']=pn; }  /* P with n=0 is incomplete — flagged in review, not auto-filled */ else if(an){ data[key]='A'; } }
       else if(type==='ynsub'){ var y=td.querySelector('.yn-btn.ay'), nn=td.querySelector('.yn-btn.an'); if(y){ data[key]='Y'; var sub=td.querySelector('.sub-sel'); if(sub&&sub.value) data[key+'_sub']=sub.value; } else if(nn){ data[key]='N'; } }
       else { var yy=td.querySelector('.yn-btn.ay'), nz=td.querySelector('.yn-btn.an'); if(yy) data[key]='Y'; else if(nz) data[key]='N'; }
     }
@@ -12568,7 +12978,29 @@ function installPWA() {
 
 /* In the guided workflow, the matrix "Save" stashes the indicators and returns
    to the walk; the full record (with transect + timing) is written at close. */
-function saveMafia() { mafiaSurveyCollected(); }
+function saveMafia() {
+  if(mafiaReviewing){
+    /* Completeness gate: every applicable indicator must be answered before the
+       survey can be closed. If any remain, jump to the first and stop. */
+    var gaps=mafiaComputeGaps();
+    if(gaps.length>0){ toast(gaps.length+' indicator'+(gaps.length!==1?'s':'')+' still need an answer.'); mafiaRenderGapState(); mafiaJumpToGap(); return; }
+    /* finishing from the review screen — re-verify identity at close, then
+       re-collect (in case answers were corrected during review) and write the
+       full record. The re-fingerprint confirms the same enrolled surveyor is
+       the one closing the survey. */
+    var b=document.getElementById('mafiaSaveBtn'); if(b){ b.disabled=true; b.textContent='Verify your fingerprint to finish…'; }
+    webAuthnVerify({ btnId:null, txtId:null, setVerified:function(){}, onSuccess:function(){
+      window._mafiaCloseVerified=true;
+      mafiaSurveyData=collectMafiaData();
+      mafiaCloseSurvey();
+    }, onFail:function(){
+      var bb=document.getElementById('mafiaSaveBtn'); if(bb){ bb.disabled=false; bb.textContent='Finish & save survey ✓'; }
+      toast('Fingerprint not recognised — tap to try again.');
+    }});
+  } else {
+    mafiaSurveyCollected();
+  }
+}
 
 /* ── Training Records ── */
 var selectedTrainingType = '';
@@ -12738,7 +13170,7 @@ function initTrainingRecord() {
   var isQualifiedSteward = (role === 'clan_steward' && authorisedTopics.length > 0);
   /* Field officers deliver training; oversight (Project/MCF & Zone staff) can
      deliver and test it; clan stewards only when authorised for a topic. */
-  var canTrain = (isOversight() || role === 'field_officer' || isQualifiedSteward);
+  var canTrain = (isOversight() || role === 'field_officer' || role === 'consultant' || isQualifiedSteward);
 
   if (!canTrain) {
     toast('Training delivery not authorised for this account.');
@@ -13227,7 +13659,7 @@ function printTimesheet() {
 }
 
 function tsRoleLabel(role) {
-  var map = { clan_steward:'Clan Steward', zone_staff:'Zone Staff', field_officer:'Field Officer', mcf_staff:'Project / MCF Staff' };
+  var map = { clan_steward:'Clan Steward', zone_staff:'Zone Staff', field_officer:'Field Officer', mcf_staff:'Project / MCF Staff', consultant:'Visiting Consultant' };
   return map[role] || (role || 'Staff');
 }
 

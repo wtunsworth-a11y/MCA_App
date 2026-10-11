@@ -211,6 +211,24 @@ old build, **fully close the app** (swipe it from recent apps) and reopen. The
 **reports** are cached separately — tap **Refresh** on the report screen.
 
 ### Install troubleshooting (Android/Chrome)
+- **No "Install" / "Add to Home screen" in the Chrome menu at all?** (The menu
+  jumps Recent tabs → Share → … → Settings with no install entry.) Work through
+  these in order — it's almost always one of the first two:
+  1. **It may already be installed.** Check the app drawer / home screen for an
+     **MCA Steward** icon. If it's there, just open that — there's nothing to
+     install.
+  2. **Reload once.** On a brand-new first visit the service worker hasn't
+     registered yet, so Chrome doesn't offer install. **Pull down to refresh**
+     (or reopen the URL), wait for it to finish loading, then open ⋮ again — the
+     entry usually appears on the second load. Also look for a small **install
+     icon in the address bar** (a screen with a down-arrow) — tapping that
+     installs too.
+  3. **Clear an orphaned install record.** Chrome → **Settings → Site settings →
+     All sites → `wtunsworth-a11y.github.io` → Clear & reset**, then reload and
+     retry. (Safe — nothing else is stored there.)
+  4. **Update Chrome** (Play Store → Chrome → Update) and make sure **Desktop
+     site** is **off** in the ⋮ menu, then reload.
+  5. Reboot the phone if it still won't offer install.
 - **Only "Create shortcut", no "Install"?** Turn **Desktop site** off in the ⋮
   menu, reload, try again. (On recent Chrome the entry is "Install and create
   shortcut" — that IS the install.)

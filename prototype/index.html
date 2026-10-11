@@ -2166,8 +2166,9 @@ select.msel {
         <!-- Transect description: conditions for the whole transect -->
         <div class="card" style="margin:10px 14px 4px;padding:10px 14px;">
           <div style="font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:6px;">Transect conditions</div>
+          <div style="font-size:0.68rem;color:#999;margin-bottom:5px;">Tap to set — left blank if not recorded.</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            <button type="button" class="weather-pill active" id="mfwx-cloudy" onclick="mfWx('cloud','cloudy')">Cloudy</button>
+            <button type="button" class="weather-pill" id="mfwx-cloudy" onclick="mfWx('cloud','cloudy')">Cloudy</button>
             <button type="button" class="weather-pill" id="mfwx-sunny" onclick="mfWx('cloud','sunny')">Sunny</button>
             <button type="button" class="weather-pill" id="mfwx-dry" onclick="mfWx('rain','dry')">Dry</button>
             <button type="button" class="weather-pill" id="mfwx-rainy" onclick="mfWx('rain','rainy')">Rainy</button>
@@ -6356,7 +6357,7 @@ function initMafia(){
   /* fresh survey: blank the matrix, comments and weather */
   var _mb=document.getElementById('mafiaMatrixBody'); if(_mb) _mb.innerHTML='';
   var _cm=document.getElementById('mafiaComments'); if(_cm) _cm.value='';
-  window._mafiaWx={cloud:'cloudy',rain:'dry',wind:'calm'};
+  window._mafiaWx={cloud:'',rain:'',wind:''};  /* unset until the surveyor taps a condition */
   mafiaVerified=false; mafiaArrived=false; mafiaHasTape=true; mafiaArriveTime=null; mafiaStep=0; mafiaSurveyData=null;
   mafiaReviewing=false; mafiaTrack=[]; mafiaTrackLast=null;
   mafiaStart=mafiaEnd=mafiaTransectBearing=mafiaTrainerPos=null;
@@ -10756,7 +10757,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v51'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v52'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12449,10 +12450,11 @@ function mafiaRegate(){
   ['G6','G7','G8'].forEach(function(c){ _mShowRow(c, anyCut); });
 }
 /* Weather toggles (transect description) */
-window._mafiaWx={cloud:'cloudy',rain:'dry',wind:'calm'};
+window._mafiaWx={cloud:'',rain:'',wind:''};  /* unset — a value is recorded only if the surveyor taps it */
 function _mafiaRenderWx(){ ['cloudy','sunny','dry','rainy','calm','windy'].forEach(function(k){ var el=document.getElementById('mfwx-'+k); if(el) el.classList.remove('active'); });
   var on=function(id){var e=document.getElementById(id); if(e) e.classList.add('active');};
-  on('mfwx-'+(window._mafiaWx.cloud==='sunny'?'sunny':'cloudy')); on('mfwx-'+(window._mafiaWx.rain==='rainy'?'rainy':'dry')); on('mfwx-'+(window._mafiaWx.wind==='windy'?'windy':'calm')); }
+  var w=window._mafiaWx||{};
+  if(w.cloud) on('mfwx-'+w.cloud); if(w.rain) on('mfwx-'+w.rain); if(w.wind) on('mfwx-'+w.wind); }
 function mfWx(group,val){ window._mafiaWx[group]=val; _mafiaRenderWx(); }
 function initMafiaMatrix(){
   var body=document.getElementById('mafiaMatrixBody');
@@ -12468,8 +12470,13 @@ function initMafiaMatrix(){
 
 function collectMafiaData(){
   var p=window._cachedProfile||{};
-  var data={ survey_type:'mafia', zone:p.zone||'', clan:p.clan||'', steward:p.stewardId||'',
-    weather_cloud:(window._mafiaWx||{}).cloud||'', weather_rain:(window._mafiaWx||{}).rain||'', weather_wind:(window._mafiaWx||{}).wind||'' };
+  var data={ survey_type:'mafia', zone:p.zone||'', clan:p.clan||'', steward:p.stewardId||'' };
+  /* Weather is recorded ONLY if the surveyor set it — a skipped question must not
+     become recorded data by default (see CLAUDE.md: no default-on-skip). */
+  var _wx=window._mafiaWx||{};
+  if(_wx.cloud) data.weather_cloud=_wx.cloud;
+  if(_wx.rain)  data.weather_rain=_wx.rain;
+  if(_wx.wind)  data.weather_wind=_wx.wind;
   MAFIA_SCHEMA.forEach(function(m){ m.q.forEach(function(q){
     var code=q[0], type=q[2];
     for(var st=1;st<=MAFIA_ST;st++){

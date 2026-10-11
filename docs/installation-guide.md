@@ -11,8 +11,9 @@ Google Drive backend. For day-to-day coordinator operations see the
 
 ## 1. What you need before you start
 
-- An **Android phone** with a recent version of **Chrome** (the app is a
-  Progressive Web App / PWA).
+- An **Android phone** with **Chrome** (or **Samsung Internet**) — the app is a
+  Progressive Web App / PWA. **Do not use Firefox to install** — it has no real
+  "Install app" option (see §3).
 - The **app URL**: `https://wtunsworth-a11y.github.io/MCA_App/prototype/index.html`
 - A **Google account** that owns the Drive folder where data will be stored
   (needed once, to deploy the backend).
@@ -78,10 +79,20 @@ only and never written to the phone.
 
 ## 3. Install the app on a steward phone
 
-1. Open the **app URL** in Chrome on the steward's phone.
+> ⚠️ **Use Chrome — not Firefox.** The install only works properly in **Chrome**
+> (or **Samsung Internet**). **Firefox for Android does not offer a real install**
+> — there is no "Install app" option (it's buried under *Add page to → Home
+> screen* and only makes a weak shortcut without offline/standalone/storage
+> protection). If a phone's default browser is Firefox, open the URL in Chrome
+> instead before installing.
+
+**In Chrome:**
+1. Open the **app URL** in **Chrome** on the steward's phone.
 2. Tap the three-dot menu (⋮) in Chrome's top-right corner.
-3. Tap **Add to Home screen** (or **Install app**), then **Add** to confirm.
+3. Tap **Add to Home screen** (or **Install app**), then **Add** / **Install** to confirm.
 4. Open the app **from the new home-screen icon** — not from a browser tab.
+
+**In Samsung Internet** (also fine): ☰ menu → **Add page to** → **Home screen**.
 
 > **Why this matters — storage protection.** Installing as a PWA (Add to Home
 > Screen) tells Android to protect the app's local data from being deleted

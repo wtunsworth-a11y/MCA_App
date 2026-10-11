@@ -3200,6 +3200,15 @@ select.msel {
             </div>
           </div>
           <div class="form-group">
+            <label class="form-label">Recipient ID <span style="color:#999;font-weight:400;">(if an enrolled steward / officer)</span></label>
+            <input type="text" id="distRecipId" class="form-input" style="text-transform:uppercase;" placeholder="e.g. MCA-7B-01 — leave blank if not enrolled" oninput="distCheckRecipId()">
+            <div id="distRecipIdStatus" style="font-size:0.72rem;margin-top:3px;"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Received by <span style="color:#999;font-weight:400;">(person who physically took them)</span></label>
+            <input type="text" id="distReceivedBy" class="form-input" placeholder="For a group: the representative's name">
+          </div>
+          <div class="form-group">
             <label class="form-label">Clan</label>
             <input type="text" id="distClan" class="form-input" placeholder="e.g. Afore">
           </div>
@@ -9580,7 +9589,8 @@ function initDistribution(){
   window._distVideo=null; window._distVideoMeta='';
   window._distRecipType='individual'; window._distPurpose='conservation_planting';
   window._distVerified=false; window._distItemSeq=0; window._distItemIds=[];
-  ['distRecipient','distClan','distContact','distPurposeNote','distNotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['distRecipient','distRecipId','distReceivedBy','distClan','distContact','distPurposeNote','distNotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var ris=document.getElementById('distRecipIdStatus'); if(ris) ris.textContent='';
   var cb=document.getElementById('distConfirmed'); if(cb) cb.checked=false;
   distSetRecipType('individual'); distSetPurpose('conservation_planting');
   ['handover','receipt'].forEach(function(s){ var b=document.getElementById('distPhoto'+(s==='handover'?'Handover':'Receipt')+'Box'); if(b){ b.innerHTML=(s==='handover'?'Items being<br>handed over':'Recipient<br>receiving them'); b.style.borderColor='#ccc'; b.style.color='#999'; } });
@@ -9594,6 +9604,16 @@ function initDistribution(){
   captureGPS(function(gps,err){ var el=document.getElementById('distGPS'); if(!el) return; if(gps){ el.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'; el.style.color='#2E6B38'; window._distGps=gps; } else { el.innerHTML=icon('warning',13)+' '+err; el.style.color='#E65100'; window._distGps=null; } });
 }
 function distSetRecipType(v){ window._distRecipType=v; var box=document.getElementById('distRecipTypePills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-rt]'),function(b){ b.classList.toggle('active', b.getAttribute('data-rt')===v); }); }
+/* Optional recipient ID: soft check against the shipped enrolled-ID list.
+   Not a hard block — many recipients (community members, groups) aren't enrolled. */
+function distCheckRecipId(){
+  var el=document.getElementById('distRecipId'), st=document.getElementById('distRecipIdStatus'); if(!el||!st) return;
+  var id=(el.value||'').trim().toUpperCase();
+  if(!id){ st.textContent=''; return; }
+  if(_idTaken(id)){ st.textContent='✓ '+id+' — matches an enrolled person.'; st.style.color='#2E7D32'; return; }
+  if(/^MCA-[A-Z0-9]+-\d{1,3}$/.test(id)){ st.textContent='△ Not in the enrolled list on this phone — check the ID, or leave blank if they aren’t enrolled.'; st.style.color='#E65100'; return; }
+  st.textContent='△ Only fill this if the recipient is an enrolled steward/officer.'; st.style.color='#888';
+}
 function distSetPurpose(v){ window._distPurpose=v; var box=document.getElementById('distPurposePills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-pp]'),function(b){ b.classList.toggle('active', b.getAttribute('data-pp')===v); }); }
 function distAddItem(){
   var n=++window._distItemSeq; window._distItemIds.push(n);
@@ -9655,7 +9675,7 @@ function submitDistribution(){
   var rec={
     survey_type:'distribution', record_uid:generateRecordId('DIST'),
     officer:{ name:p.name||'', steward_id:p.stewardId||'', role:p.role||'' },
-    recipient:{ name:recip.trim(), type:window._distRecipType||'', clan:((document.getElementById('distClan')||{}).value||'').trim(), contact:((document.getElementById('distContact')||{}).value||'').trim(), confirmed_receipt:!!(document.getElementById('distConfirmed')&&document.getElementById('distConfirmed').checked) },
+    recipient:{ name:recip.trim(), type:window._distRecipType||'', steward_id:((document.getElementById('distRecipId')||{}).value||'').trim().toUpperCase(), steward_id_known:_idTaken(((document.getElementById('distRecipId')||{}).value||'')), received_by:((document.getElementById('distReceivedBy')||{}).value||'').trim(), clan:((document.getElementById('distClan')||{}).value||'').trim(), contact:((document.getElementById('distContact')||{}).value||'').trim(), confirmed_receipt:!!(document.getElementById('distConfirmed')&&document.getElementById('distConfirmed').checked) },
     purpose_category:window._distPurpose||'', purpose:purposeNote.trim(),
     items:items,
     gps:window._distGps||null,
@@ -10724,7 +10744,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v33'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v34'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

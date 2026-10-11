@@ -6413,7 +6413,7 @@ function requestCompass(cb){
    MaFIA — real transect generation, live navigation, guided tape workflow
 ══════════════════════════════════════════════════════════════════════ */
 var MAFIA_TRANSECT_M = 100;        /* transect length (one 100 m tape) */
-var MAFIA_ARRIVE_M   = 10;         /* "you're here" threshold (m) */
+var MAFIA_ARRIVE_M   = 30;         /* "you're here" threshold (m) — matches the water/facility field gates (disturbances use 50 m) */
 var MAFIA_MAX_MIN    = 60;         /* survey longer than this is flagged */
 let mafiaVerified = false, mafiaArrived = false;
 var mafiaStart=null, mafiaEnd=null, mafiaTransectBearing=null, mafiaTrainerPos=null;
@@ -6446,7 +6446,7 @@ function initMafia(){
       return;
     }
     mafiaTrainerPos={lat:parseFloat(gps.lat), lon:parseFloat(gps.lng)};
-    var startBearing=Math.random()*360, startDist=30+Math.random()*70;   /* 30..100 m from trainer */
+    var startBearing=Math.random()*360, startDist=40+Math.random()*60;   /* 40..100 m from trainer — always beyond the 30 m arrival radius so it's a real walk */
     mafiaStart=geoDest(mafiaTrainerPos, startBearing, startDist);
     mafiaTransectBearing=Math.random()*360;
     mafiaEnd=geoDest(mafiaStart, mafiaTransectBearing, MAFIA_TRANSECT_M);
@@ -10564,7 +10564,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v40'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v41'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

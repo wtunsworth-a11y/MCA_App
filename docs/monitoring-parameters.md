@@ -166,8 +166,9 @@ generates a random **100 m transect** near the surveyor: a **start point ≤100 
 away on a random bearing, extended **100 m** along a random bearing to the end.
 The app navigates the surveyor to the start with a **live compass** — the phone's
 **magnetometer** (`DeviceOrientation`) when available, falling back to the GPS
-course — showing direction + distance. At the start (within ~10 m, or manual
-confirm under canopy) a **fingerprint** starts the survey and a **timer**. The
+course — showing direction + distance. At the start (within ~30 m — the same
+radius as the water/facility gates — or a manual confirm when canopy GPS is
+weak) a **fingerprint** starts the survey and a **timer**. The
 surveyor is then guided through the tape workflow: walk to the end (lay the
 tape), survey back to the start, re-walk to the end to check, roll the tape back,
 and close at the start. A **no-tape variant** guides the same walk by GPS

@@ -694,6 +694,9 @@ textarea.form-input:focus, input.form-input:focus {
 .tally-count.pa-need { color: #E65100; font-weight: 700; }   /* Present chosen but count still 0 — must be set */
 .tally-count.pa-lock { color: #bbb; font-weight: 600; }      /* Absent — counter locked at 0 */
 .tally-btn:disabled { opacity: 0.35; cursor: default; }
+/* Review mode — an applicable cell still without an answer (gap to chase) */
+#mafiaMatrixBody td.mafia-gap { box-shadow: inset 0 0 0 2px #E65100; background: #FFF3E0; }
+#mafiaMatrixBody td.mafia-gap-flash { box-shadow: inset 0 0 0 3px #B71C1C; background: #FFE0B2; }
 /* Conditional MaFIA cell that doesn't apply in this sub-transect (e.g. water
    module where there is no waterway): blocked so contradictory data can't be
    entered. */
@@ -10813,7 +10816,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v59'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v60'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12577,6 +12580,7 @@ function mtc(btn,delta){
          else if(v>0){ v=v-1; }
          else { v=null; } }           /* − from 0 → clear back to unset */
   _mSetTally(el,v);
+  if(mafiaReviewing) mafiaRenderGapState();
 }
 /* Present/Absent count: only meaningful when Present, and floored at 1 —
    "Present" always means at least one was seen/heard, so a 0 is not allowed. */
@@ -12591,6 +12595,7 @@ function mtcPA(btn,delta){
   v=v+delta; if(v<0)v=0;
   el.textContent=String(v); el.classList.remove('tc-unset','pa-lock');
   el.classList.toggle('pa-need', v<1);
+  if(mafiaReviewing) mafiaRenderGapState();
 }
 function _mYes(code,st){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); return !!(td && td.querySelector('.yn-btn.ay')); }
 function _mAbs(code,st){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); return !!(td && td.querySelector('.yn-btn.an')); }
@@ -12633,6 +12638,83 @@ function mafiaRegate(){
   _mShowHdr('B', anyWater); ['B1','B2','B3','B4','B5','B6'].forEach(function(c){ _mShowRow(c, anyWater); });
   ['D9','D10','D11','D12','D13'].forEach(function(c){ _mShowRow(c, anyDmg); });
   ['G6','G7','G8'].forEach(function(c){ _mShowRow(c, anyCut); });
+  if(mafiaReviewing) mafiaRenderGapState();   /* live completeness while reviewing */
+}
+
+/* ── Review completeness (every applicable cell must be answered) ──────────
+   A whole 100 m transect = ST1–ST5 all walked, so every applicable cell needs an
+   explicit answer. "Applicable" excludes gated n/a cells. Absence IS data. ── */
+function _mafiaCellAnswered(td, type){
+  if(type==='sel'){ var s=td.querySelector('select'); return !!(s && s.value); }
+  if(type==='tally'){ var c=td.querySelector('.tally-count'); var t=c?c.textContent.trim():''; return t!=='' && t!=='–'; }
+  if(type==='pa'){ var ay=td.querySelector('.yn-btn.ay'), an=td.querySelector('.yn-btn.an');
+    if(an) return true;
+    if(ay){ var cc=td.querySelector('.tally-count'); var n=cc?parseInt(cc.textContent,10)||0:0; return n>=1; }  /* Present needs a count */
+    return false; }
+  if(type==='ynsub'){ var y=td.querySelector('.yn-btn.ay'), nn=td.querySelector('.yn-btn.an');
+    if(nn) return true;
+    if(y){ var sub=td.querySelector('.sub-sel'); return !!(sub && sub.value); }  /* Yes needs the detail */
+    return false; }
+  return !!(td.querySelector('.yn-btn.ay')||td.querySelector('.yn-btn.an'));   /* yn */
+}
+function mafiaComputeGaps(){
+  var gaps=[];
+  MAFIA_SCHEMA.forEach(function(m){ m.q.forEach(function(q){
+    var code=q[0], type=q[2];
+    for(var st=1;st<=MAFIA_ST;st++){
+      var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]');
+      if(!td || td.classList.contains('cell-na')) continue;   /* gated / not applicable */
+      if(!_mafiaCellAnswered(td,type)) gaps.push({td:td, code:code, st:st, type:type});
+    }
+  }); });
+  return gaps;
+}
+var _mafiaGapIdx=0;
+function mafiaRenderGapState(){
+  var gaps=mafiaComputeGaps();
+  document.querySelectorAll('#mafiaMatrixBody td.mafia-gap').forEach(function(td){ td.classList.remove('mafia-gap'); });
+  gaps.forEach(function(g){ g.td.classList.add('mafia-gap'); });
+  var note=document.getElementById('mafiaReviewNote'), btn=document.getElementById('mafiaSaveBtn');
+  var jbtn='<button type="button" onclick="mafiaJumpToGap()" style="margin-top:6px;margin-right:6px;background:#E65100;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:0.74rem;font-weight:700;cursor:pointer;">Jump to next gap →</button>';
+  var abtn='<button type="button" onclick="mafiaBulkAbsent()" style="margin-top:6px;background:#fff;color:#1B5E20;border:1px solid #1B5E20;border-radius:8px;padding:6px 10px;font-size:0.74rem;font-weight:700;cursor:pointer;">Mark remaining Yes/No as “No / Absent”</button>';
+  if(gaps.length===0){
+    if(note){ note.style.background='#E8F5E9'; note.style.border='1px solid #C8E6C9'; note.style.color='#1B5E20';
+      note.innerHTML='<strong>All answered ✓</strong> Every indicator on this transect has an answer. Note anything unusual in <em>Comments (H)</em>, then finish.'; }
+    if(btn){ btn.disabled=false; btn.textContent='Finish & save survey ✓'; }
+  } else {
+    if(note){ note.style.background='#FFF8E1'; note.style.border='1px solid #FFE082'; note.style.color='#6D4C00';
+      note.innerHTML='<strong>'+gaps.length+' answer'+(gaps.length!==1?'s':'')+' still needed.</strong> Every indicator you walked needs Yes/No, a count, or a selection — absence is data too.<br>'+jbtn+abtn; }
+    if(btn){ btn.disabled=true; btn.textContent='Answer the '+gaps.length+' remaining'; }
+  }
+  return gaps;
+}
+function mafiaJumpToGap(){
+  var gaps=mafiaComputeGaps(); if(!gaps.length) return;
+  if(_mafiaGapIdx>=gaps.length) _mafiaGapIdx=0;
+  var g=gaps[_mafiaGapIdx++];
+  try{ g.td.scrollIntoView({block:'center', inline:'center', behavior:'smooth'}); }catch(e){ g.td.scrollIntoView(); }
+  g.td.classList.add('mafia-gap-flash');
+  setTimeout(function(){ g.td.classList.remove('mafia-gap-flash'); }, 1300);
+}
+/* Bulk: fill the remaining applicable Yes/No and Present/Absent cells as
+   No / Absent — an explicit one-tap choice ("everything else I didn't see"),
+   not a silent default. Counts and selections still need real values. */
+function mafiaBulkAbsent(){
+  var filled=0;
+  MAFIA_SCHEMA.forEach(function(m){ m.q.forEach(function(q){
+    var code=q[0], type=q[2];
+    if(type!=='yn' && type!=='pa' && type!=='ynsub') return;
+    for(var st=1;st<=MAFIA_ST;st++){
+      var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]');
+      if(!td || td.classList.contains('cell-na')) continue;
+      if(_mafiaCellAnswered(td,type)) continue;
+      var btns=td.querySelectorAll('.yn-toggle .yn-btn');
+      if(btns && btns[1]){ yn(btns[1],'n'); filled++; }   /* second button = No / Absent */
+    }
+  }); });
+  mafiaRegate();
+  var remaining=mafiaComputeGaps().length;
+  toast(filled+' set to No/Absent'+(remaining?(' — '+remaining+' count'+(remaining!==1?'s':'')+'/selection'+(remaining!==1?'s':'')+' still need a value'):' — all answered ✓'));
 }
 /* Weather toggles (transect description) */
 window._mafiaWx={cloud:'',rain:'',wind:''};  /* unset — a value is recorded only if the surveyor taps it */
@@ -12647,10 +12729,17 @@ function initMafiaMatrix(){
   _mafiaRenderWx();
   mafiaRegate();
   /* review mode (step 5) vs first pass (step 2): swap the footer button + note */
-  var b=document.getElementById('mafiaSaveBtn'); if(b) b.textContent=mafiaReviewing?'Finish & save survey ✓':'Save & Continue';
+  var b=document.getElementById('mafiaSaveBtn');
   var n=document.getElementById('mafiaReviewNote'); if(n) n.style.display=mafiaReviewing?'block':'none';
   var sub=document.querySelector('#screen-mafia-matrix .bar-subtitle'); if(sub) sub.textContent=mafiaReviewing?'Review your answers':'100 m training transect';
-  if(mafiaReviewing){ var sc=document.querySelector('#screen-mafia-matrix .scroll-content'); if(sc) sc.scrollTop=0; }
+  if(mafiaReviewing){
+    var sc=document.querySelector('#screen-mafia-matrix .scroll-content'); if(sc) sc.scrollTop=0;
+    _mafiaGapIdx=0;
+    mafiaRenderGapState();   /* computes gaps, highlights, sets the note + finish button */
+  } else {
+    if(b){ b.disabled=false; b.textContent='Save & Continue'; }
+    document.querySelectorAll('#mafiaMatrixBody td.mafia-gap').forEach(function(td){ td.classList.remove('mafia-gap'); });
+  }
 }
 
 function collectMafiaData(){
@@ -12878,6 +12967,10 @@ function installPWA() {
    to the walk; the full record (with transect + timing) is written at close. */
 function saveMafia() {
   if(mafiaReviewing){
+    /* Completeness gate: every applicable indicator must be answered before the
+       survey can be closed. If any remain, jump to the first and stop. */
+    var gaps=mafiaComputeGaps();
+    if(gaps.length>0){ toast(gaps.length+' indicator'+(gaps.length!==1?'s':'')+' still need an answer.'); mafiaRenderGapState(); mafiaJumpToGap(); return; }
     /* finishing from the review screen — re-verify identity at close, then
        re-collect (in case answers were corrected during review) and write the
        full record. The re-fingerprint confirms the same enrolled surveyor is

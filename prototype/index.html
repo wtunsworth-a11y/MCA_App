@@ -5800,6 +5800,25 @@ function toast(msg) {
 window.addEventListener('DOMContentLoaded', function() { initAutosave(); });
 
 /* ── Splash auto-advance — routes to enroll or fingerprint ── */
+/* Firefox for Android can't install this as a real PWA (no standalone/offline/
+   storage protection), and field officers often have it as the default browser.
+   If we detect Firefox and we're NOT already installed, show a dismissible hint
+   to reopen in Chrome. */
+function checkBrowserForInstall(){
+  try {
+    var ua=navigator.userAgent||'';
+    var isFirefox=/Firefox\//.test(ua) && /Android/.test(ua);
+    var standalone=(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone===true;
+    if(!isFirefox || standalone) return;
+    if(localStorage.getItem('mcaHideFxHint')==='1') return;
+    var bar=document.createElement('div');
+    bar.id='fxInstallBar';
+    bar.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:99998;background:#5C3D7A;color:#fff;padding:11px 14px;font-size:0.82rem;line-height:1.45;box-shadow:0 -3px 12px rgba(0,0,0,0.3);';
+    bar.innerHTML='<strong>Open in Chrome to install.</strong> Firefox can’t install this app properly (no offline / home-screen). Copy this page’s address into <strong>Chrome</strong>, then <strong>⋮ → Add to Home screen</strong>.'
+      +'<button onclick="try{localStorage.setItem(\'mcaHideFxHint\',\'1\');}catch(e){} var b=document.getElementById(\'fxInstallBar\'); if(b)b.remove();" style="float:right;margin-left:10px;background:rgba(255,255,255,0.25);border:none;color:#fff;border-radius:6px;padding:4px 10px;font-size:0.78rem;">Got it</button>';
+    document.body.appendChild(bar);
+  } catch(e){}
+}
 window.addEventListener('load', () => {
   /* ── Storage persistence — the single most important safeguard.
      Tells Android/Chrome this origin's data must not be auto-cleared
@@ -5819,6 +5838,7 @@ window.addEventListener('load', () => {
   /* Refresh the trusted-time anchor from the server whenever we have signal. */
   try { pingServerTime(function(){}); } catch(e) {}
   window.addEventListener('online', function(){ try { pingServerTime(function(){}); } catch(e){} });
+  try { checkBrowserForInstall(); } catch(e) {}
 
   setTimeout(() => {
     getAllRecords('auth', function(records) {
@@ -10614,7 +10634,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v45'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v46'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

@@ -3125,7 +3125,8 @@ select.msel {
 
           <div class="section-label" style="padding-left:0;">Location</div>
           <div class="card" style="padding:10px 14px;margin-bottom:10px;">
-            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> GPS</span><span id="distGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> Location <span style="color:#999;font-weight:400;">(optional)</span></span><span id="distGPS" style="font-size:0.78rem;color:#2E6B38;font-weight:600;">Acquiring…</span></div>
+            <button type="button" id="distGpsRetry" onclick="distRetryGPS()" style="display:none;margin-top:5px;width:100%;background:#fff;border:1px solid #00838F;color:#00838F;border-radius:8px;padding:8px;font-size:0.78rem;font-weight:600;cursor:pointer;"><span data-icon="pin" data-size="13"></span> Retry location</button>
           </div>
 
           <div class="section-label" style="padding-left:0;">Evidence</div>
@@ -9342,27 +9343,43 @@ function _isPhenoTree(crop){ return PHENO_TREES.indexOf(crop)>=0; }
 window._phenoObsPhotos={}; /* plotId -> dataURL (optional monitoring photo) */
 window._phenoPhases={};    /* plotId -> {phaseKey:true} active set this visit */
 
-function captureGPS(callback) {
-  /* Real GPS via navigator.geolocation; callback(gps, err) */
+function captureGPS(callback, opts) {
+  /* Real GPS via navigator.geolocation; callback(gps, err).
+     Degrades gracefully: if high-accuracy GNSS can't fix (indoors, under
+     canopy, timed out), it retries with a coarser network/last-known fix
+     rather than returning nothing. gps.source is 'gps' or 'coarse'. */
+  opts = opts || {};
   if (!navigator.geolocation) {
-    callback(null, 'GPS not supported on this device');
+    callback(null, 'Location not supported on this device');
     return;
   }
+  var msgs = {1:'Location permission denied — allow it in the browser/app settings',
+              2:'No signal here — move outside / to open sky, then retry',
+              3:'Location timed out — retry, or move to open sky'};
+  var hi = (opts.highAccuracy !== false);
+  function ok(pos, src){
+    callback({
+      lat: pos.coords.latitude.toFixed(5),
+      lng: pos.coords.longitude.toFixed(5),
+      accuracy: Math.round(pos.coords.accuracy),
+      source: src
+    }, null);
+  }
   navigator.geolocation.getCurrentPosition(
-    function(pos) {
-      callback({
-        lat: pos.coords.latitude.toFixed(5),
-        lng: pos.coords.longitude.toFixed(5),
-        accuracy: Math.round(pos.coords.accuracy)
-      }, null);
+    function(pos){ ok(pos, hi ? 'gps' : 'coarse'); },
+    function(err){
+      /* fall back to a coarse fix (network / cached) before giving up */
+      if (hi && (err.code === 2 || err.code === 3) && !opts._noFallback) {
+        navigator.geolocation.getCurrentPosition(
+          function(pos){ ok(pos, 'coarse'); },
+          function(err2){ callback(null, msgs[err2.code] || 'Location unavailable'); },
+          {enableHighAccuracy:false, timeout:(opts.coarseTimeout||15000), maximumAge:(opts.coarseMaxAge||600000)}
+        );
+        return;
+      }
+      callback(null, msgs[err.code] || 'Location unavailable');
     },
-    function(err) {
-      var msgs = {1:'GPS permission denied — check browser settings',
-                  2:'GPS signal unavailable — move outside',
-                  3:'GPS timed out — try again'};
-      callback(null, msgs[err.code] || 'GPS error');
-    },
-    {enableHighAccuracy: true, timeout: 20000, maximumAge: 0}
+    {enableHighAccuracy: hi, timeout:(opts.timeout||20000), maximumAge:(opts.maximumAge||0)}
   );
 }
 
@@ -9788,8 +9805,32 @@ function initDistribution(){
   var sb=document.getElementById('distSubmitBtn'); if(sb) sb.disabled=true;
   document.getElementById('distItemsList').innerHTML='';
   distAddItem();
+  window._distGps=null;
   var g=document.getElementById('distGPS'); if(g){ g.textContent='Acquiring…'; g.style.color='#888'; }
-  captureGPS(function(gps,err){ var el=document.getElementById('distGPS'); if(!el) return; if(gps){ el.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'; el.style.color='#2E6B38'; window._distGps=gps; } else { el.innerHTML=icon('warning',13)+' '+err; el.style.color='#E65100'; window._distGps=null; } });
+  var rb=document.getElementById('distGpsRetry'); if(rb) rb.style.display='none';
+  captureGPS(_distApplyGps);
+}
+/* Apply a GPS result to the distribution form. Location is OPTIONAL — a failed
+   fix never blocks the handover (you may be indoors, or need to step outside),
+   and retrying only re-acquires location: it never clears the photos/video. */
+function _distApplyGps(gps,err){
+  var el=document.getElementById('distGPS'); var btn=document.getElementById('distGpsRetry');
+  if(!el) return;
+  if(gps){
+    el.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'+(gps.source==='coarse'?' (approx)':'');
+    el.style.color='#2E6B38'; window._distGps=gps;
+    if(btn){ btn.style.display='none'; btn.disabled=false; }
+  } else {
+    el.innerHTML=icon('warning',13)+' '+err+' — you can still record this handover.';
+    el.style.color='#E65100'; window._distGps=null;
+    if(btn){ btn.style.display='block'; btn.disabled=false; btn.innerHTML='<span data-icon="pin" data-size="13"></span> Retry location'; try{ hydrateIcons(btn); }catch(e){} }
+  }
+}
+function distRetryGPS(){
+  var el=document.getElementById('distGPS'); var btn=document.getElementById('distGpsRetry');
+  if(el){ el.textContent='Acquiring…'; el.style.color='#888'; }
+  if(btn){ btn.disabled=true; btn.textContent='Acquiring…'; }
+  captureGPS(_distApplyGps);
 }
 function distSetRecipType(v){ window._distRecipType=v; var box=document.getElementById('distRecipTypePills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-rt]'),function(b){ b.classList.toggle('active', b.getAttribute('data-rt')===v); }); }
 function distRenderDonors(){
@@ -9868,6 +9909,8 @@ function submitDistribution(){
     donor_recognised:!!(document.getElementById('distDonorRecognised')&&document.getElementById('distDonorRecognised').checked),
     items:items,
     gps:window._distGps||null,
+    gps_source:(window._distGps&&window._distGps.source)||null,
+    location_missing:!window._distGps,
     date:now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear(),
     photo_handover:window._distPhotos.handover, photo_receipt:window._distPhotos.receipt,
     video:window._distVideo, video_size:window._distVideoMeta,
@@ -10757,7 +10800,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v52'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v53'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

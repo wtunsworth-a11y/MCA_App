@@ -18,6 +18,22 @@ Working agreements for this repo. These are binding unless the user overrides th
   the enrolment profile, not from a per-survey field. Don't present them as
   survey questions.
 
+## Resilience — never an irrecoverable dead-end
+
+- **A module must never fail in a way that loses the work.** This matters most
+  after capturing things that cannot be repeated — photos and especially a
+  **video of people** at a handover. Never let an optional step (GPS, network,
+  a sensor) block or discard captured evidence.
+- **Sensors degrade gracefully and are retryable.** GPS must: (1) fall back to a
+  coarse network/last-known fix when high-accuracy GNSS can't resolve (indoors,
+  under canopy, timeout) — see `captureGPS`; (2) offer an **in-place retry** that
+  re-acquires *only* the sensor and never resets the form or wipes media (the
+  surveyor may need to step outside); (3) be **optional** where a fix isn't
+  essential — record without it and mark `location_missing` / `gps_source` for
+  review rather than refusing to save.
+- Re-entering a capture screen must not silently destroy already-captured media.
+  Prefer re-acquiring the failed piece in place over re-initialising the screen.
+
 ## Time & dates
 
 - **Always PNG local time.** Every time and date shown to a human — on screen, in

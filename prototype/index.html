@@ -2190,8 +2190,11 @@ select.msel {
           <div style="font-size:0.8rem;font-weight:700;color:#333;margin-bottom:6px;">H — Comments (whole transect)</div>
           <textarea id="mafiaComments" class="form-input" style="min-height:80px;width:100%;" placeholder="Add any additional observations or notes for the whole transect…"></textarea>
         </div>
+        <div id="mafiaReviewNote" style="display:none;margin:4px 14px 2px;padding:10px 12px;background:#FFF8E1;border:1px solid #FFE082;border-radius:10px;font-size:0.78rem;color:#6D4C00;line-height:1.4;">
+          <strong>Review before you finish.</strong> This is everything you recorded for this transect. Scroll up and check each sub-transect (ST1–ST5). Fix anything that's wrong, then tap <em>Finish</em>.
+        </div>
         <div class="p14" style="padding-top:8px;">
-          <button class="btn-primary" onclick="saveMafia()">Save &amp; Continue</button>
+          <button class="btn-primary" id="mafiaSaveBtn" onclick="saveMafia()">Save &amp; Continue</button>
         </div>
       </div>
     </div>
@@ -6335,12 +6338,16 @@ function requestCompass(cb){
 ══════════════════════════════════════════════════════════════════════ */
 var MAFIA_TRANSECT_M = 100;        /* transect length (one 100 m tape) */
 var MAFIA_ARRIVE_M   = 30;         /* "you're here" threshold (m) — matches the water/facility field gates (disturbances use 50 m) */
-var MAFIA_MAX_MIN    = 60;         /* survey longer than this is flagged */
+var MAFIA_MAX_MIN    = 60;         /* survey longer than this is flagged (too slow) */
+var MAFIA_MIN_MIN    = 12;         /* survey shorter than this is flagged (implausibly fast — a real 100 m walk-and-record can't be done this quickly) */
 let mafiaVerified = false, mafiaArrived = false;
 var mafiaStart=null, mafiaEnd=null, mafiaTransectBearing=null, mafiaTrainerPos=null;
 var mafiaHasTape=true, mafiaArriveTime=null, mafiaStep=0, mafiaSurveyData=null;
 var mafiaWatchId=null, mafiaNavTarget=null, mafiaNavTimer=null, mafiaTimerInt=null;
 var mafiaWorkflowActive=false;  /* true between fingerprint-at-start and close — stops re-init on return from the matrix */
+var mafiaReviewing=false;       /* true while the matrix is shown in "review before finish" mode */
+var mafiaTrack=[];              /* GPS breadcrumb trail from arrival to close (Zone-Staff anti-gaming check) */
+var mafiaTrackLast=null;
 
 function initMafia(){
   mafiaWorkflowActive=false;
@@ -6349,6 +6356,7 @@ function initMafia(){
   var _cm=document.getElementById('mafiaComments'); if(_cm) _cm.value='';
   window._mafiaWx={cloud:'cloudy',rain:'dry',wind:'calm'};
   mafiaVerified=false; mafiaArrived=false; mafiaHasTape=true; mafiaArriveTime=null; mafiaStep=0; mafiaSurveyData=null;
+  mafiaReviewing=false; mafiaTrack=[]; mafiaTrackLast=null;
   mafiaStart=mafiaEnd=mafiaTransectBearing=mafiaTrainerPos=null;
   _mafiaStopNav();
   document.getElementById('mafiaBeginBtn').style.display='none';
@@ -6399,6 +6407,7 @@ function _mafiaNavTo(target, label){
   if(mafiaWatchId==null && navigator.geolocation){
     mafiaWatchId=navigator.geolocation.watchPosition(function(pos){
       window._mafiaPos={lat:pos.coords.latitude, lon:pos.coords.longitude, acc:Math.round(pos.coords.accuracy||0), heading:(pos.coords.heading!=null&&!isNaN(pos.coords.heading)?pos.coords.heading:null)};
+      _mafiaTrackAppend(window._mafiaPos);
       _mafiaUpdateNav();
     }, function(){}, {enableHighAccuracy:true, maximumAge:1000, timeout:20000});
   }
@@ -6408,6 +6417,21 @@ function _mafiaStopNav(){
   if(mafiaWatchId!=null && navigator.geolocation){ try{ navigator.geolocation.clearWatch(mafiaWatchId); }catch(e){} mafiaWatchId=null; }
   if(mafiaNavTimer!=null){ clearInterval(mafiaNavTimer); mafiaNavTimer=null; }
   mafiaNavTarget=null;
+}
+/* Breadcrumb trail — log a point only once the surveyor has arrived and the
+   workflow is live, throttled to real movement (≥4 m) and good-ish fixes.
+   Used at close to prove the transect was actually walked (anti-gaming); it is
+   never shown to the surveyor and never blocks a save. */
+function _mafiaTrackAppend(pos){
+  if(!mafiaWorkflowActive || !mafiaArriveTime || !pos) return;
+  if(pos.acc!=null && pos.acc>50) return;   /* ignore very coarse fixes — noise, not movement */
+  var pt={lat:pos.lat, lon:pos.lon, t:Date.now(), acc:(pos.acc!=null?pos.acc:null)};
+  if(mafiaTrackLast){
+    var d=_haversine({lat:mafiaTrackLast.lat, lon:mafiaTrackLast.lon}, {lat:pt.lat, lon:pt.lon});
+    if(d<4) return;   /* throttle: only record a point after ~4 m of travel */
+  }
+  if(mafiaTrack.length>2000) return;   /* safety cap */
+  mafiaTrack.push(pt); mafiaTrackLast=pt;
 }
 function _mafiaUpdateNav(){
   var pos=window._mafiaPos, nav=mafiaNavTarget; if(!pos||!nav) return;
@@ -6474,7 +6498,7 @@ var MAFIA_STEPS=[
   { title:'Survey back to the start', target:'start', tapeText:'Now walk back to the START along the tape, recording each indicator as you go.', noTapeText:'Now walk back to the START along your line, recording each indicator as you go.', btn:'Open the survey form', action:'survey' },
   { title:'Check for anything missed', target:'end', tapeText:'Walk the transect to the END again and check nothing was missed.', noTapeText:'Walk back to the END again and check nothing was missed.', btn:'Checked — nothing missed ✓' },
   { title:'Roll the tape back', target:'start', tapeText:'Roll your tape back to the START point.', noTapeText:'Return to the START point.', btn:'At the start ✓' },
-  { title:'Close the survey', target:'start', tapeText:'You are back at the start. Close and save the survey.', noTapeText:'You are back at the start. Close and save the survey.', btn:'Close & save survey ✓', action:'close' }
+  { title:'Review & close the survey', target:'start', tapeText:'You are back at the start. Review everything you recorded, then finish.', noTapeText:'You are back at the start. Review everything you recorded, then finish.', btn:'Review my answers ✓', action:'close' }
 ];
 function mafiaStartWorkflow(){
   mafiaWorkflowActive=true;
@@ -6507,7 +6531,7 @@ function _mafiaRenderStep(){
 function mafiaStepAction(){
   var s=MAFIA_STEPS[mafiaStep]; if(!s) return;
   if(s.action==='survey'){ nav('screen-mafia-matrix'); return; }
-  if(s.action==='close'){ mafiaCloseSurvey(); return; }
+  if(s.action==='close'){ mafiaBeginReview(); return; }
   if(mafiaStep<MAFIA_STEPS.length-1){ mafiaStep++; _mafiaRenderStep(); }
 }
 /* matrix "Save" in workflow context stashes the indicators and returns here */
@@ -6518,9 +6542,19 @@ function mafiaSurveyCollected(){
   setTimeout(_mafiaRenderStep, 50);
   toast('Survey recorded — continue the walk');
 }
+/* Step 5 "close" first re-opens the filled matrix in review mode so the
+   surveyor sees exactly what they recorded (buttons/pills as they left them)
+   before committing. The matrix DOM still holds their answers — it was never
+   cleared after step 2. Finishing from there calls mafiaCloseSurvey(). */
+function mafiaBeginReview(){
+  if(!mafiaSurveyData){ toast('Record the survey (step 2) before closing.'); mafiaStep=1; _mafiaRenderStep(); return; }
+  mafiaReviewing=true;
+  _mafiaStopNav();   /* stop the compass redraw; we're reviewing, not walking */
+  nav('screen-mafia-matrix');
+}
 function mafiaCloseSurvey(){
   if(!mafiaSurveyData){ toast('Record the survey (step 2) before closing.'); mafiaStep=1; _mafiaRenderStep(); return; }
-  mafiaWorkflowActive=false;
+  mafiaWorkflowActive=false; mafiaReviewing=false;
   _mafiaStopNav(); if(mafiaTimerInt!=null){ clearInterval(mafiaTimerInt); mafiaTimerInt=null; }
   var mins=mafiaArriveTime?((Date.now()-mafiaArriveTime)/60000):null;
   var rec=mafiaSurveyData;
@@ -6538,9 +6572,33 @@ function mafiaCloseSurvey(){
   rec.duration_min=mins!=null?Math.round(mins*10)/10:null;
   rec.duration_excessive=(mins!=null && mins>MAFIA_MAX_MIN);
   rec.compass_source=window._compassSource||'';
+  /* ── Breadcrumb analysis (anti-gaming) ──────────────────────────────────
+     Walk the recorded trail: total distance walked, farthest the surveyor got
+     from the start, closest they came to the end. A genuine 100 m transect
+     reaches the end and ranges the full length; someone who drifts 20 m and
+     stops never does. These are review flags for Zone Staff — they do not
+     block the save and the surveyor is not told. */
+  var trackDist=0, maxFromStart=0, minToEnd=null;
+  for(var i=0;i<mafiaTrack.length;i++){
+    var p=mafiaTrack[i];
+    if(i>0) trackDist+=_haversine({lat:mafiaTrack[i-1].lat, lon:mafiaTrack[i-1].lon}, {lat:p.lat, lon:p.lon});
+    if(mafiaStart){ var dS=_haversine({lat:p.lat, lon:p.lon}, mafiaStart); if(dS>maxFromStart) maxFromStart=dS; }
+    if(mafiaEnd){ var dE=_haversine({lat:p.lat, lon:p.lon}, mafiaEnd); if(minToEnd==null||dE<minToEnd) minToEnd=dE; }
+  }
+  rec.track_points=mafiaTrack.length;
+  rec.track_distance_m=Math.round(trackDist);
+  rec.max_from_start_m=Math.round(maxFromStart);
+  rec.min_to_end_m=(minToEnd!=null)?Math.round(minToEnd):null;
+  rec.reached_end=(minToEnd!=null && minToEnd<=MAFIA_ARRIVE_M);
+  /* Flagged if the trail never reached the end, or never ranged even half the
+     transect from the start, or there were too few points to judge movement. */
+  rec.movement_flagged=( mafiaTrack.length<3 || !rec.reached_end || rec.max_from_start_m < (MAFIA_TRANSECT_M*0.5) );
+  rec.time_fast_flagged=(mins!=null && mins<MAFIA_MIN_MIN);
+  rec.review_flagged=!!(rec.location_flagged || rec.duration_excessive || rec.time_fast_flagged || rec.movement_flagged);
   saveRecord('mafia', rec, function(){
     clearDraft('screen-mafia-matrix');
-    toast('MaFIA survey saved ✓'+(rec.duration_excessive?' (time flagged)':''));
+    var notes=[]; if(rec.time_fast_flagged)notes.push('time'); if(rec.movement_flagged)notes.push('movement'); if(rec.duration_excessive)notes.push('too slow');
+    toast('MaFIA survey saved ✓'+(notes.length?(' ('+notes.join(', ')+' flagged for review)'):''));
     showScreen('screen-dashboard');
   });
 }
@@ -10645,7 +10703,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v49'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v50'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12348,6 +12406,11 @@ function initMafiaMatrix(){
   if(body && body.children.length===0) renderMafiaMatrix();
   _mafiaRenderWx();
   mafiaRegate();
+  /* review mode (step 5) vs first pass (step 2): swap the footer button + note */
+  var b=document.getElementById('mafiaSaveBtn'); if(b) b.textContent=mafiaReviewing?'Finish & save survey ✓':'Save & Continue';
+  var n=document.getElementById('mafiaReviewNote'); if(n) n.style.display=mafiaReviewing?'block':'none';
+  var sub=document.querySelector('#screen-mafia-matrix .bar-subtitle'); if(sub) sub.textContent=mafiaReviewing?'Review your answers':'100 m training transect';
+  if(mafiaReviewing){ var sc=document.querySelector('#screen-mafia-matrix .scroll-content'); if(sc) sc.scrollTop=0; }
 }
 
 function collectMafiaData(){
@@ -12568,7 +12631,16 @@ function installPWA() {
 
 /* In the guided workflow, the matrix "Save" stashes the indicators and returns
    to the walk; the full record (with transect + timing) is written at close. */
-function saveMafia() { mafiaSurveyCollected(); }
+function saveMafia() {
+  if(mafiaReviewing){
+    /* finishing from the review screen — re-collect in case answers were
+       corrected during review, then close and write the full record */
+    mafiaSurveyData=collectMafiaData();
+    mafiaCloseSurvey();
+  } else {
+    mafiaSurveyCollected();
+  }
+}
 
 /* ── Training Records ── */
 var selectedTrainingType = '';

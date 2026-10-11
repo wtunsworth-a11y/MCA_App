@@ -183,10 +183,33 @@ GPS fix itself is coarser than 30 m, when a confirm is allowed but the record is
 surveyor is then guided through the tape workflow: walk to the end (lay the
 tape), survey back to the start, re-walk to the end to check, roll the tape back,
 and close at the start. A **no-tape variant** guides the same walk by GPS
-distance. The saved record adds: `transect_start`/`transect_end` (lat/lon),
+distance.
+
+**Review before finish.** The final step re-opens the filled matrix in a
+read-back **review mode** (yellow banner, "Finish & save survey") so the surveyor
+sees every answer — buttons and pills exactly as they left them — and can correct
+anything before committing. Finishing re-collects from the form, so review edits
+are kept.
+
+**Breadcrumb / anti-gaming flags.** From arrival to close the app logs a throttled
+**GPS breadcrumb trail** (points ≥ 4 m apart, coarse fixes dropped). At close it
+derives, for **Zone-Staff review only** (never shown to the surveyor, never
+blocking): `track_points`, `track_distance_m` (total walked),
+`max_from_start_m` (farthest reached from the start), `min_to_end_m`,
+`reached_end` (came within 30 m of the generated end). It raises
+**`movement_flagged`** when the trail never reached the end, ranged less than half
+the transect (< 50 m) from the start, or has too few points to judge — the signature
+of someone who drifts a short way and stops. A **`time_fast_flagged`** marks a
+survey closed in **under 12 min** (`MAFIA_MIN_MIN`) — implausibly fast for a real
+100 m walk-and-record. A single **`review_flagged`** rolls up location / fast /
+slow / movement for the coordinator's queue.
+
+The saved record adds: `transect_start`/`transect_end` (lat/lon),
 `transect_bearing`, `transect_length_m` (100), `had_tape`, `arrive_fix`,
-`duration_min`, **`duration_excessive`** (true if > 60 min — flagged for review;
-~30 min is normal), and `compass_source`.
+`arrive_dist_m`, **`location_flagged`**, `duration_min`,
+**`duration_excessive`** (true if > 60 min — too slow; ~30 min is normal),
+**`time_fast_flagged`** (< 12 min — too fast), the breadcrumb fields above with
+**`movement_flagged`**, **`review_flagged`**, and `compass_source`.
 
 ### 3.2 QABB — Butterfly Survey
 Store `qabb`. Transect-based matrix: date, start/end time, and per-species

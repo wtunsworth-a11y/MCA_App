@@ -17,7 +17,7 @@ and the operational procedures worked out during pilot setup.*
   baked into `prototype/index.html`
   (`…/macros/s/AKfycbxqEnJ1…JZR8XRg/exec`). **Deployed and verified**
   (`{"status":"ready"}`). **Coordinator server key is set** in Script Properties.
-- **Service worker cache:** `mca-steward-v33` (bumped every deploy). The app now
+- **Service worker cache:** `mca-steward-v50` (bumped every deploy). The app now
   **auto-applies updates** on reopen (checks on launch + focus, reloads once when
   a new worker takes over) — no more "open twice".
 - **Uploads fixed (v24):** Send Data and all registry/approval syncs POST as

@@ -10813,7 +10813,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v58'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v59'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12123,6 +12123,44 @@ function updateStorageWarning() {
   });
 }
 
+/* ── Retention: keep each record (incl. its photos/video) on the phone for a
+   month after it synced, as a local fallback if anything happens to Drive.
+   After that window, strip only the heavy media (data: URLs) and keep the
+   record's metadata. Runs after a CONFIRMED Drive upload (we know the data is
+   safely on Drive before freeing anything). Registries/ownership fields are
+   never touched — only large image/video data URLs. ── */
+var MCA_RETAIN_DAYS = 30;
+function purgeOldSyncedMedia(cb) {
+  var cutoff = Date.now() - MCA_RETAIN_DAYS * 86400000;
+  var stores = DATA_STORES.slice();
+  var i = 0, purgedRecords = 0, freedBytes = 0;
+  function nextStore() {
+    if (i >= stores.length) { if (cb) cb({ records: purgedRecords, mb: Math.round(freedBytes / 1048576) }); return; }
+    var store = stores[i++];
+    getAllRecords(store, function(rows) {
+      var toUpdate = [];
+      (rows || []).forEach(function(r) {
+        if (!r || !r.synced) return;                 /* never touch unsynced — it isn't on Drive yet */
+        if (!r.synced_at) { r.synced_at = new Date().toISOString(); toUpdate.push(r); return; } /* unknown sync time → start the clock now */
+        if (r.media_purged) return;
+        if (new Date(r.synced_at).getTime() > cutoff) return;  /* still inside the 1-month fallback window */
+        var changed = false;
+        Object.keys(r).forEach(function(k) {
+          var v = r[k];
+          if (typeof v === 'string' && v.length > 500 && v.slice(0, 5) === 'data:') { freedBytes += v.length; r[k] = ''; changed = true; }
+        });
+        if (changed) { r.media_purged = true; r.media_purged_at = new Date().toISOString(); purgedRecords++; toUpdate.push(r); }
+      });
+      var j = 0;
+      (function nextRec() {
+        if (j >= toUpdate.length) { nextStore(); return; }
+        updateRecord(store, toUpdate[j++], function() { nextRec(); });  /* put() preserves synced:true → no re-upload */
+      })();
+    });
+  }
+  nextStore();
+}
+
 /* ── Storage health in Data Export screen ────────────────────────── */
 function updateStorageInfo() {
   /* Quota / usage bar */
@@ -12366,7 +12404,12 @@ function _sendAllDataInner() {
               .then(function(result) {
                 if (result && result.status === 'ok') {
                   var pending = syncTasks.length || 1;
-                  function doneSync() { pending--; if (pending === 0) updateRecordCounts(); }
+                  function doneSync() { pending--; if (pending === 0) {
+                    updateRecordCounts();
+                    /* Data is confirmed on Drive — now free the media from records
+                       that have been synced longer than the 1-month fallback window. */
+                    purgeOldSyncedMedia(function(res){ if (res && res.records > 0) { try { localStorage.setItem('mcaLastPurge', new Date().toISOString()); } catch(e){} } });
+                  } }
                   if (syncTasks.length === 0) { doneSync(); return; }
                   syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, doneSync); });
                   var nowTs = new Date().toISOString();

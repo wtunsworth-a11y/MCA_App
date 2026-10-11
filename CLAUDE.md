@@ -18,6 +18,25 @@ Working agreements for this repo. These are binding unless the user overrides th
   the enrolment profile, not from a per-survey field. Don't present them as
   survey questions.
 
+## Storage & retention
+
+- **Work phones must keep space free for the app.** It warns on the dashboard
+  when free space is low/critical (`checkStorageLevel`), and before a Handover
+  (which captures photos + video) when critical — warn, never block.
+- **One-month local fallback, then free the media.** Records are kept in full
+  (including photos/video) for **`MCA_RETAIN_DAYS` (30) days after they sync**, as
+  a local fallback if anything happens to Drive. After that window, a purge runs
+  **only after a confirmed Drive upload** (`purgeOldSyncedMedia` in the sync
+  success path) and strips **only** the heavy `data:` media, keeping the record's
+  metadata and leaving `synced:true` (so it is never re-uploaded). Unsynced
+  records and ownership/registry fields are never touched.
+- **Receiving end MUST back up monthly.** Because phones drop media after a
+  month, Drive is the single copy. The project side must duplicate uploaded data
+  to a **second secure location at least monthly** (e.g. a scheduled Apps Script
+  copy to a backup Drive/folder, or an offsite archive). Until that exists,
+  losing the Drive folder loses everything older than one month. **Backend/ops
+  task — owned by the data & reports side, not the app.**
+
 ## Resilience — never an irrecoverable dead-end
 
 - **A module must never fail in a way that loses the work.** This matters most

@@ -3365,6 +3365,20 @@ select.msel {
           <div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>
         </div>
       </div>
+      <nav class="bottom-nav">
+        <button class="nav-item" onclick="bottomNav('home')">
+          <span class="nav-icon" data-icon="home" data-size="22"></span><span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" onclick="bottomNav('map')">
+          <span class="nav-icon" data-icon="map" data-size="22"></span><span class="nav-label">Map</span>
+        </button>
+        <button class="nav-item active" onclick="bottomNav('alerts')">
+          <span class="nav-icon" data-icon="bell" data-size="22"></span><span class="nav-label">Alerts</span>
+        </button>
+        <button class="nav-item" onclick="bottomNav('profile')">
+          <span class="nav-icon" data-icon="user" data-size="22"></span><span class="nav-label">Profile</span>
+        </button>
+      </nav>
     </div>
 
     <!-- ══════════════════════════════════════
@@ -10832,7 +10846,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v66'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v67'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

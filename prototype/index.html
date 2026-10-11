@@ -3538,6 +3538,7 @@ select.msel {
             <div class="eu-logo-caption">This application is supported by the European Union through the Managalas Conservation Fund project.</div>
           </div>
           <div class="version">v1.0.0-prototype &nbsp;|&nbsp; MCA Clan Steward App</div>
+          <div class="version" id="appBuildLine" style="margin-top:-8px;"></div>
           <button class="btn-outline-red" onclick="toast('Logging out…');setTimeout(()=>{showScreen('screen-fingerprint')},950)">Logout</button>
         </div>
       </div>
@@ -5594,6 +5595,8 @@ function showScreen(id) {
   }
   if (id === 'screen-profile') {
     loadProfileScreen();
+    var _bl = document.getElementById('appBuildLine');
+    if (_bl) _bl.textContent = 'Build ' + APP_BUILD;
   }
   if (id === 'screen-reports' && _reportProfile) {
     loadCachedReport(_reportProfile);
@@ -10829,7 +10832,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v62'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v63'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

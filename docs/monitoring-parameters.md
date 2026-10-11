@@ -181,8 +181,13 @@ GPS fix itself is coarser than 30 m, when a confirm is allowed but the record is
 **`location_flagged`** for Zone-Staff review (the surveyor is not blocked). A
 **fingerprint** then starts the survey and a **timer**. The
 surveyor is then guided through the tape workflow: walk to the end (lay the
-tape), survey back to the start, re-walk to the end to check, roll the tape back,
-and close at the start. A **no-tape variant** guides the same walk by GPS
+tape), survey back to the start, then **return to the END and review & close
+there** — the survey is saved **at the end point, with the tape still laid out**,
+so the breadcrumb confirms the surveyor was genuinely at the end when the data
+was locked in. **Only after it's saved is the tape rolled up** — once it's up, no
+answer can be generated from the ground. `close_at` records where the close
+happened (`end`); `close_dist_m` / `close_gate_flagged` measure the close fix
+against the generated end. A **no-tape variant** guides the same walk by GPS
 distance.
 
 **End-point & close GPS gates.** Each step that requires physical arrival is

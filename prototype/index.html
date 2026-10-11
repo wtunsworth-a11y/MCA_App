@@ -6513,12 +6513,14 @@ function mafiaVerify(){
 }
 
 /* ── Guided tape workflow ── */
+/* Close happens at the END, with the tape still laid out: the breadcrumb then
+   confirms the surveyor was genuinely at the end when the data was locked in,
+   and the tape is only rolled up AFTER the survey is saved — once it's up, no
+   answer can be generated from the ground. */
 var MAFIA_STEPS=[
   { title:'Lay out the tape', target:'end',   gate:true, tapeText:'Walk to the END point, pulling your 100 m tape as you go.', noTapeText:'Walk to the END point — the app will tell you when you reach ~100 m. Pace it out as evenly as you can.', btn:'I’m at the end ✓' },
-  { title:'Survey back to the start', target:'start', tapeText:'Now walk back to the START along the tape, recording each indicator as you go.', noTapeText:'Now walk back to the START along your line, recording each indicator as you go.', btn:'Open the survey form', action:'survey' },
-  { title:'Check for anything missed', target:'end', gate:true, tapeText:'Walk the transect to the END again and check nothing was missed.', noTapeText:'Walk back to the END again and check nothing was missed.', btn:'Checked — nothing missed ✓' },
-  { title:'Roll the tape back', target:'start', gate:true, tapeText:'Roll your tape back to the START point.', noTapeText:'Return to the START point.', btn:'At the start ✓' },
-  { title:'Review & close the survey', target:'start', gate:true, tapeText:'You are back at the start. Review everything you recorded, then finish.', noTapeText:'You are back at the start. Review everything you recorded, then finish.', btn:'Review my answers ✓', action:'close' }
+  { title:'Survey back to the start', target:'start', action:'survey', tapeText:'Now walk back to the START along the tape, recording each indicator as you go.', noTapeText:'Now walk back to the START along your line, recording each indicator as you go.', btn:'Open the survey form' },
+  { title:'Return to the end, review & close', target:'end', gate:true, action:'close', tapeText:'Walk the transect back to the END, checking as you go. At the END — tape still out — review every answer and fill anything missed, then close. Roll the tape up only AFTER it’s saved.', noTapeText:'Walk back to the END, checking as you go. At the END, review every answer and fill anything missed, then close.', btn:'Review & close at the end ✓' }
 ];
 function mafiaStartWorkflow(){
   mafiaWorkflowActive=true;
@@ -6597,14 +6599,15 @@ function mafiaSurveyCollected(){
   setTimeout(_mafiaRenderStep, 50);
   toast('Survey recorded — continue the walk');
 }
-/* Step 5 "close" first re-opens the filled matrix in review mode so the
-   surveyor sees exactly what they recorded (buttons/pills as they left them)
-   before committing. The matrix DOM still holds their answers — it was never
-   cleared after step 2. Finishing from there calls mafiaCloseSurvey(). */
+/* The final step re-opens the filled matrix in review mode (completeness gate)
+   so the surveyor fills any gaps while standing AT THE END with the tape still
+   out, then closes there. The GPS watch is deliberately LEFT RUNNING so the
+   breadcrumb keeps confirming they're at the end through to the close, and the
+   close fix is live. The matrix DOM still holds their answers — never cleared
+   after the survey step. Finishing from there calls mafiaCloseSurvey(). */
 function mafiaBeginReview(){
-  if(!mafiaSurveyData){ toast('Record the survey (step 2) before closing.'); mafiaStep=1; _mafiaRenderStep(); return; }
+  if(!mafiaSurveyData){ toast('Record the survey before closing.'); mafiaStep=1; _mafiaRenderStep(); return; }
   mafiaReviewing=true;
-  _mafiaStopNav();   /* stop the compass redraw; we're reviewing, not walking */
   nav('screen-mafia-matrix');
 }
 function mafiaCloseSurvey(){
@@ -6630,10 +6633,18 @@ function mafiaCloseSurvey(){
   rec.end_fix=window._mafiaEndFix||null;
   rec.end_dist_m=(typeof window._mafiaEndDist==='number')?window._mafiaEndDist:null;
   rec.end_gate_flagged=!(typeof window._mafiaEndDist==='number' && window._mafiaEndDist<=MAFIA_ARRIVE_M);
-  /* Close gate: the GPS fix captured on returning to the START before closing. */
-  rec.close_fix=window._mafiaCloseFix||null;
-  rec.close_dist_m=(typeof window._mafiaCloseDist==='number')?window._mafiaCloseDist:null;
-  rec.close_gate_flagged=!(typeof window._mafiaCloseDist==='number' && window._mafiaCloseDist<=MAFIA_ARRIVE_M);
+  /* Close gate: the survey is closed AT THE END with the tape still laid out.
+     Record where the surveyor was at close (last GPS fix) relative to the
+     generated END; flagged if it wasn't within 30 m — i.e. they closed away
+     from the end. The breadcrumb's reached_end corroborates this. */
+  var _cp = window._mafiaPos || null;
+  var _cfix = _cp ? { lat:_cp.lat, lon:_cp.lon, acc:(_cp.acc!=null?_cp.acc:null) } : (window._mafiaEndFix||null);
+  var _cdist = (_cfix && mafiaEnd) ? Math.round(_haversine({lat:_cfix.lat, lon:_cfix.lon}, mafiaEnd))
+             : ((typeof window._mafiaEndDist==='number') ? window._mafiaEndDist : null);
+  rec.close_at='end';
+  rec.close_fix=_cfix;
+  rec.close_dist_m=_cdist;
+  rec.close_gate_flagged=!(typeof _cdist==='number' && _cdist<=MAFIA_ARRIVE_M);
   /* Re-fingerprint at close — true when identity was re-verified before saving. */
   rec.reverified_at_close=!!window._mafiaCloseVerified;
   rec.duration_min=mins!=null?Math.round(mins*10)/10:null;
@@ -6666,6 +6677,8 @@ function mafiaCloseSurvey(){
     clearDraft('screen-mafia-matrix');
     var notes=[]; if(rec.time_fast_flagged)notes.push('time'); if(rec.movement_flagged)notes.push('movement'); if(rec.duration_excessive)notes.push('too slow');
     toast('MaFIA survey saved ✓'+(notes.length?(' ('+notes.join(', ')+' flagged for review)'):''));
+    /* Saved at the end — the tape can now be rolled up (nothing changes the record). */
+    if(mafiaHasTape) setTimeout(function(){ toast('Now roll your tape back to the start.'); }, 1400);
     showScreen('screen-dashboard');
   });
 }
@@ -10816,7 +10829,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v60'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v61'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

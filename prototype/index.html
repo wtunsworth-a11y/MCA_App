@@ -691,6 +691,9 @@ textarea.form-input:focus, input.form-input:focus {
 .tally-btn:active { background: #e0e0e0; }
 .tally-count { min-width: 22px; text-align: center; font-size: 0.8rem; font-weight: 600; color: #333; }
 .tally-count.tc-unset { color: #bbb; font-weight: 400; }
+.tally-count.pa-need { color: #E65100; font-weight: 700; }   /* Present chosen but count still 0 — must be set */
+.tally-count.pa-lock { color: #bbb; font-weight: 600; }      /* Absent — counter locked at 0 */
+.tally-btn:disabled { opacity: 0.35; cursor: default; }
 /* Conditional MaFIA cell that doesn't apply in this sub-transect (e.g. water
    module where there is no waterway): blocked so contradictory data can't be
    entered. */
@@ -10801,7 +10804,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v54'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v55'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12486,13 +12489,20 @@ function mtc(btn,delta){
 }
 /* Present/Absent count: only meaningful when Present, and floored at 1 —
    "Present" always means at least one was seen/heard, so a 0 is not allowed. */
+/* Present/Absent count. Absent locks the counter at 0 (buttons disabled). When
+   Present, the surveyor MUST use the counter — it starts at 0 shown in amber
+   ("needs a count") and a count of 0 is not a valid Present answer. No auto 1
+   (that would be a default-on-skip); they press + to enter the real number. */
 function mtcPA(btn,delta){
+  if(btn.disabled) return;
   var el=btn.closest('.tally').querySelector('.tally-count'); if(!el) return;
-  var t=el.textContent.trim(); var v=(t!=='–'&&t!=='')?(parseInt(t,10)||0):1;
-  v=v+delta; if(v<1)v=1;
-  _mSetTally(el,v);
+  var t=el.textContent.trim(); var v=(t==='–'||t==='')?0:(parseInt(t,10)||0);
+  v=v+delta; if(v<0)v=0;
+  el.textContent=String(v); el.classList.remove('tc-unset','pa-lock');
+  el.classList.toggle('pa-need', v<1);
 }
 function _mYes(code,st){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); return !!(td && td.querySelector('.yn-btn.ay')); }
+function _mAbs(code,st){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); return !!(td && td.querySelector('.yn-btn.an')); }
 function _mGate(code,st,on){
   var td=document.querySelector('#mafiaMatrixBody td[data-code="'+code+'"][data-st="'+st+'"]'); if(!td) return;
   td.classList.toggle('cell-na', !on);
@@ -12512,7 +12522,21 @@ function mafiaRegate(){
     /* E maintained/overgrown sub-select enabled only when Yes */
     ['E1','E2'].forEach(function(c){ var td=document.querySelector('#mafiaMatrixBody td[data-code="'+c+'"][data-st="'+st+'"]'); if(td){ var sub=td.querySelector('.sub-sel'); if(sub){ var on=_mYes(c,st); sub.disabled=!on; if(!on) sub.value=''; } } });
     /* F present → enable its count */
-    for(var f=1;f<=15;f++){ var fc='F'+f; var ftd=document.querySelector('#mafiaMatrixBody td[data-code="'+fc+'"][data-st="'+st+'"]'); if(ftd){ var pt=ftd.querySelector('.pa-tally'); if(pt){ var present=_mYes(fc,st); pt.classList.toggle('off',!present); var cc=pt.querySelector('.tally-count'); if(cc){ var ct=cc.textContent.trim(); if(!present){ cc.textContent='–'; cc.classList.add('tc-unset'); } else if(ct==='–'||ct==='0'||ct===''){ cc.textContent='1'; cc.classList.remove('tc-unset'); } } } } }
+    for(var f=1;f<=15;f++){ var fc='F'+f; var ftd=document.querySelector('#mafiaMatrixBody td[data-code="'+fc+'"][data-st="'+st+'"]'); if(!ftd) continue; var pt=ftd.querySelector('.pa-tally'); if(!pt) continue;
+      var present=_mYes(fc,st), absent=_mAbs(fc,st);
+      var cc=pt.querySelector('.tally-count'); var fbtns=pt.querySelectorAll('.tally-btn');
+      pt.classList.toggle('off', !(present||absent));   /* counter hidden until P or A chosen */
+      if(absent){
+        if(cc){ cc.textContent='0'; cc.classList.remove('tc-unset','pa-need'); cc.classList.add('pa-lock'); }
+        Array.prototype.forEach.call(fbtns,function(b){ b.disabled=true; });     /* locked at zero */
+      } else if(present){
+        Array.prototype.forEach.call(fbtns,function(b){ b.disabled=false; });
+        if(cc){ var t=cc.textContent.trim(); var n=(t==='–'||t===''||t==='0')?0:(parseInt(t,10)||0); cc.textContent=String(n); cc.classList.remove('tc-unset','pa-lock'); cc.classList.toggle('pa-need', n<1); }
+      } else {
+        Array.prototype.forEach.call(fbtns,function(b){ b.disabled=false; });
+        if(cc){ cc.textContent='–'; cc.classList.add('tc-unset'); cc.classList.remove('pa-need','pa-lock'); }
+      }
+    }
   }
   /* collapse whole conditional groups when no sub-transect triggers them */
   _mShowHdr('B', anyWater); ['B1','B2','B3','B4','B5','B6'].forEach(function(c){ _mShowRow(c, anyWater); });
@@ -12555,7 +12579,7 @@ function collectMafiaData(){
       var key=code+'_ST'+st;
       if(type==='sel'){ var s=td.querySelector('select'); if(s&&s.value) data[key]=s.value; }
       else if(type==='tally'){ var c=td.querySelector('.tally-count'); var tv=c?c.textContent.trim():''; if(tv!=='' && tv!=='–') data[key]=parseInt(tv,10)||0; }  /* explicit 0 recorded; "–" (unset) is not */
-      else if(type==='pa'){ var ay=td.querySelector('.yn-btn.ay'); var an=td.querySelector('.yn-btn.an'); if(ay){ data[key]='P'; var cn=td.querySelector('.tally-count'); var pn=cn?parseInt(cn.textContent,10)||0:0; if(pn<1)pn=1; data[key+'_n']=pn; } else if(an){ data[key]='A'; } }
+      else if(type==='pa'){ var ay=td.querySelector('.yn-btn.ay'); var an=td.querySelector('.yn-btn.an'); if(ay){ data[key]='P'; var cn=td.querySelector('.tally-count'); var pn=cn?parseInt(cn.textContent,10)||0:0; data[key+'_n']=pn; }  /* P with n=0 is incomplete — flagged in review, not auto-filled */ else if(an){ data[key]='A'; } }
       else if(type==='ynsub'){ var y=td.querySelector('.yn-btn.ay'), nn=td.querySelector('.yn-btn.an'); if(y){ data[key]='Y'; var sub=td.querySelector('.sub-sel'); if(sub&&sub.value) data[key+'_sub']=sub.value; } else if(nn){ data[key]='N'; } }
       else { var yy=td.querySelector('.yn-btn.ay'), nz=td.querySelector('.yn-btn.an'); if(yy) data[key]='Y'; else if(nz) data[key]='N'; }
     }

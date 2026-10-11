@@ -8,7 +8,7 @@
  *
  * Bump CACHE_NAME on a deploy you want to force a clean re-cache.
  */
-const CACHE_NAME = 'mca-steward-v54';
+const CACHE_NAME = 'mca-steward-v55';
 const CORE_ASSETS = [
   './',
   './index.html',

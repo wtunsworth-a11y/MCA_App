@@ -2019,7 +2019,7 @@ select.msel {
             <span class="module-emoji" data-icon="mortarboard" data-size="26"></span>
             <span class="module-name">Training Records</span>
           </div>
-          <div class="module-tile" id="tile-distribution" data-fo="1" style="display:none;" onclick="nav('screen-distribution')">
+          <div class="module-tile" id="tile-distribution" data-fo="1" data-vc="1" style="display:none;" onclick="nav('screen-distribution')">
             <span class="module-emoji" data-icon="box" data-size="26"></span>
             <span class="module-name">Handover &amp; Distribution</span>
           </div>
@@ -10829,7 +10829,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v61'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v62'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11013,7 +11013,7 @@ function cacheStewardProfile() {
          plain clan stewards). */
       var distTile = document.getElementById('tile-distribution');
       if (distTile) {
-        var canDist = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff');
+        var canDist = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' || role === 'consultant');
         distTile.style.display = canDist ? '' : 'none';
       }
       /* Focused dashboard for Field Officers — show only their tiles (marked

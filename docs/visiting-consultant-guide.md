@@ -11,10 +11,12 @@ app see the [Installation Guide](installation-guide.md).
 ## 1. What you can do
 
 As a **Visiting Consultant** your app is kept simple — your dashboard shows just
-three things:
+four things:
 
 - **Training Records** — log any training or workshop you deliver.
 - **Field Mapping** — mark the sites you visit, for your own record.
+- **Handover & Distribution** — record any items you hand over (seeds, tools,
+  materials…): what, to whom, why, with photos and a short video.
 - **Export Data** — send your records to the project when you have internet.
 
 You don't need a clan or a zone, and you won't see the clan monitoring tools —
@@ -76,6 +78,20 @@ You can reopen **Field Mapping** any time to see the sites you've already marked
 > point or shape on its own. That's enough to record where you were.
 
 ---
+
+## 4b. Recording a handover
+
+If you hand over any items, open **Handover & Distribution** and record it **as it
+happens**:
+
+- **What** you gave (seeds, tools, equipment, materials…) with quantity.
+- **Who** received it, and the **purpose**.
+- The **donor** (e.g. European Union) and tick that they were recognised.
+- A **handover photo**, a **receipt photo**, and a **short video** of the items
+  and the person receiving them.
+
+Location is optional — if GPS can't get a fix (indoors, under trees) you can
+**retry** or save without it; your photos and video are never lost.
 
 ## 5. Sending your records to the project
 

@@ -4388,7 +4388,7 @@ select.msel {
           <div class="form-group">
             <label class="form-label">Category</label>
             <div id="fmCatPills" style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button class="weather-pill active" id="fmcat-road" onclick="fmCat('road')">Road / track</button>
+              <button class="weather-pill active" id="fmcat-road" onclick="fmCat('road')">Track / path</button>
               <button class="weather-pill" id="fmcat-infrastructure" onclick="fmCat('infrastructure')">Infrastructure</button>
               <button class="weather-pill" id="fmcat-boundary" onclick="fmCat('boundary')">Clan boundary</button>
               <button class="weather-pill" id="fmcat-hazard" onclick="fmCat('hazard')">Hazard / event</button>
@@ -4415,6 +4415,11 @@ select.msel {
               <button type="button" class="weather-pill" id="fmcrop-massoy" onclick="fmToggleCrop('massoy')" style="font-size:0.75rem;padding:5px 10px;"><span data-icon="leaf" data-size="13"></span> Massoy</button>
             </div>
             <input type="text" id="fmCropOther" class="form-input" style="margin-top:6px;font-size:0.78rem;" placeholder="Other crop (optional)">
+          </div>
+          <!-- Track / path type — shown only for the Track/path category -->
+          <div class="form-group" id="fmTrackGroup" style="display:none;">
+            <label class="form-label">Type of track <span style="color:#B71C1C;">*</span></label>
+            <div id="fmTrackPills" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
           </div>
           <!-- Plant problem options — shown only for the Plant problem category -->
           <div class="form-group" id="fmPlantProblemGroup" style="display:none;">
@@ -4469,6 +4474,12 @@ select.msel {
                 <div><div id="fmPtCount" style="font-size:1.6rem;font-weight:800;color:#00695C;line-height:1;">0</div><div style="font-size:0.64rem;color:#999;text-transform:uppercase;">points</div></div>
                 <div><div id="fmLen" style="font-size:1.6rem;font-weight:800;color:#00695C;line-height:1;">0</div><div id="fmLenLabel" style="font-size:0.64rem;color:#999;text-transform:uppercase;">metres</div></div>
               </div>
+              <!-- Live preview of the path you are walking -->
+              <div style="position:relative;background:#f3f6f3;border:1px solid #d7e2d7;border-radius:10px;height:180px;margin-bottom:8px;overflow:hidden;">
+                <svg id="fmPreview" viewBox="0 0 300 180" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;"></svg>
+                <div id="fmPreviewEmpty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9bbf9b;font-size:0.76rem;text-align:center;padding:0 20px;">Your track will draw here as you walk</div>
+              </div>
+              <div id="fmCloseHint" style="font-size:0.74rem;font-weight:600;margin-bottom:8px;display:none;"></div>
               <div id="fmRecStatus" style="font-size:0.74rem;color:#888;margin-bottom:10px;">Ready to record</div>
               <div style="display:flex;gap:8px;">
                 <button class="btn-primary" id="fmStartBtn" style="background:#00695C;flex:1;" onclick="fmStart()">● Start</button>
@@ -7449,7 +7460,7 @@ function syncCalendarFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(
 ══════════════════════════════════════ */
 var _fmMode='point', _fmCat='road', _fmPhoto=null, _fmPoint=null, _fmCrops=[];
 var _fmLine=[], _fmWatchId=null, _fmRecording=false, _fmPaused=false;
-var FM_CATS={ road:'Road / track', infrastructure:'Infrastructure', boundary:'Clan boundary', plant_problem:'Plant problem', postharvest:'Processing / sale prep', hazard:'Hazard / event', fire:'Forest fire', noncompliance:'Non-compliance', unrest:'Social unrest', wildlife:'Wildlife sighting', hunting:'Hunting event', cultural:'Cultural event', cashcrop_garden:'Cash-crop garden', other:'Other' };
+var FM_CATS={ road:'Track / path', infrastructure:'Infrastructure', boundary:'Clan boundary', plant_problem:'Plant problem', postharvest:'Processing / sale prep', hazard:'Hazard / event', fire:'Forest fire', noncompliance:'Non-compliance', unrest:'Social unrest', wildlife:'Wildlife sighting', hunting:'Hunting event', cultural:'Cultural event', cashcrop_garden:'Cash-crop garden', other:'Other' };
 var FM_CROPS={ vanilla:'Vanilla', coffee:'Coffee', cocoa:'Cocoa', okari:'Okari', massoy:'Massoy' };
 /* Structured "Plant problem" + "Processing / sale prep" option lists */
 var FM_PROBLEM_CROPS=['Vanilla','Coffee','Cocoa','Okari','Massoy','Taro','Banana','Sweet potato','Cassava','Yam','Greens / vegetables','Other'];
@@ -7459,7 +7470,9 @@ var FM_PROCESS_CROPS=['Vanilla','Coffee','Cocoa','Okari','Massoy','Other'];
 var FM_PROCESS_STAGES=['Harvesting','Drying','Fermenting','Sorting / cleaning','Packing','Storage','At market'];
 var FM_PROCESS_ISSUES=['Dirty / soil','Mixed with stones / debris','Fungal / mould','Smoke contamination','Under-dried','Over-dried','Poorly packed','Insect-damaged','Discoloured','Off-smell','Other'];
 var FM_SEVERITY=['Low','Medium','Severe'];
-var _fmProblemTypes=[], _fmQualityIssues=[], _fmSeverity='', _fmExtent='';
+var FM_TRACK_TYPES=['Vehicle road — accessible','Vehicle road — rundown','Main foot track','Garden track','Hunting track'];
+var _fmProblemTypes=[], _fmQualityIssues=[], _fmSeverity='', _fmExtent='', _fmTrackType='';
+function fmSetTrackType(v){ _fmTrackType=v; _fmPillRow('fmTrackPills',FM_TRACK_TYPES,function(x){return x===_fmTrackType;},'fmSetTrackType'); }
 function _fmFillSelect(id, arr, blankFirst){ var el=document.getElementById(id); if(!el) return; el.innerHTML=(blankFirst?'<option value="">—</option>':'')+arr.map(function(x){return '<option value="'+x+'">'+x+'</option>';}).join(''); }
 function _fmPillRow(containerId, arr, activeGetter, handler){ var box=document.getElementById(containerId); if(!box) return; box.innerHTML=arr.map(function(x){ return '<button type="button" class="weather-pill'+(activeGetter(x)?' active':'')+'" data-v="'+x.replace(/"/g,'&quot;')+'" onclick="'+handler+'(this.getAttribute(\'data-v\'))" style="font-size:0.74rem;padding:5px 9px;">'+x+'</button>'; }).join(''); }
 function fmCropOtherToggle(which){ var sel=document.getElementById('fm'+which+'Crop'), oth=document.getElementById('fm'+which+'CropOther'); if(sel&&oth){ oth.style.display=(sel.value==='Other')?'' : 'none'; if(sel.value!=='Other') oth.value=''; } }
@@ -7476,6 +7489,11 @@ function _fmAreaHa(pts){
   var a=0; for(var i=0,j=xy.length-1;i<xy.length;j=i++){ a+=(xy[j].x+xy[i].x)*(xy[j].y-xy[i].y); }
   return Math.abs(a/2)/10000;
 }
+function _fmAreaM2(pts){ return _fmAreaHa(pts)*10000; }
+/* Most mapped areas are tiny, so show m² under 0.1 ha and hectares (to 0.1) above. */
+function _fmAreaLabel(pts){ var ha=_fmAreaHa(pts); return (ha<0.1) ? (Math.round(_fmAreaM2(pts))+' m²') : (ha.toFixed(1)+' ha'); }
+/* Distance from the last recorded point back to the first — for the closure hint. */
+function _fmCloseGap(pts){ if(!pts||pts.length<2) return null; return _haversine({lat:pts[pts.length-1].lat,lon:pts[pts.length-1].lon},{lat:pts[0].lat,lon:pts[0].lon}); }
 
 function initFreemap(){
   fmStopWatch();
@@ -7499,6 +7517,9 @@ function initFreemap(){
   _fmPillRow('fmProcessSevPills', FM_SEVERITY, function(){return false;}, 'fmPickSeverity');
   var pp=document.getElementById('fmPlantProblemGroup'); if(pp) pp.style.display='none';
   var pr=document.getElementById('fmProcessingGroup'); if(pr) pr.style.display='none';
+  /* Track/path type (default category is Track/path) */
+  _fmTrackType=''; _fmPillRow('fmTrackPills', FM_TRACK_TYPES, function(){return false;}, 'fmSetTrackType');
+  var tg=document.getElementById('fmTrackGroup'); if(tg) tg.style.display=(_fmCat==='road')?'block':'none';
   var lbl=document.getElementById('fmLenLabel'); if(lbl) lbl.textContent='metres';
   document.getElementById('fmPointBox').style.display='block';
   document.getElementById('fmLineBox').style.display='none';
@@ -7525,6 +7546,10 @@ function fmCat(v){
   if(isGarden && _fmMode!=='area') fmMode('area');
   var pp=document.getElementById('fmPlantProblemGroup'); if(pp) pp.style.display=(v==='plant_problem')?'block':'none';
   var pr=document.getElementById('fmProcessingGroup'); if(pr) pr.style.display=(v==='postharvest')?'block':'none';
+  /* Track/path = a line you walk; selecting it switches to Line capture and shows the type. */
+  var isTrack=(v==='road');
+  var tg=document.getElementById('fmTrackGroup'); if(tg) tg.style.display=isTrack?'block':'none';
+  if(isTrack && _fmMode==='area') fmMode('line');
 }
 function fmToggleCrop(c){
   var i=_fmCrops.indexOf(c); if(i>=0) _fmCrops.splice(i,1); else _fmCrops.push(c);
@@ -7541,8 +7566,50 @@ function fmCapturePoint(){
 }
 function _haversine(a,b){ var R=6371000, toR=function(d){return d*Math.PI/180;}; var dLat=toR(b.lat-a.lat), dLon=toR(b.lon-a.lon); var s=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(toR(a.lat))*Math.cos(toR(b.lat))*Math.sin(dLon/2)*Math.sin(dLon/2); return 2*R*Math.asin(Math.sqrt(s)); }
 function _fmLen(){ var L=0; for(var i=1;i<_fmLine.length;i++) L+=_haversine(_fmLine[i-1],_fmLine[i]); return L; }
-function fmResetLineUI(){ document.getElementById('fmPtCount').textContent='0'; document.getElementById('fmLen').textContent='0'; document.getElementById('fmRecStatus').textContent='Ready to record'; document.getElementById('fmStartBtn').style.display='block'; document.getElementById('fmStartBtn').textContent='● Start'; document.getElementById('fmPauseBtn').style.display='none'; document.getElementById('fmStopBtn').style.display='none'; }
-function fmUpdateLineUI(){ document.getElementById('fmPtCount').textContent=_fmLine.length; var el=document.getElementById('fmLen'); if(el){ el.textContent=(_fmMode==='area')?(Math.round(_fmAreaHa(_fmLine)*100)/100):Math.round(_fmLen()); } }
+function fmResetLineUI(){ document.getElementById('fmPtCount').textContent='0'; document.getElementById('fmLen').textContent='0'; document.getElementById('fmRecStatus').textContent='Ready to record'; document.getElementById('fmStartBtn').style.display='block'; document.getElementById('fmStartBtn').textContent='● Start'; document.getElementById('fmPauseBtn').style.display='none'; document.getElementById('fmStopBtn').style.display='none'; fmDrawPreview(); }
+function fmUpdateLineUI(){
+  document.getElementById('fmPtCount').textContent=_fmLine.length;
+  var el=document.getElementById('fmLen'), lbl=document.getElementById('fmLenLabel');
+  if(el){
+    if(_fmMode==='area'){ var ha=_fmAreaHa(_fmLine); if(ha<0.1){ el.textContent=Math.round(_fmAreaM2(_fmLine)); if(lbl) lbl.textContent='m² area'; } else { el.textContent=ha.toFixed(1); if(lbl) lbl.textContent='hectares'; } }
+    else { el.textContent=Math.round(_fmLen()); if(lbl) lbl.textContent='metres'; }
+  }
+  fmDrawPreview();
+}
+/* Live, auto-scaled sketch of the path being walked, so the surveyor has
+   context and can see whether an area has closed. No basemap (most areas are
+   tiny); a background is a later enhancement for large (>~1 km / >100 ha) maps. */
+function fmDrawPreview(){
+  var svg=document.getElementById('fmPreview'); if(!svg) return;
+  var pts=_fmLine||[], empty=document.getElementById('fmPreviewEmpty'), hint=document.getElementById('fmCloseHint');
+  if(empty) empty.style.display=(pts.length>0)?'none':'flex';
+  if(pts.length===0){ svg.innerHTML=''; if(hint) hint.style.display='none'; return; }
+  var W=300,H=180,pad=18, R=6378137, toR=function(d){return d*Math.PI/180;}, lat0=toR(pts[0].lat);
+  var xy=pts.map(function(p){ return { x:toR(p.lon)*R*Math.cos(lat0), y:toR(p.lat)*R }; });
+  var xs=xy.map(function(p){return p.x;}), ys=xy.map(function(p){return p.y;});
+  var minX=Math.min.apply(null,xs),maxX=Math.max.apply(null,xs),minY=Math.min.apply(null,ys),maxY=Math.max.apply(null,ys);
+  var spanX=(maxX-minX)||1, spanY=(maxY-minY)||1;
+  var sc=Math.min((W-2*pad)/spanX,(H-2*pad)/spanY);
+  var offX=(W-spanX*sc)/2, offY=(H-spanY*sc)/2;
+  var PX=function(p){ return offX+(p.x-minX)*sc; }, PY=function(p){ return H-(offY+(p.y-minY)*sc); };
+  var poly=xy.map(function(p){ return PX(p).toFixed(1)+','+PY(p).toFixed(1); }).join(' ');
+  var h='';
+  if(_fmMode==='area' && xy.length>=2){
+    h+='<polygon points="'+poly+'" fill="#2E7D32" fill-opacity="0.15" stroke="#1B5E20" stroke-width="2"/>';
+    h+='<line x1="'+PX(xy[xy.length-1]).toFixed(1)+'" y1="'+PY(xy[xy.length-1]).toFixed(1)+'" x2="'+PX(xy[0]).toFixed(1)+'" y2="'+PY(xy[0]).toFixed(1)+'" stroke="#c62828" stroke-width="1.6" stroke-dasharray="5,4"/>';
+  } else {
+    h+='<polyline points="'+poly+'" fill="none" stroke="#1B5E20" stroke-width="2.2"/>';
+  }
+  xy.forEach(function(p,idx){ var last=idx===xy.length-1; var c=idx===0?'#2E7D32':(last?'#00695C':'#5a8a5a'); h+='<circle cx="'+PX(p).toFixed(1)+'" cy="'+PY(p).toFixed(1)+'" r="'+(last?5:3)+'" fill="'+c+'"/>'; });
+  svg.innerHTML=h;
+  if(hint){
+    if(_fmMode==='area' && xy.length>=3){
+      var gap=_fmCloseGap(pts); hint.style.display='block';
+      if(gap<=6){ hint.textContent='✓ '+Math.round(gap)+' m from the start — the shape closes here.'; hint.style.color='#2E7D32'; }
+      else { hint.textContent='End is '+Math.round(gap)+' m from the start — walk back to close the shape.'; hint.style.color='#E65100'; }
+    } else hint.style.display='none';
+  }
+}
 function fmStopWatch(){ if(_fmWatchId!=null && navigator.geolocation){ navigator.geolocation.clearWatch(_fmWatchId); } _fmWatchId=null; }
 function fmStart(){
   if(!navigator.geolocation){ toast('GPS not available on this device.'); return; }
@@ -7569,7 +7636,8 @@ function fmStop(){
   document.getElementById('fmPauseBtn').style.display='none';
   document.getElementById('fmStopBtn').style.display='none';
   document.getElementById('fmStartBtn').style.display='block'; document.getElementById('fmStartBtn').textContent='● Resume recording';
-  document.getElementById('fmRecStatus').textContent='■ Stopped — '+_fmLine.length+' points'+(_fmMode==='area'?(', ~'+(Math.round(_fmAreaHa(_fmLine)*100)/100)+' ha'):(', '+Math.round(_fmLen())+' m'));
+  document.getElementById('fmRecStatus').textContent='■ Stopped — '+_fmLine.length+' points'+(_fmMode==='area'?(', ~'+_fmAreaLabel(_fmLine)):(', '+Math.round(_fmLen())+' m'));
+  fmDrawPreview();
 }
 function fmTriggerPhoto(){ var inp=document.getElementById('fmPhotoInput'); if(inp) inp.click(); }
 function fmHandlePhoto(input){ var file=input.files&&input.files[0]; if(!file) return; var r=new FileReader(); r.onload=function(e){ _fmPhoto=e.target.result; var b=document.getElementById('fmPhotoBox'); if(b) b.innerHTML='<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;">'; var s=document.getElementById('fmPhotoStatus'); if(s){s.textContent='✓ Photo added';s.style.color='#2E7D32';} }; r.readAsDataURL(file); }
@@ -7607,8 +7675,14 @@ function saveFreemap(){
     if(list.length===0){ toast('Select at least one cash crop.'); return; }
     crops=list.join(', ');
   }
+  /* Track type (track/path category) */
+  var trackType=null;
+  if(_fmCat==='road'){
+    if(!_fmTrackType){ toast('Choose the type of track.'); return; }
+    trackType=_fmTrackType;
+  }
   var now=new Date();
-  var rec={ survey_type:'freemap', uid:generateRecordId('MAP'), map_type:_fmMode, category:_fmCat, category_label:FM_CATS[_fmCat], title:title, description:(document.getElementById('fmDesc').value||'').trim(), points:pts, length_m:(_fmMode==='line')?Math.round(_fmLen()):0, area_ha:(_fmMode==='area')?(Math.round(_fmAreaHa(pts)*100)/100):0, garden_type:(_fmCat==='cashcrop_garden')?'cash_crop':null, crops:crops, plant_problem:plantProblem, processing:processing, photo:_fmPhoto||null, clan:myClan(), steward:(window._cachedProfile&&window._cachedProfile.stewardId)||'', recorded_at:now.toISOString() };
+  var rec={ survey_type:'freemap', uid:generateRecordId('MAP'), map_type:_fmMode, category:_fmCat, category_label:FM_CATS[_fmCat], title:title, description:(document.getElementById('fmDesc').value||'').trim(), points:pts, length_m:(_fmMode==='line')?Math.round(_fmLen()):0, area_ha:(_fmMode==='area')?(Math.round(_fmAreaHa(pts)*10000)/10000):0, area_m2:(_fmMode==='area')?Math.round(_fmAreaM2(pts)):0, close_gap_m:(_fmMode==='area')?Math.round(_fmCloseGap(pts)||0):null, garden_type:(_fmCat==='cashcrop_garden')?'cash_crop':null, crops:crops, track_type:trackType, plant_problem:plantProblem, processing:processing, photo:_fmPhoto||null, clan:myClan(), steward:(window._cachedProfile&&window._cachedProfile.stewardId)||'', recorded_at:now.toISOString() };
   /* Save only — the record uploads with the normal Send Data sync. No KML is
      written to the phone; use the per-record "Export" button in the list below
      if you ever need a map file to share. */
@@ -7644,18 +7718,59 @@ function renderFreemapRecent(){
     var h='<div style="font-size:0.8rem;font-weight:800;color:#00695C;margin:4px 2px 8px;">Recent maps ('+rows.length+')</div>';
     rows.slice(0,15).forEach(function(r){
       var ic = r.map_type==='area'?'sprout':(r.map_type==='line'?'map':'pin');
-      var measure = r.map_type==='area'?('~'+(r.area_ha||0)+' ha'+(r.crops?(' · '+r.crops):'')):(r.map_type==='line'?('~'+r.length_m+' m'):'point');
+      var measure = '~'+_fmRecMeasure(r)+(r.track_type?(' · '+r.track_type):'')+(r.crops?(' · '+r.crops):'');
       var meta = (r.category_label||'')+' · '+measure+(r.synced?'':' · not sent');
-      h+='<div class="card" style="padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">';
+      h+='<div class="card" style="padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">';
       h+='<span style="color:#00695C;display:flex;">'+icon(ic,18)+'</span>';
-      h+='<div style="flex:1;"><div style="font-size:0.84rem;font-weight:700;color:#333;">'+(r.title||'(untitled)')+'</div><div style="font-size:0.7rem;color:#888;">'+meta+'</div></div>';
-      h+='<button class="btn-outline" style="padding:5px 10px;font-size:0.72rem;border-color:#00695C;color:#00695C;" onclick="exportFreemapById('+r.id+')">Export</button>';
+      h+='<div style="flex:1;min-width:0;"><div style="font-size:0.84rem;font-weight:700;color:#333;">'+(r.title||'(untitled)')+'</div><div style="font-size:0.7rem;color:#888;">'+meta+'</div></div>';
+      if(r.map_type!=='point') h+='<button class="btn-outline" style="padding:5px 9px;font-size:0.72rem;border-color:#1565C0;color:#1565C0;" onclick="fmViewRecord('+r.id+')">View</button>';
+      h+='<button class="btn-outline" style="padding:5px 9px;font-size:0.72rem;border-color:#00695C;color:#00695C;" onclick="exportFreemapById('+r.id+')">Export</button>';
       h+='</div>';
     });
     el.innerHTML=h;
   });
 }
 function exportFreemapById(id){ getAllRecords('freemap', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(r) exportFreemap(r); }); }
+function _fmRecMeasure(r){
+  if(r.map_type==='area'){ var ha=(r.area_ha!=null?r.area_ha:0); var m2=(r.area_m2!=null?r.area_m2:Math.round(ha*10000)); return ha<0.1?(m2+' m²'):(ha.toFixed(1)+' ha'); }
+  if(r.map_type==='line'){ return (r.length_m||0)+' m'; }
+  return 'point';
+}
+function _fmShapeSVG(points, isArea, W, H){
+  if(!points||points.length===0) return '';
+  var pad=24, R=6378137, toR=function(d){return d*Math.PI/180;}, lat0=toR(points[0].lat);
+  var xy=points.map(function(p){ return {x:toR(p.lon)*R*Math.cos(lat0), y:toR(p.lat)*R}; });
+  var xs=xy.map(function(p){return p.x;}),ys=xy.map(function(p){return p.y;});
+  var minX=Math.min.apply(null,xs),maxX=Math.max.apply(null,xs),minY=Math.min.apply(null,ys),maxY=Math.max.apply(null,ys);
+  var spanX=(maxX-minX)||1,spanY=(maxY-minY)||1, sc=Math.min((W-2*pad)/spanX,(H-2*pad)/spanY);
+  var offX=(W-spanX*sc)/2, offY=(H-spanY*sc)/2;
+  var PX=function(p){return offX+(p.x-minX)*sc;}, PY=function(p){return H-(offY+(p.y-minY)*sc);};
+  var poly=xy.map(function(p){return PX(p).toFixed(1)+','+PY(p).toFixed(1);}).join(' ');
+  var h='';
+  if(isArea && xy.length>=2){ h+='<polygon points="'+poly+'" fill="#2E7D32" fill-opacity="0.15" stroke="#1B5E20" stroke-width="2"/><line x1="'+PX(xy[xy.length-1]).toFixed(1)+'" y1="'+PY(xy[xy.length-1]).toFixed(1)+'" x2="'+PX(xy[0]).toFixed(1)+'" y2="'+PY(xy[0]).toFixed(1)+'" stroke="#c62828" stroke-width="1.5" stroke-dasharray="5,4"/>'; }
+  else if(xy.length>=2){ h+='<polyline points="'+poly+'" fill="none" stroke="#1B5E20" stroke-width="2.2"/>'; }
+  xy.forEach(function(p,idx){ var last=idx===xy.length-1; h+='<circle cx="'+PX(p).toFixed(1)+'" cy="'+PY(p).toFixed(1)+'" r="'+((last||idx===0)?5:3)+'" fill="'+(idx===0?'#2E7D32':(last?'#c62828':'#5a8a5a'))+'"/>'; });
+  return h;
+}
+function fmViewRecord(id){
+  getAllRecords('freemap', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r) return;
+    var isArea=r.map_type==='area';
+    var ov=document.getElementById('fmViewOverlay'); if(ov) ov.remove();
+    ov=document.createElement('div'); ov.id='fmViewOverlay';
+    ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(10,20,10,0.72);display:flex;align-items:center;justify-content:center;padding:18px;';
+    var detail=(r.category_label||'')+(r.track_type?(' · '+r.track_type):'')+(r.crops?(' · '+r.crops):'')+' · '+_fmRecMeasure(r)+' · '+((r.points&&r.points.length)||0)+' pts';
+    var gap=(isArea && r.close_gap_m!=null)?('<div style="font-size:0.74rem;color:'+(r.close_gap_m<=6?'#2E7D32':'#E65100')+';margin-top:6px;">'+(r.close_gap_m<=6?('✓ closed — end '+r.close_gap_m+' m from start'):('⚠ end was '+r.close_gap_m+' m from the start (auto-closed for area)'))+'</div>'):'';
+    ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:360px;width:100%;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,0.4);">'
+      +'<div style="font-size:1rem;font-weight:800;color:#1B5E20;">'+((r.title||'(untitled)')+'').replace(/</g,'&lt;')+'</div>'
+      +'<div style="font-size:0.74rem;color:#777;margin-bottom:8px;">'+detail+'</div>'
+      +'<div style="background:#f3f6f3;border:1px solid #d7e2d7;border-radius:10px;height:240px;overflow:hidden;"><svg viewBox="0 0 320 240" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;">'+_fmShapeSVG(r.points||[], isArea, 320, 240)+'</svg></div>'
+      +(r.description?('<div style="font-size:0.78rem;color:#444;margin-top:8px;">'+(r.description+'').replace(/</g,'&lt;')+'</div>'):'')
+      +gap
+      +'<button class="btn-primary" style="background:#00695C;margin-top:12px;width:100%;" onclick="var o=document.getElementById(\'fmViewOverlay\');if(o)o.remove();">Close</button>'
+      +'</div>';
+    document.body.appendChild(ov);
+  });
+}
 
 /* ══════════════════════════════════════
    LIVE MAP — Leaflet basemap (topographic / street) + data layers
@@ -10472,7 +10587,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v43'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v44'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

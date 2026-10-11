@@ -242,6 +242,17 @@ GPS:
 Both make crop-health and post-harvest-quality reports **countable** (vs. the
 old free-text). Title auto-fills from crop + first problem if left blank.
 
+**Track / path** (`category:'road'`, line mode) carries a required
+**`track_type`**: Vehicle road — accessible · Vehicle road — rundown · Main
+foot track · Garden track · Hunting track.
+
+**Area records** store `area_ha` (4 dp) **and `area_m2`** (most mapped areas are
+tiny, so the UI shows **m² under 0.1 ha**, hectares to 0.1 above), plus
+**`close_gap_m`** — the distance from the last recorded point back to the first
+(the area auto-closes; a large gap flags that the walker didn't return to the
+start). A **live preview** draws the path as it's walked with a closure hint, and
+saved line/area records have an in-app **View**.
+
 ### 3.5 Tree mapping
 Store `trees`. Species (e.g. okari, massoy), latitude, longitude,
 **DBH (diameter at breast height, cm)**, notes.

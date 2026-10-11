@@ -52,6 +52,7 @@ via the plausibility window; it just has no server anchor to correct against.
 | `zone_staff` | Zone Staff | **all clans** (oversight) | community briefings; training = Awareness unless authorised |
 | `field_officer` | Field Officer (Agric. Extension) | own clan + can **deliver training** | agronomy/extension |
 | `mcf_staff` | **Project / MCF Staff** | **all clans** (oversight) | you, Mellie, Matilda, Josh; no clan/zone; lands on MCF Summary |
+| `consultant` | **Visiting Consultant** | **focused dashboard**: Training Records + Field Mapping + Export Data only | external/visiting; no clan or zone required; can **record training given** and **map the sites they visit**; **not** oversight (no approve/enrol/coordinator powers) |
 
 - **Oversight** = `mcf_staff`, `zone_staff`, or a coordinator-unlocked session
   (`isOversight()`), and it means **see every clan's items** so staff can

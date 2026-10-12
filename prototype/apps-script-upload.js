@@ -369,6 +369,35 @@ function registerIssue(rec) {
 }
 function updateIssues(list) { saveIssuesList(list||[]); return { status:'ok', message:'Issues saved', count:(list||[]).length }; }
 
+/* ─── Report recipients registry ───────────────────────────────────────
+ * _recipients.json in the data folder, maintained by the coordinator
+ * (update_recipients — coordinator key required). Defines where compiled
+ * reports go. Emails live ONLY in this Drive file, never in source.
+ *   { "field_reports_to": "matilda@example.org",   // ALL field-officer reports
+ *     "comms": ["comms@example.org"],              // distribution media + ledger
+ *     "consultants": { "<stewardId>": "email" } }  // each consultant's own report
+ * Not exposed over GET (emails are not returned to phones); read server-side
+ * by the report jobs. To seed it once from the editor, run seedRecipients(). */
+function loadRecipients() {
+  try { var f=getDataFolder(); var fs=f.getFilesByName('_recipients.json'); if(fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString())||{}; } catch(e){}
+  return {};
+}
+function saveRecipients(obj) {
+  var f=getDataFolder(); var fs=f.getFilesByName('_recipients.json'); var j=JSON.stringify(obj||{},null,2);
+  if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_recipients.json', j, MimeType.PLAIN_TEXT);
+}
+function updateRecipients(obj) { saveRecipients(obj||{}); return { status:'ok', message:'Recipients saved' }; }
+/* One-time convenience: fill in and run from the Apps Script editor instead of
+ * sending a coordinator action. Leave blank the ones you don't have yet. */
+function seedRecipients() {
+  saveRecipients({
+    field_reports_to: '',          /* Matilda's email */
+    comms: [],                     /* ['comms@example.org'] */
+    consultants: {}                /* { 'CIFOR-ICRAF 01': 'name@example.org' } */
+  });
+  Logger.log('Seeded _recipients.json — edit it via update_recipients or re-run seedRecipients.');
+}
+
 /* ─── Activity calendar ────────────────────────────────────────────────
  * _calendar.json in Drive: scheduled activities/meetings, keyed by uid. */
 function loadCalendarList() {
@@ -1189,7 +1218,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1347,6 +1376,10 @@ function doPost(e) {
     /* Issues — coordinator mark resolved / overwrite (coordinator key required) */
     if (body._action === 'update_issues') {
       return ContentService.createTextOutput(JSON.stringify(updateIssues(body.issues))).setMimeType(ContentService.MimeType.JSON);
+    }
+    /* Report recipients — coordinator maintains the email list (coordinator key required) */
+    if (body._action === 'update_recipients') {
+      return ContentService.createTextOutput(JSON.stringify(updateRecipients(body.recipients))).setMimeType(ContentService.MimeType.JSON);
     }
 
     /* Normal steward data upload */
@@ -1517,4 +1550,489 @@ function monthlyReport() {
     MailApp.sendEmail(email, 'MCA Monthly Data Report — ' + report.to, body);
   });
   Logger.log('Monthly report sent to: ' + REPORT_EMAILS.join(', '));
+}
+
+/* ─── Monthly distribution / handover ledger ────────────────────────────
+ * ONE report each month listing what was given out, with the handover photos
+ * and video extracted from the uploaded bundle into standalone Drive files so
+ * the comms team can review them and the ledger can link to them.
+ *
+ * Routing (from _recipients.json): distributions are field-officer work, so the
+ * ledger goes to field_reports_to (Matilda); comms also get the ledger + the
+ * month's media folder as viewers. If no recipients are set it falls back to
+ * REPORT_EMAILS.
+ *
+ * TRIGGER: run installMonthlyDistributionTrigger() once (1st of month, ~7am PNG,
+ * project time zone Asia/Port_Moresby). Run monthlyDistributionReport() from the
+ * editor any time for last month, or monthlyDistributionReport('monthly') for
+ * the current month so far. Media that is base64 in the bundle becomes real
+ * jpeg/mp4 files here (which also lets the bundle be media-stripped later). */
+
+function _recInstant(rec) {
+  var t = rec.recorded_at || rec.timestamp || rec.device_time || '';
+  var ms = Date.parse(t);
+  return isNaN(ms) ? 0 : ms;
+}
+
+function _pngDate(d, fmt) {
+  var dt = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(dt.getTime())) return '';
+  return Utilities.formatDate(dt, 'Pacific/Port_Moresby', fmt || 'yyyy-MM-dd');
+}
+
+function _dataUriToBlob(uri, name) {
+  if (!uri || typeof uri !== 'string' || uri.indexOf('data:') !== 0) return null;
+  var m = uri.match(/^data:([^;]+);base64,([\s\S]*)$/);
+  if (!m) return null;
+  try { return Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], name); }
+  catch(e) { return null; }
+}
+
+/* Save one base64 data: blob as a standalone file; returns its Drive URL
+ * (idempotent — reuses the file if a file of that name already exists). */
+function _saveMedia(folder, name, dataUri) {
+  var existing = folder.getFilesByName(name);
+  if (existing.hasNext()) return existing.next().getUrl();
+  var blob = _dataUriToBlob(dataUri, name);
+  if (!blob) return '';
+  return folder.createFile(blob).getUrl();
+}
+function _extractMedia(folder, uid, slot, dataUri, ext) {
+  return _saveMedia(folder, 'DIST_' + uid + '_' + slot + '.' + ext, dataUri);
+}
+
+/* Walk every steward subfolder, gather distribution records, dedup by
+ * record_uid keeping the latest instant. Pilot-scale: scans all bundles. */
+function collectDistributions() {
+  var folder = getDataFolder();
+  var byUid = {};
+  var zones = folder.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next();
+    if (zf.getName().charAt(0) === '_') continue;          /* skip _media/_reports/config */
+    var subs = zf.getFolders();
+    while (subs.hasNext()) {
+      var files = subs.next().getFilesByType(MimeType.PLAIN_TEXT);
+      while (files.hasNext()) {
+        var body;
+        try { body = JSON.parse(files.next().getBlob().getDataAsString()); } catch(e) { continue; }
+        var dists = (body.modules && body.modules.distributions) || [];
+        if (!dists.length) continue;
+        var stew = body.steward || {};
+        for (var i = 0; i < dists.length; i++) {
+          var rec = dists[i];
+          var uid = rec.record_uid || rec.uid;
+          if (!uid) continue;
+          var prev = byUid[uid];
+          if (prev && _recInstant(prev.rec) >= _recInstant(rec)) continue;  /* keep latest */
+          byUid[uid] = { rec: rec, steward: stew };
+        }
+      }
+    }
+  }
+  return Object.keys(byUid).map(function(k){ return byUid[k]; });
+}
+
+function _distItemsText(items) {
+  if (!items || !items.length) return '';
+  return items.map(function(it){
+    var s = '';
+    if (it.category)    s += it.category + ': ';
+    s += (it.description || '');
+    if (it.quantity != null && it.quantity !== '') s += ' × ' + it.quantity + (it.unit ? (' ' + it.unit) : '');
+    return s;
+  }).join(' ; ');
+}
+
+function monthlyDistributionReport(period) {
+  period = (typeof period === 'string') ? period : 'prevmonth';   /* trigger passes an event object */
+  var cutoff, periodEnd;
+  if (period === 'monthly') { cutoff = currentMonthStart(); periodEnd = new Date(); }
+  else { cutoff = prevMonthStart(); periodEnd = prevMonthEnd(); }
+  var ym = _pngDate(cutoff, 'yyyy-MM');
+  var cutMs = cutoff.getTime(), endMs = periodEnd.getTime();
+
+  var rows = collectDistributions().filter(function(x){
+    var t = _recInstant(x.rec); return t >= cutMs && t <= endMs;
+  });
+
+  var folder       = getDataFolder();
+  var mediaMonth   = getOrCreateFolder(ym, getOrCreateFolder('_media', folder));
+  var reportsFolder= getOrCreateFolder('_reports', folder);
+
+  /* Fresh ledger for the month (replace any previous run for the same month). */
+  var ssName = 'Distribution ledger ' + ym;
+  var old = reportsFolder.getFilesByName(ssName);
+  while (old.hasNext()) { try { old.next().setTrashed(true); } catch(e){} }
+  var ss = SpreadsheetApp.create(ssName);
+  var sheet = ss.getActiveSheet();
+  sheet.appendRow(['Date (PNG)','Officer','Zone','Recipient','Recipient type','Received by','Recipient clan','Items','Purpose','Donor','Donor recognised','Confirmed receipt','GPS','Handover photo','Receipt photo','Video','record_uid']);
+
+  rows.sort(function(a,b){ return _recInstant(a.rec) - _recInstant(b.rec); });
+  rows.forEach(function(x){
+    var r = x.rec, s = x.steward, o = r.officer || {}, rp = r.recipient || {};
+    var uid = r.record_uid || r.uid;
+    var hLink = _extractMedia(mediaMonth, uid, 'handover', r.photo_handover, 'jpg');
+    var rLink = _extractMedia(mediaMonth, uid, 'receipt',  r.photo_receipt,  'jpg');
+    var vLink = _extractMedia(mediaMonth, uid, 'video',    r.video,          'mp4');
+    var gps = (r.gps && r.gps.lat != null) ? (r.gps.lat + ', ' + r.gps.lng + (r.gps.accuracy ? (' ±' + r.gps.accuracy + 'm') : '') + (r.gps_source ? (' (' + r.gps_source + ')') : '')) : '';
+    sheet.appendRow([
+      _pngDate(_recInstant(r) ? new Date(_recInstant(r)) : '', 'yyyy-MM-dd HH:mm'),
+      (o.name || s.name || '') + (o.steward_id ? (' (' + o.steward_id + ')') : ''),
+      s.zone || '',
+      rp.name || '', rp.type || '', rp.received_by || '', rp.clan || '',
+      _distItemsText(r.items),
+      [r.purpose_category, r.purpose].filter(String).join(' — '),
+      r.donor || '',
+      (r.donor_recognised === true ? 'Yes' : (r.donor_recognised === false ? 'No' : '')),
+      (rp.confirmed_receipt === true ? 'Yes' : (rp.confirmed_receipt === false ? 'No' : '')),
+      gps, hLink, rLink, vLink, uid
+    ]);
+  });
+
+  /* Move the new spreadsheet out of My Drive root into _reports. */
+  var ssFile = DriveApp.getFileById(ss.getId());
+  try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
+
+  /* Recipients: Matilda (field_reports_to) + comms get the ledger + media. */
+  var rcp = loadRecipients();
+  var to = [];
+  if (rcp.field_reports_to) to.push(rcp.field_reports_to);
+  (rcp.comms || []).forEach(function(e){ if (e) to.push(e); });
+  if (!to.length) to = REPORT_EMAILS.slice();
+  to.forEach(function(email){
+    try { mediaMonth.addViewer(email); } catch(e){}
+    try { ssFile.addViewer(email); } catch(e){}
+  });
+
+  var body = [
+    'MCA Steward App — Monthly distribution / handover ledger',
+    '',
+    'Month: ' + ym + ' (PNG time)',
+    'Handovers: ' + rows.length,
+    '',
+    'Ledger (Google Sheet): ' + ss.getUrl(),
+    'Photos & video for the month: ' + mediaMonth.getUrl(),
+    '',
+    'Each row links to the handover photo, receipt photo and video.'
+  ].join('\n');
+  to.forEach(function(email){ MailApp.sendEmail(email, 'MCA Distribution ledger — ' + ym, body); });
+  Logger.log('Distribution ledger ' + ym + ': ' + rows.length + ' handovers → ' + to.join(', '));
+  return { status: 'ok', month: ym, handovers: rows.length, ledger: ss.getUrl(), media: mediaMonth.getUrl() };
+}
+
+function installMonthlyDistributionTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'monthlyDistributionReport') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('monthlyDistributionReport').timeBased().onMonthDay(1).atHour(7).create();
+  Logger.log('Monthly distribution trigger installed (1st of month, 7am PNG).');
+}
+
+/* ─── Per-consultant report (training given + sites visited) ─────────────
+ * Each visiting consultant gets THEIR OWN report back — training they ran and
+ * sites they visited (field maps) for the month — not a pooled one. Emailed to
+ * the address held for that stewardId in _recipients.json ("consultants").
+ *
+ * TRIGGER: run installConsultantReportsTrigger() once (1st of month, ~7am PNG).
+ * Run consultantReports() from the editor for last month, or
+ * consultantReports('monthly') for the current month so far. A consultant with
+ * no email set still gets a report file (logged) — it just isn't emailed. */
+function collectConsultantWork() {
+  var folder = getDataFolder();
+  var byConsultant = {};          /* stewardId -> { steward, training:{uid:rec}, sites:{uid:rec} } */
+  var zones = folder.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next();
+    if (zf.getName().charAt(0) === '_') continue;
+    var subs = zf.getFolders();
+    while (subs.hasNext()) {
+      var files = subs.next().getFilesByType(MimeType.PLAIN_TEXT);
+      while (files.hasNext()) {
+        var body;
+        try { body = JSON.parse(files.next().getBlob().getDataAsString()); } catch(e) { continue; }
+        var stew = body.steward || {};
+        if (stew.role !== 'consultant') continue;
+        var sid = stew.stewardId || 'UNKNOWN';
+        if (!byConsultant[sid]) byConsultant[sid] = { steward: stew, training: {}, sites: {} };
+        var acc = byConsultant[sid], mods = body.modules || {};
+        (mods.training || []).forEach(function(r){ var u=r.record_uid||r.uid; if(!u) return; var p=acc.training[u]; if(p && _recInstant(p)>=_recInstant(r)) return; acc.training[u]=r; });
+        (mods.freemap  || []).forEach(function(r){ var u=r.record_uid||r.uid; if(!u) return; var p=acc.sites[u];    if(p && _recInstant(p)>=_recInstant(r)) return; acc.sites[u]=r; });
+      }
+    }
+  }
+  return byConsultant;
+}
+
+function _num(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+
+function consultantReports(period) {
+  period = (typeof period === 'string') ? period : 'prevmonth';
+  var cutoff, periodEnd;
+  if (period === 'monthly') { cutoff = currentMonthStart(); periodEnd = new Date(); }
+  else { cutoff = prevMonthStart(); periodEnd = prevMonthEnd(); }
+  var ym = _pngDate(cutoff, 'yyyy-MM');
+  var cutMs = cutoff.getTime(), endMs = periodEnd.getTime();
+
+  var folder        = getDataFolder();
+  var reportsFolder = getOrCreateFolder('_reports', folder);
+  var consRoot      = getOrCreateFolder('consultants', getOrCreateFolder('_media', folder));
+  var consEmails    = (loadRecipients().consultants) || {};
+  var inMonth = function(r){ var t=_recInstant(r); return t>=cutMs && t<=endMs; };
+  var byTime  = function(a,b){ return _recInstant(a) - _recInstant(b); };
+
+  var all = collectConsultantWork();
+  var out = [];
+  Object.keys(all).forEach(function(sid){
+    var c = all[sid];
+    var training = Object.keys(c.training).map(function(k){ return c.training[k]; }).filter(inMonth).sort(byTime);
+    var sites    = Object.keys(c.sites).map(function(k){ return c.sites[k]; }).filter(inMonth).sort(byTime);
+    if (!training.length && !sites.length) return;              /* nothing this month */
+
+    var name = c.steward.name || sid;
+    var mediaFolder = getOrCreateFolder(ym, getOrCreateFolder(sid, consRoot));
+
+    var ssName = 'Consultant report ' + name + ' ' + ym;
+    var oldf = reportsFolder.getFilesByName(ssName); while (oldf.hasNext()) { try { oldf.next().setTrashed(true); } catch(e){} }
+    var ss = SpreadsheetApp.create(ssName);
+
+    /* Training given */
+    var ts = ss.getActiveSheet(); ts.setName('Training given');
+    ts.appendRow(['Date (PNG)','Type','Topic','Location','Duration','Pax F','Pax M','Pax youth','Pax total','Materials','Topics covered','Outcomes','Follow-up','Challenges','Notes','Photo','record_uid']);
+    training.forEach(function(r){
+      var uid = r.record_uid || r.uid;
+      var photo = _saveMedia(mediaFolder, 'TRAIN_' + uid + '.jpg', r.photo);
+      ts.appendRow([
+        _pngDate(_recInstant(r) ? new Date(_recInstant(r)) : '', 'yyyy-MM-dd HH:mm'),
+        r.type || '', r.topic || '', r.location || '', r.duration || '',
+        _num(r.pax_female), _num(r.pax_male), _num(r.pax_youth),
+        _num(r.pax_female) + _num(r.pax_male) + _num(r.pax_youth),
+        (r.materials && r.materials.length ? r.materials.join(', ') : ''),
+        r.topics_covered || '', r.outcomes || '', r.followup || '', r.challenges || '', r.notes || '',
+        photo, uid
+      ]);
+    });
+
+    /* Sites visited (field maps) */
+    var vs = ss.insertSheet('Sites visited');
+    vs.appendRow(['Date (PNG)','Category','Title','Description','Shape','Area (ha)','Length (m)','Points','Map link','Photo','record_uid']);
+    sites.forEach(function(r){
+      var uid = r.record_uid || r.uid;
+      var photo = _saveMedia(mediaFolder, 'SITE_' + uid + '.jpg', r.photo);
+      var p0 = (r.points && r.points[0]) ? r.points[0] : null;
+      var mapLink = p0 ? ('https://www.google.com/maps?q=' + p0.lat + ',' + p0.lon) : '';
+      vs.appendRow([
+        _pngDate(_recInstant(r) ? new Date(_recInstant(r)) : '', 'yyyy-MM-dd HH:mm'),
+        r.category_label || r.category || '', r.title || '', r.description || '',
+        r.map_type || '',
+        (r.area_ha != null ? r.area_ha : ''), (r.length_m != null ? r.length_m : ''),
+        (r.points && r.points.length) || 0,
+        mapLink, photo, uid
+      ]);
+    });
+
+    var ssFile = DriveApp.getFileById(ss.getId());
+    try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
+
+    var to = consEmails[sid];
+    if (to) {
+      try { ssFile.addViewer(to); } catch(e){}
+      try { mediaFolder.addViewer(to); } catch(e){}
+      var body = [
+        'Your MCA consultant report — ' + ym + ' (PNG time)',
+        '',
+        'Training sessions: ' + training.length,
+        'Sites visited: ' + sites.length,
+        '',
+        'Report (Google Sheet): ' + ss.getUrl(),
+        'Your photos for the month: ' + mediaFolder.getUrl()
+      ].join('\n');
+      MailApp.sendEmail(to, 'Your MCA consultant report — ' + ym, body);
+    } else {
+      Logger.log('No email for consultant ' + sid + ' (' + name + ') — report made but not sent: ' + ss.getUrl());
+    }
+    out.push({ stewardId: sid, name: name, training: training.length, sites: sites.length, report: ss.getUrl(), emailed: !!to });
+  });
+  Logger.log('Consultant reports ' + ym + ': ' + out.length + ' consultant(s) with activity.');
+  return { status: 'ok', month: ym, reports: out };
+}
+
+function installConsultantReportsTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'consultantReports') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('consultantReports').timeBased().onMonthDay(1).atHour(7).create();
+  Logger.log('Monthly consultant-reports trigger installed (1st of month, 7am PNG).');
+}
+
+/* ─── Field-officer reports (to Matilda) ─────────────────────────────────
+ * Field-officer work all goes to one destination — Matilda
+ * (_recipients.json → field_reports_to; falls back to REPORT_EMAILS). Three
+ * monthly outputs, all PNG time, all emailed to Matilda in one message:
+ *   1. Field officer report <YYYY-MM>            — summary, one row per officer
+ *                                                  (active days + counts per module)
+ *   2. Field officer training <YYYY-MM>          — one row per training session
+ *                                                  (only produced if any exist)
+ *   3. Field officer mapping & observations …    — one row per field map /
+ *                                                  observation (only if any exist)
+ * Distributions have their own ledger (monthlyDistributionReport); the summary
+ * still counts them and points there. TRIGGER: installFieldOfficerReportsTrigger()
+ * once (1st of month, 7am PNG). Run fieldOfficerReports('monthly') on demand. */
+
+/* Generic: all records from bundles of a given role, grouped by steward then
+ * module, deduped by record_uid (latest kept). */
+function collectRecordsByRole(role) {
+  var folder = getDataFolder();
+  var out = {};                   /* stewardId -> { steward, mods: { modName: {uid:rec} } } */
+  var zones = folder.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next();
+    if (zf.getName().charAt(0) === '_') continue;
+    var subs = zf.getFolders();
+    while (subs.hasNext()) {
+      var files = subs.next().getFilesByType(MimeType.PLAIN_TEXT);
+      while (files.hasNext()) {
+        var body;
+        try { body = JSON.parse(files.next().getBlob().getDataAsString()); } catch(e) { continue; }
+        var stew = body.steward || {};
+        if (stew.role !== role) continue;
+        var sid = stew.stewardId || 'UNKNOWN';
+        if (!out[sid]) out[sid] = { steward: stew, mods: {} };
+        var mods = body.modules || {};
+        Object.keys(mods).forEach(function(mn){
+          var arr = mods[mn]; if (!arr || !arr.length) return;
+          if (!out[sid].mods[mn]) out[sid].mods[mn] = {};
+          arr.forEach(function(r){ var u=r.record_uid||r.uid; if(!u) return; var p=out[sid].mods[mn][u]; if(p && _recInstant(p)>=_recInstant(r)) return; out[sid].mods[mn][u]=r; });
+        });
+      }
+    }
+  }
+  return out;
+}
+
+function _fmExtra(r) {
+  var bits = [];
+  if (r.crops) bits.push('crops: ' + r.crops);
+  if (r.track_type) bits.push('track: ' + r.track_type);
+  if (r.plant_problem) bits.push('problem: ' + r.plant_problem);
+  if (r.processing && r.processing.stage) bits.push('processing: ' + r.processing.stage);
+  return bits.join('; ');
+}
+
+function fieldOfficerReports(period) {
+  period = (typeof period === 'string') ? period : 'prevmonth';
+  var cutoff, periodEnd;
+  if (period === 'monthly') { cutoff = currentMonthStart(); periodEnd = new Date(); }
+  else { cutoff = prevMonthStart(); periodEnd = prevMonthEnd(); }
+  var ym = _pngDate(cutoff, 'yyyy-MM');
+  var cutMs = cutoff.getTime(), endMs = periodEnd.getTime();
+  var inMonth = function(r){ var t=_recInstant(r); return t>=cutMs && t<=endMs; };
+  var byTime  = function(a,b){ return _recInstant(a) - _recInstant(b); };
+  var when    = function(r){ return _pngDate(_recInstant(r) ? new Date(_recInstant(r)) : '', 'yyyy-MM-dd HH:mm'); };
+
+  var folder        = getDataFolder();
+  var reportsFolder = getOrCreateFolder('_reports', folder);
+  var mediaFolder   = getOrCreateFolder(ym, getOrCreateFolder('field_officers', getOrCreateFolder('_media', folder)));
+
+  var all = collectRecordsByRole('field_officer');
+  var MODS = ['training','freemap','distributions','water','gov','phenology','met','mafia'];
+  var summaryRows = [], trainingRows = [], mapRows = [];
+
+  Object.keys(all).forEach(function(sid){
+    var c = all[sid], s = c.steward, counts = {}, days = {}, total = 0;
+    MODS.forEach(function(mn){
+      var recs = c.mods[mn] ? Object.keys(c.mods[mn]).map(function(k){ return c.mods[mn][k]; }).filter(inMonth) : [];
+      counts[mn] = recs.length; total += recs.length;
+      recs.forEach(function(r){ days[_pngDate(new Date(_recInstant(r)), 'yyyy-MM-dd')] = true; });
+      if (mn === 'training') recs.sort(byTime).forEach(function(r){ trainingRows.push({ s:s, r:r }); });
+      if (mn === 'freemap')  recs.sort(byTime).forEach(function(r){ mapRows.push({ s:s, r:r }); });
+    });
+    if (total === 0) return;
+    summaryRows.push({ s:s, counts:counts, total:total, days:Object.keys(days).length });
+  });
+
+  var made = [];
+  function newSheet(name){
+    var old = reportsFolder.getFilesByName(name); while (old.hasNext()) { try { old.next().setTrashed(true); } catch(e){} }
+    var ss = SpreadsheetApp.create(name);
+    return ss;
+  }
+  function stash(ss){ var f = DriveApp.getFileById(ss.getId()); try { reportsFolder.addFile(f); DriveApp.getRootFolder().removeFile(f); } catch(e){} return f; }
+
+  /* 1. Summary — always, if any field-officer activity */
+  var summaryUrl = '';
+  if (summaryRows.length) {
+    var ss1 = newSheet('Field officer report ' + ym);
+    var sh1 = ss1.getActiveSheet();
+    sh1.appendRow(['Officer','Zone','Clan','Active days','Training','Field maps & obs','Distributions','Water','Gov services','Phenology','Met','MaFIA','Total']);
+    summaryRows.sort(function(a,b){ return (a.s.name||'').localeCompare(b.s.name||''); });
+    summaryRows.forEach(function(x){
+      var s = x.s, c = x.counts;
+      sh1.appendRow([ (s.name||'')+' ('+(s.stewardId||'')+')', s.zone||'', s.clan||'', x.days,
+        c.training||0, c.freemap||0, c.distributions||0, c.water||0, c.gov||0, c.phenology||0, c.met||0, c.mafia||0, x.total ]);
+    });
+    summaryUrl = ss1.getUrl(); stash(ss1); made.push('Summary: ' + summaryUrl);
+  }
+
+  /* 2. Training — only if any */
+  var trainingUrl = '';
+  if (trainingRows.length) {
+    var ss2 = newSheet('Field officer training ' + ym);
+    var sh2 = ss2.getActiveSheet();
+    sh2.appendRow(['Officer','Date (PNG)','Type','Topic','Location','Duration','Pax F','Pax M','Pax youth','Pax total','Materials','Topics covered','Outcomes','Follow-up','Challenges','Notes','Photo','record_uid']);
+    trainingRows.forEach(function(x){
+      var r = x.r, s = x.s, uid = r.record_uid || r.uid;
+      sh2.appendRow([ (s.name||'')+' ('+(s.stewardId||'')+')', when(r), r.type||'', r.topic||'', r.location||'', r.duration||'',
+        _num(r.pax_female), _num(r.pax_male), _num(r.pax_youth), _num(r.pax_female)+_num(r.pax_male)+_num(r.pax_youth),
+        (r.materials&&r.materials.length?r.materials.join(', '):''), r.topics_covered||'', r.outcomes||'', r.followup||'', r.challenges||'', r.notes||'',
+        _saveMedia(mediaFolder, 'TRAIN_'+uid+'.jpg', r.photo), uid ]);
+    });
+    trainingUrl = ss2.getUrl(); stash(ss2); made.push('Training: ' + trainingUrl);
+  }
+
+  /* 3. Field mapping & observations — only if any */
+  var mapUrl = '';
+  if (mapRows.length) {
+    var ss3 = newSheet('Field officer mapping & observations ' + ym);
+    var sh3 = ss3.getActiveSheet();
+    sh3.appendRow(['Officer','Date (PNG)','Category','Title','Description','Shape','Area (ha)','Length (m)','Points','Detail','Map link','Photo','record_uid']);
+    mapRows.forEach(function(x){
+      var r = x.r, s = x.s, uid = r.record_uid || r.uid;
+      var p0 = (r.points && r.points[0]) ? r.points[0] : null;
+      sh3.appendRow([ (s.name||'')+' ('+(s.stewardId||'')+')', when(r), r.category_label||r.category||'', r.title||'', r.description||'',
+        r.map_type||'', (r.area_ha!=null?r.area_ha:''), (r.length_m!=null?r.length_m:''), (r.points&&r.points.length)||0,
+        _fmExtra(r), p0?('https://www.google.com/maps?q='+p0.lat+','+p0.lon):'',
+        _saveMedia(mediaFolder, 'SITE_'+uid+'.jpg', r.photo), uid ]);
+    });
+    mapUrl = ss3.getUrl(); stash(ss3); made.push('Mapping & observations: ' + mapUrl);
+  }
+
+  /* Recipient: Matilda */
+  var rcp = loadRecipients();
+  var to = rcp.field_reports_to ? [rcp.field_reports_to] : REPORT_EMAILS.slice();
+  to.forEach(function(email){ try { mediaFolder.addViewer(email); } catch(e){} });
+  /* share the sheets we just made with Matilda */
+  ['Field officer report ' + ym, 'Field officer training ' + ym, 'Field officer mapping & observations ' + ym].forEach(function(nm){
+    var it = reportsFolder.getFilesByName(nm);
+    while (it.hasNext()) { var f = it.next(); to.forEach(function(email){ try { f.addViewer(email); } catch(e){} }); }
+  });
+
+  if (!made.length) { Logger.log('Field officer reports ' + ym + ': no activity.'); return { status:'ok', month:ym, made:[] }; }
+  var body = ['MCA Steward App — Field officer reports — ' + ym + ' (PNG time)','',
+    'Officers active: ' + summaryRows.length,
+    'Training sessions: ' + trainingRows.length,
+    'Field maps & observations: ' + mapRows.length,
+    '', 'Reports:'].concat(made.map(function(m){ return '  ' + m; }))
+    .concat(['', 'Photos for the month: ' + mediaFolder.getUrl()]).join('\n');
+  to.forEach(function(email){ MailApp.sendEmail(email, 'MCA Field officer reports — ' + ym, body); });
+  Logger.log('Field officer reports ' + ym + ' → ' + to.join(', ') + ' (' + made.length + ' sheet(s)).');
+  return { status:'ok', month:ym, officers:summaryRows.length, training:trainingRows.length, maps:mapRows.length, summary:summaryUrl, training_url:trainingUrl, map_url:mapUrl };
+}
+
+function installFieldOfficerReportsTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'fieldOfficerReports') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('fieldOfficerReports').timeBased().onMonthDay(1).atHour(7).create();
+  Logger.log('Monthly field-officer-reports trigger installed (1st of month, 7am PNG).');
 }

@@ -190,6 +190,109 @@ Substantial work still outstanding (indicator rollups, change-over-time per
 indicator, transect comparability, the measure-method rework). Not spec'd here
 yet — tracked in `TODO.md`.
 
+### H. Distribution / Handover — monthly, *built (backend)*
+
+> **Built** in `apps-script-upload.js` as `monthlyDistributionReport()`:
+> dedups distributions by `record_uid`, extracts each handover's photos + video
+> from the bundle into standalone files under `_media/<YYYY-MM>/`, writes a
+> Google Sheet ledger (one row per handover with the media links) in `_reports/`,
+> shares both with Matilda + comms, and emails them the links. **Setup (once):**
+> set emails via `seedRecipients()` or the `update_recipients` coordinator
+> action, then run `installMonthlyDistributionTrigger()` (1st of month, 7am PNG);
+> redeploy the web app. Run `monthlyDistributionReport('monthly')` from the
+> editor for the current month on demand.
+
+
+- **Question:** What was handed out this month? One simple content report per
+  month — a ledger of handovers.
+- **Data:** the `distribution` records (module key `distributions`). Each row:
+  date (PNG), steward, zone, clan, recipient + recipient type, received_by,
+  items/category + quantity + unit, purpose, donor + `donor_recognised`,
+  confirmed_receipt, GPS. Dedup by `record_uid` (snapshots).
+- **Media — the part that needs building.** Photos/video are **base64 embedded
+  in the JSON bundle**, not files. The comms team needs to *review* them, and
+  the report should **link** to them. So a backend job must, per handover:
+  decode `photo_handover`, `photo_receipt` and `video` into **standalone Drive
+  files** (e.g. `…/_media/<YYYY-MM>/DIST_<uid>_handover.jpg`,
+  `_receipt.jpg`, `_video.mp4`), share them with the comms team (or
+  link-view), and put each file's **Drive link in the report row**. Once
+  extracted + backed up, the bundle's base64 can be stripped server-side (this
+  also fixes the 10 MB audit-reader cap).
+- **Output:** a Google Sheet (one row per handover, media links in cells) or a
+  Doc; refreshed monthly. Comms get read access to the `_media` folder.
+- **Tiers:** a single MCA-wide monthly ledger is what's asked; it can still
+  carry zone/clan columns to filter.
+
+### I. Per-consultant report — monthly, *built (backend)*
+
+> **Built** in `apps-script-upload.js` as `consultantReports()`. Each visiting
+> consultant (bundles where `steward.role === 'consultant'`) gets **their own**
+> monthly report — not pooled. A two-tab Google Sheet in `_reports/`:
+> **Training given** (type, topic, location, duration, pax F/M/youth + total,
+> materials, outcomes, follow-up, challenges, notes, photo link) and **Sites
+> visited** (field maps: category, title, shape, area/length, point count, a
+> Google-Maps link to the first point, photo link). Photos are extracted to
+> `_media/consultants/<stewardId>/<YYYY-MM>/`. Emailed to the address held for
+> that stewardId in `_recipients.json → consultants`; if no email is set the
+> report is still created and the URL logged. All dates PNG. **Setup:** add the
+> consultant emails (`update_recipients` / `seedRecipients()`), run
+> `installConsultantReportsTrigger()` (1st of month, 7am PNG), redeploy. Run
+> `consultantReports('monthly')` from the editor for the current month.
+
+### J. Field-officer reports (to Matilda) — monthly, *built (backend)*
+
+> **Built** in `apps-script-upload.js` as `fieldOfficerReports()`. All
+> field-officer work routes to **one destination, Matilda**
+> (`_recipients.json → field_reports_to`, falling back to `REPORT_EMAILS`).
+> Three monthly Google Sheets in `_reports/`, PNG time, emailed together:
+> 1. **Field officer report `<YYYY-MM>`** — summary, one row per officer:
+>    active days + counts per module (training, field maps & obs, distributions,
+>    water, gov, phenology, met, MaFIA). Always produced if there is any
+>    field-officer activity.
+> 2. **Field officer training `<YYYY-MM>`** — one row per training session
+>    across officers (officer, date, type, topic, location, pax F/M/youth +
+>    total, materials, outcomes, …, photo link). **Only if any exist.**
+> 3. **Field officer mapping & observations `<YYYY-MM>`** — one row per field
+>    map / observation (officer, date, category, title, description, shape,
+>    area/length, points, crop/track/problem detail, Google-Maps link, photo).
+>    **Only if any exist.**
+>
+> Distributions keep their own ledger (report H); the summary counts them and
+> points there. Photos extracted to `_media/field_officers/<YYYY-MM>/`. **Setup:**
+> set `field_reports_to`, run `installFieldOfficerReportsTrigger()` (1st, 7am
+> PNG), redeploy. On demand: `fieldOfficerReports('monthly')`.
+
+---
+
+## Report delivery & routing
+
+Who gets which report, and how it reaches them.
+
+- **Field officers → Matilda.** All field-officer reports (distributions,
+  training, maps, etc.) compile to **one recipient, Matilda** — she is the
+  field-side destination, not each officer.
+- **Visiting consultants → themselves.** Each consultant's report (training
+  they gave + sites they visited) goes **back to that same consultant** — their
+  own record, not pooled.
+- **Comms team → distribution media.** Read access to the extracted `_media`
+  folder + the monthly distribution ledger (for recognition/reporting use).
+
+**Delivery — two ways, email first:**
+
+1. **Email + links (recommended first).** A monthly Apps Script job (the weekly/
+   monthly summary emails already exist) sends each recipient a message with a
+   **link** to their compiled report (a Drive Sheet/Doc) and its media folder.
+   Robust: works regardless of whether the phone is online, and needs no app
+   release. **Contact emails** are maintained in a coordinator-editable Drive
+   registry `_recipients.json` (never in source): `field_reports_to` (Matilda),
+   `comms` (array), and `consultants` (`{stewardId: email}`). Edit it with the
+   `update_recipients` coordinator action or `seedRecipients()` in the editor.
+   (The enrolment profile still does not capture email, so consultant addresses
+   are held here until it does.)
+2. **In-app "My reports" (phase 2).** A screen that fetches the signed-in
+   person's compiled report from the backend when online. Nicer, but needs
+   connectivity and a per-person report endpoint; do after email+links works.
+
 ---
 
 ## Data readiness snapshot

@@ -2053,7 +2053,7 @@ function installFieldOfficerReportsTrigger() {
  * installClanComplianceTrigger() (1st of month, 7am PNG). On demand:
  * clanComplianceReport('monthly'). */
 
-var COMPLIANCE_MAFIA_TARGET = 1;   /* MaFIA expected per report period (cadence TBD — adjust if not monthly) */
+var COMPLIANCE_MAFIA_TARGET = 1;   /* MaFIA: 1 per month, every clan (monthly cadence confirmed) */
 
 function _ownedApproved(list, clan) {
   return (list || []).filter(function(it){ return it && it.status === 'approved' && (it.owner_clan === clan || it.owner_clan_2 === clan); });

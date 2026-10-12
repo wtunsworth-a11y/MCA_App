@@ -61,9 +61,8 @@ Build rules, so each report is correct the first time:
     "same trees each month". Done = distinct registered trees (`plot_id`) with a
     monitoring record this month. A clan with **no coffee/cocoa registered → "—"**
     (not applicable), never 0% failing.
-  - **MaFIA:** the one **fixed** target — `COMPLIANCE_MAFIA_TARGET` (=1) per
-    period. Done/not-done. *(Cadence assumed per report period; adjust the
-    constant if MaFIA is, say, annual rather than monthly.)*
+  - **MaFIA:** the one **fixed** target — **1 per month, every clan**
+    (`COMPLIANCE_MAFIA_TARGET` = 1, monthly cadence confirmed). Done/not-done.
   - **Water quality / Gov services / Met stations:** same registry model
     (`water_source_id` / `facility_id` / `met_station_id` → their registries).
     **Not yet scoped** — those registries aren't populated, so the columns read

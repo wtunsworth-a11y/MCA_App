@@ -8137,6 +8137,41 @@ var DIST_CAUSES = {
   human:   'Human activity (garden / logging / road)',
   unclear: 'Unclear — needs follow-up'
 };
+/* Kind-specific finding taxonomies — the "simple summary of findings" that
+ * feeds the Fire and Deforestation reports. For fire and forest clearance the
+ * generic natural/human/unclear is too coarse, so the cause pills switch to a
+ * finding list matched to the disturbance kind. Record what you SEE — not a
+ * judgement of who did it or why. */
+var DIST_CAUSE_SETS = {
+  fire: {
+    garden:         'Garden burn (clearing a food garden)',
+    cashcrop:       'Cash-crop garden burn',
+    runaway_garden: 'Runaway fire from a garden',
+    grassland:      'Grassland / kunai fire',
+    land_clearing:  'Land-clearing burn (new garden or forest)',
+    hunting:        'Hunting fire',
+    other:          'Other',
+    unclear:        'Unclear — needs follow-up'
+  },
+  clearance: {
+    garden:      'Food garden',
+    cashcrop:    'Cash-crop garden',
+    rehab:       'Cash-crop rehabilitation (old block)',
+    logging:     'Logging / timber',
+    road:        'Road / access track',
+    settlement:  'Settlement / buildings',
+    landslide:   'Landslide / erosion',
+    flood:       'Flood / river change',
+    treefall:    'Storm damage / treefall',
+    unclear:     'Unclear — needs follow-up'
+  }
+};
+/* The cause/finding option set for a disturbance kind (falls back to the
+ * generic natural/human/unclear). distCauseLabel resolves a stored code to its
+ * human label, kind-aware, so reports and the inbox read correctly even for the
+ * richer fire/clearance codes. */
+function distCauseSet(kind){ return DIST_CAUSE_SETS[kind] || DIST_CAUSES; }
+function distCauseLabel(kind, cause){ if(!cause) return ''; var s=distCauseSet(kind); return (s && s[cause]) || (DIST_CAUSES[cause] || cause); }
 var DIST_AREA_THRESHOLD_HA = 2; /* clearances at or above this must be verified */
 
 /* ── Point-in-polygon router ──────────────────────────────────────────
@@ -8363,7 +8398,7 @@ function distDoneCard(r){
   h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">';
   h+='<span style="font-size:0.82rem;font-weight:700;">'+icon(dm.icon,15)+' '+dm.label+'</span>';
   h+='<span style="font-size:0.68rem;font-weight:700;color:'+om.color+';">'+om.label+'</span></div>';
-  h+='<div style="font-size:0.71rem;color:#888;margin-top:3px;">'+(v.cause?(DIST_CAUSES[v.cause]||v.cause):'')+(v.verified_by?(' · '+v.verified_by):'')+(r.synced===false?' · <span style="color:#E65100;">not yet sent</span>':' · sent ✓')+'</div>';
+  h+='<div style="font-size:0.71rem;color:#888;margin-top:3px;">'+(v.cause?distCauseLabel(r.kind,v.cause):'')+(v.verified_by?(' · '+v.verified_by):'')+(r.synced===false?' · <span style="color:#E65100;">not yet sent</span>':' · sent ✓')+'</div>';
   if(v.photo) h+='<img src="'+v.photo+'" style="width:100%;max-height:90px;object-fit:cover;border-radius:7px;margin-top:6px;" alt="Verification photo">';
   h+='</div>';
   return h;
@@ -8415,9 +8450,22 @@ function renderDisturbVerify(){
   h+='<div class="form-group"><label class="form-label">What did you find? <span style="color:#B71C1C;">*</span>'+helpTip('dz.outcome')+'</label><div id="dzOutcomeBtns" style="display:flex;flex-direction:column;gap:6px;">';
   Object.keys(DIST_OUTCOMES).forEach(function(k){ h+='<button type="button" class="weather-pill" id="dzo-'+k+'" onclick="dzSetOutcome(\''+k+'\')" style="text-align:left;font-size:0.8rem;padding:9px 11px;">'+DIST_OUTCOMES[k].label+'</button>'; });
   h+='</div></div>';
-  h+='<div class="form-group"><label class="form-label">Most likely cause <span style="color:#999;font-weight:400;">(what you see, not a judgement)</span>'+helpTip('dz.cause')+'</label><div style="display:flex;flex-direction:column;gap:6px;">';
-  Object.keys(DIST_CAUSES).forEach(function(k){ h+='<button type="button" class="weather-pill" id="dzc-'+k+'" onclick="dzSetCause(\''+k+'\')" style="text-align:left;font-size:0.8rem;padding:9px 11px;">'+DIST_CAUSES[k]+'</button>'; });
+  var causeSet=distCauseSet(r.kind);
+  var causePrompt=(r.kind==='fire')?'What caused the fire?':(r.kind==='clearance')?'What is the clearance?':'Most likely cause';
+  h+='<div class="form-group"><label class="form-label">'+causePrompt+' <span style="color:#999;font-weight:400;">(what you see, not a judgement)</span>'+helpTip('dz.cause')+'</label><div style="display:flex;flex-direction:column;gap:6px;">';
+  Object.keys(causeSet).forEach(function(k){ h+='<button type="button" class="weather-pill" id="dzc-'+k+'" onclick="dzSetCause(\''+k+'\')" style="text-align:left;font-size:0.8rem;padding:9px 11px;">'+causeSet[k]+'</button>'; });
   h+='</div></div>';
+  /* Planting year for a rehabilitated cash-crop block. Ask the plain factual
+     question only — never surface why it is collected (the implication of the
+     answer must not steer the answer). Revealed when "Cash-crop rehabilitation"
+     is chosen. */
+  if(r.kind==='clearance'){
+    h+='<div class="form-group" id="dzRehabBlock" style="display:none;">';
+    h+='<label class="form-label">Year the crop was first planted <span style="color:#B71C1C;">*</span></label>';
+    h+='<input type="number" id="dzRehabYear" class="form-input" min="1950" max="'+(new Date().getFullYear())+'" placeholder="e.g. 2003" inputmode="numeric" oninput="dzCheckReady()">';
+    h+='<label style="display:flex;align-items:center;gap:6px;font-size:0.76rem;color:#666;margin-top:6px;"><input type="checkbox" id="dzRehabApprox"> Approximate / best estimate</label>';
+    h+='</div>';
+  }
   h+='<div class="form-group"><label class="form-label">Photo of the site <span style="color:#B71C1C;">*</span>'+helpTip('dz.photo')+'</label>';
   h+='<div id="dzPhotoBox" style="width:100%;height:120px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="dzTriggerPhoto()"><div style="text-align:center;color:#999;"><div>'+icon('camera',28)+'</div><div style="font-size:0.72rem;margin-top:2px;">Tap to capture the disturbance</div></div></div>';
   h+='<input type="file" id="dzPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="dzHandlePhoto(this)">';
@@ -8447,23 +8495,32 @@ function dzVerify(){
   webAuthnVerify({ btnId:'dzFpBtn', txtId:'dzFpTxt', setVerified:function(v){ _dzVerified=v; }, onSuccess:function(){ document.getElementById('dzFormArea').style.display='block'; dzCheckReady(); } });
 }
 function dzSetOutcome(k){ _dzOutcome=k; ['confirmed','not_found','inconclusive','unreachable'].forEach(function(x){ var b=document.getElementById('dzo-'+x); if(b) b.classList.toggle('active', x===k); }); dzCheckReady(); }
-function dzSetCause(k){ _dzCause=k; ['natural','human','unclear'].forEach(function(x){ var b=document.getElementById('dzc-'+x); if(b) b.classList.toggle('active', x===k); }); }
+function dzSetCause(k){ _dzCause=k; var set=distCauseSet(_activeDisturb&&_activeDisturb.kind); Object.keys(set).forEach(function(x){ var b=document.getElementById('dzc-'+x); if(b) b.classList.toggle('active', x===k); }); var rb=document.getElementById('dzRehabBlock'); if(rb) rb.style.display=(k==='rehab')?'block':'none'; dzCheckReady(); }
 function dzTriggerPhoto(){ var inp=document.getElementById('dzPhotoInput'); if(inp) inp.click(); }
 function dzHandlePhoto(input){ var file=input.files&&input.files[0]; if(!file) return; var rd=new FileReader(); rd.onload=function(e){ _dzPhoto=e.target.result; var b=document.getElementById('dzPhotoBox'); if(b) b.innerHTML='<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;">'; var s=document.getElementById('dzPhotoStatus'); if(s){ s.textContent='✓ Photo attached'; s.style.color='#2E7D32'; } dzCheckReady(); }; rd.readAsDataURL(file); }
 function dzCheckReady(){
   var btn=document.getElementById('dzSubmitBtn'); if(!btn) return;
-  btn.disabled = !(_dzArrived && _dzVerified && _dzOutcome && _dzPhoto);
+  var yr=document.getElementById('dzRehabYear');
+  var rehabOk = (_dzCause!=='rehab') || (yr && yr.value && parseInt(yr.value,10)>0);
+  btn.disabled = !(_dzArrived && _dzVerified && _dzOutcome && _dzPhoto && rehabOk);
 }
 function submitDisturbVerify(){
   if(!_activeDisturb){ return; }
   if(!_dzOutcome){ toast('Choose what you found.'); return; }
   if(!_dzPhoto){ toast('A site photo is required.'); return; }
+  var rehabYear=null, rehabApprox=null;
+  if(_dzCause==='rehab'){
+    var ry=document.getElementById('dzRehabYear'), ra=document.getElementById('dzRehabApprox');
+    if(!ry||!ry.value){ toast('Enter the year the crop was first planted (needed for EUDR).'); return; }
+    rehabYear=parseInt(ry.value,10); rehabApprox=ra?!!ra.checked:false;
+  }
   var areaEl=document.getElementById('dzArea'), notesEl=document.getElementById('dzNotes');
   var r=_activeDisturb;
-  r.verify={ outcome:_dzOutcome, cause:_dzCause||null, photo:_dzPhoto,
+  r.verify={ outcome:_dzOutcome, cause:_dzCause||null, cause_label:(_dzCause?distCauseLabel(r.kind,_dzCause):null), photo:_dzPhoto,
     gps:_dzGps, verified_at:new Date().toISOString(),
     verified_by:(window._cachedProfile&&window._cachedProfile.stewardId)||'', clan:myClan(),
     area_measured_ha:(areaEl&&areaEl.value)?parseFloat(areaEl.value):null,
+    rehab_planting_year:rehabYear, rehab_year_approx:rehabApprox,
     notes:(notesEl&&notesEl.value||'').trim() };
   r.status='verified'; r.synced=false;
   getAllRecords('disturbances', function(rows){
@@ -10918,7 +10975,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v71'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v76'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

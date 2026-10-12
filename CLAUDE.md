@@ -18,6 +18,24 @@ Working agreements for this repo. These are binding unless the user overrides th
   the enrolment profile, not from a per-survey field. Don't present them as
   survey questions.
 
+- **Neutral, descriptive findings — never a blame framing.** When a steward
+  records what they observed (e.g. a disturbance cause / finding), the options
+  are plain descriptions of what is on the ground. **Do not tag a cause as
+  "natural" vs "unnatural/human"**, and do not phrase options so they imply fault
+  or wrongdoing. Labelling a cause "unnatural" makes a steward feel they are
+  accusing a person or clan, which skews what they record. A report may still
+  group causes for analysis, but with neutral descriptive labels (e.g. land-use
+  vs ground/physical), never a natural/human (blame) dichotomy.
+
+- **Ask the question, never the consequence.** When an answer has an external
+  implication — compliance (e.g. EUDR), eligibility, blame — the form asks the
+  **plain factual question and nothing more**. Never show the respondent *why*
+  the data is collected or what a given answer would trigger: explaining the
+  stakes of an answer gives them a reason to shade it. The reasoning and any
+  threshold/cut-off logic live **off-device** in the internal spec and the
+  report, never in on-screen help, labels or placeholders. (We still collect the
+  data; the interpretation happens later, elsewhere.)
+
 ## Storage & retention
 
 - **Work phones must keep space free for the app.** It warns on the dashboard

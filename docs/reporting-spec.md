@@ -146,20 +146,34 @@ Structurally identical to the Fire report — build them from one template.
   `area_measured_ha` (field-measured on verification).
 - **Recombine, investigated-or-not, two levels, counts, tiers:** exactly as
   Fire — group per-clan tasks by base event uid; "investigated = any clan."
-- **Findings taxonomy** (implemented, clearance-flavoured): new food garden /
-  cash-crop expansion / logging / road / settlement / landslide-erosion /
-  flood-river change / storm damage-treefall / unclear — stored as
-  `verify.cause` + `verify.cause_label`. **Plain descriptive causes with no
-  natural/unnatural tag** — labelling a cause "natural" vs "human" infers blame,
-  and a steward should never feel they are accusing anyone just by recording
-  what the land is used for. Satellite forest-loss detection (RADD/GFW) fires on
-  **any** canopy loss, so a landslide, flood scour or treefall arrives as a
-  "clearance" alert; the steward just records what they see.
+- **Findings taxonomy** (implemented, clearance-flavoured): food garden /
+  cash-crop garden / **garden rehabilitation** / logging / road / settlement /
+  landslide-erosion / flood-river change / storm damage-treefall / unclear —
+  stored as `verify.cause` + `verify.cause_label`. **Plain descriptive causes
+  with no natural/unnatural tag** — labelling a cause "natural" vs "human" infers
+  blame, and a steward should never feel they are accusing anyone just by
+  recording what the land is used for. The garden options are **not** split into
+  "new" vs "expansion" (that phrasing hid half the cases); they just state the
+  land use. Satellite forest-loss detection (RADD/GFW) fires on **any** canopy
+  loss, so a landslide, flood scour or treefall arrives as a "clearance" alert;
+  the steward just records what they see.
+- **Garden rehabilitation + EUDR.** Cleaning the regrowth off a long-abandoned
+  crop block (e.g. old coffee) reads as forest loss on satellite but is **not
+  new deforestation**. When the steward picks *garden rehabilitation*, the form
+  **requires the crop's original planting year** (`verify.rehab_planting_year`,
+  plus `verify.rehab_year_approx` if estimated). This matters for **EUDR** (EU
+  Deforestation Regulation): a commodity from land cleared of forest **after the
+  end-2020 cut-off** is non-compliant, so a rehabilitated block only stays
+  defensible if the crop **predates** that date. The report must:
+  - flag every rehabilitation record and show its planting year against the
+    **end-2020 cut-off** (clearly compliant / needs evidence / post-cut-off);
+  - treat rehabilitation as **distinct from new clearing** in the headline count
+    (it is maintenance of an existing crop, not forest conversion).
 - **Report groups causes neutrally.** For analysis the report may group
-  land-use causes (garden, cash-crop, logging, road, settlement) separately from
-  physical/ground causes (landslide, flood, treefall) — e.g. so a landslide
-  isn't counted in a land-clearing figure — but it does this with **neutral,
-  descriptive labels**, never a "natural vs human" (blame) framing.
+  land-use causes (garden, cash-crop, rehabilitation, logging, road, settlement)
+  separately from physical/ground causes (landslide, flood, treefall) — e.g. so
+  a landslide isn't counted in a land-clearing figure — but it does this with
+  **neutral, descriptive labels**, never a "natural vs human" (blame) framing.
 - **Tiers:** Clan → Zone → MCA.
 
 ### G. MaFIA — *large open area, spec deferred*

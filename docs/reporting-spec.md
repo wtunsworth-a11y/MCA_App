@@ -190,6 +190,57 @@ Substantial work still outstanding (indicator rollups, change-over-time per
 indicator, transect comparability, the measure-method rework). Not spec'd here
 yet — tracked in `TODO.md`.
 
+### H. Distribution / Handover — monthly, *buildable (needs media extraction)*
+
+- **Question:** What was handed out this month? One simple content report per
+  month — a ledger of handovers.
+- **Data:** the `distribution` records (module key `distributions`). Each row:
+  date (PNG), steward, zone, clan, recipient + recipient type, received_by,
+  items/category + quantity + unit, purpose, donor + `donor_recognised`,
+  confirmed_receipt, GPS. Dedup by `record_uid` (snapshots).
+- **Media — the part that needs building.** Photos/video are **base64 embedded
+  in the JSON bundle**, not files. The comms team needs to *review* them, and
+  the report should **link** to them. So a backend job must, per handover:
+  decode `photo_handover`, `photo_receipt` and `video` into **standalone Drive
+  files** (e.g. `…/_media/<YYYY-MM>/DIST_<uid>_handover.jpg`,
+  `_receipt.jpg`, `_video.mp4`), share them with the comms team (or
+  link-view), and put each file's **Drive link in the report row**. Once
+  extracted + backed up, the bundle's base64 can be stripped server-side (this
+  also fixes the 10 MB audit-reader cap).
+- **Output:** a Google Sheet (one row per handover, media links in cells) or a
+  Doc; refreshed monthly. Comms get read access to the `_media` folder.
+- **Tiers:** a single MCA-wide monthly ledger is what's asked; it can still
+  carry zone/clan columns to filter.
+
+---
+
+## Report delivery & routing
+
+Who gets which report, and how it reaches them.
+
+- **Field officers → Matilda.** All field-officer reports (distributions,
+  training, maps, etc.) compile to **one recipient, Matilda** — she is the
+  field-side destination, not each officer.
+- **Visiting consultants → themselves.** Each consultant's report (training
+  they gave + sites they visited) goes **back to that same consultant** — their
+  own record, not pooled.
+- **Comms team → distribution media.** Read access to the extracted `_media`
+  folder + the monthly distribution ledger (for recognition/reporting use).
+
+**Delivery — two ways, email first:**
+
+1. **Email + links (recommended first).** A monthly Apps Script job (the weekly/
+   monthly summary emails already exist) sends each recipient a message with a
+   **link** to their compiled report (a Drive Sheet/Doc) and its media folder.
+   Robust: works regardless of whether the phone is online, and needs no app
+   release. **Prerequisite:** a **contact email per recipient** — Matilda's and
+   each consultant's. The enrolment profile does **not** capture email today, so
+   add an email field (at least for consultants) or hold a small lookup table
+   server-side.
+2. **In-app "My reports" (phase 2).** A screen that fetches the signed-in
+   person's compiled report from the backend when online. Nicer, but needs
+   connectivity and a per-person report endpoint; do after email+links works.
+
 ---
 
 ## Data readiness snapshot

@@ -2074,6 +2074,15 @@ function _monitoredOwned(modMap, idKey, ownedIds, inMonth) {
   return Object.keys(seen).length;
 }
 function _complCell(done, reg) { return reg ? (done + '/' + reg + (done >= reg ? ' ✓' : '')) : '—'; }
+/* Did this steward sync ANY record dated in the period? (participation) */
+function _reportedThisMonth(mods, inMonth) {
+  var mk = Object.keys(mods || {});
+  for (var i = 0; i < mk.length; i++) {
+    var mm = mods[mk[i]], us = Object.keys(mm);
+    for (var j = 0; j < us.length; j++) { if (inMonth(mm[us[j]])) return true; }
+  }
+  return false;
+}
 
 function clanComplianceReport(period) {
   period = (typeof period === 'string') ? period : 'prevmonth';
@@ -2098,6 +2107,7 @@ function clanComplianceReport(period) {
     var maf = monthCount(c.mods.mafia);
     rows.push({
       s: s, clan: clan,
+      reported: _reportedThisMonth(c.mods, inMonth),
       maf: maf,
       pheno: { done: _monitoredOwned(c.mods.phenology,      'plot_id',        ids(phenoReg), inMonth), reg: phenoReg.length },
       water: { done: _monitoredOwned(c.mods.water,          'water_source_id',ids(waterReg), inMonth), reg: waterReg.length },
@@ -2114,9 +2124,10 @@ function clanComplianceReport(period) {
 
   /* Tab 1 — by clan steward */
   var sh = ss.getActiveSheet(); sh.setName('By clan steward');
-  sh.appendRow(['Clan steward','Zone','Clan','MaFIA (target '+COMPLIANCE_MAFIA_TARGET+')','Phenology','Water quality','Gov services','Met stations']);
+  sh.appendRow(['Clan steward','Zone','Clan','Reported this month','MaFIA (target '+COMPLIANCE_MAFIA_TARGET+')','Phenology','Water quality','Gov services','Met stations']);
   rows.forEach(function(x){
     sh.appendRow([ (x.s.name||'')+' ('+(x.s.stewardId||'')+')', x.s.zone||'', x.clan,
+      (x.reported ? 'Yes' : 'No'),
       (x.maf>=COMPLIANCE_MAFIA_TARGET ? (x.maf+'/'+COMPLIANCE_MAFIA_TARGET+' ✓') : (x.maf+'/'+COMPLIANCE_MAFIA_TARGET)),
       _complCell(x.pheno.done,x.pheno.reg), _complCell(x.water.done,x.water.reg),
       _complCell(x.gov.done,x.gov.reg), _complCell(x.met.done,x.met.reg) ]);
@@ -2126,22 +2137,22 @@ function clanComplianceReport(period) {
   var zoneMap = {};
   rows.forEach(function(x){
     var z = x.s.zone || '—';
-    if (!zoneMap[z]) zoneMap[z] = { stewards:0, mafDone:0, pD:0,pR:0, wD:0,wR:0, gD:0,gR:0, mD:0,mR:0 };
+    if (!zoneMap[z]) zoneMap[z] = { stewards:0, reported:0, mafDone:0, pD:0,pR:0, wD:0,wR:0, gD:0,gR:0, mD:0,mR:0 };
     var zm = zoneMap[z];
-    zm.stewards++; if (x.maf>=COMPLIANCE_MAFIA_TARGET) zm.mafDone++;
+    zm.stewards++; if (x.reported) zm.reported++; if (x.maf>=COMPLIANCE_MAFIA_TARGET) zm.mafDone++;
     zm.pD+=x.pheno.done; zm.pR+=x.pheno.reg; zm.wD+=x.water.done; zm.wR+=x.water.reg;
     zm.gD+=x.gov.done;   zm.gR+=x.gov.reg;   zm.mD+=x.met.done;   zm.mR+=x.met.reg;
   });
   var ru = ss.insertSheet('Rollup');
-  ru.appendRow(['Zone','Clan stewards','MaFIA done','Phenology','Water quality','Gov services','Met stations']);
-  var tot = { stewards:0, mafDone:0, pD:0,pR:0, wD:0,wR:0, gD:0,gR:0, mD:0,mR:0 };
+  ru.appendRow(['Zone','Clan stewards (roster)','Reporting','MaFIA done','Phenology','Water quality','Gov services','Met stations']);
+  var tot = { stewards:0, reported:0, mafDone:0, pD:0,pR:0, wD:0,wR:0, gD:0,gR:0, mD:0,mR:0 };
   Object.keys(zoneMap).sort().forEach(function(z){
     var zm = zoneMap[z];
-    ru.appendRow([ z, zm.stewards, zm.mafDone+'/'+zm.stewards,
+    ru.appendRow([ z, zm.stewards, zm.reported+'/'+zm.stewards, zm.mafDone+'/'+zm.stewards,
       _complCell(zm.pD,zm.pR), _complCell(zm.wD,zm.wR), _complCell(zm.gD,zm.gR), _complCell(zm.mD,zm.mR) ]);
-    ['stewards','mafDone','pD','pR','wD','wR','gD','gR','mD','mR'].forEach(function(k){ tot[k]+=zm[k]; });
+    ['stewards','reported','mafDone','pD','pR','wD','wR','gD','gR','mD','mR'].forEach(function(k){ tot[k]+=zm[k]; });
   });
-  ru.appendRow(['MCA (all zones)', tot.stewards, tot.mafDone+'/'+tot.stewards,
+  ru.appendRow(['MCA (all zones)', tot.stewards, tot.reported+'/'+tot.stewards, tot.mafDone+'/'+tot.stewards,
     _complCell(tot.pD,tot.pR), _complCell(tot.wD,tot.wR), _complCell(tot.gD,tot.gR), _complCell(tot.mD,tot.mR) ]);
 
   var ssFile = DriveApp.getFileById(ss.getId());
@@ -2153,14 +2164,20 @@ function clanComplianceReport(period) {
   to.forEach(function(email){ try { ssFile.addViewer(email); } catch(e){} });
 
   var body = ['MCA Steward App — Clan-steward compliance — ' + ym + ' (PNG time)','',
-    'Clan stewards with a profile: ' + rows.length,
+    'Clan stewards in the roster: ' + rows.length,
     '',
     'Report (Google Sheet): ' + ss.getUrl(),
     '',
     'Target is the registry, not a fixed number: phenology / water / gov / met are',
     'measured against the sites registered to each clan. "—" means nothing is',
     'registered yet for that clan (e.g. no coffee/cocoa trees, or water/gov/met',
-    'sites not defined). MaFIA target is ' + COMPLIANCE_MAFIA_TARGET + ' per period.'
+    'sites not defined). MaFIA target is ' + COMPLIANCE_MAFIA_TARGET + ' per period.',
+    '',
+    'Zone and MCA figures on the Rollup tab are a simple sum of the clan rows —',
+    'the roster (clan stewards), what is registered, and what was done all add up',
+    'the tiers. "Reporting" = how many of the roster synced anything this period.',
+    'Roster = clan stewards who have synced at least once; a steward who has',
+    'never synced cannot be counted until a central enrolment roster exists.'
   ].join('\n');
   to.forEach(function(email){ MailApp.sendEmail(email, 'MCA Clan-steward compliance — ' + ym, body); });
   Logger.log('Clan compliance ' + ym + ': ' + rows.length + ' stewards → ' + to.join(', '));

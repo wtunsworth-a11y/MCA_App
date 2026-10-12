@@ -71,7 +71,16 @@ Build rules, so each report is correct the first time:
     registered. (We don't yet know how many each clan will have.)
 - **Metric:** per clan steward, `monitored ÷ registered` per dimension
   (distinct registered items owned by the clan that were monitored this period).
-- **Tiers:** Clan steward → Zone → MCA (the Rollup tab sums each tier).
+- **Tiers — a simple sum, not a fixed number.** Zone and MCA figures are the
+  **sum of the clan rows**: the roster (clan stewards), what is registered, and
+  what was done all add up the tiers. The roster itself scales with enrolment —
+  it is **not hardcoded**. A **"Reporting"** column shows how many of the roster
+  synced anything this period (participation), so a steward who filed nothing
+  shows as 0 rather than vanishing and inflating the zone.
+- **Roster limit (honest):** the roster = clan stewards who have **synced at
+  least once** (enrolment is offline/on-device, so the backend only learns of a
+  steward when they first sync). A never-synced enrolled steward can't be
+  counted until a central enrolment roster exists — a future piece.
 
 ### B. Water Quality — *blocked: needs sources/sites defined + a time series*
 

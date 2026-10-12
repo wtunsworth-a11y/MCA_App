@@ -3,7 +3,34 @@
 Outstanding work and planned additions. Items that require action from outside
 this repo (assets, decisions, accounts, field protocols) are grouped at the end.
 
-*Last updated: 2026-10-10*
+*Last updated: 2026-10-12*
+
+---
+
+## Open threads (next up — Oct 2026 pilot)
+
+These are the live threads from the current working session, recorded here so
+they survive. Build state is on branch `claude/github-app-install-7irta9`, all
+merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
+
+- [ ] **MaFIA no-tape / measure-method rework.** Replace the binary tape/no-tape
+  toggle with a **measure method**: `knotted cord` · `tape` · `paced` · `none`,
+  plus a **precision tag** on the record. Recommended standard kit is a **100 m
+  knotted cord** (keeps the clean 5×20 m). When the method is `paced`/`none`,
+  **collapse the five sub-transects** to coarser sections rather than fake 20 m
+  bins (no fake spatial precision — mirrors the no-default-on-skip rule applied
+  to *space*). Agreed with the user; not yet built.
+- [ ] **Data & reports audit** (just raised): does everything uploaded so far
+  work / parse / read, and can the Drive JSON files be turned into useful
+  reports? Likely belongs in the parallel "data & reports" chat. Uploads land in
+  Drive as `MCA_<stewardId>_<date>.json` per steward (zone/steward folders);
+  records carry `record_uid` for dedup. Known good samples already reviewed:
+  a MaFIA survey, a freemap `087`, and a handover (MCA-F06).
+- [ ] **Receiving-end monthly off-Drive backup** (ops): phones drop media after
+  1 month, so Drive is the single copy — duplicate to a second secure location
+  monthly. See CLAUDE.md "Storage & retention". Backend/ops, not the app.
+- [ ] Field mapping with screen **fully off** needs the **native wrapper** (see
+  `upgrade-path.md`); the PWA keeps the screen awake but can't record locked.
 
 ---
 

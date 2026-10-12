@@ -223,6 +223,22 @@ yet — tracked in `TODO.md`.
 - **Tiers:** a single MCA-wide monthly ledger is what's asked; it can still
   carry zone/clan columns to filter.
 
+### I. Per-consultant report — monthly, *built (backend)*
+
+> **Built** in `apps-script-upload.js` as `consultantReports()`. Each visiting
+> consultant (bundles where `steward.role === 'consultant'`) gets **their own**
+> monthly report — not pooled. A two-tab Google Sheet in `_reports/`:
+> **Training given** (type, topic, location, duration, pax F/M/youth + total,
+> materials, outcomes, follow-up, challenges, notes, photo link) and **Sites
+> visited** (field maps: category, title, shape, area/length, point count, a
+> Google-Maps link to the first point, photo link). Photos are extracted to
+> `_media/consultants/<stewardId>/<YYYY-MM>/`. Emailed to the address held for
+> that stewardId in `_recipients.json → consultants`; if no email is set the
+> report is still created and the URL logged. All dates PNG. **Setup:** add the
+> consultant emails (`update_recipients` / `seedRecipients()`), run
+> `installConsultantReportsTrigger()` (1st of month, 7am PNG), redeploy. Run
+> `consultantReports('monthly')` from the editor for the current month.
+
 ---
 
 ## Report delivery & routing

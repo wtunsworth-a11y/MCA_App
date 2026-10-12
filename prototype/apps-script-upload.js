@@ -1588,15 +1588,17 @@ function _dataUriToBlob(uri, name) {
   catch(e) { return null; }
 }
 
-/* Extract one media blob to a standalone file in the month folder; returns its
- * Drive URL (idempotent — reuses the file if it already exists). */
-function _extractMedia(folder, uid, slot, dataUri, ext) {
-  var name = 'DIST_' + uid + '_' + slot + '.' + ext;
+/* Save one base64 data: blob as a standalone file; returns its Drive URL
+ * (idempotent — reuses the file if a file of that name already exists). */
+function _saveMedia(folder, name, dataUri) {
   var existing = folder.getFilesByName(name);
   if (existing.hasNext()) return existing.next().getUrl();
   var blob = _dataUriToBlob(dataUri, name);
   if (!blob) return '';
   return folder.createFile(blob).getUrl();
+}
+function _extractMedia(folder, uid, slot, dataUri, ext) {
+  return _saveMedia(folder, 'DIST_' + uid + '_' + slot + '.' + ext, dataUri);
 }
 
 /* Walk every steward subfolder, gather distribution records, dedup by
@@ -1725,4 +1727,140 @@ function installMonthlyDistributionTrigger() {
   });
   ScriptApp.newTrigger('monthlyDistributionReport').timeBased().onMonthDay(1).atHour(7).create();
   Logger.log('Monthly distribution trigger installed (1st of month, 7am PNG).');
+}
+
+/* ─── Per-consultant report (training given + sites visited) ─────────────
+ * Each visiting consultant gets THEIR OWN report back — training they ran and
+ * sites they visited (field maps) for the month — not a pooled one. Emailed to
+ * the address held for that stewardId in _recipients.json ("consultants").
+ *
+ * TRIGGER: run installConsultantReportsTrigger() once (1st of month, ~7am PNG).
+ * Run consultantReports() from the editor for last month, or
+ * consultantReports('monthly') for the current month so far. A consultant with
+ * no email set still gets a report file (logged) — it just isn't emailed. */
+function collectConsultantWork() {
+  var folder = getDataFolder();
+  var byConsultant = {};          /* stewardId -> { steward, training:{uid:rec}, sites:{uid:rec} } */
+  var zones = folder.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next();
+    if (zf.getName().charAt(0) === '_') continue;
+    var subs = zf.getFolders();
+    while (subs.hasNext()) {
+      var files = subs.next().getFilesByType(MimeType.PLAIN_TEXT);
+      while (files.hasNext()) {
+        var body;
+        try { body = JSON.parse(files.next().getBlob().getDataAsString()); } catch(e) { continue; }
+        var stew = body.steward || {};
+        if (stew.role !== 'consultant') continue;
+        var sid = stew.stewardId || 'UNKNOWN';
+        if (!byConsultant[sid]) byConsultant[sid] = { steward: stew, training: {}, sites: {} };
+        var acc = byConsultant[sid], mods = body.modules || {};
+        (mods.training || []).forEach(function(r){ var u=r.record_uid||r.uid; if(!u) return; var p=acc.training[u]; if(p && _recInstant(p)>=_recInstant(r)) return; acc.training[u]=r; });
+        (mods.freemap  || []).forEach(function(r){ var u=r.record_uid||r.uid; if(!u) return; var p=acc.sites[u];    if(p && _recInstant(p)>=_recInstant(r)) return; acc.sites[u]=r; });
+      }
+    }
+  }
+  return byConsultant;
+}
+
+function _num(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+
+function consultantReports(period) {
+  period = (typeof period === 'string') ? period : 'prevmonth';
+  var cutoff, periodEnd;
+  if (period === 'monthly') { cutoff = currentMonthStart(); periodEnd = new Date(); }
+  else { cutoff = prevMonthStart(); periodEnd = prevMonthEnd(); }
+  var ym = _pngDate(cutoff, 'yyyy-MM');
+  var cutMs = cutoff.getTime(), endMs = periodEnd.getTime();
+
+  var folder        = getDataFolder();
+  var reportsFolder = getOrCreateFolder('_reports', folder);
+  var consRoot      = getOrCreateFolder('consultants', getOrCreateFolder('_media', folder));
+  var consEmails    = (loadRecipients().consultants) || {};
+  var inMonth = function(r){ var t=_recInstant(r); return t>=cutMs && t<=endMs; };
+  var byTime  = function(a,b){ return _recInstant(a) - _recInstant(b); };
+
+  var all = collectConsultantWork();
+  var out = [];
+  Object.keys(all).forEach(function(sid){
+    var c = all[sid];
+    var training = Object.keys(c.training).map(function(k){ return c.training[k]; }).filter(inMonth).sort(byTime);
+    var sites    = Object.keys(c.sites).map(function(k){ return c.sites[k]; }).filter(inMonth).sort(byTime);
+    if (!training.length && !sites.length) return;              /* nothing this month */
+
+    var name = c.steward.name || sid;
+    var mediaFolder = getOrCreateFolder(ym, getOrCreateFolder(sid, consRoot));
+
+    var ssName = 'Consultant report ' + name + ' ' + ym;
+    var oldf = reportsFolder.getFilesByName(ssName); while (oldf.hasNext()) { try { oldf.next().setTrashed(true); } catch(e){} }
+    var ss = SpreadsheetApp.create(ssName);
+
+    /* Training given */
+    var ts = ss.getActiveSheet(); ts.setName('Training given');
+    ts.appendRow(['Date (PNG)','Type','Topic','Location','Duration','Pax F','Pax M','Pax youth','Pax total','Materials','Topics covered','Outcomes','Follow-up','Challenges','Notes','Photo','record_uid']);
+    training.forEach(function(r){
+      var uid = r.record_uid || r.uid;
+      var photo = _saveMedia(mediaFolder, 'TRAIN_' + uid + '.jpg', r.photo);
+      ts.appendRow([
+        _pngDate(_recInstant(r) ? new Date(_recInstant(r)) : '', 'yyyy-MM-dd HH:mm'),
+        r.type || '', r.topic || '', r.location || '', r.duration || '',
+        _num(r.pax_female), _num(r.pax_male), _num(r.pax_youth),
+        _num(r.pax_female) + _num(r.pax_male) + _num(r.pax_youth),
+        (r.materials && r.materials.length ? r.materials.join(', ') : ''),
+        r.topics_covered || '', r.outcomes || '', r.followup || '', r.challenges || '', r.notes || '',
+        photo, uid
+      ]);
+    });
+
+    /* Sites visited (field maps) */
+    var vs = ss.insertSheet('Sites visited');
+    vs.appendRow(['Date (PNG)','Category','Title','Description','Shape','Area (ha)','Length (m)','Points','Map link','Photo','record_uid']);
+    sites.forEach(function(r){
+      var uid = r.record_uid || r.uid;
+      var photo = _saveMedia(mediaFolder, 'SITE_' + uid + '.jpg', r.photo);
+      var p0 = (r.points && r.points[0]) ? r.points[0] : null;
+      var mapLink = p0 ? ('https://www.google.com/maps?q=' + p0.lat + ',' + p0.lon) : '';
+      vs.appendRow([
+        _pngDate(_recInstant(r) ? new Date(_recInstant(r)) : '', 'yyyy-MM-dd HH:mm'),
+        r.category_label || r.category || '', r.title || '', r.description || '',
+        r.map_type || '',
+        (r.area_ha != null ? r.area_ha : ''), (r.length_m != null ? r.length_m : ''),
+        (r.points && r.points.length) || 0,
+        mapLink, photo, uid
+      ]);
+    });
+
+    var ssFile = DriveApp.getFileById(ss.getId());
+    try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
+
+    var to = consEmails[sid];
+    if (to) {
+      try { ssFile.addViewer(to); } catch(e){}
+      try { mediaFolder.addViewer(to); } catch(e){}
+      var body = [
+        'Your MCA consultant report — ' + ym + ' (PNG time)',
+        '',
+        'Training sessions: ' + training.length,
+        'Sites visited: ' + sites.length,
+        '',
+        'Report (Google Sheet): ' + ss.getUrl(),
+        'Your photos for the month: ' + mediaFolder.getUrl()
+      ].join('\n');
+      MailApp.sendEmail(to, 'Your MCA consultant report — ' + ym, body);
+    } else {
+      Logger.log('No email for consultant ' + sid + ' (' + name + ') — report made but not sent: ' + ss.getUrl());
+    }
+    out.push({ stewardId: sid, name: name, training: training.length, sites: sites.length, report: ss.getUrl(), emailed: !!to });
+  });
+  Logger.log('Consultant reports ' + ym + ': ' + out.length + ' consultant(s) with activity.');
+  return { status: 'ok', month: ym, reports: out };
+}
+
+function installConsultantReportsTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'consultantReports') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('consultantReports').timeBased().onMonthDay(1).atHour(7).create();
+  Logger.log('Monthly consultant-reports trigger installed (1st of month, 7am PNG).');
 }

@@ -31,12 +31,13 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
   monthly. See CLAUDE.md "Storage & retention". Backend/ops, not the app.
 - [ ] Field mapping with screen **fully off** needs the **native wrapper** (see
   `upgrade-path.md`); the PWA keeps the screen awake but can't record locked.
-- [ ] **Hunter interview module (to build).** A capture screen for hunter
-  interviews — the Activity Calendar already has a `hunter_interview` event type
-  (clan-steward task) but **no recording module exists yet**. New store +
-  form (species, method, catch/effort, location, etc. — spec TBD with the team).
-  Once built, add it as a clan-steward compliance dimension (registry/cadence
-  TBD) in `reporting-spec.md` report A.
+- [ ] **Hunter interview module — DEFERRED (later).** Already specced below
+  ("Monthly key-informant hunter interview"), noted with Rhett. Key point:
+  **involves voice recording** — a new capability (the app does photos, not
+  audio yet: needs audio capture + storage/upload). The Activity Calendar
+  already has the `hunter_interview` event type, but no capture screen exists.
+  When built, add it as a clan-steward compliance dimension in
+  `reporting-spec.md` report A. Not now.
 - [ ] **Reports backend — go live.** The monthly/annual report jobs are built in
   `apps-script-upload.js` (reports A, H, I, J). To activate: set `_recipients.json`
   (`seedRecipients`) and `_roster.json` (`seedRoster`), run the trigger installers

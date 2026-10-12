@@ -60,6 +60,13 @@ via the plausibility window; it just has no server anchor to correct against.
 - **Coordinator powers** (approve, enrol, Manage Zones, triage) are gated by the
   **server key**, *not* the role. Role shapes what you see; the key controls what
   you can change.
+- **Disturbance-alert hierarchy** (`alertAccess()`): `mcf_staff` → **all MCA**;
+  `zone_staff` → **their zone**; `field_officer` → **their zone, VIEW ONLY**
+  (never verifies); `clan_steward` → **their clan** (alerts assigned via triage).
+  Zone/clan boundaries aren't loaded yet, so the zone-scoped roles currently see
+  **all** alerts — this narrows to the real zone/clan automatically once boundary
+  geometry exists (disturbances already carry `owner_clan`; the router just needs
+  the shapes). mcf_staff/zone_staff/clan stewards verify; field officers do not.
 - **Training delivery:** field officers, oversight (Project/MCF & Zone staff),
   and clan stewards *authorised for a topic*. MCF staff were unblocked this
   session.

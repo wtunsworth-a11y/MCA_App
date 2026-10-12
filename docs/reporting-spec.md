@@ -147,28 +147,36 @@ Structurally identical to the Fire report — build them from one template.
 - **Recombine, investigated-or-not, two levels, counts, tiers:** exactly as
   Fire — group per-clan tasks by base event uid; "investigated = any clan."
 - **Findings taxonomy** (implemented, clearance-flavoured): food garden /
-  cash-crop garden / **garden rehabilitation** / logging / road / settlement /
+  cash-crop garden / **cash-crop rehabilitation** / logging / road / settlement /
   landslide-erosion / flood-river change / storm damage-treefall / unclear —
   stored as `verify.cause` + `verify.cause_label`. **Plain descriptive causes
   with no natural/unnatural tag** — labelling a cause "natural" vs "human" infers
-  blame, and a steward should never feel they are accusing anyone just by
-  recording what the land is used for. The garden options are **not** split into
-  "new" vs "expansion" (that phrasing hid half the cases); they just state the
-  land use. Satellite forest-loss detection (RADD/GFW) fires on **any** canopy
-  loss, so a landslide, flood scour or treefall arrives as a "clearance" alert;
-  the steward just records what they see.
-- **Garden rehabilitation + EUDR.** Cleaning the regrowth off a long-abandoned
-  crop block (e.g. old coffee) reads as forest loss on satellite but is **not
-  new deforestation**. When the steward picks *garden rehabilitation*, the form
-  **requires the crop's original planting year** (`verify.rehab_planting_year`,
-  plus `verify.rehab_year_approx` if estimated). This matters for **EUDR** (EU
-  Deforestation Regulation): a commodity from land cleared of forest **after the
-  end-2020 cut-off** is non-compliant, so a rehabilitated block only stays
-  defensible if the crop **predates** that date. The report must:
-  - flag every rehabilitation record and show its planting year against the
-    **end-2020 cut-off** (clearly compliant / needs evidence / post-cut-off);
-  - treat rehabilitation as **distinct from new clearing** in the headline count
-    (it is maintenance of an existing crop, not forest conversion).
+  blame. The garden options are **not** split into "new" vs "expansion" (that
+  phrasing hid half the cases); they just state the land use. Satellite
+  forest-loss detection (RADD/GFW) fires on **any** canopy loss, so a landslide,
+  flood scour or treefall arrives as a "clearance" alert; the steward just
+  records what they see.
+- **Food garden vs cash-crop rehabilitation — different acts.** A food garden is
+  burned fresh from forest and replanted — a **restart**, never a
+  "rehabilitation". **Rehabilitation applies only to cash crops**, which stay
+  under canopy, so an old block (e.g. coffee) can be cleaned up and brought back.
+  That cleanup reads as forest loss on satellite but is **not new
+  deforestation**. Food gardens are **not** an EUDR commodity.
+- **Cash-crop rehabilitation → planting year (reason held internally).** When
+  the steward picks *cash-crop rehabilitation*, the form **requires the crop's
+  original planting year** (`verify.rehab_planting_year`, plus
+  `verify.rehab_year_approx`). The field asks the **plain factual question only
+  and never says why** — telling someone the implication of an answer gives them
+  a reason to shade it. The reason is internal and off-device: **EUDR** (EU
+  Deforestation Regulation) treats a commodity from forest cleared **after the
+  end-2020 cut-off** as non-compliant, so a rehabilitated block is defensible
+  only if the crop **predates** that date — and this bites **only if the crop is
+  sold into the EU** (sold elsewhere it is moot; if the EU refuses it, it goes
+  elsewhere). We collect the year regardless; the analysis happens in the
+  report. The report should:
+  - flag cash-crop rehabilitation records and show planting year against the
+    **end-2020 cut-off** (predates / needs evidence / post-cut-off);
+  - keep rehabilitation **distinct from new clearing** in the headline count.
 - **Report groups causes neutrally.** For analysis the report may group
   land-use causes (garden, cash-crop, rehabilitation, logging, road, settlement)
   separately from physical/ground causes (landslide, flood, treefall) — e.g. so

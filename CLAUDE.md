@@ -27,6 +27,15 @@ Working agreements for this repo. These are binding unless the user overrides th
   group causes for analysis, but with neutral descriptive labels (e.g. land-use
   vs ground/physical), never a natural/human (blame) dichotomy.
 
+- **Ask the question, never the consequence.** When an answer has an external
+  implication — compliance (e.g. EUDR), eligibility, blame — the form asks the
+  **plain factual question and nothing more**. Never show the respondent *why*
+  the data is collected or what a given answer would trigger: explaining the
+  stakes of an answer gives them a reason to shade it. The reasoning and any
+  threshold/cut-off logic live **off-device** in the internal spec and the
+  report, never in on-screen help, labels or placeholders. (We still collect the
+  data; the interpretation happens later, elsewhere.)
+
 ## Storage & retention
 
 - **Work phones must keep space free for the app.** It warns on the dashboard

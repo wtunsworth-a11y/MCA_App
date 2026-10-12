@@ -8156,7 +8156,7 @@ var DIST_CAUSE_SETS = {
   clearance: {
     garden:      'Food garden',
     cashcrop:    'Cash-crop garden',
-    rehab:       'Garden rehabilitation (clearing regrowth on an old crop block)',
+    rehab:       'Cash-crop rehabilitation (old block)',
     logging:     'Logging / timber',
     road:        'Road / access track',
     settlement:  'Settlement / buildings',
@@ -8455,15 +8455,15 @@ function renderDisturbVerify(){
   h+='<div class="form-group"><label class="form-label">'+causePrompt+' <span style="color:#999;font-weight:400;">(what you see, not a judgement)</span>'+helpTip('dz.cause')+'</label><div style="display:flex;flex-direction:column;gap:6px;">';
   Object.keys(causeSet).forEach(function(k){ h+='<button type="button" class="weather-pill" id="dzc-'+k+'" onclick="dzSetCause(\''+k+'\')" style="text-align:left;font-size:0.8rem;padding:9px 11px;">'+causeSet[k]+'</button>'; });
   h+='</div></div>';
-  /* Rehabilitation of an old crop block is not new clearing — but the crop's
-     original planting year is needed to show it predates the EU deforestation
-     cut-off (end 2020). Revealed only when "Garden rehabilitation" is chosen. */
+  /* Planting year for a rehabilitated cash-crop block. Ask the plain factual
+     question only — never surface why it is collected (the implication of the
+     answer must not steer the answer). Revealed when "Cash-crop rehabilitation"
+     is chosen. */
   if(r.kind==='clearance'){
     h+='<div class="form-group" id="dzRehabBlock" style="display:none;">';
     h+='<label class="form-label">Year the crop was first planted <span style="color:#B71C1C;">*</span></label>';
     h+='<input type="number" id="dzRehabYear" class="form-input" min="1950" max="'+(new Date().getFullYear())+'" placeholder="e.g. 2003" inputmode="numeric" oninput="dzCheckReady()">';
     h+='<label style="display:flex;align-items:center;gap:6px;font-size:0.76rem;color:#666;margin-top:6px;"><input type="checkbox" id="dzRehabApprox"> Approximate / best estimate</label>';
-    h+='<div style="font-size:0.68rem;color:#888;margin-top:4px;">This is an old block being cleaned up, not new clearing. The original planting year shows the crop predates the EU deforestation cut-off (end 2020).</div>';
     h+='</div>';
   }
   h+='<div class="form-group"><label class="form-label">Photo of the site <span style="color:#B71C1C;">*</span>'+helpTip('dz.photo')+'</label>';
@@ -10975,7 +10975,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v75'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v76'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

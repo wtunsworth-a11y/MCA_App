@@ -398,6 +398,54 @@ function seedRecipients() {
   Logger.log('Seeded _recipients.json — edit it via update_recipients or re-run seedRecipients.');
 }
 
+/* ─── Expected clan-steward roster ──────────────────────────────────────
+ * _roster.json in the data folder, coordinator-maintained (update_roster —
+ * coordinator key required; or seedRoster() in the editor). The LIST OF WHO IS
+ * SUPPOSED TO REPORT. Compliance is measured against this roster, so a steward
+ * who never syncs still shows up as FAILED (not reporting = not done = no pay),
+ * instead of silently vanishing. Entries:
+ *   [ { "stewardId":"MCA-012", "name":"...", "clan":"Kubi", "zone":"Z05 — Zone 5" }, ... ]
+ * Enrolment is offline/on-device; this roster is how the project declares the
+ * expected cohort until a profile is registered centrally at enrolment. */
+function loadRoster() {
+  try { var f=getDataFolder(); var fs=f.getFilesByName('_roster.json'); if(fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString())||[]; } catch(e){}
+  return [];
+}
+function saveRoster(list) {
+  var f=getDataFolder(); var fs=f.getFilesByName('_roster.json'); var j=JSON.stringify(list||[],null,2);
+  if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_roster.json', j, MimeType.PLAIN_TEXT);
+}
+function getRoster() {
+  return ContentService.createTextOutput(JSON.stringify({ status:'ok', roster: loadRoster() })).setMimeType(ContentService.MimeType.JSON);
+}
+function updateRoster(list) { saveRoster(list||[]); return { status:'ok', message:'Roster saved', count:(list||[]).length }; }
+function seedRoster() {
+  saveRoster([ /* { stewardId:'MCA-012', name:'', clan:'', zone:'' } */ ]);
+  Logger.log('Seeded _roster.json — add the expected clan stewards via update_roster or seedRoster.');
+}
+/* collectRecordsByRole('clan_steward') reconciled with the expected roster:
+ *  - an ACTIVE roster member who never synced is added (empty mods → fails);
+ *  - a RETIRED member (active:false — died or replaced) is dropped, so their
+ *    old data stays in Drive for audit but they no longer show as a failing
+ *    active reporter;
+ *  - ever-synced stewards not on the roster are KEPT (nothing hides).
+ * With no roster set, this is just the ever-synced set (safe fallback). The
+ * roster is the movable active cohort until 100% enrolment pins the clan count. */
+function clanStewardsWithRoster() {
+  var all = collectRecordsByRole('clan_steward');
+  loadRoster().forEach(function(e){
+    if (!e || !e.stewardId) return;
+    if (e.active === false || (e.role && e.role !== 'clan_steward')) { delete all[e.stewardId]; return; }  /* retired / wrong role */
+    if (!all[e.stewardId]) {
+      all[e.stewardId] = { steward:{ stewardId:e.stewardId, name:e.name||'', clan:e.clan||'', zone:e.zone||'', role:'clan_steward' }, mods:{} };
+    } else {
+      var s = all[e.stewardId].steward;
+      s.name = s.name || e.name; s.clan = s.clan || e.clan; s.zone = s.zone || e.zone;
+    }
+  });
+  return all;
+}
+
 /* ─── Activity calendar ────────────────────────────────────────────────
  * _calendar.json in Drive: scheduled activities/meetings, keyed by uid. */
 function loadCalendarList() {
@@ -1218,7 +1266,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1381,6 +1429,10 @@ function doPost(e) {
     if (body._action === 'update_recipients') {
       return ContentService.createTextOutput(JSON.stringify(updateRecipients(body.recipients))).setMimeType(ContentService.MimeType.JSON);
     }
+    /* Expected clan-steward roster — coordinator maintains it (coordinator key required) */
+    if (body._action === 'update_roster') {
+      return ContentService.createTextOutput(JSON.stringify(updateRoster(body.roster))).setMimeType(ContentService.MimeType.JSON);
+    }
 
     /* Normal steward data upload */
     var folder = getDataFolder();
@@ -1437,6 +1489,7 @@ function doGet(e) {
   if (action === 'help') { return getHelp(); }
   if (action === 'date_review') { return getDateReview(); }
   if (action === 'issues') { return getIssues(); }
+  if (action === 'roster') { return getRoster(); }
 
   if (action === 'authorisations') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';
@@ -2035,4 +2088,293 @@ function installFieldOfficerReportsTrigger() {
   });
   ScriptApp.newTrigger('fieldOfficerReports').timeBased().onMonthDay(1).atHour(7).create();
   Logger.log('Monthly field-officer-reports trigger installed (1st of month, 7am PNG).');
+}
+
+/* ─── Clan-steward compliance report ─────────────────────────────────────
+ * "Were the regular tasks done, against target?" — but the target is almost
+ * never a fixed number: it is the REGISTRY. A clan is due to monitor the
+ * phenology trees / water sources / facilities / met stations REGISTERED to it,
+ * so the denominator scales as those are registered (a clan with no coffee/cocoa
+ * has 0 trees → shown "—", not 0% failing). The one fixed target is MaFIA: 1 per
+ * period. Water / gov / met registries are not populated yet, so those columns
+ * read "—" until clan-owned sites exist — then they light up automatically.
+ *
+ * Compliance per clan steward = distinct registered items (owned by their clan)
+ * that have a monitoring record this period ÷ items registered to that clan.
+ * Tiered: clan steward → zone → MCA. Monthly, PNG time. Sent to MCF oversight
+ * (REPORT_EMAILS) + Matilda (field_reports_to). TRIGGER:
+ * installClanComplianceTrigger() (1st of month, 7am PNG). On demand:
+ * clanComplianceReport('monthly'). */
+
+var COMPLIANCE_MAFIA_TARGET = 1;   /* MaFIA: 1 per month, every clan (monthly cadence confirmed) */
+
+function _ownedApproved(list, clan) {
+  return (list || []).filter(function(it){ return it && it.status === 'approved' && (it.owner_clan === clan || it.owner_clan_2 === clan); });
+}
+/* distinct registry-item ids referenced by this steward's monitoring records
+ * (module `mod`, id field `idKey`) in the period, limited to `ownedIds`. */
+function _monitoredOwned(modMap, idKey, ownedIds, inMonth) {
+  if (!modMap) return 0;
+  var owned = {}; ownedIds.forEach(function(id){ owned[String(id)] = true; });
+  var seen = {};
+  Object.keys(modMap).forEach(function(u){
+    var r = modMap[u];
+    if (!inMonth(r)) return;
+    var id = r[idKey];
+    if (id == null) return;
+    if (owned[String(id)]) seen[String(id)] = true;
+  });
+  return Object.keys(seen).length;
+}
+function _complCell(done, reg) { return reg ? (done + '/' + reg + (done >= reg ? ' ✓' : '')) : '—'; }
+/* Fire & deforestation investigation for a clan in a window: due = fire/clearance
+ * alerts owned by the clan raised in the window; done = those verified/closed.
+ * "(if any)" — due is 0 when no alerts were raised for the clan. */
+function _clanInvestigations(distList, clan, cutMs, endMs) {
+  var due = 0, done = 0;
+  (distList || []).forEach(function(d){
+    if (!d || (d.kind !== 'fire' && d.kind !== 'clearance')) return;
+    if (d.owner_clan !== clan) return;
+    var t = Date.parse(d.created_date || d.detected_date || '');
+    if (isNaN(t) || t < cutMs || t > endMs) return;
+    due++;
+    if (d.status === 'verified' || d.status === 'closed') done++;
+  });
+  return { due: due, done: done };
+}
+/* Did this steward sync ANY record dated in the period? (participation) */
+function _reportedThisMonth(mods, inMonth) {
+  var mk = Object.keys(mods || {});
+  for (var i = 0; i < mk.length; i++) {
+    var mm = mods[mk[i]], us = Object.keys(mm);
+    for (var j = 0; j < us.length; j++) { if (inMonth(mm[us[j]])) return true; }
+  }
+  return false;
+}
+
+function clanComplianceReport(period) {
+  period = (typeof period === 'string') ? period : 'prevmonth';
+  var cutoff, periodEnd;
+  if (period === 'monthly') { cutoff = currentMonthStart(); periodEnd = new Date(); }
+  else { cutoff = prevMonthStart(); periodEnd = prevMonthEnd(); }
+  var ym = _pngDate(cutoff, 'yyyy-MM');
+  var cutMs = cutoff.getTime(), endMs = periodEnd.getTime();
+  var inMonth = function(r){ var t=_recInstant(r); return t>=cutMs && t<=endMs; };
+  var monthCount = function(modMap){ if(!modMap) return 0; var n=0; Object.keys(modMap).forEach(function(u){ if(inMonth(modMap[u])) n++; }); return n; };
+
+  var phenoList = loadPhenoPlotsList(), waterList = loadWaterSourcesList(),
+      facList   = loadFacilitiesList(), metList   = loadMetStationsList(),
+      distList  = loadDisturbancesList();
+  var ids = function(arr){ return arr.map(function(it){ return (it.id != null) ? it.id : it.uid; }); };
+  var everSynced = function(mods){ return Object.keys(mods||{}).some(function(mk){ return Object.keys(mods[mk]).length > 0; }); };
+
+  var all = clanStewardsWithRoster();
+  var rows = [];
+  Object.keys(all).forEach(function(sid){
+    var c = all[sid], s = c.steward, clan = s.clan || '';
+    var phenoReg = _ownedApproved(phenoList, clan), waterReg = _ownedApproved(waterList, clan),
+        facReg   = _ownedApproved(facList, clan),   metReg   = _ownedApproved(metList, clan);
+    var maf = monthCount(c.mods.mafia);
+    rows.push({
+      s: s, clan: clan,
+      reported: _reportedThisMonth(c.mods, inMonth),
+      everSynced: everSynced(c.mods),
+      maf: maf,
+      fire:  _clanInvestigations(distList, clan, cutMs, endMs),
+      pheno: { done: _monitoredOwned(c.mods.phenology,      'plot_id',        ids(phenoReg), inMonth), reg: phenoReg.length },
+      water: { done: _monitoredOwned(c.mods.water,          'water_source_id',ids(waterReg), inMonth), reg: waterReg.length },
+      gov:   { done: _monitoredOwned(c.mods.facility_visits,'facility_id',    ids(facReg),   inMonth), reg: facReg.length },
+      met:   { done: _monitoredOwned(c.mods.met_readings,   'met_station_id', ids(metReg),   inMonth), reg: metReg.length }
+    });
+  });
+  rows.sort(function(a,b){ return (a.s.zone||'').localeCompare(b.s.zone||'') || (a.s.name||'').localeCompare(b.s.name||''); });
+
+  var folder = getDataFolder(), reportsFolder = getOrCreateFolder('_reports', folder);
+  var ssName = 'Clan steward compliance ' + ym;
+  var old = reportsFolder.getFilesByName(ssName); while (old.hasNext()) { try { old.next().setTrashed(true); } catch(e){} }
+  var ss = SpreadsheetApp.create(ssName);
+
+  /* Tab 1 — by clan steward */
+  var sh = ss.getActiveSheet(); sh.setName('By clan steward');
+  sh.appendRow(['Clan steward','Zone','Clan','Reported this month','MaFIA (target '+COMPLIANCE_MAFIA_TARGET+')','Fire & deforestation','Phenology','Water quality','Gov services','Met stations']);
+  rows.forEach(function(x){
+    sh.appendRow([ (x.s.name||'')+' ('+(x.s.stewardId||'')+')', x.s.zone||'', x.clan,
+      (x.reported ? 'Yes' : (x.everSynced ? 'No' : 'No (never synced)')),
+      (x.maf>=COMPLIANCE_MAFIA_TARGET ? (x.maf+'/'+COMPLIANCE_MAFIA_TARGET+' ✓') : (x.maf+'/'+COMPLIANCE_MAFIA_TARGET)),
+      _complCell(x.fire.done,x.fire.due),
+      _complCell(x.pheno.done,x.pheno.reg), _complCell(x.water.done,x.water.reg),
+      _complCell(x.gov.done,x.gov.reg), _complCell(x.met.done,x.met.reg) ]);
+  });
+
+  /* Tab 2 — rollup by zone + MCA */
+  var zoneMap = {};
+  rows.forEach(function(x){
+    var z = x.s.zone || '—';
+    if (!zoneMap[z]) zoneMap[z] = { stewards:0, reported:0, mafDone:0, fD:0,fR:0, pD:0,pR:0, wD:0,wR:0, gD:0,gR:0, mD:0,mR:0 };
+    var zm = zoneMap[z];
+    zm.stewards++; if (x.reported) zm.reported++; if (x.maf>=COMPLIANCE_MAFIA_TARGET) zm.mafDone++;
+    zm.fD+=x.fire.done;  zm.fR+=x.fire.due;
+    zm.pD+=x.pheno.done; zm.pR+=x.pheno.reg; zm.wD+=x.water.done; zm.wR+=x.water.reg;
+    zm.gD+=x.gov.done;   zm.gR+=x.gov.reg;   zm.mD+=x.met.done;   zm.mR+=x.met.reg;
+  });
+  var ru = ss.insertSheet('Rollup');
+  ru.appendRow(['Zone','Clan stewards (roster)','Reporting','MaFIA done','Fire & deforestation','Phenology','Water quality','Gov services','Met stations']);
+  var tot = { stewards:0, reported:0, mafDone:0, fD:0,fR:0, pD:0,pR:0, wD:0,wR:0, gD:0,gR:0, mD:0,mR:0 };
+  Object.keys(zoneMap).sort().forEach(function(z){
+    var zm = zoneMap[z];
+    ru.appendRow([ z, zm.stewards, zm.reported+'/'+zm.stewards, zm.mafDone+'/'+zm.stewards,
+      _complCell(zm.fD,zm.fR), _complCell(zm.pD,zm.pR), _complCell(zm.wD,zm.wR), _complCell(zm.gD,zm.gR), _complCell(zm.mD,zm.mR) ]);
+    ['stewards','reported','mafDone','fD','fR','pD','pR','wD','wR','gD','gR','mD','mR'].forEach(function(k){ tot[k]+=zm[k]; });
+  });
+  ru.appendRow(['MCA (all zones)', tot.stewards, tot.reported+'/'+tot.stewards, tot.mafDone+'/'+tot.stewards,
+    _complCell(tot.fD,tot.fR), _complCell(tot.pD,tot.pR), _complCell(tot.wD,tot.wR), _complCell(tot.gD,tot.gR), _complCell(tot.mD,tot.mR) ]);
+
+  var ssFile = DriveApp.getFileById(ss.getId());
+  try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
+
+  var rcp = loadRecipients();
+  var to = REPORT_EMAILS.slice();
+  if (rcp.field_reports_to && to.indexOf(rcp.field_reports_to) === -1) to.push(rcp.field_reports_to);
+  to.forEach(function(email){ try { ssFile.addViewer(email); } catch(e){} });
+
+  var body = ['MCA Steward App — Clan-steward compliance — ' + ym + ' (PNG time)','',
+    'Clan stewards in the roster: ' + rows.length,
+    '',
+    'Report (Google Sheet): ' + ss.getUrl(),
+    '',
+    'Target is the registry, not a fixed number: phenology / water / gov / met are',
+    'measured against the sites registered to each clan. "—" means nothing is',
+    'registered yet for that clan (e.g. no coffee/cocoa trees, or water/gov/met',
+    'sites not defined). MaFIA target is ' + COMPLIANCE_MAFIA_TARGET + ' per period.',
+    '',
+    'Zone and MCA figures on the Rollup tab are a simple sum of the clan rows —',
+    'the roster (clan stewards), what is registered, and what was done all add up',
+    'the tiers. "Reporting" = how many of the roster synced anything this period.',
+    'Roster = clan stewards who have synced at least once; a steward who has',
+    'never synced cannot be counted until a central enrolment roster exists.'
+  ].join('\n');
+  to.forEach(function(email){ MailApp.sendEmail(email, 'MCA Clan-steward compliance — ' + ym, body); });
+  Logger.log('Clan compliance ' + ym + ': ' + rows.length + ' stewards → ' + to.join(', '));
+  return { status:'ok', month:ym, stewards:rows.length, report:ss.getUrl() };
+}
+
+function installClanComplianceTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'clanComplianceReport') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('clanComplianceReport').timeBased().onMonthDay(1).atHour(7).create();
+  Logger.log('Monthly clan-compliance trigger installed (1st of month, 7am PNG).');
+}
+
+/* ─── Annual clan-steward compliance (2-month leeway) ───────────────────
+ * Once a year, a COMPLETE picture of progress and action. Records bucket by
+ * their own date (PNG), so running this ~1 March for the previous calendar year
+ * captures reports synced late — the 2-month leeway. Per clan steward, a 12-
+ * month summary (months reported, MaFIA done /12, fire & deforestation, annual
+ * phenology coverage, water/gov/met), plus a zone + MCA rollup (simple sums).
+ * Same registry-as-target and roster logic as the monthly report. To MCF
+ * oversight + Matilda. TRIGGER: installAnnualComplianceTrigger() → fires 1st of
+ * each month 8am PNG but only acts in March (prior year). On demand:
+ * annualComplianceReport(2026). */
+function annualComplianceReport(year) {
+  var now = new Date();
+  if (typeof year !== 'number') year = (now.getMonth() <= 1) ? (now.getFullYear() - 1) : now.getFullYear();
+  var yStart = new Date(year,0,1).getTime(), yEnd = new Date(year+1,0,1).getTime() - 1;
+  var months = []; for (var m=0;m<12;m++) months.push({ s:new Date(year,m,1).getTime(), e:new Date(year,m+1,1).getTime()-1 });
+
+  var phenoList=loadPhenoPlotsList(), waterList=loadWaterSourcesList(), facList=loadFacilitiesList(),
+      metList=loadMetStationsList(), distList=loadDisturbancesList();
+  var ids=function(arr){ return arr.map(function(it){ return (it.id!=null)?it.id:it.uid; }); };
+
+  var all = clanStewardsWithRoster();
+  var rows = [];
+  Object.keys(all).forEach(function(sid){
+    var c=all[sid], s=c.steward, clan=s.clan||'';
+    var phenoReg=_ownedApproved(phenoList,clan), waterReg=_ownedApproved(waterList,clan),
+        facReg=_ownedApproved(facList,clan), metReg=_ownedApproved(metList,clan);
+    var rep=0, maf=0, pD=0, wD=0, gD=0, mD=0;
+    months.forEach(function(w){
+      var inM=function(r){ var t=_recInstant(r); return t>=w.s && t<=w.e; };
+      if (_reportedThisMonth(c.mods, inM)) rep++;
+      var mafN=0; if (c.mods.mafia) Object.keys(c.mods.mafia).forEach(function(u){ if(inM(c.mods.mafia[u])) mafN++; });
+      if (mafN>=COMPLIANCE_MAFIA_TARGET) maf++;
+      pD+=_monitoredOwned(c.mods.phenology,      'plot_id',        ids(phenoReg), inM);
+      wD+=_monitoredOwned(c.mods.water,          'water_source_id',ids(waterReg), inM);
+      gD+=_monitoredOwned(c.mods.facility_visits,'facility_id',    ids(facReg),   inM);
+      mD+=_monitoredOwned(c.mods.met_readings,   'met_station_id', ids(metReg),   inM);
+    });
+    rows.push({ s:s, clan:clan, rep:rep, maf:maf, fire:_clanInvestigations(distList,clan,yStart,yEnd),
+      pheno:{done:pD,exp:phenoReg.length*12}, water:{done:wD,exp:waterReg.length*12},
+      gov:{done:gD,exp:facReg.length*12},     met:{done:mD,exp:metReg.length*12} });
+  });
+  rows.sort(function(a,b){ return (a.s.zone||'').localeCompare(b.s.zone||'') || (a.s.name||'').localeCompare(b.s.name||''); });
+
+  var folder=getDataFolder(), reportsFolder=getOrCreateFolder('_reports', folder);
+  var ssName='Clan steward annual compliance '+year;
+  var old=reportsFolder.getFilesByName(ssName); while(old.hasNext()){ try{old.next().setTrashed(true);}catch(e){} }
+  var ss=SpreadsheetApp.create(ssName);
+
+  var sh=ss.getActiveSheet(); sh.setName('By clan steward ('+year+')');
+  sh.appendRow(['Clan steward','Zone','Clan','Months reported','MaFIA (/12)','Fire & deforestation','Phenology (tree-months)','Water quality','Gov services','Met stations']);
+  rows.forEach(function(x){
+    sh.appendRow([ (x.s.name||'')+' ('+(x.s.stewardId||'')+')', x.s.zone||'', x.clan,
+      x.rep+'/12', x.maf+'/12'+(x.maf>=12?' ✓':''), _complCell(x.fire.done,x.fire.due),
+      _complCell(x.pheno.done,x.pheno.exp), _complCell(x.water.done,x.water.exp),
+      _complCell(x.gov.done,x.gov.exp), _complCell(x.met.done,x.met.exp) ]);
+  });
+
+  var zoneMap={};
+  rows.forEach(function(x){
+    var z=x.s.zone||'—';
+    if(!zoneMap[z]) zoneMap[z]={ stewards:0, repM:0, mafM:0, fD:0,fR:0, pD:0,pE:0, wD:0,wE:0, gD:0,gE:0, mD:0,mE:0 };
+    var zm=zoneMap[z];
+    zm.stewards++; zm.repM+=x.rep; zm.mafM+=x.maf; zm.fD+=x.fire.done; zm.fR+=x.fire.due;
+    zm.pD+=x.pheno.done; zm.pE+=x.pheno.exp; zm.wD+=x.water.done; zm.wE+=x.water.exp;
+    zm.gD+=x.gov.done;   zm.gE+=x.gov.exp;   zm.mD+=x.met.done;   zm.mE+=x.met.exp;
+  });
+  var ru=ss.insertSheet('Rollup ('+year+')');
+  ru.appendRow(['Zone','Clan stewards (roster)','Months reported (of 12N)','MaFIA (of 12N)','Fire & deforestation','Phenology (tree-months)','Water quality','Gov services','Met stations']);
+  var tot={ stewards:0, repM:0, mafM:0, fD:0,fR:0, pD:0,pE:0, wD:0,wE:0, gD:0,gE:0, mD:0,mE:0 };
+  Object.keys(zoneMap).sort().forEach(function(z){
+    var zm=zoneMap[z], cap=zm.stewards*12;
+    ru.appendRow([ z, zm.stewards, zm.repM+'/'+cap, zm.mafM+'/'+cap, _complCell(zm.fD,zm.fR),
+      _complCell(zm.pD,zm.pE), _complCell(zm.wD,zm.wE), _complCell(zm.gD,zm.gE), _complCell(zm.mD,zm.mE) ]);
+    ['stewards','repM','mafM','fD','fR','pD','pE','wD','wE','gD','gE','mD','mE'].forEach(function(k){ tot[k]+=zm[k]; });
+  });
+  var capT=tot.stewards*12;
+  ru.appendRow(['MCA (all zones)', tot.stewards, tot.repM+'/'+capT, tot.mafM+'/'+capT, _complCell(tot.fD,tot.fR),
+    _complCell(tot.pD,tot.pE), _complCell(tot.wD,tot.wE), _complCell(tot.gD,tot.gE), _complCell(tot.mD,tot.mE) ]);
+
+  var ssFile=DriveApp.getFileById(ss.getId());
+  try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
+  var rcp=loadRecipients(); var to=REPORT_EMAILS.slice();
+  if (rcp.field_reports_to && to.indexOf(rcp.field_reports_to)===-1) to.push(rcp.field_reports_to);
+  to.forEach(function(email){ try{ ssFile.addViewer(email); }catch(e){} });
+  var body=['MCA Steward App — Annual clan-steward compliance — '+year+' (PNG time)','',
+    'Clan stewards in the roster: '+rows.length,
+    '',
+    'Report (Google Sheet): '+ss.getUrl(),
+    '',
+    'Complete year with a 2-month leeway: records count in the month of the work,',
+    'so reports synced up to ~end of February still land in last year. "12N" = 12',
+    'months × stewards. Targets are the registry (phenology/water/gov/met) and the',
+    'alerts raised (fire & deforestation); "—" means nothing was due. Not reporting',
+    'is a failure — the report is the deliverable.'
+  ].join('\n');
+  to.forEach(function(email){ MailApp.sendEmail(email, 'MCA Annual clan-steward compliance — '+year, body); });
+  Logger.log('Annual compliance '+year+': '+rows.length+' stewards → '+to.join(', '));
+  return { status:'ok', year:year, stewards:rows.length, report:ss.getUrl() };
+}
+
+/* Fires 1st of each month (8am PNG) but only acts in March, producing the
+ * previous calendar year's annual report after the 2-month leeway. */
+function annualComplianceTriggerRun() {
+  if (new Date().getMonth() === 2) annualComplianceReport(new Date().getFullYear() - 1);
+}
+function installAnnualComplianceTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'annualComplianceTriggerRun') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('annualComplianceTriggerRun').timeBased().onMonthDay(1).atHour(8).create();
+  Logger.log('Annual clan-compliance trigger installed (1st monthly, acts in March for prior year).');
 }

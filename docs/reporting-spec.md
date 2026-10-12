@@ -239,6 +239,29 @@ yet — tracked in `TODO.md`.
 > `installConsultantReportsTrigger()` (1st of month, 7am PNG), redeploy. Run
 > `consultantReports('monthly')` from the editor for the current month.
 
+### J. Field-officer reports (to Matilda) — monthly, *built (backend)*
+
+> **Built** in `apps-script-upload.js` as `fieldOfficerReports()`. All
+> field-officer work routes to **one destination, Matilda**
+> (`_recipients.json → field_reports_to`, falling back to `REPORT_EMAILS`).
+> Three monthly Google Sheets in `_reports/`, PNG time, emailed together:
+> 1. **Field officer report `<YYYY-MM>`** — summary, one row per officer:
+>    active days + counts per module (training, field maps & obs, distributions,
+>    water, gov, phenology, met, MaFIA). Always produced if there is any
+>    field-officer activity.
+> 2. **Field officer training `<YYYY-MM>`** — one row per training session
+>    across officers (officer, date, type, topic, location, pax F/M/youth +
+>    total, materials, outcomes, …, photo link). **Only if any exist.**
+> 3. **Field officer mapping & observations `<YYYY-MM>`** — one row per field
+>    map / observation (officer, date, category, title, description, shape,
+>    area/length, points, crop/track/problem detail, Google-Maps link, photo).
+>    **Only if any exist.**
+>
+> Distributions keep their own ledger (report H); the summary counts them and
+> points there. Photos extracted to `_media/field_officers/<YYYY-MM>/`. **Setup:**
+> set `field_reports_to`, run `installFieldOfficerReportsTrigger()` (1st, 7am
+> PNG), redeploy. On demand: `fieldOfficerReports('monthly')`.
+
 ---
 
 ## Report delivery & routing

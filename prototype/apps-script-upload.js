@@ -1864,3 +1864,175 @@ function installConsultantReportsTrigger() {
   ScriptApp.newTrigger('consultantReports').timeBased().onMonthDay(1).atHour(7).create();
   Logger.log('Monthly consultant-reports trigger installed (1st of month, 7am PNG).');
 }
+
+/* ─── Field-officer reports (to Matilda) ─────────────────────────────────
+ * Field-officer work all goes to one destination — Matilda
+ * (_recipients.json → field_reports_to; falls back to REPORT_EMAILS). Three
+ * monthly outputs, all PNG time, all emailed to Matilda in one message:
+ *   1. Field officer report <YYYY-MM>            — summary, one row per officer
+ *                                                  (active days + counts per module)
+ *   2. Field officer training <YYYY-MM>          — one row per training session
+ *                                                  (only produced if any exist)
+ *   3. Field officer mapping & observations …    — one row per field map /
+ *                                                  observation (only if any exist)
+ * Distributions have their own ledger (monthlyDistributionReport); the summary
+ * still counts them and points there. TRIGGER: installFieldOfficerReportsTrigger()
+ * once (1st of month, 7am PNG). Run fieldOfficerReports('monthly') on demand. */
+
+/* Generic: all records from bundles of a given role, grouped by steward then
+ * module, deduped by record_uid (latest kept). */
+function collectRecordsByRole(role) {
+  var folder = getDataFolder();
+  var out = {};                   /* stewardId -> { steward, mods: { modName: {uid:rec} } } */
+  var zones = folder.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next();
+    if (zf.getName().charAt(0) === '_') continue;
+    var subs = zf.getFolders();
+    while (subs.hasNext()) {
+      var files = subs.next().getFilesByType(MimeType.PLAIN_TEXT);
+      while (files.hasNext()) {
+        var body;
+        try { body = JSON.parse(files.next().getBlob().getDataAsString()); } catch(e) { continue; }
+        var stew = body.steward || {};
+        if (stew.role !== role) continue;
+        var sid = stew.stewardId || 'UNKNOWN';
+        if (!out[sid]) out[sid] = { steward: stew, mods: {} };
+        var mods = body.modules || {};
+        Object.keys(mods).forEach(function(mn){
+          var arr = mods[mn]; if (!arr || !arr.length) return;
+          if (!out[sid].mods[mn]) out[sid].mods[mn] = {};
+          arr.forEach(function(r){ var u=r.record_uid||r.uid; if(!u) return; var p=out[sid].mods[mn][u]; if(p && _recInstant(p)>=_recInstant(r)) return; out[sid].mods[mn][u]=r; });
+        });
+      }
+    }
+  }
+  return out;
+}
+
+function _fmExtra(r) {
+  var bits = [];
+  if (r.crops) bits.push('crops: ' + r.crops);
+  if (r.track_type) bits.push('track: ' + r.track_type);
+  if (r.plant_problem) bits.push('problem: ' + r.plant_problem);
+  if (r.processing && r.processing.stage) bits.push('processing: ' + r.processing.stage);
+  return bits.join('; ');
+}
+
+function fieldOfficerReports(period) {
+  period = (typeof period === 'string') ? period : 'prevmonth';
+  var cutoff, periodEnd;
+  if (period === 'monthly') { cutoff = currentMonthStart(); periodEnd = new Date(); }
+  else { cutoff = prevMonthStart(); periodEnd = prevMonthEnd(); }
+  var ym = _pngDate(cutoff, 'yyyy-MM');
+  var cutMs = cutoff.getTime(), endMs = periodEnd.getTime();
+  var inMonth = function(r){ var t=_recInstant(r); return t>=cutMs && t<=endMs; };
+  var byTime  = function(a,b){ return _recInstant(a) - _recInstant(b); };
+  var when    = function(r){ return _pngDate(_recInstant(r) ? new Date(_recInstant(r)) : '', 'yyyy-MM-dd HH:mm'); };
+
+  var folder        = getDataFolder();
+  var reportsFolder = getOrCreateFolder('_reports', folder);
+  var mediaFolder   = getOrCreateFolder(ym, getOrCreateFolder('field_officers', getOrCreateFolder('_media', folder)));
+
+  var all = collectRecordsByRole('field_officer');
+  var MODS = ['training','freemap','distributions','water','gov','phenology','met','mafia'];
+  var summaryRows = [], trainingRows = [], mapRows = [];
+
+  Object.keys(all).forEach(function(sid){
+    var c = all[sid], s = c.steward, counts = {}, days = {}, total = 0;
+    MODS.forEach(function(mn){
+      var recs = c.mods[mn] ? Object.keys(c.mods[mn]).map(function(k){ return c.mods[mn][k]; }).filter(inMonth) : [];
+      counts[mn] = recs.length; total += recs.length;
+      recs.forEach(function(r){ days[_pngDate(new Date(_recInstant(r)), 'yyyy-MM-dd')] = true; });
+      if (mn === 'training') recs.sort(byTime).forEach(function(r){ trainingRows.push({ s:s, r:r }); });
+      if (mn === 'freemap')  recs.sort(byTime).forEach(function(r){ mapRows.push({ s:s, r:r }); });
+    });
+    if (total === 0) return;
+    summaryRows.push({ s:s, counts:counts, total:total, days:Object.keys(days).length });
+  });
+
+  var made = [];
+  function newSheet(name){
+    var old = reportsFolder.getFilesByName(name); while (old.hasNext()) { try { old.next().setTrashed(true); } catch(e){} }
+    var ss = SpreadsheetApp.create(name);
+    return ss;
+  }
+  function stash(ss){ var f = DriveApp.getFileById(ss.getId()); try { reportsFolder.addFile(f); DriveApp.getRootFolder().removeFile(f); } catch(e){} return f; }
+
+  /* 1. Summary — always, if any field-officer activity */
+  var summaryUrl = '';
+  if (summaryRows.length) {
+    var ss1 = newSheet('Field officer report ' + ym);
+    var sh1 = ss1.getActiveSheet();
+    sh1.appendRow(['Officer','Zone','Clan','Active days','Training','Field maps & obs','Distributions','Water','Gov services','Phenology','Met','MaFIA','Total']);
+    summaryRows.sort(function(a,b){ return (a.s.name||'').localeCompare(b.s.name||''); });
+    summaryRows.forEach(function(x){
+      var s = x.s, c = x.counts;
+      sh1.appendRow([ (s.name||'')+' ('+(s.stewardId||'')+')', s.zone||'', s.clan||'', x.days,
+        c.training||0, c.freemap||0, c.distributions||0, c.water||0, c.gov||0, c.phenology||0, c.met||0, c.mafia||0, x.total ]);
+    });
+    summaryUrl = ss1.getUrl(); stash(ss1); made.push('Summary: ' + summaryUrl);
+  }
+
+  /* 2. Training — only if any */
+  var trainingUrl = '';
+  if (trainingRows.length) {
+    var ss2 = newSheet('Field officer training ' + ym);
+    var sh2 = ss2.getActiveSheet();
+    sh2.appendRow(['Officer','Date (PNG)','Type','Topic','Location','Duration','Pax F','Pax M','Pax youth','Pax total','Materials','Topics covered','Outcomes','Follow-up','Challenges','Notes','Photo','record_uid']);
+    trainingRows.forEach(function(x){
+      var r = x.r, s = x.s, uid = r.record_uid || r.uid;
+      sh2.appendRow([ (s.name||'')+' ('+(s.stewardId||'')+')', when(r), r.type||'', r.topic||'', r.location||'', r.duration||'',
+        _num(r.pax_female), _num(r.pax_male), _num(r.pax_youth), _num(r.pax_female)+_num(r.pax_male)+_num(r.pax_youth),
+        (r.materials&&r.materials.length?r.materials.join(', '):''), r.topics_covered||'', r.outcomes||'', r.followup||'', r.challenges||'', r.notes||'',
+        _saveMedia(mediaFolder, 'TRAIN_'+uid+'.jpg', r.photo), uid ]);
+    });
+    trainingUrl = ss2.getUrl(); stash(ss2); made.push('Training: ' + trainingUrl);
+  }
+
+  /* 3. Field mapping & observations — only if any */
+  var mapUrl = '';
+  if (mapRows.length) {
+    var ss3 = newSheet('Field officer mapping & observations ' + ym);
+    var sh3 = ss3.getActiveSheet();
+    sh3.appendRow(['Officer','Date (PNG)','Category','Title','Description','Shape','Area (ha)','Length (m)','Points','Detail','Map link','Photo','record_uid']);
+    mapRows.forEach(function(x){
+      var r = x.r, s = x.s, uid = r.record_uid || r.uid;
+      var p0 = (r.points && r.points[0]) ? r.points[0] : null;
+      sh3.appendRow([ (s.name||'')+' ('+(s.stewardId||'')+')', when(r), r.category_label||r.category||'', r.title||'', r.description||'',
+        r.map_type||'', (r.area_ha!=null?r.area_ha:''), (r.length_m!=null?r.length_m:''), (r.points&&r.points.length)||0,
+        _fmExtra(r), p0?('https://www.google.com/maps?q='+p0.lat+','+p0.lon):'',
+        _saveMedia(mediaFolder, 'SITE_'+uid+'.jpg', r.photo), uid ]);
+    });
+    mapUrl = ss3.getUrl(); stash(ss3); made.push('Mapping & observations: ' + mapUrl);
+  }
+
+  /* Recipient: Matilda */
+  var rcp = loadRecipients();
+  var to = rcp.field_reports_to ? [rcp.field_reports_to] : REPORT_EMAILS.slice();
+  to.forEach(function(email){ try { mediaFolder.addViewer(email); } catch(e){} });
+  /* share the sheets we just made with Matilda */
+  ['Field officer report ' + ym, 'Field officer training ' + ym, 'Field officer mapping & observations ' + ym].forEach(function(nm){
+    var it = reportsFolder.getFilesByName(nm);
+    while (it.hasNext()) { var f = it.next(); to.forEach(function(email){ try { f.addViewer(email); } catch(e){} }); }
+  });
+
+  if (!made.length) { Logger.log('Field officer reports ' + ym + ': no activity.'); return { status:'ok', month:ym, made:[] }; }
+  var body = ['MCA Steward App — Field officer reports — ' + ym + ' (PNG time)','',
+    'Officers active: ' + summaryRows.length,
+    'Training sessions: ' + trainingRows.length,
+    'Field maps & observations: ' + mapRows.length,
+    '', 'Reports:'].concat(made.map(function(m){ return '  ' + m; }))
+    .concat(['', 'Photos for the month: ' + mediaFolder.getUrl()]).join('\n');
+  to.forEach(function(email){ MailApp.sendEmail(email, 'MCA Field officer reports — ' + ym, body); });
+  Logger.log('Field officer reports ' + ym + ' → ' + to.join(', ') + ' (' + made.length + ' sheet(s)).');
+  return { status:'ok', month:ym, officers:summaryRows.length, training:trainingRows.length, maps:mapRows.length, summary:summaryUrl, training_url:trainingUrl, map_url:mapUrl };
+}
+
+function installFieldOfficerReportsTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'fieldOfficerReports') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('fieldOfficerReports').timeBased().onMonthDay(1).atHour(7).create();
+  Logger.log('Monthly field-officer-reports trigger installed (1st of month, 7am PNG).');
+}

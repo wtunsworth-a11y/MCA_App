@@ -147,15 +147,19 @@ Structurally identical to the Fire report — build them from one template.
 - **Recombine, investigated-or-not, two levels, counts, tiers:** exactly as
   Fire — group per-clan tasks by base event uid; "investigated = any clan."
 - **Findings taxonomy** (implemented, clearance-flavoured): new food garden /
-  cash-crop expansion / logging / road / settlement / **landslide / flood /
-  treefall (natural)** / other / unclear — stored as `verify.cause` +
-  `verify.cause_label`. Satellite forest-loss detection (RADD/GFW) fires on
-  **any** canopy loss, so a **landslide, flood scour or storm treefall shows up
-  as a "clearance" alert**; the steward records it as the natural finding it is.
-- **Report must separate natural loss from human clearance.** The headline
-  "deforestation" (human-driven) count **excludes** records found to be natural
-  (landslide/flood/treefall); report those in a separate "natural forest loss"
-  line so a landslide is never counted as deforestation.
+  cash-crop expansion / logging / road / settlement / landslide-erosion /
+  flood-river change / storm damage-treefall / unclear — stored as
+  `verify.cause` + `verify.cause_label`. **Plain descriptive causes with no
+  natural/unnatural tag** — labelling a cause "natural" vs "human" infers blame,
+  and a steward should never feel they are accusing anyone just by recording
+  what the land is used for. Satellite forest-loss detection (RADD/GFW) fires on
+  **any** canopy loss, so a landslide, flood scour or treefall arrives as a
+  "clearance" alert; the steward just records what they see.
+- **Report groups causes neutrally.** For analysis the report may group
+  land-use causes (garden, cash-crop, logging, road, settlement) separately from
+  physical/ground causes (landslide, flood, treefall) — e.g. so a landslide
+  isn't counted in a land-clearing figure — but it does this with **neutral,
+  descriptive labels**, never a "natural vs human" (blame) framing.
 - **Tiers:** Clan → Zone → MCA.
 
 ### G. MaFIA — *large open area, spec deferred*

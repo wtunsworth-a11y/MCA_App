@@ -146,9 +146,16 @@ Structurally identical to the Fire report — build them from one template.
   `area_measured_ha` (field-measured on verification).
 - **Recombine, investigated-or-not, two levels, counts, tiers:** exactly as
   Fire — group per-clan tasks by base event uid; "investigated = any clan."
-- **Findings taxonomy** (implemented in v72, clearance-flavoured): new food
-  garden / cash-crop expansion / logging / road / settlement / other / unclear —
-  stored as `verify.cause` + `verify.cause_label`.
+- **Findings taxonomy** (implemented, clearance-flavoured): new food garden /
+  cash-crop expansion / logging / road / settlement / **landslide / flood /
+  treefall (natural)** / other / unclear — stored as `verify.cause` +
+  `verify.cause_label`. Satellite forest-loss detection (RADD/GFW) fires on
+  **any** canopy loss, so a **landslide, flood scour or storm treefall shows up
+  as a "clearance" alert**; the steward records it as the natural finding it is.
+- **Report must separate natural loss from human clearance.** The headline
+  "deforestation" (human-driven) count **excludes** records found to be natural
+  (landslide/flood/treefall); report those in a separate "natural forest loss"
+  line so a landslide is never counted as deforestation.
 - **Tiers:** Clan → Zone → MCA.
 
 ### G. MaFIA — *large open area, spec deferred*

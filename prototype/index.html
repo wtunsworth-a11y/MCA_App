@@ -8159,6 +8159,9 @@ var DIST_CAUSE_SETS = {
     logging:     'Logging / timber',
     road:        'Road / access track',
     settlement:  'New settlement / buildings',
+    landslide:   'Landslide / erosion (natural)',
+    flood:       'Flood / river change (natural)',
+    treefall:    'Storm damage / treefall (natural)',
     other:       'Other',
     unclear:     'Unclear — needs follow-up'
   }
@@ -10952,7 +10955,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v72'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v73'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

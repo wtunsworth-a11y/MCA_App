@@ -47,39 +47,53 @@ Build rules, so each report is correct the first time:
 
 ### A. Clan Steward Task Compliance — *built (backend)*
 
-> **Built** in `apps-script-upload.js` as `clanComplianceReport()`. Two-tab
-> Google Sheet (By clan steward; Rollup by zone + MCA), monthly, PNG time, to
-> MCF oversight (`REPORT_EMAILS`) + Matilda (`field_reports_to`). Setup:
-> `installClanComplianceTrigger()` (1st, 7am PNG), redeploy; on demand
-> `clanComplianceReport('monthly')`.
+> **Built** in `apps-script-upload.js`: `clanComplianceReport()` (monthly) and
+> `annualComplianceReport(year)` (yearly, 2-month leeway). Two-tab Google Sheets
+> (By clan steward; Rollup by zone + MCA), PNG time, to MCF oversight
+> (`REPORT_EMAILS`) + Matilda (`field_reports_to`). Setup:
+> `installClanComplianceTrigger()` (1st, 7am) and `installAnnualComplianceTrigger()`
+> (acts each March for the prior year); redeploy. On demand:
+> `clanComplianceReport('monthly')`, `annualComplianceReport(2026)`.
 
 - **Question:** Were the regular tasks done, against target?
 - **The target is the REGISTRY, not a fixed number.** A clan is due to monitor
   the items **registered to it**, so the denominator scales as sites are
   registered. This is the key correction: we can't hardcode counts.
-  - **Phenology:** target = phenology trees registered (approved) to the clan;
-    "same trees each month". Done = distinct registered trees (`plot_id`) with a
-    monitoring record this month. A clan with **no coffee/cocoa registered → "—"**
-    (not applicable), never 0% failing.
   - **MaFIA:** the one **fixed** target — **1 per month, every clan**
-    (`COMPLIANCE_MAFIA_TARGET` = 1, monthly cadence confirmed). Done/not-done.
+    (`COMPLIANCE_MAFIA_TARGET` = 1). Done/not-done.
+  - **Fire & deforestation investigation:** target = fire/clearance **alerts
+    raised for the clan** in the period (`_disturbances.json`, `owner_clan`);
+    done = those verified/closed. `"—"` when no alerts were raised ("if any").
+    Clan stewards *do* investigate alerts in their clan (field officers don't).
+  - **Phenology:** target = phenology trees registered (approved) to the clan;
+    "same trees each month". Done = distinct registered trees (`plot_id`)
+    monitored. **No coffee/cocoa registered → "—"**, never 0% failing.
   - **Water quality / Gov services / Met stations:** same registry model
-    (`water_source_id` / `facility_id` / `met_station_id` → their registries).
-    **Not yet scoped** — those registries aren't populated, so the columns read
-    **"—"** today and light up automatically once clan-owned sites are
-    registered. (We don't yet know how many each clan will have.)
-- **Metric:** per clan steward, `monitored ÷ registered` per dimension
-  (distinct registered items owned by the clan that were monitored this period).
+    (`water_source_id` / `facility_id` / `met_station_id`). **Not yet scoped** —
+    registries empty, so `"—"` today; light up when clan-owned sites register.
+- **Metric:** per clan steward, `done ÷ due` per dimension.
 - **Tiers — a simple sum, not a fixed number.** Zone and MCA figures are the
-  **sum of the clan rows**: the roster (clan stewards), what is registered, and
-  what was done all add up the tiers. The roster itself scales with enrolment —
-  it is **not hardcoded**. A **"Reporting"** column shows how many of the roster
-  synced anything this period (participation), so a steward who filed nothing
-  shows as 0 rather than vanishing and inflating the zone.
-- **Roster limit (honest):** the roster = clan stewards who have **synced at
-  least once** (enrolment is offline/on-device, so the backend only learns of a
-  steward when they first sync). A never-synced enrolled steward can't be
-  counted until a central enrolment roster exists — a future piece.
+  **sum of the clan rows** (roster, due, done all add up the tiers). A
+  **"Reporting"** column = how many of the roster synced anything this period.
+- **Not reporting = failed = unpaid.** The report *is* the deliverable: a steward
+  who did the work but didn't submit it failed, and isn't paid. So compliance is
+  measured against an **expected roster**, not just whoever synced.
+  - **Expected roster** `_roster.json` (coordinator-maintained: `update_roster`
+    / `seedRoster()`) lists who is supposed to report. A roster member who
+    **never synced** still appears — as **"No (never synced)" / failed** — rather
+    than vanishing. Observed-but-not-on-roster stewards are kept too (nothing
+    hides).
+  - **Roster management.** A steward who dies or is replaced is **retired** by
+    setting `active:false` on their entry (don't delete — keeps their history for
+    audit; they stop showing as a failing active reporter). A replacement is a
+    new entry. The roster is a **movable target** until 100% enrolment pins the
+    clan count — exactly as intended; nothing hardcodes the number of clans.
+- **Annual report (2-month leeway).** `annualComplianceReport(year)` gives a
+  complete yearly picture: records bucket by the **month of the work**, so a
+  report synced late (up to ~end of February) still counts in last year — run it
+  in March. Per steward: months reported /12, MaFIA /12, fire & deforestation,
+  annual phenology tree-months, water/gov/met; summed to zone + MCA ("12N" = 12 ×
+  stewards).
 
 ### B. Water Quality — *blocked: needs sources/sites defined + a time series*
 

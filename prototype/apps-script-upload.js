@@ -2036,3 +2036,141 @@ function installFieldOfficerReportsTrigger() {
   ScriptApp.newTrigger('fieldOfficerReports').timeBased().onMonthDay(1).atHour(7).create();
   Logger.log('Monthly field-officer-reports trigger installed (1st of month, 7am PNG).');
 }
+
+/* ─── Clan-steward compliance report ─────────────────────────────────────
+ * "Were the regular tasks done, against target?" — but the target is almost
+ * never a fixed number: it is the REGISTRY. A clan is due to monitor the
+ * phenology trees / water sources / facilities / met stations REGISTERED to it,
+ * so the denominator scales as those are registered (a clan with no coffee/cocoa
+ * has 0 trees → shown "—", not 0% failing). The one fixed target is MaFIA: 1 per
+ * period. Water / gov / met registries are not populated yet, so those columns
+ * read "—" until clan-owned sites exist — then they light up automatically.
+ *
+ * Compliance per clan steward = distinct registered items (owned by their clan)
+ * that have a monitoring record this period ÷ items registered to that clan.
+ * Tiered: clan steward → zone → MCA. Monthly, PNG time. Sent to MCF oversight
+ * (REPORT_EMAILS) + Matilda (field_reports_to). TRIGGER:
+ * installClanComplianceTrigger() (1st of month, 7am PNG). On demand:
+ * clanComplianceReport('monthly'). */
+
+var COMPLIANCE_MAFIA_TARGET = 1;   /* MaFIA expected per report period (cadence TBD — adjust if not monthly) */
+
+function _ownedApproved(list, clan) {
+  return (list || []).filter(function(it){ return it && it.status === 'approved' && (it.owner_clan === clan || it.owner_clan_2 === clan); });
+}
+/* distinct registry-item ids referenced by this steward's monitoring records
+ * (module `mod`, id field `idKey`) in the period, limited to `ownedIds`. */
+function _monitoredOwned(modMap, idKey, ownedIds, inMonth) {
+  if (!modMap) return 0;
+  var owned = {}; ownedIds.forEach(function(id){ owned[String(id)] = true; });
+  var seen = {};
+  Object.keys(modMap).forEach(function(u){
+    var r = modMap[u];
+    if (!inMonth(r)) return;
+    var id = r[idKey];
+    if (id == null) return;
+    if (owned[String(id)]) seen[String(id)] = true;
+  });
+  return Object.keys(seen).length;
+}
+function _complCell(done, reg) { return reg ? (done + '/' + reg + (done >= reg ? ' ✓' : '')) : '—'; }
+
+function clanComplianceReport(period) {
+  period = (typeof period === 'string') ? period : 'prevmonth';
+  var cutoff, periodEnd;
+  if (period === 'monthly') { cutoff = currentMonthStart(); periodEnd = new Date(); }
+  else { cutoff = prevMonthStart(); periodEnd = prevMonthEnd(); }
+  var ym = _pngDate(cutoff, 'yyyy-MM');
+  var cutMs = cutoff.getTime(), endMs = periodEnd.getTime();
+  var inMonth = function(r){ var t=_recInstant(r); return t>=cutMs && t<=endMs; };
+  var monthCount = function(modMap){ if(!modMap) return 0; var n=0; Object.keys(modMap).forEach(function(u){ if(inMonth(modMap[u])) n++; }); return n; };
+
+  var phenoList = loadPhenoPlotsList(), waterList = loadWaterSourcesList(),
+      facList   = loadFacilitiesList(), metList   = loadMetStationsList();
+  var ids = function(arr){ return arr.map(function(it){ return (it.id != null) ? it.id : it.uid; }); };
+
+  var all = collectRecordsByRole('clan_steward');
+  var rows = [];
+  Object.keys(all).forEach(function(sid){
+    var c = all[sid], s = c.steward, clan = s.clan || '';
+    var phenoReg = _ownedApproved(phenoList, clan), waterReg = _ownedApproved(waterList, clan),
+        facReg   = _ownedApproved(facList, clan),   metReg   = _ownedApproved(metList, clan);
+    var maf = monthCount(c.mods.mafia);
+    rows.push({
+      s: s, clan: clan,
+      maf: maf,
+      pheno: { done: _monitoredOwned(c.mods.phenology,      'plot_id',        ids(phenoReg), inMonth), reg: phenoReg.length },
+      water: { done: _monitoredOwned(c.mods.water,          'water_source_id',ids(waterReg), inMonth), reg: waterReg.length },
+      gov:   { done: _monitoredOwned(c.mods.facility_visits,'facility_id',    ids(facReg),   inMonth), reg: facReg.length },
+      met:   { done: _monitoredOwned(c.mods.met_readings,   'met_station_id', ids(metReg),   inMonth), reg: metReg.length }
+    });
+  });
+  rows.sort(function(a,b){ return (a.s.zone||'').localeCompare(b.s.zone||'') || (a.s.name||'').localeCompare(b.s.name||''); });
+
+  var folder = getDataFolder(), reportsFolder = getOrCreateFolder('_reports', folder);
+  var ssName = 'Clan steward compliance ' + ym;
+  var old = reportsFolder.getFilesByName(ssName); while (old.hasNext()) { try { old.next().setTrashed(true); } catch(e){} }
+  var ss = SpreadsheetApp.create(ssName);
+
+  /* Tab 1 — by clan steward */
+  var sh = ss.getActiveSheet(); sh.setName('By clan steward');
+  sh.appendRow(['Clan steward','Zone','Clan','MaFIA (target '+COMPLIANCE_MAFIA_TARGET+')','Phenology','Water quality','Gov services','Met stations']);
+  rows.forEach(function(x){
+    sh.appendRow([ (x.s.name||'')+' ('+(x.s.stewardId||'')+')', x.s.zone||'', x.clan,
+      (x.maf>=COMPLIANCE_MAFIA_TARGET ? (x.maf+'/'+COMPLIANCE_MAFIA_TARGET+' ✓') : (x.maf+'/'+COMPLIANCE_MAFIA_TARGET)),
+      _complCell(x.pheno.done,x.pheno.reg), _complCell(x.water.done,x.water.reg),
+      _complCell(x.gov.done,x.gov.reg), _complCell(x.met.done,x.met.reg) ]);
+  });
+
+  /* Tab 2 — rollup by zone + MCA */
+  var zoneMap = {};
+  rows.forEach(function(x){
+    var z = x.s.zone || '—';
+    if (!zoneMap[z]) zoneMap[z] = { stewards:0, mafDone:0, pD:0,pR:0, wD:0,wR:0, gD:0,gR:0, mD:0,mR:0 };
+    var zm = zoneMap[z];
+    zm.stewards++; if (x.maf>=COMPLIANCE_MAFIA_TARGET) zm.mafDone++;
+    zm.pD+=x.pheno.done; zm.pR+=x.pheno.reg; zm.wD+=x.water.done; zm.wR+=x.water.reg;
+    zm.gD+=x.gov.done;   zm.gR+=x.gov.reg;   zm.mD+=x.met.done;   zm.mR+=x.met.reg;
+  });
+  var ru = ss.insertSheet('Rollup');
+  ru.appendRow(['Zone','Clan stewards','MaFIA done','Phenology','Water quality','Gov services','Met stations']);
+  var tot = { stewards:0, mafDone:0, pD:0,pR:0, wD:0,wR:0, gD:0,gR:0, mD:0,mR:0 };
+  Object.keys(zoneMap).sort().forEach(function(z){
+    var zm = zoneMap[z];
+    ru.appendRow([ z, zm.stewards, zm.mafDone+'/'+zm.stewards,
+      _complCell(zm.pD,zm.pR), _complCell(zm.wD,zm.wR), _complCell(zm.gD,zm.gR), _complCell(zm.mD,zm.mR) ]);
+    ['stewards','mafDone','pD','pR','wD','wR','gD','gR','mD','mR'].forEach(function(k){ tot[k]+=zm[k]; });
+  });
+  ru.appendRow(['MCA (all zones)', tot.stewards, tot.mafDone+'/'+tot.stewards,
+    _complCell(tot.pD,tot.pR), _complCell(tot.wD,tot.wR), _complCell(tot.gD,tot.gR), _complCell(tot.mD,tot.mR) ]);
+
+  var ssFile = DriveApp.getFileById(ss.getId());
+  try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
+
+  var rcp = loadRecipients();
+  var to = REPORT_EMAILS.slice();
+  if (rcp.field_reports_to && to.indexOf(rcp.field_reports_to) === -1) to.push(rcp.field_reports_to);
+  to.forEach(function(email){ try { ssFile.addViewer(email); } catch(e){} });
+
+  var body = ['MCA Steward App — Clan-steward compliance — ' + ym + ' (PNG time)','',
+    'Clan stewards with a profile: ' + rows.length,
+    '',
+    'Report (Google Sheet): ' + ss.getUrl(),
+    '',
+    'Target is the registry, not a fixed number: phenology / water / gov / met are',
+    'measured against the sites registered to each clan. "—" means nothing is',
+    'registered yet for that clan (e.g. no coffee/cocoa trees, or water/gov/met',
+    'sites not defined). MaFIA target is ' + COMPLIANCE_MAFIA_TARGET + ' per period.'
+  ].join('\n');
+  to.forEach(function(email){ MailApp.sendEmail(email, 'MCA Clan-steward compliance — ' + ym, body); });
+  Logger.log('Clan compliance ' + ym + ': ' + rows.length + ' stewards → ' + to.join(', '));
+  return { status:'ok', month:ym, stewards:rows.length, report:ss.getUrl() };
+}
+
+function installClanComplianceTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'clanComplianceReport') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('clanComplianceReport').timeBased().onMonthDay(1).atHour(7).create();
+  Logger.log('Monthly clan-compliance trigger installed (1st of month, 7am PNG).');
+}

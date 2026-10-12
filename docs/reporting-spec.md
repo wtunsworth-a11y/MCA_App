@@ -45,19 +45,33 @@ Build rules, so each report is correct the first time:
 
 ## Report catalogue
 
-### A. Clan Steward Task Compliance — *buildable now*
+### A. Clan Steward Task Compliance — *built (backend)*
 
-- **Question:** Were the regular scheduled tasks done, against target?
-- **Why clan-steward-scoped:** regular scheduled monitoring is the clan
-  steward's standing job; the report measures adherence to it. (This is why the
-  existing report filters to `clan_steward` — correct for *this* report.)
-- **Data:** Activity Calendar — scheduled events (the target) + mark-done
-  (the actual). Module already exists and syncs.
-- **Metric:** `done ÷ due` = % compliance for the period; plus a list of which
-  tasks were done vs missed, per steward.
-- **Tiers:** Clan (one steward's tasks) → Zone (all stewards in the zone) → MCA.
-- **Status:** data model exists. This is the first report to stand up and
-  validate against real uploads.
+> **Built** in `apps-script-upload.js` as `clanComplianceReport()`. Two-tab
+> Google Sheet (By clan steward; Rollup by zone + MCA), monthly, PNG time, to
+> MCF oversight (`REPORT_EMAILS`) + Matilda (`field_reports_to`). Setup:
+> `installClanComplianceTrigger()` (1st, 7am PNG), redeploy; on demand
+> `clanComplianceReport('monthly')`.
+
+- **Question:** Were the regular tasks done, against target?
+- **The target is the REGISTRY, not a fixed number.** A clan is due to monitor
+  the items **registered to it**, so the denominator scales as sites are
+  registered. This is the key correction: we can't hardcode counts.
+  - **Phenology:** target = phenology trees registered (approved) to the clan;
+    "same trees each month". Done = distinct registered trees (`plot_id`) with a
+    monitoring record this month. A clan with **no coffee/cocoa registered → "—"**
+    (not applicable), never 0% failing.
+  - **MaFIA:** the one **fixed** target — `COMPLIANCE_MAFIA_TARGET` (=1) per
+    period. Done/not-done. *(Cadence assumed per report period; adjust the
+    constant if MaFIA is, say, annual rather than monthly.)*
+  - **Water quality / Gov services / Met stations:** same registry model
+    (`water_source_id` / `facility_id` / `met_station_id` → their registries).
+    **Not yet scoped** — those registries aren't populated, so the columns read
+    **"—"** today and light up automatically once clan-owned sites are
+    registered. (We don't yet know how many each clan will have.)
+- **Metric:** per clan steward, `monitored ÷ registered` per dimension
+  (distinct registered items owned by the clan that were monitored this period).
+- **Tiers:** Clan steward → Zone → MCA (the Rollup tab sums each tier).
 
 ### B. Water Quality — *blocked: needs sources/sites defined + a time series*
 

@@ -5588,6 +5588,9 @@ function showScreen(id) {
     if (sc) sc.scrollTop = 0;
   }
   currentScreen = id;
+  /* Colour the dashboard tiles on EVERY path to the dashboard (login, Home tab,
+     and nav()), not just via the nav() wrapper. */
+  if (id === 'screen-dashboard') { try { colorDashTiles(); } catch(e){} }
   /* Screen entry side-effects */
   if (id === 'screen-zone-config') {
     getZoneList(function(zones) {
@@ -10878,7 +10881,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v69'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v70'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

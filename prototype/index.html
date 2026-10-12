@@ -8196,30 +8196,56 @@ function initDisturbances(){
   renderDisturbanceInbox();
   syncDisturbancesFromServer(function(ok){ if(ok) renderDisturbanceInbox(); });
 }
+/* Who sees which disturbance alerts, and who may verify them. Boundary data
+   isn't loaded yet, so zone/clan filtering can't be computed — until then the
+   zone-scoped roles see all alerts (which will narrow to their zone/clan once
+   boundaries exist). Hierarchy:
+     mcf_staff      → All MCA, can verify/triage (oversight)
+     zone_staff     → their zone (interim: all), can verify
+     field_officer  → their zone (interim: all), VIEW ONLY — never verifies
+     clan_steward   → their clan (alerts assigned via triage), can verify   */
+function alertAccess(){
+  var role=(window._cachedProfile&&window._cachedProfile.role)||'';
+  var fieldView=(role==='field_officer');
+  return {
+    role:role,
+    seesAll: isOversight() || fieldView,   /* interim until zone/clan boundaries exist */
+    canVerify: !fieldView,                 /* field officers do not verify alerts */
+    scope: role==='mcf_staff' ? 'All MCA'
+         : role==='zone_staff' ? 'All zones'
+         : fieldView ? 'Your zone'
+         : (myClan()||'your clan')
+  };
+}
 function renderDisturbanceInbox(){
   var c=document.getElementById('alertsContent'); if(!c) return;
   var isCoord=!!window._coordSecret, mine=myClan();
+  var acc=alertAccess();
   getAllRecords('disturbances', function(rows){
     var sub=document.getElementById('alertsSubtitle');
-    var myOpen=rows.filter(function(r){ return r.status==='open' && (isOversight() || (r.owner_clan===mine && mine)); });
+    var openRows=rows.filter(function(r){return r.status==='open';});
+    var myOpen=rows.filter(function(r){ return r.status==='open' && (acc.seesAll || (r.owner_clan===mine && mine)); });
     var triage=rows.filter(function(r){ return r.status==='open' && !r.owner_clan; });
     var done=rows.filter(function(r){ return r.status==='verified' || r.status==='closed'; });
-    if(sub) sub.textContent = isCoord ? (triage.length+' to triage · '+rows.filter(function(r){return r.status==='open';}).length+' open') : (myOpen.length+' task'+(myOpen.length===1?'':'s')+' for '+(mine||'your clan'));
+    if(sub) sub.textContent = isCoord ? (triage.length+' to triage · '+openRows.length+' open')
+            : acc.seesAll ? (acc.scope+' · '+myOpen.length+' open'+(acc.canVerify?'':' · view only'))
+            : (myOpen.length+' task'+(myOpen.length===1?'':'s')+' for '+(mine||'your clan'));
     var h='';
     h+='<div class="matrix-note" style="background:#FFF8E1;border-color:#FFE082;color:#8D6E00;font-size:0.76rem;">'
-      + icon('info',13)+' A <strong>disturbance</strong> is any sudden change — fire, landslide or forest clearance — flagged from satellite or reported. Field-verify it with a photo and an honest result. Record <em>what you see</em>; the cause is noted separately and is not pre-judged.</div>';
+      + icon('info',13)+' A <strong>disturbance</strong> is any sudden change — fire, landslide or forest clearance — flagged from satellite or reported. '+(acc.canVerify?'Field-verify it with a photo and an honest result. ':'')+'Record <em>what you see</em>; the cause is noted separately and is not pre-judged.</div>';
 
     if(rows.length===0){
       h+='<div class="card" style="padding:18px;text-align:center;color:#888;">'+icon('shieldcheck',22)+'<div style="margin-top:6px;font-size:0.85rem;">No disturbance alerts. New satellite detections will appear here after a sync.</div></div>';
       c.innerHTML=h; hydrateIcons(c); return;
     }
 
-    /* Steward's own clan tasks */
-    if(mine){
-      h+='<div style="font-size:0.9rem;font-weight:700;color:#333;margin:14px 0 8px;">'+icon('clipboard',15)+' Your clan’s verification tasks</div>';
-      if(myOpen.length===0) h+='<div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.76rem;">Nothing to verify right now.</div>';
-      else myOpen.sort(distSort).forEach(function(r){ h+=distCard(r, true); });
-    }
+    /* The alert list — scoped by role */
+    var headerTxt = acc.seesAll
+        ? (icon('clipboard',15)+' Disturbance alerts — '+acc.scope+(acc.canVerify?'':' <span style="font-weight:400;color:#888;">(view only)</span>'))
+        : (icon('clipboard',15)+' Your clan’s verification tasks');
+    h+='<div style="font-size:0.9rem;font-weight:700;color:#333;margin:14px 0 8px;">'+headerTxt+'</div>';
+    if(myOpen.length===0) h+='<div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;font-size:0.76rem;">'+(acc.seesAll?'No open alerts right now.':'Nothing to verify right now.')+'</div>';
+    else myOpen.sort(distSort).forEach(function(r){ h+=distCard(r, acc.canVerify); });
 
     /* Coordinator triage queue */
     if(isCoord){
@@ -8313,6 +8339,7 @@ function assignDisturbance(uid){
 /* ── Field verification ── */
 var _activeDisturb=null, _dzOutcome=null, _dzCause=null, _dzPhoto=null, _dzArrived=false, _dzVerified=false, _dzGps=null;
 function openDisturbVerify(uid){
+  if(!alertAccess().canVerify){ toast('Field officers view alerts; verification is done by zone staff or clan stewards.'); return; }
   getAllRecords('disturbances', function(rows){
     var r=rows.find(function(x){ return x.uid===uid; }); if(!r){ toast('Alert not found.'); return; }
     _activeDisturb=r; _dzOutcome=null; _dzCause=null; _dzPhoto=null; _dzArrived=false; _dzVerified=false; _dzGps=null;
@@ -10846,7 +10873,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v67'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v68'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

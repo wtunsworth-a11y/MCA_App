@@ -100,7 +100,56 @@ Build rules, so each report is correct the first time:
 - **Prerequisites before it can be built:** facilities defined with
   establishment numbers; an attendance-capture field; health/education typing.
 
-### D. MaFIA — *large open area, spec deferred*
+### E. Fire report — *mostly buildable; one taxonomy gap*
+
+- **Base:** every **fire** raised in MCA — the FIRMS satellite feed
+  (`kind:'fire'`) plus any field-raised fire — **whether or not it was
+  investigated**. The registry (`_disturbances.json`) already holds open
+  (uninvestigated) tasks, so the base list is complete.
+- **One fire, many clans — the recombine.** The project *did not create* the
+  fires; it investigated them from different angles. The data already encodes
+  this: a fire overlapping several clans raises **one task per clan**, each with
+  uid = `<base event uid>-<clanslug>` and a `multi_clan:true` flag. The base
+  event uid (`FIRMS-<cell>`) is the **recombine key**. The report therefore has
+  **two levels**:
+  - **Fire level (recombined):** one row per distinct fire. Columns: fire id,
+    detected date, location, **clans affected** (the list), **investigated?**,
+    and **summary of findings**. A fire in 3 clans is **one row here**, never 3.
+  - **Clan level (the angles):** the per-clan investigation rows — the same fire
+    shown once per clan, explicitly labelled as the same fire (shared base uid +
+    `multi_clan`). A fire in 3 clans visited by only 1 clan shows **3 clan rows,
+    1 investigated**.
+- **Whether it was investigated:** per-clan `status` (`open` vs
+  `verified`/`closed`) and whether a `verify` block came back. Recombined to the
+  fire level as **"investigated = yes if *any* clan investigated it"** — so a
+  multi-clan fire visited by a single clan counts, at the fire level, as **one
+  fire, visited.**
+- **Counts the report produces:**
+  - distinct fires (recombined — the honest fire count);
+  - distinct fires investigated (≥1 clan returned a verification);
+  - per-clan task coverage = tasks investigated ÷ tasks raised (the investigation
+    *workload* view — different number, both valid, label each clearly).
+- **Summary of findings:** from the verification's `cause`/finding. **GAP:** the
+  current taxonomy is only `natural` / `human` / `unclear` — too coarse for what
+  you want (**garden, cash-crop garden, runaway fire from a garden, grassland,
+  land-clearing burn, arson, unclear**). Needs a **fire-specific finding list**
+  added to the field-verify form before this column is meaningful.
+- **Tiers:** Clan → Zone → MCA (fires are clan-located via boundary routing).
+
+### F. Deforestation (forest clearance) report — *same shape as Fire*
+
+Structurally identical to the Fire report — build them from one template.
+
+- **Base:** every forest-clearance event (`kind:'clearance'`, GFW/RADD feed),
+  base event uid `GFW-<cell>`, carrying `area_ha` (satellite) and
+  `area_measured_ha` (field-measured on verification).
+- **Recombine, investigated-or-not, two levels, counts, tiers:** exactly as
+  Fire — group per-clan tasks by base event uid; "investigated = any clan."
+- **Findings taxonomy** (the same gap, clearance-flavoured): garden expansion,
+  cash-crop expansion, logging, road, settlement, unclear.
+- **Tiers:** Clan → Zone → MCA.
+
+### G. MaFIA — *large open area, spec deferred*
 
 Substantial work still outstanding (indicator rollups, change-over-time per
 indicator, transect comparability, the measure-method rework). Not spec'd here
@@ -171,6 +220,15 @@ must normalize it). Observed in real uploads:
 6. **Time is internally coherent.** All stored stamps are UTC `Z`; the
    `record_uid` embeds PNG-local `HHMM` and matches `Z + 10h` consistently.
    Convert UTC → PNG for every human-facing value (per the mechanics above).
+7. **Store the base event uid for fire/deforestation recombine.** Per-clan
+   disturbance tasks only carry the base event uid as a *prefix* of their own
+   uid (`<base>-<clanslug>`). The Fire and Deforestation reports group on the
+   base event — so have the feed write an explicit **`event_uid` = `ev.uid`** on
+   each per-clan record. Then "distinct fires" is a trivial group-by instead of
+   stripping a clan-slug suffix (which breaks if a clan name ever contains the
+   delimiter). Small backend change in `fetchDisturbanceFeed`. Until it exists,
+   the report can derive the base by removing the trailing `-<clanslug>` /
+   `-TRIAGE`, using `multi_clan` and `owner_clan` as corroboration.
 
 ---
 
@@ -178,6 +236,11 @@ must normalize it). Observed in real uploads:
 
 1. **Clan Steward Task Compliance** — data exists; validates the tiered-rollup
    plumbing and the dedup/PNG-time mechanics on real uploads.
-2. **Water Quality** and **Government Services Outturn** — as their upstream
+2. **Fire** and **Deforestation** — one shared template; the data model already
+   supports the recombine. Only blocker to the *findings* column is the
+   fire/clearance taxonomy gap (and the `event_uid` convenience field). These
+   can come early — the disturbance registry is populated by the feed, not by
+   waiting on stewards.
+3. **Water Quality** and **Government Services Outturn** — as their upstream
    definitions (sites, facilities + establishment) are created.
-3. **MaFIA reporting** — after the module's own open work settles.
+4. **MaFIA reporting** — after the module's own open work settles.

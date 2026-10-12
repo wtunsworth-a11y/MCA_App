@@ -129,11 +129,12 @@ Build rules, so each report is correct the first time:
   - distinct fires investigated (≥1 clan returned a verification);
   - per-clan task coverage = tasks investigated ÷ tasks raised (the investigation
     *workload* view — different number, both valid, label each clearly).
-- **Summary of findings:** from the verification's `cause`/finding. **GAP:** the
-  current taxonomy is only `natural` / `human` / `unclear` — too coarse for what
-  you want (**garden, cash-crop garden, runaway fire from a garden, grassland,
-  land-clearing burn, arson, unclear**). Needs a **fire-specific finding list**
-  added to the field-verify form before this column is meaningful.
+- **Summary of findings:** from the verification's `cause`/finding. The field-
+  verify form now records a **fire-specific finding** (v72): garden burn /
+  cash-crop garden burn / runaway fire from a garden / grassland (kunai) /
+  land-clearing burn / hunting fire / other / unclear. Stored as `verify.cause`
+  with a self-describing `verify.cause_label` so the report needs no taxonomy
+  table. (Older records predating v72 carry only `natural`/`human`/`unclear`.)
 - **Tiers:** Clan → Zone → MCA (fires are clan-located via boundary routing).
 
 ### F. Deforestation (forest clearance) report — *same shape as Fire*
@@ -145,8 +146,9 @@ Structurally identical to the Fire report — build them from one template.
   `area_measured_ha` (field-measured on verification).
 - **Recombine, investigated-or-not, two levels, counts, tiers:** exactly as
   Fire — group per-clan tasks by base event uid; "investigated = any clan."
-- **Findings taxonomy** (the same gap, clearance-flavoured): garden expansion,
-  cash-crop expansion, logging, road, settlement, unclear.
+- **Findings taxonomy** (implemented in v72, clearance-flavoured): new food
+  garden / cash-crop expansion / logging / road / settlement / other / unclear —
+  stored as `verify.cause` + `verify.cause_label`.
 - **Tiers:** Clan → Zone → MCA.
 
 ### G. MaFIA — *large open area, spec deferred*

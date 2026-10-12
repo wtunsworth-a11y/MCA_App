@@ -369,6 +369,35 @@ function registerIssue(rec) {
 }
 function updateIssues(list) { saveIssuesList(list||[]); return { status:'ok', message:'Issues saved', count:(list||[]).length }; }
 
+/* ─── Report recipients registry ───────────────────────────────────────
+ * _recipients.json in the data folder, maintained by the coordinator
+ * (update_recipients — coordinator key required). Defines where compiled
+ * reports go. Emails live ONLY in this Drive file, never in source.
+ *   { "field_reports_to": "matilda@example.org",   // ALL field-officer reports
+ *     "comms": ["comms@example.org"],              // distribution media + ledger
+ *     "consultants": { "<stewardId>": "email" } }  // each consultant's own report
+ * Not exposed over GET (emails are not returned to phones); read server-side
+ * by the report jobs. To seed it once from the editor, run seedRecipients(). */
+function loadRecipients() {
+  try { var f=getDataFolder(); var fs=f.getFilesByName('_recipients.json'); if(fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString())||{}; } catch(e){}
+  return {};
+}
+function saveRecipients(obj) {
+  var f=getDataFolder(); var fs=f.getFilesByName('_recipients.json'); var j=JSON.stringify(obj||{},null,2);
+  if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_recipients.json', j, MimeType.PLAIN_TEXT);
+}
+function updateRecipients(obj) { saveRecipients(obj||{}); return { status:'ok', message:'Recipients saved' }; }
+/* One-time convenience: fill in and run from the Apps Script editor instead of
+ * sending a coordinator action. Leave blank the ones you don't have yet. */
+function seedRecipients() {
+  saveRecipients({
+    field_reports_to: '',          /* Matilda's email */
+    comms: [],                     /* ['comms@example.org'] */
+    consultants: {}                /* { 'CIFOR-ICRAF 01': 'name@example.org' } */
+  });
+  Logger.log('Seeded _recipients.json — edit it via update_recipients or re-run seedRecipients.');
+}
+
 /* ─── Activity calendar ────────────────────────────────────────────────
  * _calendar.json in Drive: scheduled activities/meetings, keyed by uid. */
 function loadCalendarList() {
@@ -1189,7 +1218,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1347,6 +1376,10 @@ function doPost(e) {
     /* Issues — coordinator mark resolved / overwrite (coordinator key required) */
     if (body._action === 'update_issues') {
       return ContentService.createTextOutput(JSON.stringify(updateIssues(body.issues))).setMimeType(ContentService.MimeType.JSON);
+    }
+    /* Report recipients — coordinator maintains the email list (coordinator key required) */
+    if (body._action === 'update_recipients') {
+      return ContentService.createTextOutput(JSON.stringify(updateRecipients(body.recipients))).setMimeType(ContentService.MimeType.JSON);
     }
 
     /* Normal steward data upload */
@@ -1517,4 +1550,179 @@ function monthlyReport() {
     MailApp.sendEmail(email, 'MCA Monthly Data Report — ' + report.to, body);
   });
   Logger.log('Monthly report sent to: ' + REPORT_EMAILS.join(', '));
+}
+
+/* ─── Monthly distribution / handover ledger ────────────────────────────
+ * ONE report each month listing what was given out, with the handover photos
+ * and video extracted from the uploaded bundle into standalone Drive files so
+ * the comms team can review them and the ledger can link to them.
+ *
+ * Routing (from _recipients.json): distributions are field-officer work, so the
+ * ledger goes to field_reports_to (Matilda); comms also get the ledger + the
+ * month's media folder as viewers. If no recipients are set it falls back to
+ * REPORT_EMAILS.
+ *
+ * TRIGGER: run installMonthlyDistributionTrigger() once (1st of month, ~7am PNG,
+ * project time zone Asia/Port_Moresby). Run monthlyDistributionReport() from the
+ * editor any time for last month, or monthlyDistributionReport('monthly') for
+ * the current month so far. Media that is base64 in the bundle becomes real
+ * jpeg/mp4 files here (which also lets the bundle be media-stripped later). */
+
+function _recInstant(rec) {
+  var t = rec.recorded_at || rec.timestamp || rec.device_time || '';
+  var ms = Date.parse(t);
+  return isNaN(ms) ? 0 : ms;
+}
+
+function _pngDate(d, fmt) {
+  var dt = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(dt.getTime())) return '';
+  return Utilities.formatDate(dt, 'Pacific/Port_Moresby', fmt || 'yyyy-MM-dd');
+}
+
+function _dataUriToBlob(uri, name) {
+  if (!uri || typeof uri !== 'string' || uri.indexOf('data:') !== 0) return null;
+  var m = uri.match(/^data:([^;]+);base64,([\s\S]*)$/);
+  if (!m) return null;
+  try { return Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], name); }
+  catch(e) { return null; }
+}
+
+/* Extract one media blob to a standalone file in the month folder; returns its
+ * Drive URL (idempotent — reuses the file if it already exists). */
+function _extractMedia(folder, uid, slot, dataUri, ext) {
+  var name = 'DIST_' + uid + '_' + slot + '.' + ext;
+  var existing = folder.getFilesByName(name);
+  if (existing.hasNext()) return existing.next().getUrl();
+  var blob = _dataUriToBlob(dataUri, name);
+  if (!blob) return '';
+  return folder.createFile(blob).getUrl();
+}
+
+/* Walk every steward subfolder, gather distribution records, dedup by
+ * record_uid keeping the latest instant. Pilot-scale: scans all bundles. */
+function collectDistributions() {
+  var folder = getDataFolder();
+  var byUid = {};
+  var zones = folder.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next();
+    if (zf.getName().charAt(0) === '_') continue;          /* skip _media/_reports/config */
+    var subs = zf.getFolders();
+    while (subs.hasNext()) {
+      var files = subs.next().getFilesByType(MimeType.PLAIN_TEXT);
+      while (files.hasNext()) {
+        var body;
+        try { body = JSON.parse(files.next().getBlob().getDataAsString()); } catch(e) { continue; }
+        var dists = (body.modules && body.modules.distributions) || [];
+        if (!dists.length) continue;
+        var stew = body.steward || {};
+        for (var i = 0; i < dists.length; i++) {
+          var rec = dists[i];
+          var uid = rec.record_uid || rec.uid;
+          if (!uid) continue;
+          var prev = byUid[uid];
+          if (prev && _recInstant(prev.rec) >= _recInstant(rec)) continue;  /* keep latest */
+          byUid[uid] = { rec: rec, steward: stew };
+        }
+      }
+    }
+  }
+  return Object.keys(byUid).map(function(k){ return byUid[k]; });
+}
+
+function _distItemsText(items) {
+  if (!items || !items.length) return '';
+  return items.map(function(it){
+    var s = '';
+    if (it.category)    s += it.category + ': ';
+    s += (it.description || '');
+    if (it.quantity != null && it.quantity !== '') s += ' × ' + it.quantity + (it.unit ? (' ' + it.unit) : '');
+    return s;
+  }).join(' ; ');
+}
+
+function monthlyDistributionReport(period) {
+  period = (typeof period === 'string') ? period : 'prevmonth';   /* trigger passes an event object */
+  var cutoff, periodEnd;
+  if (period === 'monthly') { cutoff = currentMonthStart(); periodEnd = new Date(); }
+  else { cutoff = prevMonthStart(); periodEnd = prevMonthEnd(); }
+  var ym = _pngDate(cutoff, 'yyyy-MM');
+  var cutMs = cutoff.getTime(), endMs = periodEnd.getTime();
+
+  var rows = collectDistributions().filter(function(x){
+    var t = _recInstant(x.rec); return t >= cutMs && t <= endMs;
+  });
+
+  var folder       = getDataFolder();
+  var mediaMonth   = getOrCreateFolder(ym, getOrCreateFolder('_media', folder));
+  var reportsFolder= getOrCreateFolder('_reports', folder);
+
+  /* Fresh ledger for the month (replace any previous run for the same month). */
+  var ssName = 'Distribution ledger ' + ym;
+  var old = reportsFolder.getFilesByName(ssName);
+  while (old.hasNext()) { try { old.next().setTrashed(true); } catch(e){} }
+  var ss = SpreadsheetApp.create(ssName);
+  var sheet = ss.getActiveSheet();
+  sheet.appendRow(['Date (PNG)','Officer','Zone','Recipient','Recipient type','Received by','Recipient clan','Items','Purpose','Donor','Donor recognised','Confirmed receipt','GPS','Handover photo','Receipt photo','Video','record_uid']);
+
+  rows.sort(function(a,b){ return _recInstant(a.rec) - _recInstant(b.rec); });
+  rows.forEach(function(x){
+    var r = x.rec, s = x.steward, o = r.officer || {}, rp = r.recipient || {};
+    var uid = r.record_uid || r.uid;
+    var hLink = _extractMedia(mediaMonth, uid, 'handover', r.photo_handover, 'jpg');
+    var rLink = _extractMedia(mediaMonth, uid, 'receipt',  r.photo_receipt,  'jpg');
+    var vLink = _extractMedia(mediaMonth, uid, 'video',    r.video,          'mp4');
+    var gps = (r.gps && r.gps.lat != null) ? (r.gps.lat + ', ' + r.gps.lng + (r.gps.accuracy ? (' ±' + r.gps.accuracy + 'm') : '') + (r.gps_source ? (' (' + r.gps_source + ')') : '')) : '';
+    sheet.appendRow([
+      _pngDate(_recInstant(r) ? new Date(_recInstant(r)) : '', 'yyyy-MM-dd HH:mm'),
+      (o.name || s.name || '') + (o.steward_id ? (' (' + o.steward_id + ')') : ''),
+      s.zone || '',
+      rp.name || '', rp.type || '', rp.received_by || '', rp.clan || '',
+      _distItemsText(r.items),
+      [r.purpose_category, r.purpose].filter(String).join(' — '),
+      r.donor || '',
+      (r.donor_recognised === true ? 'Yes' : (r.donor_recognised === false ? 'No' : '')),
+      (rp.confirmed_receipt === true ? 'Yes' : (rp.confirmed_receipt === false ? 'No' : '')),
+      gps, hLink, rLink, vLink, uid
+    ]);
+  });
+
+  /* Move the new spreadsheet out of My Drive root into _reports. */
+  var ssFile = DriveApp.getFileById(ss.getId());
+  try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
+
+  /* Recipients: Matilda (field_reports_to) + comms get the ledger + media. */
+  var rcp = loadRecipients();
+  var to = [];
+  if (rcp.field_reports_to) to.push(rcp.field_reports_to);
+  (rcp.comms || []).forEach(function(e){ if (e) to.push(e); });
+  if (!to.length) to = REPORT_EMAILS.slice();
+  to.forEach(function(email){
+    try { mediaMonth.addViewer(email); } catch(e){}
+    try { ssFile.addViewer(email); } catch(e){}
+  });
+
+  var body = [
+    'MCA Steward App — Monthly distribution / handover ledger',
+    '',
+    'Month: ' + ym + ' (PNG time)',
+    'Handovers: ' + rows.length,
+    '',
+    'Ledger (Google Sheet): ' + ss.getUrl(),
+    'Photos & video for the month: ' + mediaMonth.getUrl(),
+    '',
+    'Each row links to the handover photo, receipt photo and video.'
+  ].join('\n');
+  to.forEach(function(email){ MailApp.sendEmail(email, 'MCA Distribution ledger — ' + ym, body); });
+  Logger.log('Distribution ledger ' + ym + ': ' + rows.length + ' handovers → ' + to.join(', '));
+  return { status: 'ok', month: ym, handovers: rows.length, ledger: ss.getUrl(), media: mediaMonth.getUrl() };
+}
+
+function installMonthlyDistributionTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'monthlyDistributionReport') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('monthlyDistributionReport').timeBased().onMonthDay(1).atHour(7).create();
+  Logger.log('Monthly distribution trigger installed (1st of month, 7am PNG).');
 }

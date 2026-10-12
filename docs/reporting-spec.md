@@ -190,7 +190,18 @@ Substantial work still outstanding (indicator rollups, change-over-time per
 indicator, transect comparability, the measure-method rework). Not spec'd here
 yet — tracked in `TODO.md`.
 
-### H. Distribution / Handover — monthly, *buildable (needs media extraction)*
+### H. Distribution / Handover — monthly, *built (backend)*
+
+> **Built** in `apps-script-upload.js` as `monthlyDistributionReport()`:
+> dedups distributions by `record_uid`, extracts each handover's photos + video
+> from the bundle into standalone files under `_media/<YYYY-MM>/`, writes a
+> Google Sheet ledger (one row per handover with the media links) in `_reports/`,
+> shares both with Matilda + comms, and emails them the links. **Setup (once):**
+> set emails via `seedRecipients()` or the `update_recipients` coordinator
+> action, then run `installMonthlyDistributionTrigger()` (1st of month, 7am PNG);
+> redeploy the web app. Run `monthlyDistributionReport('monthly')` from the
+> editor for the current month on demand.
+
 
 - **Question:** What was handed out this month? One simple content report per
   month — a ledger of handovers.
@@ -233,10 +244,12 @@ Who gets which report, and how it reaches them.
    monthly summary emails already exist) sends each recipient a message with a
    **link** to their compiled report (a Drive Sheet/Doc) and its media folder.
    Robust: works regardless of whether the phone is online, and needs no app
-   release. **Prerequisite:** a **contact email per recipient** — Matilda's and
-   each consultant's. The enrolment profile does **not** capture email today, so
-   add an email field (at least for consultants) or hold a small lookup table
-   server-side.
+   release. **Contact emails** are maintained in a coordinator-editable Drive
+   registry `_recipients.json` (never in source): `field_reports_to` (Matilda),
+   `comms` (array), and `consultants` (`{stewardId: email}`). Edit it with the
+   `update_recipients` coordinator action or `seedRecipients()` in the editor.
+   (The enrolment profile still does not capture email, so consultant addresses
+   are held here until it does.)
 2. **In-app "My reports" (phase 2).** A screen that fetches the signed-in
    person's compiled report from the backend when online. Nicer, but needs
    connectivity and a per-person report endpoint; do after email+links works.

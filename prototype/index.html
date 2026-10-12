@@ -5947,7 +5947,12 @@ function updateDashHeader(profile) {
   var greet = document.getElementById('dashGreeting');
   var clan  = document.getElementById('dashClan');
   if (greet) greet.textContent = timeGreeting() + ', ' + firstName + ' 👋';
-  if (clan)  clan.textContent  = (profile.clan || '') + (profile.zone ? ' | ' + profile.zone : '');
+  if (clan) {
+    var role = profile.role || '';
+    clan.textContent = (role === 'mcf_staff') ? 'All MCA'
+      : (role === 'consultant') ? 'Visiting Consultant'
+      : (profile.clan || 'Managalas Conservation Area') + (profile.zone ? ' | ' + profile.zone : '');
+  }
 }
 
 /* ── Enrollment: Step 1 — Passcode ── */
@@ -10873,7 +10878,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v68'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v69'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11704,11 +11709,19 @@ function loadProfileScreen() {
       /* Detail rows */
       var detailDiv = document.querySelector('#screen-profile .card');
       if (detailDiv) {
+        var pr = profile.role || '';
+        /* mcf_staff oversee all of MCA, consultants are external — neither is
+           scoped to a clan/zone, so show "Coverage" instead of a clan + zone. */
+        var coverageRows = (pr === 'mcf_staff')
+          ? '<div class="detail-row"><span class="dl">Coverage</span><span class="dv">All MCA</span></div>'
+          : (pr === 'consultant')
+          ? '<div class="detail-row"><span class="dl">Coverage</span><span class="dv">Visiting — no clan/zone</span></div>'
+          : '<div class="detail-row"><span class="dl">Clan</span><span class="dv">' + (profile.clan || '—') + '</span></div>' +
+            '<div class="detail-row"><span class="dl">Zone</span><span class="dv">' + (profile.zone || '—') + '</span></div>';
         detailDiv.innerHTML =
           '<div class="detail-row"><span class="dl">Name</span><span class="dv">' + (profile.name || '—') + '</span></div>' +
           '<div class="detail-row"><span class="dl">ID</span><span class="dv">' + (profile.stewardId || '—') + '</span></div>' +
-          '<div class="detail-row"><span class="dl">Clan</span><span class="dv">' + (profile.clan || '—') + '</span></div>' +
-          '<div class="detail-row"><span class="dl">Zone</span><span class="dv">' + (profile.zone || '—') + '</span></div>' +
+          coverageRows +
           '<div class="detail-row"><span class="dl">Enrolled</span><span class="dv">' + (profile.enrolled ? profile.enrolled.slice(0,10) : '—') + '</span></div>';
       }
 

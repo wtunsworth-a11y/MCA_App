@@ -43,7 +43,8 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
   (`seedRecipients`) and `_roster.json` (`seedRoster`), run the trigger installers
   (`installClanComplianceTrigger`, `installAnnualComplianceTrigger`,
   `installMonthlyDistributionTrigger`, `installConsultantReportsTrigger`,
-  `installFieldOfficerReportsTrigger`), and **redeploy the web app**.
+  `installFieldOfficerReportsTrigger`, `installWaterQualityTrigger`), and
+  **redeploy the web app**.
 
 ---
 

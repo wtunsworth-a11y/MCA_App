@@ -1,0 +1,61 @@
+name: Build MCApp APK
+
+# Manual trigger: Actions tab → "Build MCApp APK" → Run workflow.
+# Produces a signed Android APK that opens the live app (a Trusted Web Activity).
+# Install the one APK on every field phone — gives a home-screen icon, no reliance
+# on Chrome's "Install" button (which some low-end phones, e.g. Redmi A5, never show).
+#
+# One-time setup — add these repository secrets (Settings → Secrets → Actions):
+#   ANDROID_KEYSTORE_BASE64   base64 of your android.keystore (see docs/android-apk.md)
+#   ANDROID_KEYSTORE_PASSWORD keystore password
+#   ANDROID_KEY_PASSWORD      key password (often the same)
+# The SAME keystore must be reused for every future build, or phones reject the update.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli@1.22.0
+
+      - name: Restore signing keystore
+        working-directory: android
+        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android.keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
+      - name: Print signing fingerprint (for assetlinks.json)
+        working-directory: android
+        run: keytool -list -v -keystore android.keystore -alias mcapp -storepass "$ANDROID_KEYSTORE_PASSWORD" | grep -A1 "SHA256:" || true
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+
+      - name: Build signed APK
+        working-directory: android
+        run: bubblewrap build --skipPwaValidation
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MCApp-signed-apk
+          path: |
+            android/app-release-signed.apk
+            android/app-release-bundle.aab
+          if-no-files-found: warn

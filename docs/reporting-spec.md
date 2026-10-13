@@ -95,29 +95,35 @@ Build rules, so each report is correct the first time:
   annual phenology tree-months, water/gov/met; summed to zone + MCA ("12N" = 12 ×
   stewards).
 
-### B. Water Quality — *blocked: needs sources/sites defined + a time series*
+### B. Water Quality — *built (backend); fills out as readings accumulate*
 
-- **Questions:**
-  1. Is water quality **better or worse than it was**?
-  2. What are the **seasonal trends**?
-  3. Are water sources **drying out**?
-- **Data needed:**
-  - Water **sources and sites defined** (registry store exists; the *named,
-    located sites* do not yet).
-  - **Repeated WQ sampling events** per source over time, with comparable
-    parameters (see `monitoring-parameters.md`) and a **baseline**.
-  - For drying: a **flow/level** reading or a **"source dry? y/n"** observation
-    captured each visit.
-- **Metrics:**
-  - *Better/worse*: latest reading vs previous (and vs baseline) per parameter —
-    direction (improved / declined) and whether it sits inside the agreed safe
-    band.
-  - *Seasonal*: time series per parameter, grouped by PNG wet/dry season.
-  - *Drying*: flow/level trend + count of "dry" observations over time.
-- **Tiers:** Clan → Zone → MCA.
-- **Prerequisites before it can be built:** sources/sites defined; **≥2 readings
-  per source** (for change); ideally a full **wet+dry cycle** (for season);
-  **safe-band thresholds agreed** per parameter.
+> **Built** in `apps-script-upload.js` as `waterQualityReport()`. Four-tab Google
+> Sheet (Readings · By source · Seasonal · Rollup clan→zone→MCA), PNG time, to
+> MCF oversight + Matilda. Setup: `installWaterQualityTrigger()` (1st, 8am PNG),
+> redeploy; on demand `waterQualityReport()`.
+
+- **Questions it answers:**
+  1. **Better or worse than before** — *By source* tab: concern-flag count of the
+     latest reading vs the previous one → better ↑ / worse ↓ / same =
+     ("insufficient data" with <2 readings).
+  2. **Seasonal trend** — *Seasonal* tab: per source × season (wet Nov–Apr / dry
+     May–Oct), average concern flags + dry-reading count.
+  3. **Drying out** — from the **flow** field: a reading of *Still/Not flowing*
+     (natural) or *None — dry* (engineered) flags dry; flow declining first→last
+     flags "flow declining".
+- **Quality is observational, not lab chemistry.** Readings capture colour,
+  odour, pollution (Y/N), Secchi clarity, creek bioindicators; engineered sources
+  capture contamination / leaks / damage. "Quality" is a **count of concern
+  signals** (colour≠Clear, odour≠None, pollution=Yes, or contamination/leaks/
+  damage≠none) — deliberately **not a fake composite score**. Secchi and
+  bioindicators are shown as values, not scored (no invented thresholds).
+- **Tiers:** Rollup sums clan → zone → MCA: sources monitored, readings, sources
+  with a concern (latest reading), sources drying.
+- **Honest limits:** better/worse needs **≥2 readings** per source; seasonal
+  needs a **full wet+dry cycle**; the report is live and fills out as readings
+  accumulate. Named/located sites still come from the `water_sources` registry as
+  it is populated. (Wet/dry month split is a sensible default — adjust if Oro's
+  calendar differs.)
 
 ### C. Government Services Outturn — *blocked: needs gov services defined*
 

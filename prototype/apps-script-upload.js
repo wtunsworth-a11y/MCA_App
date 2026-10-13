@@ -318,6 +318,32 @@ function updatePhenoPlots(list) {
   return { status: 'ok', message: 'Pheno plot registry saved', count: (list || []).length };
 }
 
+/* ─── Phenology target counts (per clan, optional per species) ───────────
+ * _pheno_targets.json — coordinator-maintained (update_pheno_targets, key
+ * required; or seedPhenoTargets()). The standard is 5 trees per species; for
+ * clans doing more detailed work the coordinator NAMES the clan here and sets a
+ * higher number (before the extra trees are approved). Shape, default 5:
+ *   { "Kubi": 10,                       // 10 of every species for Kubi
+ *     "Afore": { "default":5, "okari":12 } }  // 12 okari, 5 of the rest
+ * The app reads this to show that many establish slots; compliance already uses
+ * the registered count, so no report change is needed. */
+function loadPhenoTargets() {
+  try { var f=getDataFolder(); var fs=f.getFilesByName('_pheno_targets.json'); if(fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString())||{}; } catch(e){}
+  return {};
+}
+function savePhenoTargets(obj) {
+  var f=getDataFolder(); var fs=f.getFilesByName('_pheno_targets.json'); var j=JSON.stringify(obj||{},null,2);
+  if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_pheno_targets.json', j, MimeType.PLAIN_TEXT);
+}
+function getPhenoTargets() {
+  return ContentService.createTextOutput(JSON.stringify({ status:'ok', pheno_targets: loadPhenoTargets() })).setMimeType(ContentService.MimeType.JSON);
+}
+function updatePhenoTargets(obj) { savePhenoTargets(obj||{}); return { status:'ok', message:'Pheno targets saved' }; }
+function seedPhenoTargets() {
+  savePhenoTargets({ /* "Kubi": 10, "Afore": { "default":5, "okari":12 } */ });
+  Logger.log('Seeded _pheno_targets.json — name the clans and set their counts via update_pheno_targets or seedPhenoTargets. Default is 5.');
+}
+
 /* ─── Date review: records captured on an unverified device clock ───────
  * _date_review.json: flagged reading records with a date bracket
  * [earliest..latest] (the last verified-online time .. the upload time) for the
@@ -1266,7 +1292,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1433,6 +1459,10 @@ function doPost(e) {
     if (body._action === 'update_roster') {
       return ContentService.createTextOutput(JSON.stringify(updateRoster(body.roster))).setMimeType(ContentService.MimeType.JSON);
     }
+    /* Phenology target counts per clan — coordinator maintains it (coordinator key required) */
+    if (body._action === 'update_pheno_targets') {
+      return ContentService.createTextOutput(JSON.stringify(updatePhenoTargets(body.pheno_targets))).setMimeType(ContentService.MimeType.JSON);
+    }
 
     /* Normal steward data upload */
     var folder = getDataFolder();
@@ -1490,6 +1520,7 @@ function doGet(e) {
   if (action === 'date_review') { return getDateReview(); }
   if (action === 'issues') { return getIssues(); }
   if (action === 'roster') { return getRoster(); }
+  if (action === 'pheno_targets') { return getPhenoTargets(); }
 
   if (action === 'authorisations') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';
@@ -2377,4 +2408,189 @@ function installAnnualComplianceTrigger() {
   });
   ScriptApp.newTrigger('annualComplianceTriggerRun').timeBased().onMonthDay(1).atHour(8).create();
   Logger.log('Annual clan-compliance trigger installed (1st monthly, acts in March for prior year).');
+}
+
+/* ─── Water quality report (clan → zone → MCA) ──────────────────────────
+ * Answers the three questions: (1) better or worse than before, (2) seasonal
+ * trend, (3) drying out. Water quality here is OBSERVATIONAL (colour, odour,
+ * pollution, Secchi clarity, bioindicators; engineered: contamination, leaks,
+ * damage) — not lab chemistry — so "quality" is a count of concern signals, not
+ * a fake score. "Drying" reads the flow field. Covers all readings to date
+ * (trends need history); seasonal needs a full wet+dry cycle to be meaningful.
+ * To MCF oversight + Matilda. TRIGGER: installWaterQualityTrigger() (1st, 8am
+ * PNG). On demand: waterQualityReport(). Populates as readings accumulate. */
+
+/* Generic: all records of a module across every steward bundle, deduped by
+ * record_uid (latest kept), with the recording steward attached. */
+function collectModule(moduleKey) {
+  var folder = getDataFolder(), byUid = {};
+  var zones = folder.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next(); if (zf.getName().charAt(0) === '_') continue;
+    var subs = zf.getFolders();
+    while (subs.hasNext()) {
+      var files = subs.next().getFilesByType(MimeType.PLAIN_TEXT);
+      while (files.hasNext()) {
+        var body; try { body = JSON.parse(files.next().getBlob().getDataAsString()); } catch(e) { continue; }
+        var arr = (body.modules && body.modules[moduleKey]) || []; if (!arr.length) continue;
+        var stew = body.steward || {};
+        arr.forEach(function(r){ var u=r.record_uid||r.uid; if(!u) return; var p=byUid[u]; if(p && _recInstant(p.rec)>=_recInstant(r)) return; byUid[u]={rec:r, steward:stew}; });
+      }
+    }
+  }
+  return Object.keys(byUid).map(function(k){ return byUid[k]; });
+}
+
+function _wIsEngineered(rec) { return rec.source_flow != null || rec.delivery_flow != null; }
+function _waterFlow(rec) {
+  if (_wIsEngineered(rec)) {
+    var f = rec.source_flow || '';
+    return { label:f, ord:(f==='Good flow'?2:f==='Low / reduced'?1:f==='None — dry'?0:null), dry:(f==='None — dry') };
+  }
+  var n = rec.flow || '';
+  return { label:n, ord:(n==='Fast/Flood'?3:n==='Moderate'?2:n==='Slow'?1:n==='Still / Not flowing'?0:null), dry:(n==='Still / Not flowing') };
+}
+function _waterConcerns(rec) {
+  var c = [];
+  if (_wIsEngineered(rec)) {
+    if (rec.contamination && rec.contamination !== 'none') c.push('contamination:'+rec.contamination);
+    if (rec.leaks && rec.leaks !== 'none')               c.push('leaks:'+rec.leaks);
+    if (rec.damage && rec.damage !== 'none')             c.push('damage:'+rec.damage);
+  } else {
+    if (rec.water_colour && rec.water_colour !== 'Clear') c.push('colour:'+rec.water_colour);
+    if (rec.odour && rec.odour !== 'None')                c.push('odour:'+rec.odour);
+    if (rec.pollution === 'Yes')                          c.push('pollution');
+  }
+  return c;
+}
+function _waterSeason(ms) {
+  var m = parseInt(Utilities.formatDate(new Date(ms), 'Pacific/Port_Moresby', 'M'), 10);
+  return (m >= 11 || m <= 4) ? 'Wet (Nov–Apr)' : 'Dry (May–Oct)';
+}
+function _waterBioCell(rec) {
+  var b = [];
+  if (rec.secchi_depth_cm != null && rec.secchi_depth_cm !== 0) b.push('Secchi ' + rec.secchi_depth_cm + 'cm');
+  if (rec.pond_skaters) b.push('skaters:' + rec.pond_skaters);
+  if (rec.shading) b.push('shade:' + rec.shading);
+  return b.join(', ');
+}
+
+function waterQualityReport() {
+  var readings = collectModule('water');
+  /* clan → zone from steward blocks (recorder's zone) */
+  var clanZone = {};
+  readings.forEach(function(x){ var cl=x.rec.clan||''; if(cl && x.steward.zone) clanZone[cl]=x.steward.zone; });
+
+  /* group by source */
+  var bySource = {};
+  readings.forEach(function(x){
+    var r = x.rec, id = (r.water_source_id != null) ? String(r.water_source_id) : ('name:'+(r.water_source_name||'?'));
+    if (!bySource[id]) bySource[id] = { id:id, name:r.water_source_name||'(unnamed)', type:r.source_type||'', clan:r.clan||'', zone:clanZone[r.clan]||'', readings:[] };
+    bySource[id].readings.push(r);
+  });
+  Object.keys(bySource).forEach(function(id){ bySource[id].readings.sort(function(a,b){ return _recInstant(a)-_recInstant(b); }); });
+
+  var folder = getDataFolder(), reportsFolder = getOrCreateFolder('_reports', folder);
+  var stamp = _pngDate(new Date(), 'yyyy-MM-dd');
+  var ssName = 'Water quality report ' + stamp;
+  var old = reportsFolder.getFilesByName(ssName); while (old.hasNext()) { try { old.next().setTrashed(true); } catch(e){} }
+  var ss = SpreadsheetApp.create(ssName);
+
+  /* Tab 1 — Readings (time series) */
+  var rd = ss.getActiveSheet(); rd.setName('Readings');
+  rd.appendRow(['Source','Clan','Zone','Type','Date (PNG)','Season','Flow','Colour','Odour','Pollution','Clarity/bioindicators','Concern flags','Photo','Notes']);
+  Object.keys(bySource).sort().forEach(function(id){
+    var sc = bySource[id];
+    sc.readings.forEach(function(r){
+      var fl = _waterFlow(r), cc = _waterConcerns(r);
+      rd.appendRow([ sc.name, sc.clan, sc.zone, sc.type,
+        _pngDate(_recInstant(r)?new Date(_recInstant(r)):'', 'yyyy-MM-dd'),
+        _recInstant(r)?_waterSeason(_recInstant(r)):'',
+        fl.label + (fl.dry?' ⚠':''),
+        r.water_colour||'', r.odour||'', r.pollution||'',
+        _waterBioCell(r), (cc.length?cc.length+' ('+cc.join('; ')+')':'0'),
+        (r.photo?'yes':''), r.notes||'' ]);
+    });
+  });
+
+  /* Tab 2 — By source: better/worse + drying */
+  var bs = ss.insertSheet('By source');
+  bs.appendRow(['Source','Clan','Zone','Type','Readings','First','Last','Quality vs before','Flow now','Drying?','Latest concerns']);
+  Object.keys(bySource).sort().forEach(function(id){
+    var sc = bySource[id], rs = sc.readings, n = rs.length;
+    var last = rs[n-1], prev = n>=2 ? rs[n-2] : null, first = rs[0];
+    var lastC = _waterConcerns(last).length, prevC = prev ? _waterConcerns(prev).length : null;
+    var quality = (prev==null) ? 'insufficient data' : (lastC<prevC ? 'better ↑' : lastC>prevC ? 'worse ↓' : 'same =');
+    var flLast = _waterFlow(last), flFirst = _waterFlow(first);
+    var drying = flLast.dry ? 'DRY/stagnant now' :
+                 (flLast.ord!=null && flFirst.ord!=null && n>=2 && flLast.ord<flFirst.ord) ? 'flow declining' : 'stable';
+    bs.appendRow([ sc.name, sc.clan, sc.zone, sc.type, n,
+      _pngDate(_recInstant(first)?new Date(_recInstant(first)):'', 'yyyy-MM-dd'),
+      _pngDate(_recInstant(last)?new Date(_recInstant(last)):'', 'yyyy-MM-dd'),
+      quality, flLast.label, drying, _waterConcerns(last).join('; ') ]);
+  });
+
+  /* Tab 3 — Seasonal (per source × season) */
+  var se = ss.insertSheet('Seasonal');
+  se.appendRow(['Source','Clan','Zone','Season','Readings','Avg concern flags','Dry/stagnant readings']);
+  Object.keys(bySource).sort().forEach(function(id){
+    var sc = bySource[id], bySeason = {};
+    sc.readings.forEach(function(r){
+      var t=_recInstant(r); if(!t) return; var s=_waterSeason(t);
+      if(!bySeason[s]) bySeason[s]={ n:0, c:0, dry:0 };
+      bySeason[s].n++; bySeason[s].c += _waterConcerns(r).length; if(_waterFlow(r).dry) bySeason[s].dry++;
+    });
+    Object.keys(bySeason).sort().forEach(function(s){
+      var v=bySeason[s];
+      se.appendRow([ sc.name, sc.clan, sc.zone, s, v.n, (v.n?(Math.round(v.c/v.n*10)/10):0), v.dry ]);
+    });
+  });
+
+  /* Tab 4 — Rollup clan → zone → MCA */
+  var agg = function(){ return { sources:0, readings:0, concern:0, drying:0 }; };
+  var clanM={}, zoneM={}, mca=agg();
+  Object.keys(bySource).forEach(function(id){
+    var sc=bySource[id], rs=sc.readings, last=rs[rs.length-1];
+    var hasConcern = _waterConcerns(last).length>0 ? 1:0;
+    var fl=_waterFlow(last), flFirst=_waterFlow(rs[0]);
+    var isDry = (fl.dry || (fl.ord!=null && flFirst.ord!=null && rs.length>=2 && fl.ord<flFirst.ord)) ? 1:0;
+    var ck=sc.clan||'—', zk=sc.zone||'—';
+    if(!clanM[ck]) clanM[ck]={ zone:zk, a:agg() }; if(!zoneM[zk]) zoneM[zk]=agg();
+    [clanM[ck].a, zoneM[zk], mca].forEach(function(a){ a.sources++; a.readings+=rs.length; a.concern+=hasConcern; a.drying+=isDry; });
+  });
+  var ro = ss.insertSheet('Rollup');
+  ro.appendRow(['Tier','Name','Zone','Sources monitored','Readings','Sources w/ concern (latest)','Sources drying']);
+  Object.keys(clanM).sort().forEach(function(ck){ var a=clanM[ck].a; ro.appendRow(['Clan', ck, clanM[ck].zone, a.sources, a.readings, a.concern, a.drying]); });
+  Object.keys(zoneM).sort().forEach(function(zk){ var a=zoneM[zk]; ro.appendRow(['Zone', zk, zk, a.sources, a.readings, a.concern, a.drying]); });
+  ro.appendRow(['MCA','All zones','', mca.sources, mca.readings, mca.concern, mca.drying]);
+
+  var ssFile = DriveApp.getFileById(ss.getId());
+  try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
+  var rcp = loadRecipients(), to = REPORT_EMAILS.slice();
+  if (rcp.field_reports_to && to.indexOf(rcp.field_reports_to)===-1) to.push(rcp.field_reports_to);
+  to.forEach(function(email){ try{ ssFile.addViewer(email); }catch(e){} });
+  var srcCount = Object.keys(bySource).length;
+  var body = ['MCA Steward App — Water quality report — ' + stamp + ' (PNG time)','',
+    'Sources with readings: ' + srcCount + '   ·   total readings: ' + readings.length,
+    '',
+    'Report (Google Sheet): ' + ss.getUrl(),
+    '',
+    'Tabs: Readings (every reading) · By source (better/worse vs last reading +',
+    'drying from the flow field) · Seasonal (wet Nov–Apr / dry May–Oct) · Rollup',
+    '(clan → zone → MCA). Quality is observational — a count of concern signals',
+    '(colour/odour/pollution or contamination/leaks/damage), not a lab score.',
+    '"Better/worse" needs ≥2 readings; seasonal needs a full wet+dry cycle. The',
+    'report fills out as readings accumulate.'
+  ].join('\n');
+  to.forEach(function(email){ MailApp.sendEmail(email, 'MCA Water quality report — ' + stamp, body); });
+  Logger.log('Water quality report ' + stamp + ': ' + srcCount + ' sources, ' + readings.length + ' readings → ' + to.join(', '));
+  return { status:'ok', sources:srcCount, readings:readings.length, report:ss.getUrl() };
+}
+
+function installWaterQualityTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'waterQualityReport') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('waterQualityReport').timeBased().onMonthDay(1).atHour(8).create();
+  Logger.log('Monthly water-quality trigger installed (1st of month, 8am PNG).');
 }

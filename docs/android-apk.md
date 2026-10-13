@@ -75,6 +75,32 @@ This step is cosmetic — the icon and the app work without it.
 
 ---
 
+## Capability set baked into the first APK (decided)
+
+Adding a capability later means re‑pushing all 100 phones, so the first APK
+declares everything foreseeable up front (over‑declaring is cheap; re‑touching
+the fleet is not):
+
+- **Location delegation — MUST.** The app is GPS‑everywhere; in a TWA the web
+  Geolocation API only works if the APK enables location delegation
+  (`locationDelegation.enabled` in `twa-manifest.json` → adds
+  `ACCESS_FINE_LOCATION`). Without it, GPS silently breaks across the app.
+- **Notifications — enabled now for future push.** `enableNotifications: true`
+  leaves the door open for *online* server push later with no rebuild. It does
+  **not** turn push on by itself, and note: **offline** today/tomorrow reminders
+  do **not** use push — they're the on‑open banner in the web app. A proactive
+  **offline** alarm needs the native wrapper (AlarmManager), beyond TWA.
+- **Microphone (for in‑page hunter‑interview voice) — confirm at build.** Not a
+  `twa-manifest.json` toggle. In a TWA, mic/camera capture is usually mediated by
+  Chrome and needs **no** APK permission; if a build+test shows in‑page recording
+  is blocked, add `<uses-permission android:name="android.permission.RECORD_AUDIO"/>`
+  to the generated `app/src/main/AndroidManifest.xml` before building. (Or sidestep
+  it entirely with the system‑recorder intent — see the hunter‑interview note in
+  `TODO.md`.)
+
+What this covers: the whole roadmap **except background GPS** (screen‑off long
+mapping), which needs the native step no matter what.
+
 ## Notes
 
 - **Package id:** `org.managalas.mcapp` (fixed — changing it makes a different app).

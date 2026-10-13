@@ -80,9 +80,20 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
 
 ## Planned monitoring modules / surveys (requested 2026-10-04)
 
-- [ ] **QABB transect — "Christine method plus"** — extend the existing QABB
-      butterfly survey to the Christine-method protocol plus the additional
-      fields/steps. (Protocol detail to be specified.)
+- [ ] **QABB (Queen Alexandra's Birdwing) survey — detail out.** Cadence:
+      **once a year, in July.** Method: a **500 m transect** (here "transect"
+      is right — it's a straight-line count) counting **adult QABB butterflies,
+      caterpillars, eggs, and food plants** (the Aristolochia host vine).
+      - **Mostly built already:** `screen-qabb-setup` (navigate-to-start +
+        fingerprint gate) → `screen-qabb-matrix` records land-use, Aristolochia
+        vine count and QABB sightings (adults / eggs / caterpillars) across
+        **10 × 50 m sub-transects = 500 m**.
+      - **Gap to close:** lock the cadence to **annual / July** (not monthly) in
+        compliance + the calendar; use a **fixed transect location** re-walked
+        each year (repeatability); confirm the four counts (butterflies,
+        caterpillars, eggs, food plants) are all present and labelled clearly.
+      - Earlier note ("Christine method plus") — fold any extra protocol
+        fields/steps in once that protocol is specified.
 
 - [ ] **Monthly key-informant hunter interview** — a new monthly survey, one
       per key-informant hunter:
@@ -289,18 +300,20 @@ is coordinator-defined and syncs down like the other registries.
 - [ ] **Patrol module — TBC.** A **FIXED walking route** per clan (~8–10 km,
       where they have enough land), walked **once a month**. Fixed route chosen
       because it's **safer for the steward** (planned, known path) and gives a
-      **repeatable observation** (same transect monthly → comparable sightings/
-      sounds over time). Model = register → approve → monitor, like the other
-      registries + MaFIA navigation:
-      - **Define the route once** — map the polyline (Field Mapping line),
-        coordinator-approved. Planned at design time to **pass sacred sites**
-        (to check for disturbance + refresh the **red-band tree marking**) and
-        stay **≥100 m from disputed areas** — so safety is baked into the route,
-        not computed live.
-      - **Monthly patrol** — navigate/follow the fixed route (reuse MaFIA-style
-        live navigation), recording **sightings & sounds**. Open: continuous
-        along the line vs **fixed observation stations/waypoints** (stations give
-        cleaner month-to-month trends).
+      **repeatable observation** (same route and stations each month →
+      comparable sightings/sounds over time). Model = register → approve →
+      monitor, with guided navigation (reuse the MaFIA navigation code).
+      **Call it a "patrol route", never a "transect"** — people read transect
+      as a straight line and it will confuse them.
+      - **Define the route once** — map the path (Field Mapping line),
+        coordinator-approved, with **fixed observation stations** along it.
+        Planned at design time to **pass sacred sites** (to check for
+        disturbance + refresh the **red-band tree marking**) and stay **≥100 m
+        from disputed areas** — so safety is baked into the route, not computed
+        live.
+      - **Monthly patrol** — follow the fixed route with guided navigation,
+        stopping at each **fixed station** to record **sightings & sounds**
+        (stations give clean month-to-month trends).
       - Optional **live ≥100 m disputed-area warning** as a backstop (warn,
         never block). Sacred-site / disputed layers (`_sacred_sites`,
         `_disputed_areas`) are **sensitive** → role-gated; useful for route

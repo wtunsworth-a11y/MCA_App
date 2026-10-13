@@ -1958,17 +1958,9 @@ select.msel {
             <span class="module-emoji" data-icon="pin" data-size="26"></span>
             <span class="module-name">Field Mapping</span>
           </div>
-          <div class="module-tile" data-fo="1" onclick="openSocialDisturbanceInFieldMap()">
-            <span class="module-emoji" data-icon="megaphone" data-size="26"></span>
-            <span class="module-name">Social Disturbance</span>
-          </div>
           <div class="module-tile" onclick="openUnderConstruction('Patrol')">
             <span class="module-emoji" data-icon="walk" data-size="26"></span>
             <span class="module-name">Patrol</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-freemap')">
-            <span class="module-emoji" data-icon="eye" data-size="26"></span>
-            <span class="module-name">Observations</span>
           </div>
           <div class="module-tile" onclick="nav('screen-sdm')">
             <span class="module-emoji" data-icon="clipboard" data-size="26"></span>
@@ -2009,14 +2001,6 @@ select.msel {
           <div class="module-tile" onclick="nav('screen-meteo-setup')">
             <span class="module-emoji" data-icon="cloudrain" data-size="26"></span>
             <span class="module-name">Weather Station</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-tree-mapping')">
-            <span class="module-emoji" data-icon="tree" data-size="26"></span>
-            <span class="module-name">Tree Mapping</span>
-          </div>
-          <div class="module-tile" data-fo="1" onclick="openGardenInFieldMap()">
-            <span class="module-emoji" data-icon="grain" data-size="26"></span>
-            <span class="module-name">Garden Mapping</span>
           </div>
           <div class="module-tile" onclick="nav('screen-conserv-setup')">
             <span class="module-emoji" data-icon="sprout" data-size="26"></span>
@@ -4649,88 +4633,6 @@ select.msel {
 
 
     <!-- ══════════════════════════════════════
-         SCREEN: TREE MAPPING
-    ══════════════════════════════════════ -->
-    <div class="screen" id="screen-tree-mapping">
-      <div class="top-bar" style="background:#00695C;">
-        <button class="back-btn" onclick="goBack()">←</button>
-        <div>
-          <div class="bar-title">Tree Mapping</div>
-          <div class="bar-subtitle">Okari &amp; Massoy GPS Survey</div>
-        </div>
-        <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Foundation" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_MCF.png" alt="Managalas Conservation Foundation" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="European Union" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_EU_v1.png" alt="European Union" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/CIFOR-ICRAF-logo.png" alt="CIFOR-ICRAF" style="width:100%;height:100%;object-fit:contain;display:block;"></div></div>
-      </div>
-      <div class="scroll-content">
-        <div class="p14">
-          <div style="background:#E0F2F1;border-radius:10px;padding:14px;margin-bottom:14px;border-left:4px solid #00695C;">
-            <div style="font-size:0.82rem;font-weight:700;color:#00695C;margin-bottom:4px;">How it works</div>
-            <div style="font-size:0.75rem;color:#555;line-height:1.5;">Walk to each tree, stand at the trunk, and tap <strong>Capture GPS</strong>. Measure the trunk circumference at chest height with a tape, or estimate with your arms. Record the species and DBH.</div>
-          </div>
-
-          <div class="card" style="padding:14px 16px;margin-bottom:12px;">
-            <div style="font-size:0.85rem;font-weight:700;color:#00695C;margin-bottom:10px;">Record New Tree</div>
-
-            <div class="form-group" style="margin-bottom:10px;">
-              <label class="form-label" style="font-size:0.75rem;font-weight:600;">Species</label>
-              <div style="display:flex;gap:6px;">
-                <button class="weather-pill active" id="tree-sp-okari" onclick="selectTreeSpecies('okari')" style="font-size:0.78rem;padding:6px 16px;"><span data-icon="nut" data-size="14"></span> Okari</button>
-                <button class="weather-pill" id="tree-sp-massoy" onclick="selectTreeSpecies('massoy')" style="font-size:0.78rem;padding:6px 16px;"><span data-icon="tree" data-size="14"></span> Massoy</button>
-              </div>
-            </div>
-
-            <div class="form-group" style="margin-bottom:10px;">
-              <label class="form-label" style="font-size:0.75rem;font-weight:600;"><span data-icon="pin" data-size="14"></span> GPS Location</label>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <button class="btn-outline" onclick="captureTreeGPS()" style="border-color:#00695C;color:#00695C;font-size:0.78rem;padding:8px 14px;flex:1;">Capture GPS</button>
-              </div>
-              <div id="treeGpsDisplay" style="font-size:0.75rem;color:#888;margin-top:6px;padding:6px 10px;background:#f5f5f5;border-radius:6px;">
-                Waiting for GPS capture...
-              </div>
-            </div>
-
-            <div class="form-group" style="margin-bottom:10px;">
-              <label class="form-label" style="font-size:0.75rem;font-weight:600;">DBH (Diameter at Breast Height)</label>
-              <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
-                <button class="tally-btn" onclick="adjTreeDBH(-5)" style="width:44px;height:44px;font-size:1.2rem;border-radius:10px;background:#E0F2F1;border:1.5px solid #00695C;color:#00695C;">−5</button>
-                <button class="tally-btn" onclick="adjTreeDBH(-1)" style="width:38px;height:38px;font-size:1rem;border-radius:10px;background:#E0F2F1;border:1.5px solid #00695C;color:#00695C;">−1</button>
-                <div style="text-align:center;">
-                  <input type="number" id="treeDbhInput" value="30" min="1" max="500" style="width:70px;text-align:center;font-size:1.3rem;font-weight:700;padding:8px;border:2px solid #00695C;border-radius:10px;color:#00695C;">
-                  <div style="font-size:0.68rem;color:#888;margin-top:2px;">cm</div>
-                </div>
-                <button class="tally-btn" onclick="adjTreeDBH(1)" style="width:38px;height:38px;font-size:1rem;border-radius:10px;background:#E0F2F1;border:1.5px solid #00695C;color:#00695C;">+1</button>
-                <button class="tally-btn" onclick="adjTreeDBH(5)" style="width:44px;height:44px;font-size:1.2rem;border-radius:10px;background:#E0F2F1;border:1.5px solid #00695C;color:#00695C;">+5</button>
-              </div>
-              <div style="text-align:center;margin-top:6px;">
-                <span style="font-size:0.7rem;color:#888;">Quick: </span>
-                <button class="weather-pill" onclick="document.getElementById('treeDbhInput').value=10" style="font-size:0.65rem;padding:2px 8px;">10</button>
-                <button class="weather-pill" onclick="document.getElementById('treeDbhInput').value=20" style="font-size:0.65rem;padding:2px 8px;">20</button>
-                <button class="weather-pill" onclick="document.getElementById('treeDbhInput').value=40" style="font-size:0.65rem;padding:2px 8px;">40</button>
-                <button class="weather-pill" onclick="document.getElementById('treeDbhInput').value=60" style="font-size:0.65rem;padding:2px 8px;">60</button>
-                <button class="weather-pill" onclick="document.getElementById('treeDbhInput').value=80" style="font-size:0.65rem;padding:2px 8px;">80</button>
-                <button class="weather-pill" onclick="document.getElementById('treeDbhInput').value=100" style="font-size:0.65rem;padding:2px 8px;">100</button>
-              </div>
-            </div>
-
-            <div class="form-group" style="margin-bottom:10px;">
-              <label class="form-label" style="font-size:0.75rem;font-weight:600;">Notes (optional)</label>
-              <input type="text" id="treeNotes" class="form-input" style="font-size:0.78rem;padding:8px 10px;" placeholder="e.g. fruiting, near creek, tagged #12...">
-            </div>
-
-            <button class="btn-primary" style="background:#00695C;" onclick="saveTree()">Save Tree Record</button>
-          </div>
-
-          <div style="font-size:0.85rem;font-weight:700;color:#00695C;margin-bottom:8px;">Recent Recordings</div>
-          <div id="treeLogList">
-            <div style="font-size:0.78rem;color:#999;text-align:center;padding:20px;">No trees recorded yet in this session</div>
-          </div>
-          <div style="margin-top:12px;">
-            <button class="btn-outline" style="border-color:#00695C;color:#00695C;" onclick="exportCSV('trees')">Export All Tree Data as CSV ↓</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════════════
          SCREEN: CONSERVATION ACTIVITY SETUP
     ══════════════════════════════════════ -->
     <div class="screen" id="screen-conserv-setup">
@@ -5578,7 +5480,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-performance','screen-recent-activity',
   'screen-ack','screen-profile','screen-timesheet',
-  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-tree-mapping','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-distribution','screen-data-export'
+  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-distribution','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -7803,11 +7705,6 @@ function fmToggleCrop(c){
   var i=_fmCrops.indexOf(c); if(i>=0) _fmCrops.splice(i,1); else _fmCrops.push(c);
   var el=document.getElementById('fmcrop-'+c); if(el) el.classList.toggle('active', _fmCrops.indexOf(c)>=0);
 }
-/* Dashboard "Garden Mapping" tile → Field Mapping, pre-set to a cash-crop garden. */
-function openGardenInFieldMap(){ nav('screen-freemap'); try{ fmCat('cashcrop_garden'); }catch(e){} }
-/* Quick access (esp. field officers) to record a social disturbance that stops
-   them working — opens Field Mapping pre-set to the Social unrest category. */
-function openSocialDisturbanceInFieldMap(){ nav('screen-freemap'); try{ fmCat('unrest'); }catch(e){} }
 function fmCapturePoint(){
   document.getElementById('fmPointCoords').textContent='📍 Acquiring GPS…';
   captureGPS(function(gps,err){
@@ -10869,99 +10766,6 @@ function submitMeteo() {
 
 
 /* ══════════════════════════════════════
-   TREE MAPPING
-══════════════════════════════════════ */
-var treeSpecies = 'okari';
-var treeLat = null, treeLon = null;
-var treeSessionLog = [];
-
-function selectTreeSpecies(sp) {
-  treeSpecies = sp;
-  document.getElementById('tree-sp-okari').classList.toggle('active', sp === 'okari');
-  document.getElementById('tree-sp-massoy').classList.toggle('active', sp === 'massoy');
-}
-
-function adjTreeDBH(d) {
-  var el = document.getElementById('treeDbhInput');
-  var v = Math.max(1, parseInt(el.value || 30) + d);
-  el.value = v;
-}
-
-function captureTreeGPS() {
-  var display = document.getElementById('treeGpsDisplay');
-  if (navigator.geolocation) {
-    display.innerHTML = '<span style="color:#5D4037;">Acquiring GPS...</span>';
-    navigator.geolocation.getCurrentPosition(function(pos) {
-      treeLat = pos.coords.latitude;
-      treeLon = pos.coords.longitude;
-      var acc = pos.coords.accuracy ? ' (±' + Math.round(pos.coords.accuracy) + 'm)' : '';
-      display.innerHTML = '<span style="color:#2E7D32;font-weight:600;">✓ ' +
-        treeLat.toFixed(6) + '° S, ' + treeLon.toFixed(6) + '° E' + acc + '</span>';
-    }, function(err) {
-      treeLat = -9.1400 + (Math.random() - 0.5) * 0.01;
-      treeLon = 148.4000 + (Math.random() - 0.5) * 0.01;
-      display.innerHTML = '<span style="color:#E65100;">'+icon('warning',13)+' GPS unavailable — simulated: ' +
-        treeLat.toFixed(6) + '°, ' + treeLon.toFixed(6) + '°</span>';
-    }, { enableHighAccuracy: true, timeout: 10000 });
-  } else {
-    treeLat = -9.1400 + (Math.random() - 0.5) * 0.01;
-    treeLon = 148.4000 + (Math.random() - 0.5) * 0.01;
-    display.innerHTML = '<span style="color:#E65100;">'+icon('warning',13)+' GPS not supported — simulated: ' +
-      treeLat.toFixed(6) + '°, ' + treeLon.toFixed(6) + '°</span>';
-  }
-}
-
-function saveTree() {
-  if (treeLat === null) {
-    toast('Please capture GPS location first');
-    return;
-  }
-  var dbh = parseInt(document.getElementById('treeDbhInput').value) || 0;
-  if (dbh < 1) {
-    toast('Please enter a valid DBH');
-    return;
-  }
-  var data = {
-    survey_type: 'tree_mapping',
-    species: treeSpecies,
-    latitude: treeLat,
-    longitude: treeLon,
-    dbh_cm: dbh,
-    notes: document.getElementById('treeNotes').value || ''
-  };
-  saveRecord('trees', data, function() {
-    clearDraft('screen-tree-mapping');
-    toast(treeSpecies.charAt(0).toUpperCase() + treeSpecies.slice(1) + ' tree saved ✓');
-    treeSessionLog.unshift(data);
-    renderTreeLog();
-    // Reset for next tree
-    treeLat = null; treeLon = null;
-    document.getElementById('treeGpsDisplay').innerHTML = 'Waiting for GPS capture...';
-    document.getElementById('treeNotes').value = '';
-  });
-}
-
-function renderTreeLog() {
-  var el = document.getElementById('treeLogList');
-  if (treeSessionLog.length === 0) {
-    el.innerHTML = '<div style="font-size:0.78rem;color:#999;text-align:center;padding:20px;">No trees recorded yet in this session</div>';
-    return;
-  }
-  var h = '';
-  treeSessionLog.forEach(function(t, i) {
-    var icon = t.species === 'okari' ? ''+icon('nut',13)+'' : ''+icon('tree',13)+'';
-    h += '<div style="background:#fff;border-radius:8px;padding:10px 12px;margin-bottom:6px;box-shadow:0 1px 2px rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;">';
-    h += '<div><span style="font-size:0.9rem;margin-right:4px;">' + icon + '</span>';
-    h += '<span style="font-size:0.78rem;font-weight:600;text-transform:capitalize;">' + t.species + '</span>';
-    h += '<span style="font-size:0.72rem;color:#888;margin-left:8px;">DBH ' + t.dbh_cm + ' cm</span></div>';
-    h += '<span style="font-size:0.68rem;color:#5D4037;background:#EFEBE9;padding:2px 8px;border-radius:6px;">' +
-      t.latitude.toFixed(4) + ', ' + t.longitude.toFixed(4) + '</span>';
-    h += '</div>';
-  });
-  el.innerHTML = h;
-}
-
-/* ══════════════════════════════════════
    PWA: Service Worker Registration
 ══════════════════════════════════════ */
 if ('serviceWorker' in navigator) {
@@ -11034,7 +10838,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v82'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v83'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11174,7 +10978,7 @@ function _dateReviewEntry(store, r, br, profile){
 var DRAFT_SCREENS = [
   'screen-mafia-matrix','screen-qabb-matrix','screen-water-record',
   'screen-pheno-establish','screen-pheno-record',
-  'screen-meteo-record','screen-tree-mapping',
+  'screen-meteo-record',
   'screen-conserv-record','screen-conserv-followup',
   'screen-training-record',
   'screen-new-meeting-1','screen-new-meeting-2','screen-new-meeting-3'

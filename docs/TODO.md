@@ -242,6 +242,30 @@ is coordinator-defined and syncs down like the other registries.
     (vector) to build the tile pack → load onto the phone → MapLibre/Leaflet
     renders it beneath the GPS points/lines.
 
+## Mapping consolidation (done 2026-10-13, v83)
+
+- [x] **One mapping entry point** — retired the standalone **Tree Mapping**
+      screen/tile (it duplicated phenology: same Okari/Massoy + GPS + DBH + notes,
+      which phenology already registers with ownership/approval/monitoring on
+      top). Collapsed **Field Mapping + Observations + Social Disturbance +
+      Garden Mapping** into the single **Field Mapping** tile (its category
+      picker already covers all four). Front screen loses 5 mapping-ish tiles,
+      keeps one; Phenology stays its own (field-officer-hidden) tile. The `trees`
+      store is retained so any existing tree records still sync/export/plot.
+- [ ] **Phenology "register your trees first" reminder** (requested, not yet
+      built) — when a clan has **no** phenology trees registered, show a prompt
+      in the Phenology module pointing to its own **register/establish** step,
+      and keep a running reminder ("n of N registered") until the clan reaches
+      its allocated target (`phenoTargetFor`, default 5, coordinator-editable).
+      *Open question:* reminder points at Phenology's own register step
+      (recommended) vs relocating tree registration into the Mapping tile.
+- [ ] **Economic-tree inventory survey — MAYBE, if needed.** A possible future
+      module to map *all* economic trees (Okari nut / Massoy bark) across a few
+      clans for **harvest/resource planning** — distinct from monitoring a
+      phenology *sample*. Would be scoped fresh (map-many workflow), not a
+      revival of the retired Tree Mapping screen. Only build if a real need
+      emerges; limited to a few clans.
+
 ## Extend existing work (optional)
 
 - [ ] **Clan-ownership gating for the older modules** — MaFIA, QABB,

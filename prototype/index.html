@@ -1996,7 +1996,7 @@ select.msel {
           </div>
           <div class="module-tile" onclick="nav('screen-pheno-setup')">
             <span class="module-emoji" data-icon="flower" data-size="26"></span>
-            <span class="module-name">Phenology Monitoring</span>
+            <span class="module-name">Phenology</span>
           </div>
           <div class="module-tile" onclick="nav('screen-meteo-setup')">
             <span class="module-emoji" data-icon="cloudrain" data-size="26"></span>
@@ -2008,7 +2008,7 @@ select.msel {
           </div>
           <div class="module-tile" id="tile-training" data-fo="1" data-vc="1" onclick="nav('screen-training-setup')">
             <span class="module-emoji" data-icon="mortarboard" data-size="26"></span>
-            <span class="module-name">Training Records</span>
+            <span class="module-name">Training</span>
           </div>
           <div class="module-tile" id="tile-distribution" data-fo="1" data-vc="1" style="display:none;" onclick="nav('screen-distribution')">
             <span class="module-emoji" data-icon="box" data-size="26"></span>
@@ -2795,7 +2795,7 @@ select.msel {
       <div class="top-bar" style="background:#E65100;">
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
-          <div class="bar-title">Phenology Monitoring</div>
+          <div class="bar-title">Phenology</div>
           <div class="bar-subtitle">Plot Setup &amp; Monthly Observations</div>
         </div>
         <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Foundation" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_MCF.png" alt="Managalas Conservation Foundation" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="European Union" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_EU_v1.png" alt="European Union" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/CIFOR-ICRAF-logo.png" alt="CIFOR-ICRAF" style="width:100%;height:100%;object-fit:contain;display:block;"></div></div>
@@ -5079,7 +5079,7 @@ select.msel {
       <div class="top-bar" style="background:#5C3D7A;">
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
-          <div class="bar-title">Training Records</div>
+          <div class="bar-title">Training</div>
           <div class="bar-subtitle" id="trainingSub">All sessions</div>
         </div>
         <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Foundation" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_MCF.png" alt="Managalas Conservation Foundation" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="European Union" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_EU_v1.png" alt="European Union" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/CIFOR-ICRAF-logo.png" alt="CIFOR-ICRAF" style="width:100%;height:100%;object-fit:contain;display:block;"></div></div>
@@ -5399,7 +5399,7 @@ select.msel {
                 </div>
               </div>
               <div class="sync-row" id="sync-row-training">
-                <div class="sync-row-label"><span class="sync-emoji" data-icon="mortarboard" data-size="16"></span><span class="sync-name">Training Records</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="mortarboard" data-size="16"></span><span class="sync-name">Training</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-training" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-training" style="display:none;"></span>
@@ -10838,7 +10838,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v83'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v84'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11683,7 +11683,7 @@ function syncAuthorisations(profile) {
         /* Notify user if they now have new training access */
         var newTopics = granted.filter(function(tid) { return existing.indexOf(tid) === -1; });
         if (newTopics.length > 0) {
-          toast('New training topic(s) unlocked — see Training Records');
+          toast('New training topic(s) unlocked — see Training');
         }
       });
     }).catch(function() { /* network errors are silent — not critical path */ });
@@ -12150,14 +12150,14 @@ var DATA_STORES = ['mafia','qabb','water','phenology','pheno_plots',
    water/weather/biodiversity, warm = field ops & incidents, blue/indigo/purple
    = service, community & admin. White text throughout for contrast. ── */
 var DASH_TILE_COLORS = {
-  'MaFIA Tool':'#2E7D32', 'Conservation Activities':'#43A047', 'Tree Mapping':'#33691E',
-  'Phenology Monitoring':'#558B2F', 'Garden Mapping':'#827717',
+  'MaFIA Tool':'#2E7D32', 'Conservation Activities':'#43A047',
+  'Phenology':'#558B2F',
   'Water Quality':'#00838F', 'Weather Station':'#0097A7', 'QABB Butterfly Survey':'#00897B',
-  'Field Mapping':'#E65100', 'Observations':'#0288D1', 'Patrol':'#5D4037',
-  'Social Disturbance':'#D84315', 'Disturbance Alerts':'#C62828',
+  'Field Mapping':'#E65100', 'Patrol':'#5D4037',
+  'Disturbance Alerts':'#C62828',
   'Activity Calendar':'#1565C0', 'Service Delivery Monitoring':'#00695C',
   'Meetings':'#5E35B1', 'Community Data':'#3949AB', 'Performance Monitoring':'#283593',
-  'Training Records':'#6A1B9A', 'Handover & Distribution':'#AD1457', 'Export Data':'#455A64'
+  'Training':'#6A1B9A', 'Handover & Distribution':'#AD1457', 'Export Data':'#455A64'
 };
 function colorDashTiles() {
   document.querySelectorAll('#screen-dashboard .module-tile').forEach(function(t) {
@@ -13122,7 +13122,7 @@ function saveMafia() {
   }
 }
 
-/* ── Training Records ── */
+/* ── Training ── */
 var selectedTrainingType = '';
 var selectedMaterials = [];
 

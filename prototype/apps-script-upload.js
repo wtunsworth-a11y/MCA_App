@@ -443,6 +443,46 @@ function getClans() {
   return ContentService.createTextOutput(JSON.stringify({ status:'ok', clans: loadClans() })).setMimeType(ContentService.MimeType.JSON);
 }
 function updateClans(obj) { saveClans(obj||{}); return { status:'ok', message:'Clans saved' }; }
+
+/* ─── Public holidays (national PNG) ────────────────────────────────────
+ * _holidays.json — coordinator-maintained (update_holidays; or seedHolidays()
+ * in the editor). A flat list the app shows on the Activity Calendar and uses
+ * to pre-fill a facility "Public holiday" closed-reason:
+ *   [ { "date":"2026-12-25", "name":"Christmas Day", "everyone_off":true }, ... ]
+ * everyone_off = Christmas & Easter (no fieldwork at all); the rest are
+ * government-office closures. Dates shift year to year — re-confirm against the
+ * National Gazette and re-seed each year. No Oro provincial days. */
+function loadHolidays() {
+  try { var f=getDataFolder(); var fs=f.getFilesByName('_holidays.json'); if(fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString())||[]; } catch(e){}
+  return [];
+}
+function saveHolidays(list) {
+  var f=getDataFolder(); var fs=f.getFilesByName('_holidays.json'); var j=JSON.stringify(list||[],null,2);
+  if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_holidays.json', j, MimeType.PLAIN_TEXT);
+}
+function getHolidays() {
+  return ContentService.createTextOutput(JSON.stringify({ status:'ok', holidays: loadHolidays() })).setMimeType(ContentService.MimeType.JSON);
+}
+function updateHolidays(list) { saveHolidays(list||[]); return { status:'ok', message:'Holidays saved' }; }
+function seedHolidays() {
+  /* PNG national public holidays — 2026 (gazette-based; confirm King's Birthday
+   * via the National Gazette). Re-run yearly with the new dates. */
+  saveHolidays([
+    { date:'2026-01-01', name:"New Year's Day" },
+    { date:'2026-02-26', name:'Grand Chief Sir Michael Somare Remembrance Day' },
+    { date:'2026-04-03', name:'Good Friday', everyone_off:true },
+    { date:'2026-04-04', name:'Easter Saturday', everyone_off:true },
+    { date:'2026-04-05', name:'Easter Sunday', everyone_off:true },
+    { date:'2026-04-06', name:'Easter Monday', everyone_off:true },
+    { date:'2026-06-17', name:"King's Birthday" },
+    { date:'2026-07-23', name:'National Remembrance Day' },
+    { date:'2026-08-26', name:'National Repentance Day' },
+    { date:'2026-09-16', name:'Independence Day' },
+    { date:'2026-12-25', name:'Christmas Day', everyone_off:true },
+    { date:'2026-12-26', name:'Boxing Day', everyone_off:true }
+  ]);
+  Logger.log('Seeded _holidays.json with the PNG 2026 national holidays — confirm against the Gazette and re-seed each year.');
+}
 function seedClans() {
   /* Fill each zone's clan names between the brackets, in the clans' own order,
    * exactly as they should appear and be stored (this string is what ownership
@@ -1335,7 +1375,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1510,6 +1550,10 @@ function doPost(e) {
     if (body._action === 'update_clans') {
       return ContentService.createTextOutput(JSON.stringify(updateClans(body.clans))).setMimeType(ContentService.MimeType.JSON);
     }
+    /* Public holidays (national PNG) — coordinator maintains it (coordinator key required) */
+    if (body._action === 'update_holidays') {
+      return ContentService.createTextOutput(JSON.stringify(updateHolidays(body.holidays))).setMimeType(ContentService.MimeType.JSON);
+    }
 
     /* Normal steward data upload */
     var folder = getDataFolder();
@@ -1568,6 +1612,7 @@ function doGet(e) {
   if (action === 'issues') { return getIssues(); }
   if (action === 'roster') { return getRoster(); }
   if (action === 'clans') { return getClans(); }
+  if (action === 'holidays') { return getHolidays(); }
   if (action === 'pheno_targets') { return getPhenoTargets(); }
 
   if (action === 'authorisations') {

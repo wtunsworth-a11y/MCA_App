@@ -349,6 +349,16 @@ body {
   gap: 12px;
   padding: 14px;
 }
+.module-group-hdr {
+  grid-column: 1 / -1;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #6b6b6b;
+  margin: 10px 2px 0;
+}
+.module-group-hdr:first-child { margin-top: 0; }
 .module-tile {
   background: linear-gradient(135deg, #2E7D32, #388E3C);
   border-radius: 16px;
@@ -1950,45 +1960,20 @@ select.msel {
         <div id="dashDisturb" style="margin:8px 12px 0;"></div>
         <div id="dashStatus" style="margin:8px 12px 2px;"></div>
         <div class="module-grid">
+          <div class="module-group-hdr">Calendar</div>
           <div class="module-tile" onclick="nav('screen-activity-calendar')">
             <span class="module-emoji" data-icon="calendar" data-size="26"></span>
             <span class="module-name">Activity Calendar</span>
           </div>
+
+          <div class="module-group-hdr">Activities</div>
           <div class="module-tile" data-fo="1" data-vc="1" onclick="nav('screen-freemap')">
             <span class="module-emoji" data-icon="pin" data-size="26"></span>
             <span class="module-name">Field Mapping</span>
           </div>
-          <div class="module-tile" onclick="openUnderConstruction('Patrol')">
-            <span class="module-emoji" data-icon="walk" data-size="26"></span>
-            <span class="module-name">Patrol</span>
-          </div>
           <div class="module-tile" onclick="nav('screen-sdm')">
             <span class="module-emoji" data-icon="clipboard" data-size="26"></span>
             <span class="module-name">Service Delivery Monitoring</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-alerts')">
-            <span class="module-emoji" data-icon="warning" data-size="26"></span>
-            <span class="module-name">Disturbance Alerts</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-mafia-setup')">
-            <span class="module-emoji" data-icon="barchart" data-size="26"></span>
-            <span class="module-name">MaFIA Tool</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-meetings')">
-            <span class="module-emoji" data-icon="people" data-size="26"></span>
-            <span class="module-name">Meetings</span>
-          </div>
-          <div class="module-tile" onclick="openUnderConstruction('Community Data')">
-            <span class="module-emoji" data-icon="people" data-size="26"></span>
-            <span class="module-name">Community Data</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-performance')">
-            <span class="module-emoji" data-icon="linechart" data-size="26"></span>
-            <span class="module-name">Performance Monitoring</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-qabb-setup')">
-            <span class="module-emoji" data-icon="butterfly" data-size="26"></span>
-            <span class="module-name">QABB Butterfly Survey</span>
           </div>
           <div class="module-tile" onclick="nav('screen-water-setup')">
             <span class="module-emoji" data-icon="river" data-size="26"></span>
@@ -2002,9 +1987,30 @@ select.msel {
             <span class="module-emoji" data-icon="cloudrain" data-size="26"></span>
             <span class="module-name">Weather Station</span>
           </div>
+          <div class="module-tile" onclick="nav('screen-mafia-setup')">
+            <span class="module-emoji" data-icon="barchart" data-size="26"></span>
+            <span class="module-name">MaFIA Tool</span>
+          </div>
+          <div class="module-tile" onclick="nav('screen-qabb-setup')">
+            <span class="module-emoji" data-icon="butterfly" data-size="26"></span>
+            <span class="module-name">QABB Butterfly Survey</span>
+          </div>
           <div class="module-tile" onclick="nav('screen-conserv-setup')">
             <span class="module-emoji" data-icon="sprout" data-size="26"></span>
             <span class="module-name">Conservation Activities</span>
+          </div>
+          <div class="module-tile" onclick="nav('screen-alerts')">
+            <span class="module-emoji" data-icon="warning" data-size="26"></span>
+            <span class="module-name">Disturbance Alerts</span>
+          </div>
+          <div class="module-tile" onclick="nav('screen-meetings')">
+            <span class="module-emoji" data-icon="people" data-size="26"></span>
+            <span class="module-name">Meetings</span>
+          </div>
+          <div class="module-tile disabled">
+            <span class="coming-badge">Soon</span>
+            <span class="module-emoji" data-icon="walk" data-size="26"></span>
+            <span class="module-name">Patrol</span>
           </div>
           <div class="module-tile" id="tile-training" data-fo="1" data-vc="1" onclick="nav('screen-training-setup')">
             <span class="module-emoji" data-icon="mortarboard" data-size="26"></span>
@@ -2014,9 +2020,15 @@ select.msel {
             <span class="module-emoji" data-icon="box" data-size="26"></span>
             <span class="module-name">Handover &amp; Distribution</span>
           </div>
+
+          <div class="module-group-hdr">Reports</div>
           <div class="module-tile" data-fo="1" data-vc="1" onclick="nav('screen-data-export')">
             <span class="module-emoji" data-icon="upload" data-size="26"></span>
             <span class="module-name">Export Data</span>
+          </div>
+          <div class="module-tile" onclick="nav('screen-performance')">
+            <span class="module-emoji" data-icon="linechart" data-size="26"></span>
+            <span class="module-name">Performance Monitoring</span>
           </div>
         </div>
       </div>
@@ -11094,8 +11106,23 @@ function cacheStewardProfile() {
            map the sites they visit (plus Export Data to get records off-phone). */
         else if (role === 'consultant') { if (t.getAttribute('data-vc') !== '1') t.style.display = 'none'; }
       });
+      /* Hide a group header when its role-filtered group has no visible tiles. */
+      _applyGroupHeaders();
     }
   });
+}
+/* Show a dashboard group header only if at least one tile under it is visible
+   (so a field officer doesn't get an empty "Calendar" or "Monitoring" header). */
+function _applyGroupHeaders(){
+  var grid = document.querySelector('#screen-dashboard .module-grid');
+  if (!grid) return;
+  var curHdr = null, anyVisible = false;
+  var flush = function(){ if (curHdr) curHdr.style.display = anyVisible ? '' : 'none'; };
+  Array.prototype.slice.call(grid.children).forEach(function(el){
+    if (el.classList.contains('module-group-hdr')) { flush(); curHdr = el; anyVisible = false; }
+    else if (el.classList.contains('module-tile')) { if (el.style.display !== 'none') anyVisible = true; }
+  });
+  flush();
 }
 
 /* ── Zone list management ─────────────────────────────────────────── */

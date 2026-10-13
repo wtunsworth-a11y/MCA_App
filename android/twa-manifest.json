@@ -1,7 +1,7 @@
 {
   "packageId": "org.managalas.mcapp",
   "host": "wtunsworth-a11y.github.io",
-  "name": "MCApp — MCA Steward",
+  "name": "MCApp",
   "launcherName": "MCApp",
   "display": "standalone",
   "orientation": "portrait",

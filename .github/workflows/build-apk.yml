@@ -68,6 +68,14 @@ jobs:
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
 
+      - name: Generate the Android project from twa-manifest.json
+        working-directory: android
+        # android/ holds only twa-manifest.json; Bubblewrap needs the generated
+        # Gradle project + manifest-checksum.txt before it will build without
+        # prompting. `update` regenerates both from the manifest (fetches the
+        # icon from iconUrl). --skipVersionUpgrade keeps it non-interactive.
+        run: bubblewrap update --skipVersionUpgrade < /dev/null
+
       - name: Build signed APK
         working-directory: android
         run: bubblewrap build --skipPwaValidation < /dev/null

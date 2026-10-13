@@ -1,0 +1,6 @@
+
+# Signing material & local APK build — NEVER commit
+MCApp-keystore-base64.txt
+MCApp-APK-build-steps.txt
+*.keystore
+android/android.keystore

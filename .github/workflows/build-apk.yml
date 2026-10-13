@@ -32,6 +32,15 @@ jobs:
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli@1.22.0
 
+      - name: Point Bubblewrap at the runner's JDK + Android SDK (avoids interactive download)
+        run: |
+          mkdir -p "$HOME/.bubblewrap"
+          SDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$SDK" > "$HOME/.bubblewrap/config.json"
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "ANDROID_SDK=$SDK"
+          cat "$HOME/.bubblewrap/config.json"
+
       - name: Restore signing keystore
         working-directory: android
         run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android.keystore
@@ -46,7 +55,7 @@ jobs:
 
       - name: Build signed APK
         working-directory: android
-        run: bubblewrap build --skipPwaValidation
+        run: bubblewrap build --skipPwaValidation < /dev/null
         env:
           BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}

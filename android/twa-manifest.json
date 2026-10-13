@@ -27,6 +27,7 @@
   },
   "appVersionName": "1.0.0",
   "appVersionCode": 1,
+  "splashScreenFadeOutDuration": 300,
   "minSdkVersion": 21,
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,

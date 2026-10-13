@@ -261,9 +261,11 @@ is coordinator-defined and syncs down like the other registries.
       + **clan boundaries** (to assign facilities to clans). On-time for SDM
       waits on this; until then SDM shows count-only in Performance.
 - [ ] **Performance Monitoring overhaul — role-aware "My Month".**
-      - **Phase 1 (buildable now):** clan steward (done/target/on-time/pay-ready
-        from their own records) + field officer (activity tally — no targets
-        yet, target-ready for when Matilda sets them). Replaces the mock.
+      - **Phase 1 (DONE v85):** clan steward "My Month" — real per-module
+        done/total + done/sent/pay-ready tri-panel (25th/28th cutoffs) + this
+        month's effort tally, from the device's own records; field officer
+        "What you did" tally (no targets yet). Replaced the hardcoded mock;
+        oversight sees a phase-2 note + MCF Summary link.
       - **Phase 2 (later):** zone-staff **rollup of their clans** — needs
         cross-clan data on-device (backend/online), so it follows phase 1.
       - **Phase 3 (later — governance cadence "meetings held on time"):** track

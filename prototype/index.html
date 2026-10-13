@@ -3685,76 +3685,7 @@ select.msel {
         <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Foundation" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_MCF.png" alt="Managalas Conservation Foundation" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="European Union" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_EU_v1.png" alt="European Union" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/CIFOR-ICRAF-logo.png" alt="CIFOR-ICRAF" style="width:100%;height:100%;object-fit:contain;display:block;"></div></div>
       </div>
       <div class="scroll-content">
-        <div class="p14">
-          <div class="section-label" style="padding-left:0;">My Performance — June 2026</div>
-          <div class="card">
-            <div class="perf-metric">
-              <span class="pm-label">Task Completion Rate</span>
-              <span class="pm-val good">87%</span>
-            </div>
-            <div class="progress-bar"><div class="progress-fill" style="width:87%"></div></div>
-            <div class="perf-metric" style="margin-top:8px;">
-              <span class="pm-label">GPS Compliance</span>
-              <span class="pm-val good">94%</span>
-            </div>
-            <div class="progress-bar"><div class="progress-fill" style="width:94%"></div></div>
-            <div class="perf-metric" style="margin-top:8px;">
-              <span class="pm-label">On-Time Rate</span>
-              <span class="pm-val warn">78%</span>
-            </div>
-            <div class="progress-bar"><div class="progress-fill warn" style="width:78%"></div></div>
-            <div class="perf-metric" style="margin-top:8px;">
-              <span class="pm-label">SDM Visits This Month</span>
-              <span class="pm-val good">2 / 2 ✓</span>
-            </div>
-          </div>
-
-          <div class="section-label" style="padding-left:0;">Zone 7B Sub-Committee</div>
-          <div class="card">
-            <div class="perf-metric">
-              <span class="pm-label">Meetings held (Q2)</span>
-              <span class="pm-val warn">4 / 6</span>
-            </div>
-            <div class="perf-metric">
-              <span class="pm-label">Minutes submitted</span>
-              <span class="pm-val warn">3 / 4</span>
-            </div>
-            <div class="perf-metric">
-              <span class="pm-label">Avg. attendance</span>
-              <span class="pm-val good">82%</span>
-            </div>
-            <div class="perf-metric">
-              <span class="pm-label">Minutes overdue</span>
-              <span class="pm-val bad">1 set</span>
-            </div>
-          </div>
-
-          <div class="section-label" style="padding-left:0;">Monthly Effort Report — June 2026</div>
-          <div class="card" style="padding:10px 16px;">
-            <div class="effort-row"><span><span data-icon="leaf" data-size="14"></span> Patrol</span><span style="font-weight:600;color:#2E7D32;">× 3</span></div>
-            <div class="effort-row"><span><span data-icon="health" data-size="14"></span> SDM Visits</span><span style="font-weight:600;color:#2E7D32;">× 2</span></div>
-            <div class="effort-row"><span><span data-icon="barchart" data-size="14"></span> MaFIA Survey</span><span style="font-weight:600;color:#2E7D32;">× 1</span></div>
-            <div class="effort-row"><span><span data-icon="eye" data-size="14"></span> Observations</span><span style="font-weight:600;color:#2E7D32;">× 5</span></div>
-            <div class="effort-row"><span><span data-icon="people" data-size="14"></span> Meetings attended</span><span style="font-weight:600;color:#2E7D32;">× 2</span></div>
-          </div>
-          <button class="btn-outline" onclick="toast('Monthly report downloaded ✓')">⬇ Download Effort Report</button>
-
-          <div class="section-label" style="padding-left:0;margin-top:14px;">Activity Calendar — June 2026</div>
-          <div class="card" style="padding:12px;">
-            <div class="cal-month-hdr">June 2026</div>
-            <div class="cal-header">
-              <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
-            </div>
-            <div class="cal-grid" id="calendarGrid"></div>
-            <div class="cal-legend">
-              <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#2E7D32;"></div>Completed</div>
-              <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#c62828;"></div>Missed</div>
-              <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#1976D2;"></div>Ad-hoc</div>
-              <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#F57F17;"></div>Upcoming</div>
-            </div>
-          </div>
-          <button class="btn-outline" onclick="nav('screen-recent-activity')" style="margin-top:4px;"><span data-icon="map" data-size="14"></span> View Recent Activity Map</button>
-        </div>
+        <div class="p14" id="perfContent"></div>
       </div>
     </div>
 
@@ -5607,7 +5538,7 @@ function nav(id) {
   if (id === 'screen-meteo-record') initMeteoRecord();
   /* Restore autosave draft when entering any form screen */
   if (DRAFT_SCREENS.indexOf(id) >= 0) restoreDraft(id);
-  if (id === 'screen-performance') renderCalendar();
+  if (id === 'screen-performance') renderPerformance();
   showScreen(id);
 }
 
@@ -7358,6 +7289,108 @@ function renderDashboardStatus() {
 }
 
 /* ══════════════════════════════════════
+   PERFORMANCE — "My Month" (Phase 1: steward self-view + field-officer tally)
+   Real figures from the device's own records. Zone/MCA roll-up and the
+   governance meeting cadence are later phases (see docs/TODO.md).
+══════════════════════════════════════ */
+function _perfMonthKey(r){ var t=r.timestamp||r.recorded_at||r.recordedAt||r.date||r.done_date||r.registered_date; if(!t) return null; try{ var d=new Date(t); return isNaN(d.getTime())?null:monthKey(d); }catch(e){ return null; } }
+function _perfCount(rows, clan){ var mk=monthKey(); return rows.filter(function(r){ return _perfMonthKey(r)===mk && (!clan || !r.clan || r.clan===clan); }).length; }
+function _perfHdr(title, monLabel){
+  return '<div style="display:flex;align-items:center;justify-content:space-between;margin:2px 2px 10px;">'
+    +'<span style="font-size:0.95rem;font-weight:800;color:#283593;">'+title+'</span>'
+    +'<span style="font-size:0.68rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;">'+monLabel+'</span></div>';
+}
+function renderPerformance(){
+  var el=document.getElementById('perfContent'); if(!el) return;
+  var role=(window._cachedProfile&&window._cachedProfile.role)||'clan_steward';
+  var MO=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var now=new Date(); var monLabel=MO[now.getMonth()]; var nextMon=MO[(now.getMonth()+1)%12];
+  if(role==='field_officer'){ _perfTally(el, monLabel, 'field-officer'); return; }
+  if(role==='zone_staff'||role==='mcf_staff'||role==='consultant'){ _perfOversight(el, monLabel); return; }
+  _perfSteward(el, monLabel, nextMon);
+}
+function _perfSteward(el, monLabel, nextMon){
+  var clan=myClan(); var mk=monthKey();
+  getAllRecords('water_sources',function(ws){getAllRecords('water',function(wr){
+  getAllRecords('facilities',function(fc){getAllRecords('facility_visits',function(fv){
+  getAllRecords('met_stations',function(ms){getAllRecords('met_readings',function(mr){
+  getAllRecords('pheno_plots',function(pp){getAllRecords('phenology',function(ph){
+  getAllRecords('mafia',function(mf){
+    var mods=[
+      {name:'Water Quality',icon:'river',s:_linkedStatus(ws,wr,'water_source_id',clan)},
+      {name:'Service Delivery',icon:'clipboard',s:_linkedStatus(fc,fv,'facility_id',clan)},
+      {name:'Met Stations',icon:'raingauge',s:_linkedStatus(ms,mr,'met_station_id',clan)}
+    ];
+    var ownedPp=pp.filter(function(p){return p.status==='approved'&&(isOversight()||p.owner_clan===clan||p.owner_clan_2===clan||!p.owner_clan);});
+    var phThis=ph.filter(function(r){return r.timestamp&&monthKey(new Date(r.timestamp))===mk;});
+    var phenoDone=phThis.length>0, phenoSent=phThis.some(function(r){return r.synced;});
+    mods.push({name:'Phenology',icon:'flower',s:{total:ownedPp.length,done:phenoDone?ownedPp.length:0,due:(ownedPp.length>0&&!phenoDone)?ownedPp.length:0,overdue:0,sent:phenoSent?ownedPp.length:0,unsent:phenoDone&&!phenoSent?ownedPp.length:0}});
+    var mfThis=mf.filter(function(r){ return _perfMonthKey(r)===mk && (!r.clan||!clan||r.clan===clan); });
+    var mfDone=mfThis.length>0, mfSent=mfThis.some(function(r){return r.synced;});
+    mods.push({name:'MaFIA',icon:'barchart',s:{total:1,done:mfDone?1:0,due:mfDone?0:1,overdue:0,sent:mfSent?1:0,unsent:mfDone&&!mfSent?1:0}});
+
+    var assigned=mods.filter(function(m){return m.s.total>0;});
+    var planned=assigned.reduce(function(n,m){return n+m.s.total;},0);
+    var done=assigned.reduce(function(n,m){return n+m.s.done;},0);
+    var sent=assigned.reduce(function(n,m){return n+m.s.sent;},0);
+    var allDone=planned>0&&done>=planned, allSent=planned>0&&sent>=planned;
+
+    var h=_perfHdr('My Month', monLabel);
+    if(assigned.length===0){
+      h+='<div class="card" style="padding:12px 14px;"><div style="font-size:0.8rem;color:#777;">No monitoring tasks assigned to your clan yet. Once the coordinator approves and assigns items to '+(clan||'your clan')+', your month appears here.</div></div>';
+      el.innerHTML=h; hydrateIcons(el); return;
+    }
+    h+='<div class="card" style="padding:0;overflow:hidden;border:1px solid #e3e3e3;">';
+    mods.forEach(function(m,i){
+      var pill=_statePill(m.s); var countTxt=m.s.total>0?(m.s.done+'/'+m.s.total):'—';
+      h+='<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;'+(i>0?'border-top:1px solid #f0f0f0;':'')+'">';
+      h+='<span style="color:#455A64;display:flex;">'+icon(m.icon,17)+'</span>';
+      h+='<span style="flex:1;font-size:0.84rem;font-weight:600;color:#333;">'+m.name+'</span>';
+      h+='<span style="font-size:0.72rem;color:#888;font-variant-numeric:tabular-nums;">'+countTxt+'</span>';
+      h+='<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:700;color:'+pill.color+';min-width:84px;justify-content:flex-end;">'+dot(pill.color,9)+' '+pill.label+'</span></div>';
+    });
+    h+='</div>';
+    var payColor=(allDone&&allSent)?'#2E7D32':(allDone?'#E65100':'#B71C1C');
+    h+='<div class="card" style="padding:0;margin-top:10px;display:flex;text-align:center;font-size:0.68rem;overflow:hidden;border:1px solid #e3e3e3;">';
+    h+='<div style="flex:1;padding:10px 4px;border-right:1px solid #f0f0f0;"><div style="font-weight:800;font-size:1.05rem;color:'+(allDone?'#2E7D32':'#E65100')+';">'+done+'/'+planned+'</div><div style="color:#999;">done · by '+CYCLE.completeBy+'th</div></div>';
+    h+='<div style="flex:1;padding:10px 4px;border-right:1px solid #f0f0f0;"><div style="font-weight:800;font-size:1.05rem;color:'+(allSent?'#2E7D32':'#E65100')+';">'+sent+'/'+planned+'</div><div style="color:#999;">sent · by '+CYCLE.uploadBy+'th</div></div>';
+    h+='<div style="flex:1;padding:10px 4px;"><div style="font-weight:800;font-size:1.05rem;color:'+payColor+';">'+((allDone&&allSent)?'Ready':'Hold')+'</div><div style="color:#999;">pay · by '+CYCLE.payByNextMonth+' '+nextMon.slice(0,3)+'</div></div>';
+    h+='</div>';
+    var eff=[
+      {name:'Water readings', n:_perfCount(wr,clan)},
+      {name:'Service-delivery visits', n:_perfCount(fv,clan)},
+      {name:'Met readings', n:_perfCount(mr,clan)},
+      {name:'Phenology observations', n:phThis.length},
+      {name:'MaFIA surveys', n:mfThis.length}
+    ].filter(function(x){return x.n>0;});
+    h+='<div style="font-size:0.8rem;font-weight:800;color:#283593;margin:16px 2px 8px;">This month’s effort</div>';
+    if(eff.length===0){ h+='<div class="card" style="padding:10px 14px;"><div style="font-size:0.78rem;color:#999;">Nothing recorded yet this month.</div></div>'; }
+    else { h+='<div class="card" style="padding:6px 14px;">'; eff.forEach(function(x){ h+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:0.8rem;"><span style="color:#444;">'+x.name+'</span><span style="font-weight:700;color:#2E7D32;">× '+x.n+'</span></div>'; }); h+='</div>'; }
+    el.innerHTML=h; hydrateIcons(el);
+  });});});});});});});});});
+}
+function _perfTally(el, monLabel, roleLabel){
+  getAllRecords('training',function(tr){getAllRecords('freemap',function(fm){getAllRecords('distributions',function(di){
+    var h=_perfHdr('What you did', monLabel);
+    h+='<div class="matrix-note" style="background:#E8EAF6;border-color:#9FA8DA;color:#283593;font-size:0.76rem;">A record of your work this month. Targets aren’t set for '+roleLabel+' activities yet — this is a tally of what you did.</div>';
+    var eff=[
+      {name:'Training sessions', n:_perfCount(tr,null)},
+      {name:'Field maps / sites', n:_perfCount(fm,null)},
+      {name:'Handovers / distributions', n:_perfCount(di,null)}
+    ].filter(function(x){return x.n>0;});
+    if(eff.length===0){ h+='<div class="card" style="padding:12px 14px;"><div style="font-size:0.8rem;color:#999;">Nothing recorded yet this month.</div></div>'; }
+    else { h+='<div class="card" style="padding:6px 14px;">'; eff.forEach(function(x){ h+='<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:0.82rem;"><span style="color:#444;">'+x.name+'</span><span style="font-weight:700;color:#2E7D32;">× '+x.n+'</span></div>'; }); h+='</div>'; }
+    el.innerHTML=h; hydrateIcons(el);
+  });});});
+}
+function _perfOversight(el, monLabel){
+  var h=_perfHdr('Performance', monLabel);
+  h+='<div class="matrix-note" style="background:#E8EAF6;border-color:#9FA8DA;color:#283593;font-size:0.78rem;">The zone / MCA roll-up across clans is compiled in the monthly <strong>compliance reports</strong>. An in-app view for your clans is coming in a later phase.</div>';
+  h+='<button class="btn-outline" style="border-color:#283593;color:#283593;margin-top:6px;width:100%;" onclick="openReports()"><span data-icon="barchart" data-size="14"></span> MCF Summary / Reports</button>';
+  el.innerHTML=h; hydrateIcons(el);
+}
+
+/* ══════════════════════════════════════
    UNIFIED ACTIVITY CALENDAR
    Brings together recurring monitoring (derived), scheduled events and
    meetings (calendar store), and conservation follow-ups — for one month —
@@ -8861,34 +8894,6 @@ function updateVoteOutcome() {
 
 
 /* ── Performance Calendar ── */
-function renderCalendar() {
-  const grid = document.getElementById('calendarGrid');
-  if (!grid || grid.children.length > 0) return;
-  const acts = {
-    2:[{c:'#2E7D32',l:'Patrol'}],
-    4:[{c:'#1976D2',l:'Observation'}],
-    5:[{c:'#2E7D32',l:'Meeting'}],
-    7:[{c:'#1976D2',l:'Observation'}],
-    8:[{c:'#2E7D32',l:'SDM x2'}],
-    9:[{c:'#1976D2',l:'Observation'}],
-    10:[{c:'#2E7D32',l:'MaFIA'}],
-    11:[{c:'#1976D2',l:'Observation'}],
-    12:[{c:'#1976D2',l:'Observation'}],
-    13:[{c:'#2E7D32',l:'Patrol'}],
-    15:[{c:'#c62828',l:'Missed'}],
-    19:[{c:'#F57F17',l:'SDM'}],
-    22:[{c:'#F57F17',l:'MaFIA'}]
-  };
-  // June 1 2026 = Monday (offset 0)
-  let html = '';
-  for (let d = 1; d <= 30; d++) {
-    const a = acts[d] || [];
-    const dots = a.map(x => '<div class="cal-dot" style="background:' + x.c + ';" title="' + x.l + '"></div>').join('');
-    html += '<div class="cal-day"><span class="cal-num">' + d + '</span><div class="cal-dots">' + dots + '</div></div>';
-  }
-  grid.innerHTML = html;
-}
-
 /* ── Time filter (Recent Activity) ── */
 function setTimeFilter(val) {
   ['7','30','365'].forEach(v => {
@@ -10908,7 +10913,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v84'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v85'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

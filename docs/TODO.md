@@ -260,17 +260,36 @@ is coordinator-defined and syncs down like the other registries.
       closures are noted, not pre-excluded). Blocked on the **facility register**
       + **clan boundaries** (to assign facilities to clans). On-time for SDM
       waits on this; until then SDM shows count-only in Performance.
-- [ ] **Performance Monitoring overhaul — queued.** Role-aware "My Month":
-      clan steward (done/target/on-time/pay-ready), field officer (activity
-      tally — no targets yet; target-ready for when Matilda sets them), zone
-      staff (zone rollup of their clans). Currently a hardcoded mock; hide it
-      until rebuilt. On-time = cutoff model (25th/28th) now; census/random-day
-      on-time later with SDM.
-- [ ] **Dashboard layout — grouped headers (in discussion).** Group tiles under
-      headers (Calendar / Monitoring / Field & Community / Reports & Data),
-      role-aware (hide empty headers). Hide **Community Data** (no feature);
-      **Patrol** → queue for work (grey "coming soon" interim TBD). Field-officer
-      calendar still to spec (who schedules; what's on it).
+- [ ] **Performance Monitoring overhaul — role-aware "My Month".**
+      - **Phase 1 (DONE v85):** clan steward "My Month" — real per-module
+        done/total + done/sent/pay-ready tri-panel (25th/28th cutoffs) + this
+        month's effort tally, from the device's own records; field officer
+        "What you did" tally (no targets yet). Replaced the hardcoded mock;
+        oversight sees a phase-2 note + MCF Summary link.
+      - **Phase 2 (later):** zone-staff **rollup of their clans** — needs
+        cross-clan data on-device (backend/online), so it follows phase 1.
+      - **Phase 3 (later — governance cadence "meetings held on time"):** track
+        required meetings against their schedule:
+        - **Zone Boards** — every **6 months**
+        - **MCF Board** — every **3 months**
+        - **Combined Forum** — **1/year**
+        - **Zone Forums** — **2/year** (one **before** the CF, one **after**)
+      - On-time = cutoff model (25th/28th) now; census/random-day on-time later
+        with SDM.
+- [ ] **Zone-staff awareness tracking + topic channel.** Zone staff should do
+      **≥1 day/month of awareness** on focused topics. Needs (a) a compliance
+      line for it, and (b) a **channel to push the month's awareness topic to
+      zone staff** (coordinator-set, synced down like `_help.json`). Feeds the
+      zone-staff cut of Performance.
+- [ ] **Field-officer calendar — TBC** (who schedules; what's on it).
+- [x] **Dashboard layout — grouped headers (done v84).** Tiles grouped under
+      **Calendar / Activities / Reports**, role-aware (empty headers hide).
+      Community Data hidden; Patrol greyed "SOON"; Performance Monitoring at the
+      bottom of Reports.
+- [ ] **Patrol module — TBC.** Likely a targeted **~8–10 km walk within each
+      clan** (where they have enough land), **once a month**, recording
+      **sightings and sounds** along the route. Shape: probably a tracked walk
+      (Field Mapping line mode) + timed sighting/sound entries. Spec to confirm.
 
 ## Mapping consolidation (done 2026-10-13, v83)
 

@@ -318,6 +318,32 @@ function updatePhenoPlots(list) {
   return { status: 'ok', message: 'Pheno plot registry saved', count: (list || []).length };
 }
 
+/* ─── Phenology target counts (per clan, optional per species) ───────────
+ * _pheno_targets.json — coordinator-maintained (update_pheno_targets, key
+ * required; or seedPhenoTargets()). The standard is 5 trees per species; for
+ * clans doing more detailed work the coordinator NAMES the clan here and sets a
+ * higher number (before the extra trees are approved). Shape, default 5:
+ *   { "Kubi": 10,                       // 10 of every species for Kubi
+ *     "Afore": { "default":5, "okari":12 } }  // 12 okari, 5 of the rest
+ * The app reads this to show that many establish slots; compliance already uses
+ * the registered count, so no report change is needed. */
+function loadPhenoTargets() {
+  try { var f=getDataFolder(); var fs=f.getFilesByName('_pheno_targets.json'); if(fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString())||{}; } catch(e){}
+  return {};
+}
+function savePhenoTargets(obj) {
+  var f=getDataFolder(); var fs=f.getFilesByName('_pheno_targets.json'); var j=JSON.stringify(obj||{},null,2);
+  if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_pheno_targets.json', j, MimeType.PLAIN_TEXT);
+}
+function getPhenoTargets() {
+  return ContentService.createTextOutput(JSON.stringify({ status:'ok', pheno_targets: loadPhenoTargets() })).setMimeType(ContentService.MimeType.JSON);
+}
+function updatePhenoTargets(obj) { savePhenoTargets(obj||{}); return { status:'ok', message:'Pheno targets saved' }; }
+function seedPhenoTargets() {
+  savePhenoTargets({ /* "Kubi": 10, "Afore": { "default":5, "okari":12 } */ });
+  Logger.log('Seeded _pheno_targets.json — name the clans and set their counts via update_pheno_targets or seedPhenoTargets. Default is 5.');
+}
+
 /* ─── Date review: records captured on an unverified device clock ───────
  * _date_review.json: flagged reading records with a date bracket
  * [earliest..latest] (the last verified-online time .. the upload time) for the
@@ -1266,7 +1292,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1433,6 +1459,10 @@ function doPost(e) {
     if (body._action === 'update_roster') {
       return ContentService.createTextOutput(JSON.stringify(updateRoster(body.roster))).setMimeType(ContentService.MimeType.JSON);
     }
+    /* Phenology target counts per clan — coordinator maintains it (coordinator key required) */
+    if (body._action === 'update_pheno_targets') {
+      return ContentService.createTextOutput(JSON.stringify(updatePhenoTargets(body.pheno_targets))).setMimeType(ContentService.MimeType.JSON);
+    }
 
     /* Normal steward data upload */
     var folder = getDataFolder();
@@ -1490,6 +1520,7 @@ function doGet(e) {
   if (action === 'date_review') { return getDateReview(); }
   if (action === 'issues') { return getIssues(); }
   if (action === 'roster') { return getRoster(); }
+  if (action === 'pheno_targets') { return getPhenoTargets(); }
 
   if (action === 'authorisations') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';

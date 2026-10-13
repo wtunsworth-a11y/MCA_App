@@ -2880,7 +2880,7 @@ select.msel {
       </div>
       <div class="scroll-content">
         <div class="matrix-note" style="background:#fff3e0;border-color:#ffcc80;color:#E65100;">
-          Register 5 plants of each crop. Each plant may be in a different location. Plants must be approved by Zone Staff before monitoring begins.
+          Register the set number of plants of each crop (standard 5; more for some clans). Each plant may be in a different location. Plants must be approved by Zone Staff before monitoring begins.
         </div>
         <div id="phenoPlotsContent" class="p14" style="padding-bottom:20px;">
           <div style="padding:40px 20px;text-align:center;">
@@ -9597,17 +9597,19 @@ function initPhenoPlots() {
   var c=document.getElementById('phenoPlotsContent');
   if(!c) return;
   c.innerHTML='<div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>';
+  getPhenoTargets(function(targets) {
   getAllRecords('pheno_plots', function(plots) {
     var h='';
     PHENO_CROPS.forEach(function(cr) {
+      var target=phenoTargetFor(myClan(), cr.key, targets);
       var cp=plots.filter(function(p){return p.crop_type===cr.key;});
       var na=cp.filter(function(p){return p.status==='approved';}).length;
       h+='<div class="card" style="padding:12px 14px;margin-bottom:10px;">';
       h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
       h+='<span style="font-size:0.88rem;font-weight:700;">'+cr.emoji+' '+cr.label+'</span>';
-      h+='<span style="font-size:0.75rem;font-weight:700;color:'+(na>=5?'#2E7D32':'#E65100')+';">'+na+'/5 approved</span>';
+      h+='<span style="font-size:0.75rem;font-weight:700;color:'+(na>=target?'#2E7D32':'#E65100')+';">'+na+'/'+target+' approved</span>';
       h+='</div>';
-      for(var n=1;n<=5;n++) {
+      for(var n=1;n<=target;n++) {
         var plot=cp.find(function(p){return p.plant_num===n && p.status!=='inactive' && p.status!=='inactive_replaced';});
         h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid #f0f0f0;gap:6px;">';
         h+='<span style="font-size:0.78rem;font-weight:700;color:#555;flex-shrink:0;">Plant '+n+'</span>';
@@ -9633,6 +9635,7 @@ function initPhenoPlots() {
       h+='</div>';
     });
     c.innerHTML=h;
+  });
   });
 }
 
@@ -10975,7 +10978,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v76'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v77'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11210,6 +11213,35 @@ function getZoneList(callback) {
       callback(cached || DEFAULT_ZONE_LIST);
     }
   });
+}
+
+/* Phenology per-clan target counts (coordinator-set; default 5). Cached in the
+   'auth' store like zones, refreshed from the server when online. */
+function getPhenoTargets(callback) {
+  getAllRecords('auth', function(records) {
+    var cached = null;
+    if (records) records.forEach(function(r){ if (r.id === 'pheno_targets') cached = r.targets; });
+    if (UPLOAD_ENDPOINT && navigator.onLine) {
+      fetch(UPLOAD_ENDPOINT + '?action=pheno_targets')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if (d.status === 'ok' && d.pheno_targets) {
+            saveRecord('auth', {id:'pheno_targets', targets:d.pheno_targets, fetched:new Date().toISOString()}, function(){});
+            callback(d.pheno_targets);
+          } else { callback(cached || {}); }
+        }).catch(function(){ callback(cached || {}); });
+    } else { callback(cached || {}); }
+  });
+}
+/* How many plants of a species a clan should establish. Default 5; a clan the
+   coordinator named gets its set number (a flat number, or per-species with an
+   optional default). */
+function phenoTargetFor(clan, cropKey, targets) {
+  var t = (targets || {})[clan];
+  if (t == null) return 5;
+  if (typeof t === 'number') return t > 0 ? t : 5;
+  if (typeof t === 'object') { if (t[cropKey] != null) return t[cropKey]; if (t.default != null) return t.default; }
+  return 5;
 }
 
 /* Populate the zone select in enrollment step 2 */

@@ -424,6 +424,30 @@ function seedRecipients() {
   Logger.log('Seeded _recipients.json — edit it via update_recipients or re-run seedRecipients.');
 }
 
+/* ─── Clan list per zone ────────────────────────────────────────────────
+ * _clans.json — coordinator-maintained (update_clans; or seedClans() in the
+ * editor). Maps zone_id → the clans in that zone, so enrolment offers a
+ * zone-scoped clan PICK-LIST (no free text) and a clan steward's clan name is
+ * always exact — ownership routing, compliance and reports all match on it.
+ *   { "Z05": ["Kubi","Bigaije"], "Z06": ["Muaduraina"] }
+ * Only clan stewards carry a clan; other roles are zone- or MCA-level. */
+function loadClans() {
+  try { var f=getDataFolder(); var fs=f.getFilesByName('_clans.json'); if(fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString())||{}; } catch(e){}
+  return {};
+}
+function saveClans(obj) {
+  var f=getDataFolder(); var fs=f.getFilesByName('_clans.json'); var j=JSON.stringify(obj||{},null,2);
+  if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_clans.json', j, MimeType.PLAIN_TEXT);
+}
+function getClans() {
+  return ContentService.createTextOutput(JSON.stringify({ status:'ok', clans: loadClans() })).setMimeType(ContentService.MimeType.JSON);
+}
+function updateClans(obj) { saveClans(obj||{}); return { status:'ok', message:'Clans saved' }; }
+function seedClans() {
+  saveClans({ /* "Z05": ["Kubi","Bigaije"], "Z06": ["Muaduraina"] */ });
+  Logger.log('Seeded _clans.json — add each zone’s clan names via update_clans or seedClans. Keys are zone_ids.');
+}
+
 /* ─── Expected clan-steward roster ──────────────────────────────────────
  * _roster.json in the data folder, coordinator-maintained (update_roster —
  * coordinator key required; or seedRoster() in the editor). The LIST OF WHO IS
@@ -1292,7 +1316,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1463,6 +1487,10 @@ function doPost(e) {
     if (body._action === 'update_pheno_targets') {
       return ContentService.createTextOutput(JSON.stringify(updatePhenoTargets(body.pheno_targets))).setMimeType(ContentService.MimeType.JSON);
     }
+    /* Clan list per zone — coordinator maintains it (coordinator key required) */
+    if (body._action === 'update_clans') {
+      return ContentService.createTextOutput(JSON.stringify(updateClans(body.clans))).setMimeType(ContentService.MimeType.JSON);
+    }
 
     /* Normal steward data upload */
     var folder = getDataFolder();
@@ -1520,6 +1548,7 @@ function doGet(e) {
   if (action === 'date_review') { return getDateReview(); }
   if (action === 'issues') { return getIssues(); }
   if (action === 'roster') { return getRoster(); }
+  if (action === 'clans') { return getClans(); }
   if (action === 'pheno_targets') { return getPhenoTargets(); }
 
   if (action === 'authorisations') {

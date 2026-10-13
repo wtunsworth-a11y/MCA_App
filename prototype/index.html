@@ -1674,10 +1674,6 @@ select.msel {
             <div id="enrollIdStatus" style="font-size:0.72rem;margin-top:3px;"></div>
           </div>
           <div class="form-group">
-            <label class="form-label">Clan <span style="color:#B71C1C;">*</span></label>
-            <input type="text" id="enrollClan" class="form-input" placeholder="e.g. Afore Clan" autocomplete="off">
-          </div>
-          <div class="form-group">
             <label class="form-label">Role <span style="color:#B71C1C;">*</span></label>
             <select id="enrollRole" class="form-input" onchange="enrollRoleChanged()">
               <option value="clan_steward">Clan Steward</option>
@@ -1689,9 +1685,18 @@ select.msel {
           </div>
           <div class="form-group" id="enrollZoneGroup">
             <label class="form-label">Zone <span style="color:#B71C1C;">*</span></label>
-            <select id="enrollZoneSelect" class="form-input">
+            <select id="enrollZoneSelect" class="form-input" onchange="enrollZoneChanged()">
               <option value="">— loading zones —</option>
             </select>
+          </div>
+          <!-- Clan — clan stewards only; a zone-scoped pick-list (no free text) so
+               the clan name is always exact and ownership/routing/reports match. -->
+          <div class="form-group" id="enrollClanGroup">
+            <label class="form-label">Clan <span style="color:#B71C1C;">*</span></label>
+            <select id="enrollClan" class="form-input">
+              <option value="">— select a zone first —</option>
+            </select>
+            <div id="enrollClanHint" style="font-size:0.68rem;color:#888;margin-top:4px;"></div>
           </div>
           <div class="form-group">
             <label class="form-label">Village</label>
@@ -1939,6 +1944,8 @@ select.msel {
         <div id="syncWarningBanner" style="display:none;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;font-size:0.79rem;line-height:1.4;cursor:pointer;" onclick="nav('screen-data-export')"></div>
         <!-- Low-storage warning — this is a work phone; storage must be kept free for the app -->
         <div id="storageWarningBanner" style="display:none;margin:8px 12px 4px;padding:10px 12px;border-radius:10px;font-size:0.79rem;line-height:1.4;cursor:pointer;" onclick="nav('screen-data-export')"></div>
+        <!-- Today / tomorrow scheduled-activity reminder — computed locally on open, works offline -->
+        <div id="dueReminderBanner" style="display:none;margin:8px 12px 4px;" onclick="nav('screen-activity-calendar')"></div>
         <!-- This-month monitoring status — calm, static, updated on each dashboard visit -->
         <div id="dashDisturb" style="margin:8px 12px 0;"></div>
         <div id="dashStatus" style="margin:8px 12px 2px;"></div>
@@ -5591,7 +5598,7 @@ function showScreen(id) {
   currentScreen = id;
   /* Colour the dashboard tiles on EVERY path to the dashboard (login, Home tab,
      and nav()), not just via the nav() wrapper. */
-  if (id === 'screen-dashboard') { try { colorDashTiles(); } catch(e){} }
+  if (id === 'screen-dashboard') { try { colorDashTiles(); } catch(e){} try { renderDueReminders(); } catch(e){} }
   /* Screen entry side-effects */
   if (id === 'screen-zone-config') {
     getZoneList(function(zones) {
@@ -5669,7 +5676,7 @@ function nav(id) {
   if (id === 'screen-conserv-schedule') initConservSchedule();
   if (id === 'screen-training-setup') initTraining();
   if (id === 'screen-data-export') { updateRecordCounts(); updateStorageInfo(); }
-  if (id === 'screen-dashboard')   { updateSyncWarning(); updateStorageWarning(); renderDashboardStatus(); colorDashTiles(); }
+  if (id === 'screen-dashboard')   { updateSyncWarning(); updateStorageWarning(); renderDashboardStatus(); colorDashTiles(); renderDueReminders(); }
   if (id === 'screen-training-record') initTrainingRecord();
   if (id === 'screen-timesheet') loadTimesheetData();
   if (id === 'screen-meteo-record') initMeteoRecord();
@@ -6020,6 +6027,11 @@ function enrollRoleChanged() {
   var tg   = document.getElementById('enrollTopicsGroup');
   zg.style.display = (role === 'mcf_staff' || role === 'consultant') ? 'none' : 'block';
   tg.style.display = (role === 'field_officer') ? 'block' : 'none';
+  /* Clan is a clan-steward concept only — zone staff / field officers work
+     across the zone, MCF staff are MCA-wide, consultants external. */
+  var cg = document.getElementById('enrollClanGroup');
+  if (cg) cg.style.display = (role === 'clan_steward') ? 'block' : 'none';
+  if (role === 'clan_steward') { try { enrollZoneChanged(); } catch(e){} }
 }
 
 /* ── Known Steward/Officer IDs that already exist in the project ──
@@ -6062,8 +6074,9 @@ function enrollSaveProfile() {
 
   /* Visiting consultants are external — no clan/zone required (they record
      training given and map the sites they visit, nothing clan-gated). */
-  if (!name || !sid || (!clan && role !== 'consultant')) {
-    toast('Please fill all required fields (Name, ID' + (role !== 'consultant' ? ', Clan' : '') + ').');
+  var needsClan = (role === 'clan_steward');   /* only clan stewards belong to a clan */
+  if (!name || !sid || (needsClan && !clan)) {
+    toast('Please fill all required fields (Name, ID' + (needsClan ? ', Clan' : '') + ').');
     return;
   }
   if (role !== 'mcf_staff' && role !== 'consultant' && !zoneId) {
@@ -7577,6 +7590,49 @@ function submitCalEvent(){
 }
 function markCalDone(id){
   getAllRecords('calendar', function(rows){ var r=rows.find(function(x){return x.id===id;}); if(!r) return; r.status='done'; r.done_date=new Date().toISOString().slice(0,10); r.synced=false; updateRecord('calendar', r, function(){ pushCalendar(function(){}); toast('Marked done ✓'); renderActivityCalendar(); }); });
+}
+
+/* ── On-open today/tomorrow reminder (offline; computed locally on dashboard) ──
+   Works with no network and no notifications: when the steward opens MCApp, it
+   checks the local calendar + follow-ups and surfaces what is due TODAY and
+   TOMORROW (PNG dates). A proactive buzz while the app is closed would need the
+   native wrapper — see upgrade-path.md. */
+function pngDateStr(d){ try { return (d||new Date()).toLocaleDateString('en-CA',{timeZone:'Pacific/Port_Moresby'}); } catch(e){ return (d||new Date()).toISOString().slice(0,10); } }
+function _escRem(s){ return (s||'').replace(/[&<>]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+function renderDueReminders(){
+  var el=document.getElementById('dueReminderBanner'); if(!el) return;
+  var today=pngDateStr(), tomorrow=pngDateStr(new Date(Date.now()+86400000));
+  var clan=myClan();
+  getAllRecords('calendar', function(cal){
+    getAllRecords('followups', function(fus){
+      var todayItems=[], tomItems=[];
+      (cal||[]).forEach(function(e){
+        if(!e || e.status==='done') return;
+        if(e.clan && clan && e.clan!==clan) return;   /* another clan's event */
+        var label=e.title || 'Scheduled activity';
+        if(e.date===today) todayItems.push(label);
+        else if(e.date===tomorrow) tomItems.push(label);
+      });
+      (fus||[]).forEach(function(f){
+        if(!f || f.completed) return;
+        var d=f.due_date||f.date; if(!d) return;
+        var label=f.title || 'Follow-up';
+        if(d===today) todayItems.push(label);
+        else if(d===tomorrow) tomItems.push(label);
+      });
+      if(!todayItems.length && !tomItems.length){ el.style.display='none'; el.innerHTML=''; return; }
+      var h='';
+      if(todayItems.length){
+        h+='<div style="padding:10px 12px;border-radius:10px;background:#FFF3E0;border:1px solid #FFCC80;color:#E65100;font-size:0.8rem;line-height:1.45;'+(tomItems.length?'margin-bottom:6px;':'')+'">'
+          +icon('calendar',14)+' <strong>TODAY</strong> — due: '+todayItems.map(_escRem).join(' · ')+'</div>';
+      }
+      if(tomItems.length){
+        h+='<div style="padding:10px 12px;border-radius:10px;background:#E3F2FD;border:1px solid #90CAF9;color:#1565C0;font-size:0.8rem;line-height:1.45;">'
+          +icon('calendar',14)+' <strong>Tomorrow</strong> — due: '+tomItems.map(_escRem).join(' · ')+'</div>';
+      }
+      el.innerHTML=h; el.style.display='block'; try{ hydrateIcons(el); }catch(e){}
+    });
+  });
 }
 
 /* ── Compliance report ── */
@@ -10978,7 +11034,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v80'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v82'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11256,6 +11312,49 @@ function loadZonesForEnrollment() {
       opt.textContent = z.id + ' — ' + z.name;
       sel.appendChild(opt);
     });
+    try { enrollZoneChanged(); } catch(e){}
+  });
+}
+
+/* Clan list per zone (coordinator-maintained; cached in the auth store like
+   zones). The enrolment clan dropdown is populated from this, filtered to the
+   chosen zone — no free text, so a clan steward's clan name is always exact. */
+function getClanList(callback) {
+  getAllRecords('auth', function(records) {
+    var cached = null;
+    if (records) records.forEach(function(r){ if (r.id === 'clans') cached = r.clans; });
+    if (UPLOAD_ENDPOINT && navigator.onLine) {
+      fetch(UPLOAD_ENDPOINT + '?action=clans')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if (d.status === 'ok' && d.clans) {
+            saveRecord('auth', {id:'clans', clans:d.clans, fetched:new Date().toISOString()}, function(){});
+            callback(d.clans);
+          } else { callback(cached || {}); }
+        }).catch(function(){ callback(cached || {}); });
+    } else { callback(cached || {}); }
+  });
+}
+/* Repopulate the clan dropdown for the currently-selected zone. */
+function enrollZoneChanged() {
+  var zsel = document.getElementById('enrollZoneSelect');
+  var csel = document.getElementById('enrollClan');
+  var hint = document.getElementById('enrollClanHint');
+  if (!csel) return;
+  var zoneId = zsel ? (zsel.value || '') : '';
+  getClanList(function(map) {
+    var clans = (map && map[zoneId]) || [];
+    csel.innerHTML = '';
+    if (!clans.length) {
+      var o = document.createElement('option');
+      o.value = ''; o.textContent = zoneId ? '— no clans listed for this zone —' : '— select a zone first —';
+      csel.appendChild(o);
+      if (hint) hint.textContent = zoneId ? ('No clans configured for ' + zoneId + '. Ask the coordinator to add this zone’s clans before enrolling a steward.') : '';
+    } else {
+      var o0 = document.createElement('option'); o0.value = ''; o0.textContent = '— choose clan —'; csel.appendChild(o0);
+      clans.forEach(function(cn){ var o = document.createElement('option'); o.value = cn; o.textContent = cn; csel.appendChild(o); });
+      if (hint) hint.textContent = '';
+    }
   });
 }
 

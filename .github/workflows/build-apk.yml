@@ -32,13 +32,28 @@ jobs:
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli@1.22.0
 
-      - name: Point Bubblewrap at the runner's JDK + Android SDK (avoids interactive download)
+      - name: Point Bubblewrap at the runner's JDK + Android SDK (no interactive download)
         run: |
-          mkdir -p "$HOME/.bubblewrap"
+          set -e
           SDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          # Bubblewrap validates the SDK by checking for <root>/tools or <root>/bin and looks for
+          # sdkmanager there. Modern runners ship the command-line tools at
+          # <root>/cmdline-tools/latest/bin, so expose that as <root>/bin for Bubblewrap.
+          CLT="$(ls -d "$SDK"/cmdline-tools/*/bin 2>/dev/null | head -1)"
+          if [ -n "$CLT" ] && [ ! -e "$SDK/bin" ] && [ ! -e "$SDK/tools" ]; then
+            ln -s "$CLT" "$SDK/bin" 2>/dev/null || sudo ln -s "$CLT" "$SDK/bin"
+          fi
+          # Bubblewrap 1.22 needs build-tools 34.0.0 (and the project compiles against android-35).
+          # ubuntu-latest ships these; install via the real sdkmanager only if absent.
+          if [ ! -d "$SDK/build-tools/34.0.0" ] && [ -n "$CLT" ]; then
+            yes | "$CLT/sdkmanager" --sdk_root="$SDK" --licenses >/dev/null 2>&1 || true
+            "$CLT/sdkmanager" --sdk_root="$SDK" "build-tools;34.0.0" "platforms;android-35" || true
+          fi
+          mkdir -p "$HOME/.bubblewrap"
           printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$SDK" > "$HOME/.bubblewrap/config.json"
-          echo "JAVA_HOME=$JAVA_HOME"
-          echo "ANDROID_SDK=$SDK"
+          echo "JAVA_HOME=$JAVA_HOME"; echo "ANDROID_SDK=$SDK"
+          echo "--- SDK root ---"; ls -la "$SDK" | head -30
+          echo "--- build-tools ---"; ls "$SDK/build-tools" 2>/dev/null || true
           cat "$HOME/.bubblewrap/config.json"
 
       - name: Restore signing keystore

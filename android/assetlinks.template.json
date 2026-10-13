@@ -1,4 +1,5 @@
 [{
+  "_note": "TEMPLATE / blueprint only — this file is NOT served. The LIVE Digital Asset Links file is deployed at https://wtunsworth-a11y.github.io/.well-known/assetlinks.json (repo wtunsworth-a11y/wtunsworth-a11y.github.io, with a .nojekyll so Pages serves the .well-known folder). It carries the real signing fingerprint 4A:EA:5E:44:EF:78:E0:02:00:4B:D5:95:22:BD:F3:87:0B:A0:78:06:44:56:C3:31:68:E0:0B:DA:F2:6D:09:57 and is verified live via Google's digitalassetlinks statements:list API. Keep this template as the structure reference. If the signing keystore is ever rotated, update the fingerprint in the LIVE file (not here). The fingerprint below stays a placeholder on purpose so this reads as a template.",
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target": {
     "namespace": "android_app",

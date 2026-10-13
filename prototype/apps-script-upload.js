@@ -444,8 +444,27 @@ function getClans() {
 }
 function updateClans(obj) { saveClans(obj||{}); return { status:'ok', message:'Clans saved' }; }
 function seedClans() {
-  saveClans({ /* "Z05": ["Kubi","Bigaije"], "Z06": ["Muaduraina"] */ });
-  Logger.log('Seeded _clans.json — add each zone’s clan names via update_clans or seedClans. Keys are zone_ids.');
+  /* Fill each zone's clan names between the brackets, in the clans' own order,
+   * exactly as they should appear and be stored (this string is what ownership
+   * routing, compliance and reports all match on — keep spelling consistent).
+   * Leave a zone [] if it has no clan stewards yet. Keys are the zone_ids from
+   * the app's zone list (Z01–Z10, with Z07 split into Z07A/Z07B). Re-run this
+   * in the Apps Script editor after editing, or push the same map via
+   * update_clans. Example: "Z05": ["Kubi", "Bigaije"]  */
+  saveClans({
+    "Z01":  [],   // Zone 1
+    "Z02":  [],   // Zone 2
+    "Z03":  [],   // Zone 3
+    "Z04":  [],   // Zone 4
+    "Z05":  [],   // Zone 5
+    "Z06":  [],   // Zone 6
+    "Z07A": [],   // Zone 7A
+    "Z07B": [],   // Zone 7B
+    "Z08":  [],   // Zone 8
+    "Z09":  [],   // Zone 9
+    "Z10":  []    // Zone 10
+  });
+  Logger.log('Seeded _clans.json with 11 zone keys — fill each zone’s clan names then re-run seedClans() (or push via update_clans). Keys are zone_ids.');
 }
 
 /* ─── Expected clan-steward roster ──────────────────────────────────────

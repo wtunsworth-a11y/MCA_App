@@ -286,10 +286,19 @@ is coordinator-defined and syncs down like the other registries.
       **Calendar / Activities / Reports**, role-aware (empty headers hide).
       Community Data hidden; Patrol greyed "SOON"; Performance Monitoring at the
       bottom of Reports.
-- [ ] **Patrol module — TBC.** Likely a targeted **~8–10 km walk within each
-      clan** (where they have enough land), **once a month**, recording
-      **sightings and sounds** along the route. Shape: probably a tracked walk
-      (Field Mapping line mode) + timed sighting/sound entries. Spec to confirm.
+- [ ] **Patrol module — TBC.** Targeted **~8–10 km walk within each clan**
+      (where they have enough land), **once a month**, recording **sightings
+      and sounds** along a tracked route (Field Mapping line mode + timed
+      entries). Spatial-aware extensions (need data layers we don't hold yet):
+      - **Route past sacred sites** (where we have the data) to **check for
+        disturbance**; part of the patrol may be to **refresh the red-band tree
+        marking** that delineates the site, and record it.
+      - **Keep ≥100 m from disputed areas** — a live proximity **warning** as
+        the track nears a disputed-area boundary (warn, never block — resilience
+        rule).
+      - **Needs new spatial layers:** `_sacred_sites` and `_disputed_areas`
+        (polygons/points), captured via Field Mapping like clan boundaries, or
+        supplied as GIS. **Sensitive** — role-gate who can see them.
 
 ## Mapping consolidation (done 2026-10-13, v83)
 

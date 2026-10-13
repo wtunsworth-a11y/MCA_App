@@ -38,6 +38,17 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
   already has the `hunter_interview` event type, but no capture screen exists.
   When built, add it as a clan-steward compliance dimension in
   `reporting-spec.md` report A. Not now.
+- [ ] **Zones & Clans governance module (to build).** Coordinator create /
+  reallocate / merge zones+clans, forward‑only, with mandatory scanned community
+  evidence and an append‑only audit log (coordinator ID + fingerprint + PNG time
+  + community reference), surfaced in the annual report + searchable. **Gap to
+  close first:** coordinator actions are currently gated by a *shared* key with
+  no who/what/when log — needs enrolled‑identity + fingerprint attribution. Full
+  spec in `governance-and-audit.md`.
+- [ ] **Reference data to load before real clan stewards enrol** (see
+  `deployment-prerequisites.md`): clan list per zone (`_clans.json`), clan
+  boundaries per clan (`_clan_boundaries.json` — biggest gap), clan‑steward
+  roster (`_roster.json`), recipient emails (`_recipients.json`).
 - [ ] **Reports backend — go live.** The monthly/annual report jobs are built in
   `apps-script-upload.js` (reports A, H, I, J). To activate: set `_recipients.json`
   (`seedRecipients`) and `_roster.json` (`seedRoster`), run the trigger installers

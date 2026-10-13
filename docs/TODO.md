@@ -92,6 +92,10 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
         compliance + the calendar; use a **fixed transect location** re-walked
         each year (repeatability); confirm the four counts (butterflies,
         caterpillars, eggs, food plants) are all present and labelled clearly.
+      - **Layout:** like the **MaFIA matrix** — a grid with **counters per
+        sub-transect** (tally +/- for adults / eggs / caterpillars / food-plant
+        per 50 m cell), not plain text fields. Align the existing QABB matrix to
+        the MaFIA counter style where it isn't already.
       - Earlier note ("Christine method plus") — fold any extra protocol
         fields/steps in once that protocol is specified.
 

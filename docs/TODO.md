@@ -242,6 +242,36 @@ is coordinator-defined and syncs down like the other registries.
     (vector) to build the tile pack → load onto the phone → MapLibre/Leaflet
     renders it beneath the GPS points/lines.
 
+## SDM timing, holidays & dashboard (in progress, v84)
+
+- [x] **Public holidays on the Activity Calendar** — national PNG holidays
+      (`_holidays.json`; client `getHolidays`/`DEFAULT_HOLIDAYS` cached like zones;
+      backend `getHolidays`/`updateHolidays`/`seedHolidays`, GET `?action=holidays`,
+      coordinator `update_holidays`). Shown as a month section: everyone-off
+      (Christmas/Easter) = "No fieldwork", the rest = "Govt offices closed". No
+      Oro provincial days. **Ops: run `seedHolidays()` and re-confirm each year
+      against the National Gazette** (King's Birthday date especially).
+- [x] **Facility visit closed-reason** — when a facility is partial/closed the
+      steward records why (School holiday · Public holiday · Staff absent ·
+      Facility problem · Other), so a holiday closure isn't mis-read as a failed
+      service. Pre-fills "Public holiday" when the visit date is a known holiday.
+- [ ] **SDM random-day scheduler + SDM on-time — DEFERRED.** Two random working
+      days/month (tech-spec §8.7), year-round (no school-holiday exclusion —
+      closures are noted, not pre-excluded). Blocked on the **facility register**
+      + **clan boundaries** (to assign facilities to clans). On-time for SDM
+      waits on this; until then SDM shows count-only in Performance.
+- [ ] **Performance Monitoring overhaul — queued.** Role-aware "My Month":
+      clan steward (done/target/on-time/pay-ready), field officer (activity
+      tally — no targets yet; target-ready for when Matilda sets them), zone
+      staff (zone rollup of their clans). Currently a hardcoded mock; hide it
+      until rebuilt. On-time = cutoff model (25th/28th) now; census/random-day
+      on-time later with SDM.
+- [ ] **Dashboard layout — grouped headers (in discussion).** Group tiles under
+      headers (Calendar / Monitoring / Field & Community / Reports & Data),
+      role-aware (hide empty headers). Hide **Community Data** (no feature);
+      **Patrol** → queue for work (grey "coming soon" interim TBD). Field-officer
+      calendar still to spec (who schedules; what's on it).
+
 ## Mapping consolidation (done 2026-10-13, v83)
 
 - [x] **One mapping entry point** — retired the standalone **Tree Mapping**

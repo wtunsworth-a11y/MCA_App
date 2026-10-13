@@ -349,6 +349,16 @@ body {
   gap: 12px;
   padding: 14px;
 }
+.module-group-hdr {
+  grid-column: 1 / -1;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #6b6b6b;
+  margin: 10px 2px 0;
+}
+.module-group-hdr:first-child { margin-top: 0; }
 .module-tile {
   background: linear-gradient(135deg, #2E7D32, #388E3C);
   border-radius: 16px;
@@ -1950,45 +1960,20 @@ select.msel {
         <div id="dashDisturb" style="margin:8px 12px 0;"></div>
         <div id="dashStatus" style="margin:8px 12px 2px;"></div>
         <div class="module-grid">
+          <div class="module-group-hdr">Calendar</div>
           <div class="module-tile" onclick="nav('screen-activity-calendar')">
             <span class="module-emoji" data-icon="calendar" data-size="26"></span>
             <span class="module-name">Activity Calendar</span>
           </div>
+
+          <div class="module-group-hdr">Activities</div>
           <div class="module-tile" data-fo="1" data-vc="1" onclick="nav('screen-freemap')">
             <span class="module-emoji" data-icon="pin" data-size="26"></span>
             <span class="module-name">Field Mapping</span>
           </div>
-          <div class="module-tile" onclick="openUnderConstruction('Patrol')">
-            <span class="module-emoji" data-icon="walk" data-size="26"></span>
-            <span class="module-name">Patrol</span>
-          </div>
           <div class="module-tile" onclick="nav('screen-sdm')">
             <span class="module-emoji" data-icon="clipboard" data-size="26"></span>
             <span class="module-name">Service Delivery Monitoring</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-alerts')">
-            <span class="module-emoji" data-icon="warning" data-size="26"></span>
-            <span class="module-name">Disturbance Alerts</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-mafia-setup')">
-            <span class="module-emoji" data-icon="barchart" data-size="26"></span>
-            <span class="module-name">MaFIA Tool</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-meetings')">
-            <span class="module-emoji" data-icon="people" data-size="26"></span>
-            <span class="module-name">Meetings</span>
-          </div>
-          <div class="module-tile" onclick="openUnderConstruction('Community Data')">
-            <span class="module-emoji" data-icon="people" data-size="26"></span>
-            <span class="module-name">Community Data</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-performance')">
-            <span class="module-emoji" data-icon="linechart" data-size="26"></span>
-            <span class="module-name">Performance Monitoring</span>
-          </div>
-          <div class="module-tile" onclick="nav('screen-qabb-setup')">
-            <span class="module-emoji" data-icon="butterfly" data-size="26"></span>
-            <span class="module-name">QABB Butterfly Survey</span>
           </div>
           <div class="module-tile" onclick="nav('screen-water-setup')">
             <span class="module-emoji" data-icon="river" data-size="26"></span>
@@ -1996,27 +1981,54 @@ select.msel {
           </div>
           <div class="module-tile" onclick="nav('screen-pheno-setup')">
             <span class="module-emoji" data-icon="flower" data-size="26"></span>
-            <span class="module-name">Phenology Monitoring</span>
+            <span class="module-name">Phenology</span>
           </div>
           <div class="module-tile" onclick="nav('screen-meteo-setup')">
             <span class="module-emoji" data-icon="cloudrain" data-size="26"></span>
             <span class="module-name">Weather Station</span>
           </div>
+          <div class="module-tile" onclick="nav('screen-mafia-setup')">
+            <span class="module-emoji" data-icon="barchart" data-size="26"></span>
+            <span class="module-name">MaFIA Tool</span>
+          </div>
+          <div class="module-tile" onclick="nav('screen-qabb-setup')">
+            <span class="module-emoji" data-icon="butterfly" data-size="26"></span>
+            <span class="module-name">QABB Butterfly Survey</span>
+          </div>
           <div class="module-tile" onclick="nav('screen-conserv-setup')">
             <span class="module-emoji" data-icon="sprout" data-size="26"></span>
             <span class="module-name">Conservation Activities</span>
           </div>
+          <div class="module-tile" onclick="nav('screen-alerts')">
+            <span class="module-emoji" data-icon="warning" data-size="26"></span>
+            <span class="module-name">Disturbance Alerts</span>
+          </div>
+          <div class="module-tile" onclick="nav('screen-meetings')">
+            <span class="module-emoji" data-icon="people" data-size="26"></span>
+            <span class="module-name">Meetings</span>
+          </div>
+          <div class="module-tile disabled">
+            <span class="coming-badge">Soon</span>
+            <span class="module-emoji" data-icon="walk" data-size="26"></span>
+            <span class="module-name">Patrol</span>
+          </div>
           <div class="module-tile" id="tile-training" data-fo="1" data-vc="1" onclick="nav('screen-training-setup')">
             <span class="module-emoji" data-icon="mortarboard" data-size="26"></span>
-            <span class="module-name">Training Records</span>
+            <span class="module-name">Training</span>
           </div>
           <div class="module-tile" id="tile-distribution" data-fo="1" data-vc="1" style="display:none;" onclick="nav('screen-distribution')">
             <span class="module-emoji" data-icon="box" data-size="26"></span>
             <span class="module-name">Handover &amp; Distribution</span>
           </div>
+
+          <div class="module-group-hdr">Reports</div>
           <div class="module-tile" data-fo="1" data-vc="1" onclick="nav('screen-data-export')">
             <span class="module-emoji" data-icon="upload" data-size="26"></span>
             <span class="module-name">Export Data</span>
+          </div>
+          <div class="module-tile" onclick="nav('screen-performance')">
+            <span class="module-emoji" data-icon="linechart" data-size="26"></span>
+            <span class="module-name">Performance Monitoring</span>
           </div>
         </div>
       </div>
@@ -2795,7 +2807,7 @@ select.msel {
       <div class="top-bar" style="background:#E65100;">
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
-          <div class="bar-title">Phenology Monitoring</div>
+          <div class="bar-title">Phenology</div>
           <div class="bar-subtitle">Plot Setup &amp; Monthly Observations</div>
         </div>
         <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Foundation" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_MCF.png" alt="Managalas Conservation Foundation" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="European Union" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_EU_v1.png" alt="European Union" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/CIFOR-ICRAF-logo.png" alt="CIFOR-ICRAF" style="width:100%;height:100%;object-fit:contain;display:block;"></div></div>
@@ -3303,6 +3315,17 @@ select.msel {
                 <button class="weather-pill" id="fop-partial" onclick="facOpen('partial')">Partial</button>
                 <button class="weather-pill" id="fop-closed" onclick="facOpen('closed')">Closed</button>
               </div>
+            </div>
+            <div class="form-group" id="facReasonGroup" style="display:none;">
+              <label class="form-label">If not fully open, why? <span style="color:#B71C1C;">*</span></label>
+              <div id="facReasonPills" style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button type="button" class="weather-pill" id="freason-school_holiday" onclick="facReason('school_holiday')">School holiday</button>
+                <button type="button" class="weather-pill" id="freason-public_holiday" onclick="facReason('public_holiday')">Public holiday</button>
+                <button type="button" class="weather-pill" id="freason-staff_absent" onclick="facReason('staff_absent')">Staff absent</button>
+                <button type="button" class="weather-pill" id="freason-facility_problem" onclick="facReason('facility_problem')">Facility problem</button>
+                <button type="button" class="weather-pill" id="freason-other" onclick="facReason('other')">Other</button>
+              </div>
+              <input type="text" id="facReasonOther" class="form-input" style="display:none;margin-top:6px;font-size:0.78rem;" placeholder="Give the reason">
             </div>
             <div class="form-group">
               <label class="form-label">Staff present today</label>
@@ -5079,7 +5102,7 @@ select.msel {
       <div class="top-bar" style="background:#5C3D7A;">
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
-          <div class="bar-title">Training Records</div>
+          <div class="bar-title">Training</div>
           <div class="bar-subtitle" id="trainingSub">All sessions</div>
         </div>
         <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Foundation" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_MCF.png" alt="Managalas Conservation Foundation" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="European Union" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_EU_v1.png" alt="European Union" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/CIFOR-ICRAF-logo.png" alt="CIFOR-ICRAF" style="width:100%;height:100%;object-fit:contain;display:block;"></div></div>
@@ -5399,7 +5422,7 @@ select.msel {
                 </div>
               </div>
               <div class="sync-row" id="sync-row-training">
-                <div class="sync-row-label"><span class="sync-emoji" data-icon="mortarboard" data-size="16"></span><span class="sync-name">Training Records</span></div>
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="mortarboard" data-size="16"></span><span class="sync-name">Training</span></div>
                 <div class="sync-row-counts">
                   <span class="sync-badge-new" id="sync-new-training" style="display:none;"></span>
                   <span class="sync-badge-sent" id="sync-sent-training" style="display:none;"></span>
@@ -6651,7 +6674,8 @@ var FAC_TYPES = [
   {key:'aidpost', label:'Aid Post',      emoji:''+icon('aidpost',13)+''}
 ];
 var facSelectedType = '', facPhotoData = null, facGPSFix = null, _activeFacility = null;
-var fvPhotoData = null, _fOpen = 'open', _fMeds = 'yes';
+var fvPhotoData = null, _fOpen = 'open', _fMeds = 'yes', _fReason = '';
+var FAC_REASON_LABELS = { school_holiday:'School holiday', public_holiday:'Public holiday', staff_absent:'Staff absent', facility_problem:'Facility problem', other:'Other' };
 
 function facTypeMeta(key){ return FAC_TYPES.find(function(t){return t.key===key;}) || {key:key, label:key||'—'}; }
 
@@ -6907,6 +6931,7 @@ function openFacilityVisit() {
   /* reset inputs */
   _fOpen='open'; _fMeds='yes';
   ['open','partial','closed'].forEach(function(k){ var el=document.getElementById('fop-'+k); if(el) el.classList.toggle('active', k==='open'); });
+  facReason(''); var frg=document.getElementById('facReasonGroup'); if(frg) frg.style.display='none';
   ['yes','partial','no'].forEach(function(k){ var el=document.getElementById('fmed-'+k); if(el) el.classList.toggle('active', k==='yes'); });
   ['facStaffPresent','facStudents','facNotes'].forEach(function(fid){ var el=document.getElementById(fid); if(el) el.value=''; });
   fvPhotoData = null;
@@ -6915,7 +6940,25 @@ function openFacilityVisit() {
   var ps = document.getElementById('fvPhotoStatus'); if (ps){ ps.textContent='No photo taken'; ps.style.color='#888'; }
   nav('screen-facility');
 }
-function facOpen(v){ _fOpen=v; ['open','partial','closed'].forEach(function(k){var el=document.getElementById('fop-'+k);if(el)el.classList.toggle('active',k===v);}); }
+function facOpen(v){
+  _fOpen=v;
+  ['open','partial','closed'].forEach(function(k){var el=document.getElementById('fop-'+k);if(el)el.classList.toggle('active',k===v);});
+  /* Reason is asked only when the facility is not fully open. */
+  var g=document.getElementById('facReasonGroup');
+  if(g){
+    if(v==='open'){ g.style.display='none'; facReason(''); }
+    else {
+      g.style.display='block';
+      /* If today is a known public holiday and no reason chosen yet, pre-fill it. */
+      if(!_fReason && _isHolidayToday()) facReason('public_holiday');
+    }
+  }
+}
+function facReason(v){
+  _fReason=v;
+  Object.keys(FAC_REASON_LABELS).forEach(function(k){ var el=document.getElementById('freason-'+k); if(el) el.classList.toggle('active', k===v); });
+  var o=document.getElementById('facReasonOther'); if(o){ o.style.display=(v==='other')?'block':'none'; if(v!=='other') o.value=''; }
+}
 function facMeds(v){ _fMeds=v; ['yes','partial','no'].forEach(function(k){var el=document.getElementById('fmed-'+k);if(el)el.classList.toggle('active',k===v);}); }
 function fvTriggerPhoto(){ var inp=document.getElementById('fvPhotoInput'); if(inp) inp.click(); }
 function fvHandlePhoto(input){
@@ -6933,6 +6976,11 @@ function submitFacilityVisit() {
   var s = _activeFacility || {};
   if (!fvPhotoData) { toast('Capture a photo of the facility before submitting.'); return; }
   var val = function(id){ var e=document.getElementById(id); return e ? e.value : ''; };
+  /* When not fully open, the reason is recorded — so a holiday closure reads as
+     "closed for the holiday", not a failed service. */
+  if (_fOpen !== 'open' && !_fReason) { toast('Choose why the facility is not fully open.'); return; }
+  var reasonOther = (_fReason === 'other') ? (val('facReasonOther')||'').trim() : '';
+  if (_fOpen !== 'open' && _fReason === 'other' && !reasonOther) { toast('Give the reason.'); return; }
   var data = {
     survey_type:'facility_visit',
     facility_id: (typeof s.id !== 'undefined') ? s.id : null,
@@ -6940,6 +6988,9 @@ function submitFacilityVisit() {
     clan: myClan(),
     date: document.getElementById('facVisitDate') ? document.getElementById('facVisitDate').textContent : '',
     operating: _fOpen,
+    closed_reason: (_fOpen !== 'open') ? _fReason : '',
+    closed_reason_label: (_fOpen !== 'open') ? (FAC_REASON_LABELS[_fReason]||'') : '',
+    closed_reason_other: reasonOther,
     staff_present: val('facStaffPresent'),
     notes: val('facNotes'),
     photo: fvPhotoData
@@ -7336,6 +7387,7 @@ function initActivityCalendar(){
   if (addBtn) addBtn.style.display = window._coordSecret ? 'block' : 'none';
   renderActivityCalendar();
   syncCalendarFromServer(function(ok){ if(ok) renderActivityCalendar(); });
+  getHolidays(function(){ renderActivityCalendar(); });
 }
 function calShiftMonth(d){ _calMonth = new Date(_calMonth.getFullYear(), _calMonth.getMonth()+d, 1); renderActivityCalendar(); }
 
@@ -7428,6 +7480,24 @@ function renderActivityCalendar(){
         }
         if (!e._followup && e.status!=='done' && e.status!=='cancelled' && window._coordSecret && e.id!=null)
           h += '<button class="btn-outline" style="margin-top:8px;width:100%;padding:6px;font-size:0.76rem;border-color:#2E7D32;color:#2E7D32;" onclick="markCalDone('+e.id+')">Mark done</button>';
+        h += '</div>';
+      });
+    }
+    /* Public holidays this month (context). Government offices close on all of
+       them; Christmas & Easter stop fieldwork too. */
+    var hols = _holidaysInMonth(mk);
+    if (hols.length){
+      h += '<div style="font-size:0.8rem;font-weight:800;color:#4A148C;margin:16px 2px 8px;">Public holidays</div>';
+      hols.forEach(function(ho){
+        var dd = new Date(ho.date+'T00:00:00').getDate();
+        var everyone = !!ho.everyone_off;
+        var tag = everyone ? 'No fieldwork' : 'Govt offices closed';
+        var tagColor = everyone ? '#B71C1C' : '#8a6d00';
+        var tagBg = everyone ? '#FFEBEE' : '#FFF8E1';
+        h += '<div class="card" style="padding:9px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;">';
+        h += '<div style="text-align:center;min-width:34px;"><div style="font-size:1.1rem;font-weight:800;color:#4A148C;line-height:1;">'+dd+'</div><div style="font-size:0.58rem;color:#999;text-transform:uppercase;">'+MONTHS[_calMonth.getMonth()].slice(0,3)+'</div></div>';
+        h += '<span style="flex:1;font-size:0.82rem;font-weight:600;color:#333;">'+_escRem(ho.name||'Public holiday')+'</span>';
+        h += '<span style="font-size:0.63rem;font-weight:700;color:'+tagColor+';background:'+tagBg+';border-radius:8px;padding:3px 7px;white-space:nowrap;">'+tag+'</span>';
         h += '</div>';
       });
     }
@@ -10838,7 +10908,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v83'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v84'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11036,8 +11106,23 @@ function cacheStewardProfile() {
            map the sites they visit (plus Export Data to get records off-phone). */
         else if (role === 'consultant') { if (t.getAttribute('data-vc') !== '1') t.style.display = 'none'; }
       });
+      /* Hide a group header when its role-filtered group has no visible tiles. */
+      _applyGroupHeaders();
     }
   });
+}
+/* Show a dashboard group header only if at least one tile under it is visible
+   (so a field officer doesn't get an empty "Calendar" or "Monitoring" header). */
+function _applyGroupHeaders(){
+  var grid = document.querySelector('#screen-dashboard .module-grid');
+  if (!grid) return;
+  var curHdr = null, anyVisible = false;
+  var flush = function(){ if (curHdr) curHdr.style.display = anyVisible ? '' : 'none'; };
+  Array.prototype.slice.call(grid.children).forEach(function(el){
+    if (el.classList.contains('module-group-hdr')) { flush(); curHdr = el; anyVisible = false; }
+    else if (el.classList.contains('module-tile')) { if (el.style.display !== 'none') anyVisible = true; }
+  });
+  flush();
 }
 
 /* ── Zone list management ─────────────────────────────────────────── */
@@ -11139,6 +11224,50 @@ function getClanList(callback) {
     } else { callback(cached || {}); }
   });
 }
+/* ── Public holidays (national PNG; coordinator-maintained, cached in the auth
+   store like zones/clans). Shown on the Activity Calendar for context and used
+   to pre-fill a facility "Public holiday" closed-reason. Christmas & Easter are
+   everyone_off (no fieldwork); the rest are government-office closures. Dates
+   shift year to year — confirm against the National Gazette. No Oro provincial
+   days. The project refreshes _holidays.json each year (seedHolidays /
+   update_holidays); this shipped list is the offline fallback. ── */
+var DEFAULT_HOLIDAYS = [
+  {date:'2026-01-01', name:"New Year's Day"},
+  {date:'2026-02-26', name:'Grand Chief Sir Michael Somare Remembrance Day'},
+  {date:'2026-04-03', name:'Good Friday', everyone_off:true},
+  {date:'2026-04-04', name:'Easter Saturday', everyone_off:true},
+  {date:'2026-04-05', name:'Easter Sunday', everyone_off:true},
+  {date:'2026-04-06', name:'Easter Monday', everyone_off:true},
+  {date:'2026-06-17', name:"King's Birthday"},
+  {date:'2026-07-23', name:'National Remembrance Day'},
+  {date:'2026-08-26', name:'National Repentance Day'},
+  {date:'2026-09-16', name:'Independence Day'},
+  {date:'2026-12-25', name:'Christmas Day', everyone_off:true},
+  {date:'2026-12-26', name:'Boxing Day', everyone_off:true}
+];
+var _holidaysCache = DEFAULT_HOLIDAYS.slice();
+function getHolidays(callback){
+  getAllRecords('auth', function(records){
+    var cached=null;
+    if(records) records.forEach(function(r){ if(r.id==='holidays') cached=r.holidays; });
+    if(cached && cached.length) _holidaysCache = cached;
+    if(UPLOAD_ENDPOINT && navigator.onLine){
+      fetch(UPLOAD_ENDPOINT+'?action=holidays')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if(d.status==='ok' && d.holidays && d.holidays.length){
+            _holidaysCache = d.holidays;
+            saveRecord('auth', {id:'holidays', holidays:d.holidays, fetched:new Date().toISOString()}, function(){});
+            if(callback) callback(d.holidays);
+          } else { if(callback) callback(_holidaysCache); }
+        }).catch(function(){ if(callback) callback(_holidaysCache); });
+    } else { if(callback) callback(_holidaysCache); }
+  });
+}
+function _pngDate(d){ try{ return (d||new Date()).toLocaleDateString('en-CA',{timeZone:'Pacific/Port_Moresby'}); }catch(e){ return (d||new Date()).toISOString().slice(0,10); } }
+function _isHolidayToday(){ var t=_pngDate(); return _holidaysCache.some(function(h){ return h.date===t; }); }
+function _holidaysInMonth(mk){ return _holidaysCache.filter(function(h){ return h.date && h.date.slice(0,7)===mk; }).sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); }); }
+
 /* Repopulate the clan dropdown for the currently-selected zone. */
 function enrollZoneChanged() {
   var zsel = document.getElementById('enrollZoneSelect');
@@ -11683,7 +11812,7 @@ function syncAuthorisations(profile) {
         /* Notify user if they now have new training access */
         var newTopics = granted.filter(function(tid) { return existing.indexOf(tid) === -1; });
         if (newTopics.length > 0) {
-          toast('New training topic(s) unlocked — see Training Records');
+          toast('New training topic(s) unlocked — see Training');
         }
       });
     }).catch(function() { /* network errors are silent — not critical path */ });
@@ -12150,14 +12279,14 @@ var DATA_STORES = ['mafia','qabb','water','phenology','pheno_plots',
    water/weather/biodiversity, warm = field ops & incidents, blue/indigo/purple
    = service, community & admin. White text throughout for contrast. ── */
 var DASH_TILE_COLORS = {
-  'MaFIA Tool':'#2E7D32', 'Conservation Activities':'#43A047', 'Tree Mapping':'#33691E',
-  'Phenology Monitoring':'#558B2F', 'Garden Mapping':'#827717',
+  'MaFIA Tool':'#2E7D32', 'Conservation Activities':'#43A047',
+  'Phenology':'#558B2F',
   'Water Quality':'#00838F', 'Weather Station':'#0097A7', 'QABB Butterfly Survey':'#00897B',
-  'Field Mapping':'#E65100', 'Observations':'#0288D1', 'Patrol':'#5D4037',
-  'Social Disturbance':'#D84315', 'Disturbance Alerts':'#C62828',
+  'Field Mapping':'#E65100', 'Patrol':'#5D4037',
+  'Disturbance Alerts':'#C62828',
   'Activity Calendar':'#1565C0', 'Service Delivery Monitoring':'#00695C',
   'Meetings':'#5E35B1', 'Community Data':'#3949AB', 'Performance Monitoring':'#283593',
-  'Training Records':'#6A1B9A', 'Handover & Distribution':'#AD1457', 'Export Data':'#455A64'
+  'Training':'#6A1B9A', 'Handover & Distribution':'#AD1457', 'Export Data':'#455A64'
 };
 function colorDashTiles() {
   document.querySelectorAll('#screen-dashboard .module-tile').forEach(function(t) {
@@ -13122,7 +13251,7 @@ function saveMafia() {
   }
 }
 
-/* ── Training Records ── */
+/* ── Training ── */
 var selectedTrainingType = '';
 var selectedMaterials = [];
 

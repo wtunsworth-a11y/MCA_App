@@ -286,19 +286,25 @@ is coordinator-defined and syncs down like the other registries.
       **Calendar / Activities / Reports**, role-aware (empty headers hide).
       Community Data hidden; Patrol greyed "SOON"; Performance Monitoring at the
       bottom of Reports.
-- [ ] **Patrol module — TBC.** Targeted **~8–10 km walk within each clan**
-      (where they have enough land), **once a month**, recording **sightings
-      and sounds** along a tracked route (Field Mapping line mode + timed
-      entries). Spatial-aware extensions (need data layers we don't hold yet):
-      - **Route past sacred sites** (where we have the data) to **check for
-        disturbance**; part of the patrol may be to **refresh the red-band tree
-        marking** that delineates the site, and record it.
-      - **Keep ≥100 m from disputed areas** — a live proximity **warning** as
-        the track nears a disputed-area boundary (warn, never block — resilience
-        rule).
-      - **Needs new spatial layers:** `_sacred_sites` and `_disputed_areas`
-        (polygons/points), captured via Field Mapping like clan boundaries, or
-        supplied as GIS. **Sensitive** — role-gate who can see them.
+- [ ] **Patrol module — TBC.** A **FIXED walking route** per clan (~8–10 km,
+      where they have enough land), walked **once a month**. Fixed route chosen
+      because it's **safer for the steward** (planned, known path) and gives a
+      **repeatable observation** (same transect monthly → comparable sightings/
+      sounds over time). Model = register → approve → monitor, like the other
+      registries + MaFIA navigation:
+      - **Define the route once** — map the polyline (Field Mapping line),
+        coordinator-approved. Planned at design time to **pass sacred sites**
+        (to check for disturbance + refresh the **red-band tree marking**) and
+        stay **≥100 m from disputed areas** — so safety is baked into the route,
+        not computed live.
+      - **Monthly patrol** — navigate/follow the fixed route (reuse MaFIA-style
+        live navigation), recording **sightings & sounds**. Open: continuous
+        along the line vs **fixed observation stations/waypoints** (stations give
+        cleaner month-to-month trends).
+      - Optional **live ≥100 m disputed-area warning** as a backstop (warn,
+        never block). Sacred-site / disputed layers (`_sacred_sites`,
+        `_disputed_areas`) are **sensitive** → role-gated; useful for route
+        design + the warning, but not a hard blocker once the route is fixed.
 
 ## Mapping consolidation (done 2026-10-13, v83)
 

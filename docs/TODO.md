@@ -88,10 +88,40 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
         fingerprint gate) → `screen-qabb-matrix` records land-use, Aristolochia
         vine count and QABB sightings (adults / eggs / caterpillars) across
         **10 × 50 m sub-transects = 500 m**.
-      - **Gap to close:** lock the cadence to **annual / July** (not monthly) in
-        compliance + the calendar; use a **fixed transect location** re-walked
-        each year (repeatability); confirm the four counts (butterflies,
-        caterpillars, eggs, food plants) are all present and labelled clearly.
+      - **Finished (v88):** dummy values **removed from the markup** and zeroed
+        on entry; cadence is **monthly through the breeding season — June, July
+        & August** (`cadence: seasonal_jun_aug`, `survey_month` stored; soft
+        reminder outside Jun–Aug, never blocks); record carries survey_year,
+        weather, notes, start GPS, clan + steward; food-plant row relabelled
+        "Aristolochia vines (food plant)"; fake "Transect #14" labels removed.
+      - **Training mode (done v89):** a toggle generates a 500 m transect near
+        the steward (like MaFIA); walk-to-start (live distance + auto-fingerprint
+        within 30 m); the matrix shows the **active 50 m sub-transect from GPS**
+        (projects the live position onto the start→end line → along-track ÷ 50 →
+        ST1–10, highlighted — no tape). All practice data is `is_training:true`
+        with prominent TRAINING banners. **MaFIA** records are also
+        `is_training:true` now (it always runs on a generated transect).
+      - **Still to do — real transects:** preload **one transect per clan**
+        (start+end) into a `_qabb_transects` registry (coord seeds; synced like
+        clans); the same nav/detection then runs on the real transect. Wire QABB
+        into **seasonal (Jun–Aug)** compliance. Blocked on the preloaded points.
+
+- [ ] **Progressive rollout — training → full, per clan (design).** Make
+      "training vs full" **data-driven per clan**: a clan auto-flips to **full**
+      once its real **transect + clan list** are loaded; until then it stays
+      **training-only**. Zones light up independently as data lands (registry
+      state, no redeploy).
+- [ ] **Training-gated module unlock (entitlements).** Coordinator marks a
+      steward/clan **trained** for a module after training is delivered; the full
+      module opens only when **trained AND real data ready** (both gates).
+      Small synced registry (`_entitlements` / per-module `trained` list) — also
+      the rollout control. (Applies to QABB, MaFIA, and future modules.)
+- [ ] **In-app training materials — host SEPARATELY, add later.** Do NOT embed
+      in `index.html` (already ~880 KB; would bloat every app update,
+      esp. images/video). Host as their own files/page, loaded on demand and
+      cached on their own, so material size is decoupled from app-update size.
+      **Vanilla first**, others later; best added once the app changes less
+      often.
       - **Layout:** like the **MaFIA matrix** — a grid with **counters per
         sub-transect** (tally +/- for adults / eggs / caterpillars / food-plant
         per 50 m cell), not plain text fields. Align the existing QABB matrix to

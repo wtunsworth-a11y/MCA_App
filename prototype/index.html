@@ -2222,7 +2222,7 @@ select.msel {
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
           <div class="bar-title">QABB Butterfly Survey</div>
-          <div class="bar-subtitle">Transect Setup</div>
+          <div class="bar-subtitle">Breeding season — Jun · Jul · Aug</div>
         </div>
         <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Foundation" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_MCF.png" alt="Managalas Conservation Foundation" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="European Union" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_EU_v1.png" alt="European Union" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/CIFOR-ICRAF-logo.png" alt="CIFOR-ICRAF" style="width:100%;height:100%;object-fit:contain;display:block;"></div></div>
       </div>
@@ -2233,6 +2233,17 @@ select.msel {
         </div>
         <div id="qabbContent" style="display:none;">
           <div class="p14" style="padding-bottom:20px;">
+
+            <div class="card" style="padding:10px 14px;margin-bottom:12px;background:#FFF8E1;border:1px solid #FFE082;">
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;">
+                <span style="font-size:0.82rem;font-weight:700;color:#8a6d00;">Training mode — generate a nearby transect</span>
+                <input type="checkbox" id="qabbTrainingToggle" onchange="initQabb()" style="width:20px;height:20px;">
+              </label>
+              <div style="font-size:0.68rem;color:#8a6d00;margin-top:4px;">For practice until the real clan transects are loaded. Generates a 500 m transect near you to walk.</div>
+            </div>
+            <div id="qabbTrainingBanner" style="display:none;margin-bottom:12px;padding:10px 12px;border-radius:10px;background:#C62828;color:#fff;font-size:0.78rem;font-weight:700;text-align:center;">&#9888; TRAINING MODE — this is a practice transect at a made-up location, not a real survey site. Anything you save is flagged as training.</div>
+            <div id="qabbNoTransect" style="display:none;margin-bottom:12px;padding:10px 12px;border-radius:10px;background:#FFF3E0;border:1px solid #FFCC80;color:#E65100;font-size:0.78rem;">No QABB transect is loaded for your clan yet. Turn on <strong>Training mode</strong> above to practise the survey.</div>
+
 
             <div class="map-placeholder">
               <svg viewBox="0 0 362 160" xmlns="http://www.w3.org/2000/svg">
@@ -2270,19 +2281,19 @@ select.msel {
             <div class="card" style="padding:12px 16px;">
               <div class="transect-row">
                 <span class="td-label"><span data-icon="butterfly" data-size="14"></span> Survey</span>
-                <span>QABB Transect #14</span>
+                <span>QABB — breeding season (Jun–Aug)</span>
               </div>
               <div class="transect-row">
                 <span class="td-label"><span data-icon="pin" data-size="14"></span> Start</span>
-                <span>-9.1320° S, 148.4050° E</span>
+                <span id="qabbInfoStart">—</span>
               </div>
               <div class="transect-row">
                 <span class="td-label">🏁 End</span>
-                <span>-9.1276° S, 148.4105° E</span>
+                <span id="qabbInfoEnd">—</span>
               </div>
               <div class="transect-row">
                 <span class="td-label"><span data-icon="compass" data-size="14"></span> Bearing</span>
-                <span>142° SE</span>
+                <span id="qabbInfoBearing">—</span>
               </div>
               <div class="transect-row">
                 <span class="td-label"><span data-icon="ruler" data-size="14"></span> Length</span>
@@ -2339,13 +2350,16 @@ select.msel {
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
           <div class="bar-title">QABB Survey</div>
-          <div class="bar-subtitle">Transect #14 — Recording</div>
+          <div class="bar-subtitle">Recording — 500 m transect</div>
         </div>
       </div>
       <div class="scroll-content">
         <div class="matrix-note" style="background:#e0f2f1;border-color:#80cbc4;color:#00695C;">
-          Record land use, Aristolochia vine count, and QABB sightings (adults, eggs, caterpillars) for each 50 m sub-transect. Scroll right for all 10 sub-transects.
+          The QABB count runs <strong>each month through the breeding season — June, July &amp; August</strong>. Record land use, Aristolochia (food-plant) vine count, and QABB sightings (adult butterflies, eggs, caterpillars) for each 50 m sub-transect. Scroll right for all 10 sub-transects.
         </div>
+        <div id="qabbCadenceNote" style="display:none;margin:8px 14px 0;padding:8px 11px;border-radius:10px;font-size:0.76rem;background:#FFF3E0;border:1px solid #FFCC80;color:#E65100;"></div>
+        <div id="qabbMatrixTrainingBanner" style="display:none;margin:8px 14px 0;padding:8px 11px;border-radius:10px;font-size:0.76rem;font-weight:700;background:#C62828;color:#fff;text-align:center;">&#9888; TRAINING — practice data, flagged as training (not a real survey).</div>
+        <div id="qabbActiveST" style="display:none;margin:8px 14px 0;padding:8px 11px;border-radius:10px;font-size:0.78rem;font-weight:700;background:#E0F2F1;border:1px solid #80CBC4;color:#00695C;text-align:center;"></div>
 
         <div class="p14" style="padding-top:6px;padding-bottom:0;">
           <div class="card" style="padding:10px 14px;">
@@ -2395,9 +2409,9 @@ select.msel {
               <tr style="background:#e0f2f1;"><td style="position:sticky;left:0;z-index:3;background:#e0f2f1;font-weight:700;color:#00695C;padding:6px 8px;" colspan="11">LAND USE &amp; HABITAT</td></tr>
               <tr>
                 <td style="position:sticky;left:0;z-index:2;background:#fff;">Land Use</td>
-                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" value="gaden" placeholder="..."></td>
-                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" value="bus" placeholder="..."></td>
-                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" value="bus" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
                 <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
                 <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
                 <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
@@ -2408,24 +2422,24 @@ select.msel {
               </tr>
               <tr style="background:#e0f2f1;"><td style="position:sticky;left:0;z-index:3;background:#e0f2f1;font-weight:700;color:#00695C;padding:6px 8px;" colspan="11">HOST PLANT</td></tr>
               <tr>
-                <td style="position:sticky;left:0;z-index:2;background:#fff;">Aristolochia Vines</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">8</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">5</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td style="position:sticky;left:0;z-index:2;background:#fff;">Aristolochia vines<br><span style="font-weight:400;font-size:0.6rem;color:#888;">food plant</span></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
                 <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
               </tr>
               <tr style="background:#e0f2f1;"><td style="position:sticky;left:0;z-index:3;background:#e0f2f1;font-weight:700;color:#00695C;padding:6px 8px;" colspan="11">QABB SIGHTINGS</td></tr>
               <tr>
                 <td style="position:sticky;left:0;z-index:2;background:#fff;">Adult QABB</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">2</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
                 <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
               </tr>
               <tr>
                 <td style="position:sticky;left:0;z-index:2;background:#fff;">QABB Eggs</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
                 <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
               </tr>
               <tr>
                 <td style="position:sticky;left:0;z-index:2;background:#fff;">QABB Caterpillars</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">2</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
                 <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
               </tr>
             </tbody>
@@ -6344,7 +6358,7 @@ function initMafia(){
     _mafiaFill('mfEnd',   mafiaEnd.lat.toFixed(5)+'°, '+mafiaEnd.lon.toFixed(5)+'°');
     _mafiaFill('mfBearing', Math.round(mafiaTransectBearing)+'° '+compass16(mafiaTransectBearing));
     _mafiaFill('mfLength', MAFIA_TRANSECT_M+' m');
-    document.getElementById('mafiaGenNote').innerHTML=icon('info',13)+' Training transect generated '+Math.round(startDist)+' m from you. Walk to the <strong>start point</strong>.';
+    document.getElementById('mafiaGenNote').innerHTML=icon('warning',13)+' <strong>TRAINING</strong> — practice transect generated '+Math.round(startDist)+' m from you (made-up location, not a real survey site; data flagged as training). Walk to the <strong>start point</strong>.';
     _mafiaNavTo(mafiaStart, 'Transect Start');
   });
 }
@@ -9012,39 +9026,99 @@ function toggleActivityLayer(type) {
 let qabbVerified = false;
 let qabbArrived = false;
 
+var qabbStartGps = null, qabbStart = null, qabbEnd = null, qabbBearing = null, qabbTrainerPos = null, qabbTraining = false, qabbNavWatch = null, qabbTrack = [];
+var QABB_LEN_M = 500, QABB_ST_M = 50, QABB_ARRIVE_M = 30;
+/* Along-track distance (m) of cur projected onto the start->end line, clamped 0..length. */
+function _qabbAlongM(start, end, cur) {
+  if (!start || !end || !cur) return null;
+  var toM = function(a, b) {
+    var R = 6371000, toR = function(d){ return d*Math.PI/180; };
+    return { e: toR(b.lon - a.lon) * R * Math.cos(toR(a.lat)), n: toR(b.lat - a.lat) * R };
+  };
+  var E = toM(start, end), C = toM(start, cur);
+  var len2 = E.e*E.e + E.n*E.n; if (len2 === 0) return 0;
+  var t = (C.e*E.e + C.n*E.n) / len2;
+  t = Math.max(0, Math.min(1, t));
+  return t * Math.sqrt(len2);
+}
+/* Active sub-transect (1..10) from an along-track distance. */
+function _qabbSTIndex(alongM) {
+  if (alongM == null) return null;
+  return Math.max(1, Math.min(10, Math.floor(alongM / QABB_ST_M) + 1));
+}
 function initQabb() {
-  qabbVerified = false;
-  qabbArrived = false;
+  qabbVerified = false; qabbArrived = false;
+  qabbStartGps = null; qabbStart = null; qabbEnd = null; qabbBearing = null; qabbTrack = [];
+  if (qabbNavWatch != null && navigator.geolocation) { try { navigator.geolocation.clearWatch(qabbNavWatch); } catch(e){} qabbNavWatch = null; }
+  qabbTraining = !!(document.getElementById('qabbTrainingToggle') && document.getElementById('qabbTrainingToggle').checked);
   document.getElementById('qabbBeginBtn').disabled = true;
   document.getElementById('qabbFpBtn').classList.remove('verified');
   document.getElementById('qabbFpTxt').textContent = 'Tap to Verify Identity';
   document.getElementById('qabbFpSection').style.display = 'none';
   document.getElementById('qabbNavGateCard').classList.remove('arrived');
   document.getElementById('qabbBtnArrive').disabled = false;
-  document.getElementById('qabbBtnArrive').textContent = 'I\'ve Reached Start Point \u2713';
-  document.getElementById('qabbNavGateHint').textContent = 'Walk to start point \u2014 fingerprint verify unlocks when within 30 m';
-  document.getElementById('qabbLoading').style.display = 'block';
-  document.getElementById('qabbContent').style.display = 'none';
-  setTimeout(function() {
-    document.getElementById('qabbLoading').style.display = 'none';
-    document.getElementById('qabbContent').style.display = 'block';
-  }, 1200);
+  document.getElementById('qabbBtnArrive').textContent = "I've Reached Start Point ✓";
+  document.getElementById('qabbNavGateHint').textContent = 'Walk to start point — fingerprint verify unlocks when within 30 m';
+  var tb = document.getElementById('qabbTrainingBanner'); if (tb) tb.style.display = qabbTraining ? 'block' : 'none';
+  var nt = document.getElementById('qabbNoTransect'); if (nt) nt.style.display = 'none';
+  var gate = document.getElementById('qabbNavGateCard');
+  document.getElementById('qabbLoading').style.display = 'none';
+  document.getElementById('qabbContent').style.display = 'block';
+  if (qabbTraining) {
+    if (gate) gate.style.display = 'block';
+    ['qabbInfoStart','qabbInfoEnd','qabbInfoBearing'].forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent='locating…'; });
+    captureGPS(function(gps) {
+      if (!gps) { document.getElementById('qabbNavGateHint').textContent = 'Could not get GPS — move to open sky and toggle Training again.'; return; }
+      qabbTrainerPos = { lat: parseFloat(gps.lat), lon: parseFloat(gps.lng) };
+      var sB = Math.random()*360, sD = 40 + Math.random()*60;
+      qabbStart = geoDest(qabbTrainerPos, sB, sD);
+      qabbBearing = Math.random()*360;
+      qabbEnd = geoDest(qabbStart, qabbBearing, QABB_LEN_M);
+      document.getElementById('qabbInfoStart').textContent = qabbStart.lat.toFixed(5)+'°, '+qabbStart.lon.toFixed(5)+'°';
+      document.getElementById('qabbInfoEnd').textContent = qabbEnd.lat.toFixed(5)+'°, '+qabbEnd.lon.toFixed(5)+'°';
+      document.getElementById('qabbInfoBearing').textContent = Math.round(qabbBearing)+'° '+compass16(qabbBearing);
+      document.getElementById('qabbNavGateHint').textContent = 'Training transect generated '+Math.round(sD)+' m away — walk to the start point.';
+      _qabbStartNav();
+    });
+  } else {
+    if (gate) gate.style.display = 'none';
+    if (nt) nt.style.display = 'block';
+    ['qabbInfoStart','qabbInfoEnd','qabbInfoBearing'].forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent='—'; });
+  }
 }
-
+function _qabbStartNav() {
+  if (qabbNavWatch != null || !navigator.geolocation) return;
+  qabbNavWatch = navigator.geolocation.watchPosition(function(pos) {
+    if (qabbArrived) return;
+    var cur = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    var d = qabbStart ? Math.round(_haversine(cur, qabbStart)) : null;
+    if (d != null && d > QABB_ARRIVE_M) {
+      document.getElementById('qabbNavGateHint').textContent = d + ' m to start point — keep walking (verify unlocks within '+QABB_ARRIVE_M+' m).';
+    } else if (d != null) {
+      _qabbReachedStart(cur, pos.coords.accuracy);
+    }
+  }, function(){}, { enableHighAccuracy: true, maximumAge: 1000, timeout: 20000 });
+}
+function _qabbReachedStart(cur, acc) {
+  qabbArrived = true;
+  qabbStartGps = { lat: cur.lat, lng: cur.lon, accuracy: Math.round(acc||0), source: 'gnss' };
+  document.getElementById('qabbNavGateCard').classList.add('arrived');
+  document.getElementById('qabbNavGateHint').textContent = '✓ At the start point — verify identity';
+  document.getElementById('qabbBtnArrive').textContent = '✓ Arrived';
+  document.getElementById('qabbBtnArrive').disabled = true;
+  document.getElementById('qabbFpSection').style.display = 'block';
+  checkQabbReady();
+}
 function qabbArrive() {
   var btn = document.getElementById('qabbBtnArrive');
   btn.disabled = true;
   btn.innerHTML = ''+icon('pin',13)+' Getting GPS…';
   captureGPS(function(gps, err) {
     qabbArrived = true;
+    qabbStartGps = gps || null;
     document.getElementById('qabbNavGateCard').classList.add('arrived');
-    if (gps) {
-      document.getElementById('qabbNavGateHint').textContent = '\u2713 At start point ('+gps.lat+', '+gps.lng+' \u00b1'+gps.accuracy+'m) \u2014 verify identity';
-      btn.textContent = '\u2713 Arrived \u2014 GPS recorded';
-    } else {
-      document.getElementById('qabbNavGateHint').textContent = '\u2713 At start point (GPS: '+err+') \u2014 verify identity';
-      btn.textContent = '\u2713 Arrived (no GPS)';
-    }
+    document.getElementById('qabbNavGateHint').textContent = gps ? ('✓ At start point ('+gps.lat+', '+gps.lng+' ±'+gps.accuracy+'m) — verify identity') : ('✓ At start point (GPS: '+err+') — verify identity');
+    btn.textContent = gps ? '✓ Arrived — GPS recorded' : '✓ Arrived (no GPS)';
     document.getElementById('qabbFpSection').style.display = 'block';
     checkQabbReady();
   });
@@ -9072,6 +9146,47 @@ function initQabbMatrix() {
   document.getElementById('qabbEndAuto').textContent = 'set on submit';
   var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('qabbDate').textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+  /* Start every survey blank — clear the demo land-use text and zero all tallies. */
+  var table = document.querySelector('#screen-qabb-matrix .matrix-table');
+  if (table) {
+    table.querySelectorAll('input[type="text"]').forEach(function(i){ i.value=''; });
+    table.querySelectorAll('.tally-count').forEach(function(s){ s.textContent='0'; });
+  }
+  /* Weather back to the neutral default; notes cleared. */
+  try { wxQ('cloudy','sunny'); } catch(e){}
+  var nt = document.querySelector('#screen-qabb-matrix textarea'); if (nt) nt.value='';
+  /* Breeding-season cadence — soft reminder (never blocks) outside Jun–Aug. */
+  var cad = document.getElementById('qabbCadenceNote');
+  if (cad) {
+    if ([5,6,7].indexOf(now.getMonth()) >= 0) { cad.style.display='none'; }
+    else {
+      cad.style.display='block';
+      cad.innerHTML = '⚠ QABB is surveyed each month in the <strong>breeding season (June–August)</strong> — today is '+months[now.getMonth()]+'. Record only if this is a planned catch-up.';
+    }
+  }
+  /* Training banner on the matrix too. */
+  var mtb = document.getElementById('qabbMatrixTrainingBanner'); if (mtb) mtb.style.display = qabbTraining ? 'block' : 'none';
+  /* Live GPS → which 50 m sub-transect you're in (no 500 m tape). */
+  _qabbMatrixNav();
+}
+/* As the steward walks the transect, show the active sub-transect from GPS. */
+function _qabbMatrixNav() {
+  var ind = document.getElementById('qabbActiveST');
+  if (!qabbStart || !qabbEnd) { if (ind) ind.style.display = 'none'; return; }
+  if (qabbNavWatch != null && navigator.geolocation) { try { navigator.geolocation.clearWatch(qabbNavWatch); } catch(e){} qabbNavWatch = null; }
+  if (!navigator.geolocation) return;
+  qabbNavWatch = navigator.geolocation.watchPosition(function(pos) {
+    var cur = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    qabbTrack.push({ lat: cur.lat, lon: cur.lon, t: Date.now() });
+    var along = _qabbAlongM(qabbStart, qabbEnd, cur);
+    var st = _qabbSTIndex(along);
+    if (ind && st) { ind.style.display = 'block'; ind.textContent = 'You are in ST' + st + ' (' + ((st-1)*50) + '–' + (st*50) + ' m along the transect) — record counts here'; }
+    _qabbHighlightST(st);
+  }, function(){}, { enableHighAccuracy: true, maximumAge: 1000, timeout: 20000 });
+}
+function _qabbHighlightST(st) {
+  var ths = document.querySelectorAll('#screen-qabb-matrix thead th');
+  for (var i = 1; i < ths.length; i++) { ths[i].style.background = (i === st) ? '#FFF59D' : ''; }
 }
 
 function submitQabb() {
@@ -11006,11 +11121,32 @@ if ('serviceWorker' in navigator) {
       window.location.reload();
     });
   }
-  navigator.serviceWorker.register('sw.js').then(function(reg) {
+  /* A small, visible "update ready" banner so a new version isn't silent — the
+     steward can tap to apply it immediately (instead of waiting for the next
+     reopen). The new worker skipWaiting()s, so a tap just reloads. */
+  function _mcaShowUpdateBanner(){
+    if (document.getElementById('mcaUpdateBanner')) return;
+    var d=document.createElement('div');
+    d.id='mcaUpdateBanner';
+    d.style.cssText='position:fixed;left:10px;right:10px;bottom:14px;z-index:9999;background:#1B5E20;color:#fff;border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,0.3);font-size:0.82rem;';
+    d.innerHTML='<span style="flex:1;">A new version is ready.</span><button style="background:#fff;color:#1B5E20;border:none;border-radius:8px;padding:7px 14px;font-weight:700;font-size:0.8rem;">Update now</button>';
+    d.querySelector('button').onclick=function(){ window.location.reload(); };
+    document.body.appendChild(d);
+  }
+  /* updateViaCache:'none' — never serve the SW script itself from the HTTP
+     cache, so a new build is detected promptly on reopen/focus. */
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function(reg) {
     console.log('SW registered, scope:', reg.scope);
-    /* Check for a new version on every launch and whenever we regain focus. */
     try { reg.update(); } catch(e) {}
     document.addEventListener('visibilitychange', function(){ if (!document.hidden) { try { reg.update(); } catch(e) {} } });
+    /* When a new worker finishes installing while a version is already running,
+       surface the banner. */
+    reg.addEventListener('updatefound', function(){
+      var nw=reg.installing; if(!nw) return;
+      nw.addEventListener('statechange', function(){
+        if (nw.state==='installed' && navigator.serviceWorker.controller) _mcaShowUpdateBanner();
+      });
+    });
   }).catch(function(err) {
     console.log('SW registration failed:', err);
   });
@@ -11063,7 +11199,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v87'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v89'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -13161,7 +13297,10 @@ function initMafiaMatrix(){
 
 function collectMafiaData(){
   var p=window._cachedProfile||{};
-  var data={ survey_type:'mafia', zone:p.zone||'', clan:p.clan||'', steward:p.stewardId||'' };
+  /* MaFIA currently always runs on a GENERATED (training) transect — no real
+     transect registry yet — so flag every record as training until real
+     transects are loaded. */
+  var data={ survey_type:'mafia', is_training:true, zone:p.zone||'', clan:p.clan||'', steward:p.stewardId||'' };
   /* Weather is recorded ONLY if the surveyor set it — a skipped question must not
      become recorded data by default (see CLAUDE.md: no default-on-skip). */
   var _wx=window._mafiaWx||{};
@@ -13186,12 +13325,31 @@ function collectMafiaData(){
 }
 
 function collectQabbData() {
+  var p = window._cachedProfile || {};
+  var wxOn = document.querySelector('#screen-qabb-matrix .weather-pill.active');
+  var notesEl = document.querySelector('#screen-qabb-matrix textarea');
   var data = {
     survey_type: 'qabb',
-    transect: 'QABB Transect #14',
+    uid: generateRecordId('QABB'),
+    transect: 'QABB — ' + (myClan() || 'clan') + (qabbTraining ? ' (TRAINING)' : ''),
+    is_training: !!qabbTraining,
+    transect_start: qabbStart || null,
+    transect_end: qabbEnd || null,
+    transect_bearing: (qabbBearing != null ? Math.round(qabbBearing) : null),
+    track: (qabbTrack || []).slice(),
+    survey_year: new Date().getFullYear(),
+    cadence: 'seasonal_jun_aug',
+    survey_month: ['January','February','March','April','May','June','July','August','September','October','November','December'][new Date().getMonth()],
     date: document.getElementById('qabbDate') ? document.getElementById('qabbDate').textContent : '',
     start_time: document.getElementById('qabbStartTime') ? document.getElementById('qabbStartTime').value : '',
-    end_time: document.getElementById('qabbEndTime') ? document.getElementById('qabbEndTime').value : ''
+    end_time: document.getElementById('qabbEndTime') ? document.getElementById('qabbEndTime').value : '',
+    weather: wxOn ? wxOn.id.replace('qwx-','') : '',
+    start_gps: qabbStartGps || null,
+    gps_source: (qabbStartGps && qabbStartGps.source) || null,
+    location_missing: !qabbStartGps,
+    notes: notesEl ? (notesEl.value||'').trim() : '',
+    clan: myClan(),
+    steward: p.stewardId || ''
   };
   var table = document.querySelector('#screen-qabb-matrix .matrix-table');
   if (!table) return data;

@@ -4396,6 +4396,33 @@ select.msel {
             </div>
             <input type="text" id="fmCropOther" class="form-input" style="margin-top:6px;font-size:0.78rem;" placeholder="Other crop (optional)">
           </div>
+          <!-- Cash-crop garden owner + planting — shown only for the garden category -->
+          <div id="fmGardenOwnerGroup" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Garden owner's name <span style="color:#B71C1C;">*</span></label>
+              <input type="text" id="fmOwnerName" class="form-input" style="font-size:0.8rem;" placeholder="Full name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Owner's home zone <span style="color:#B71C1C;">*</span></label>
+              <select id="fmOwnerZone" class="form-input" style="font-size:0.8rem;padding:8px 11px;" onchange="fmOwnerZoneChanged()"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Owner's clan <span style="color:#B71C1C;">*</span></label>
+              <select id="fmOwnerClan" class="form-input" style="font-size:0.8rem;padding:8px 11px;"></select>
+              <div id="fmOwnerClanHint" style="font-size:0.68rem;color:#888;margin-top:4px;"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Owner's village of residence <span style="color:#B71C1C;">*</span></label>
+              <input type="text" id="fmOwnerVillage" class="form-input" style="font-size:0.8rem;" placeholder="Where the owner lives now">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Year the crop was first planted <span style="color:#B71C1C;">*</span></label>
+              <input type="number" id="fmPlantYear" class="form-input" style="font-size:0.8rem;" inputmode="numeric" min="1950" max="2100" placeholder="e.g. 2015">
+              <label style="font-size:0.72rem;color:#555;display:flex;align-items:center;gap:6px;margin-top:6px;">
+                <input type="checkbox" id="fmPlantYearApprox"> Approximate year
+              </label>
+            </div>
+          </div>
           <!-- Track / path type — shown only for the Track/path category -->
           <div class="form-group" id="fmTrackGroup" style="display:none;">
             <label class="form-label">Type of track <span style="color:#B71C1C;">*</span></label>
@@ -7757,6 +7784,11 @@ function initFreemap(){
   Object.keys(FM_CROPS).forEach(function(k){ var el=document.getElementById('fmcrop-'+k); if(el) el.classList.remove('active'); });
   var co=document.getElementById('fmCropOther'); if(co) co.value='';
   var cg=document.getElementById('fmCropsGroup'); if(cg) cg.style.display='none';
+  var og=document.getElementById('fmGardenOwnerGroup'); if(og) og.style.display='none';
+  ['fmOwnerName','fmOwnerVillage','fmPlantYear'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  var oz=document.getElementById('fmOwnerZone'); if(oz) oz.value='';
+  var pya=document.getElementById('fmPlantYearApprox'); if(pya) pya.checked=false;
+  try{ fmOwnerZoneChanged(); }catch(e){}
   /* Structured plant-problem / processing sub-forms */
   _fmProblemTypes=[]; _fmQualityIssues=[]; _fmSeverity=''; _fmExtent='';
   _fmFillSelect('fmProblemCrop', FM_PROBLEM_CROPS, false);
@@ -7796,6 +7828,8 @@ function fmCat(v){
   /* Garden = an area with crop options; selecting it switches to Area capture. */
   var isGarden=(v==='cashcrop_garden');
   var cg=document.getElementById('fmCropsGroup'); if(cg) cg.style.display=isGarden?'block':'none';
+  var og=document.getElementById('fmGardenOwnerGroup'); if(og) og.style.display=isGarden?'block':'none';
+  if(isGarden) fmPopulateOwnerZones();
   if(isGarden && _fmMode!=='area') fmMode('area');
   var pp=document.getElementById('fmPlantProblemGroup'); if(pp) pp.style.display=(v==='plant_problem')?'block':'none';
   var pr=document.getElementById('fmProcessingGroup'); if(pr) pr.style.display=(v==='postharvest')?'block':'none';
@@ -7803,6 +7837,36 @@ function fmCat(v){
   var isTrack=(v==='road');
   var tg=document.getElementById('fmTrackGroup'); if(tg) tg.style.display=isTrack?'block':'none';
   if(isTrack && _fmMode==='area') fmMode('line');
+}
+/* Garden-owner zone → clan cascade. Clan is always a picker (never typed), tiered
+   to the owner's HOME zone (which can differ from where they live now). */
+function fmPopulateOwnerZones(){
+  var zs=document.getElementById('fmOwnerZone'); if(!zs) return;
+  if(zs.options.length>0){ return; } /* already populated */
+  getZoneList(function(zones){
+    var cur=zs.value;
+    zs.innerHTML='<option value="">— choose zone —</option>';
+    zones.forEach(function(z){ var o=document.createElement('option'); o.value=z.id; o.textContent=z.id+' — '+z.name; zs.appendChild(o); });
+    if(cur) zs.value=cur;
+    fmOwnerZoneChanged();
+  });
+}
+function fmOwnerZoneChanged(){
+  var zs=document.getElementById('fmOwnerZone'), cs=document.getElementById('fmOwnerClan'), hint=document.getElementById('fmOwnerClanHint');
+  if(!cs) return;
+  var zid=zs?zs.value:'';
+  if(!zid){ cs.innerHTML='<option value="">— choose zone first —</option>'; if(hint) hint.textContent=''; return; }
+  getClanList(function(map){
+    var clans=(map&&map[zid])||[];
+    if(clans.length===0){
+      cs.innerHTML='<option value="">— no clans listed for this zone —</option>';
+      if(hint) hint.textContent='This zone’s clan list isn’t loaded yet (coordinator seeds it).';
+    } else {
+      cs.innerHTML='<option value="">— choose clan —</option>';
+      clans.forEach(function(c){ var o=document.createElement('option'); o.value=c; o.textContent=c; cs.appendChild(o); });
+      if(hint) hint.textContent='';
+    }
+  });
 }
 function fmToggleCrop(c){
   var i=_fmCrops.indexOf(c); if(i>=0) _fmCrops.splice(i,1); else _fmCrops.push(c);
@@ -7957,10 +8021,25 @@ function saveFreemap(){
   else { if(_fmLine.length<2){ toast('Record at least 2 points for a line.'); return; } pts=_fmLine.slice(); }
   /* Garden crops (cash-crop garden category) */
   var crops=null;
+  var gardenOwner=null;
   if(_fmCat==='cashcrop_garden'){
     var list=_fmCrops.slice(); var other=(document.getElementById('fmCropOther').value||'').trim(); if(other) list.push(other);
     if(list.length===0){ toast('Select at least one cash crop.'); return; }
     crops=list.join(', ');
+    /* Owner + planting — clan always from the picker, tiered to the owner's home zone. */
+    var oName=(document.getElementById('fmOwnerName').value||'').trim();
+    var oZone=(document.getElementById('fmOwnerZone').value||'');
+    var oZoneLabel=(function(){ var s=document.getElementById('fmOwnerZone'); return (s&&s.selectedIndex>0)?s.options[s.selectedIndex].textContent:''; })();
+    var oClan=(document.getElementById('fmOwnerClan').value||'');
+    var oVillage=(document.getElementById('fmOwnerVillage').value||'').trim();
+    var pYear=(document.getElementById('fmPlantYear').value||'').trim();
+    var pApprox=!!document.getElementById('fmPlantYearApprox').checked;
+    if(!oName){ toast('Enter the garden owner’s name.'); return; }
+    if(!oZone){ toast('Choose the owner’s home zone.'); return; }
+    if(!oClan){ toast('Choose the owner’s clan from the list.'); return; }
+    if(!oVillage){ toast('Enter the owner’s village of residence.'); return; }
+    if(!pYear){ toast('Enter the year the crop was first planted.'); return; }
+    gardenOwner={ name:oName, zone_id:oZone, zone:oZoneLabel, clan:oClan, village:oVillage, planting_year:parseInt(pYear,10)||pYear, planting_year_approx:pApprox };
   }
   /* Track type (track/path category) */
   var trackType=null;
@@ -7969,7 +8048,7 @@ function saveFreemap(){
     trackType=_fmTrackType;
   }
   var now=new Date();
-  var rec={ survey_type:'freemap', uid:generateRecordId('MAP'), map_type:_fmMode, category:_fmCat, category_label:FM_CATS[_fmCat], title:title, description:(document.getElementById('fmDesc').value||'').trim(), points:pts, length_m:(_fmMode==='line')?Math.round(_fmLen()):0, area_ha:(_fmMode==='area')?(Math.round(_fmAreaHa(pts)*10000)/10000):0, area_m2:(_fmMode==='area')?Math.round(_fmAreaM2(pts)):0, close_gap_m:(_fmMode==='area')?Math.round(_fmCloseGap(pts)||0):null, garden_type:(_fmCat==='cashcrop_garden')?'cash_crop':null, crops:crops, track_type:trackType, plant_problem:plantProblem, processing:processing, photo:_fmPhoto||null, clan:myClan(), steward:(window._cachedProfile&&window._cachedProfile.stewardId)||'', recorded_at:now.toISOString() };
+  var rec={ survey_type:'freemap', uid:generateRecordId('MAP'), map_type:_fmMode, category:_fmCat, category_label:FM_CATS[_fmCat], title:title, description:(document.getElementById('fmDesc').value||'').trim(), points:pts, length_m:(_fmMode==='line')?Math.round(_fmLen()):0, area_ha:(_fmMode==='area')?(Math.round(_fmAreaHa(pts)*10000)/10000):0, area_m2:(_fmMode==='area')?Math.round(_fmAreaM2(pts)):0, close_gap_m:(_fmMode==='area')?Math.round(_fmCloseGap(pts)||0):null, garden_type:(_fmCat==='cashcrop_garden')?'cash_crop':null, crops:crops, garden_owner:gardenOwner, track_type:trackType, plant_problem:plantProblem, processing:processing, photo:_fmPhoto||null, clan:myClan(), steward:(window._cachedProfile&&window._cachedProfile.stewardId)||'', recorded_at:now.toISOString() };
   /* Area maps auto-close (last point → first). Review the closed shape before
      saving so an accidental half-finished walk isn't saved cutting across the
      field. Lines/points save directly. */
@@ -10913,7 +10992,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v85'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v86'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

@@ -80,9 +80,24 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
 
 ## Planned monitoring modules / surveys (requested 2026-10-04)
 
-- [ ] **QABB transect — "Christine method plus"** — extend the existing QABB
-      butterfly survey to the Christine-method protocol plus the additional
-      fields/steps. (Protocol detail to be specified.)
+- [ ] **QABB (Queen Alexandra's Birdwing) survey — detail out.** Cadence:
+      **once a year, in July.** Method: a **500 m transect** (here "transect"
+      is right — it's a straight-line count) counting **adult QABB butterflies,
+      caterpillars, eggs, and food plants** (the Aristolochia host vine).
+      - **Mostly built already:** `screen-qabb-setup` (navigate-to-start +
+        fingerprint gate) → `screen-qabb-matrix` records land-use, Aristolochia
+        vine count and QABB sightings (adults / eggs / caterpillars) across
+        **10 × 50 m sub-transects = 500 m**.
+      - **Gap to close:** lock the cadence to **annual / July** (not monthly) in
+        compliance + the calendar; use a **fixed transect location** re-walked
+        each year (repeatability); confirm the four counts (butterflies,
+        caterpillars, eggs, food plants) are all present and labelled clearly.
+      - **Layout:** like the **MaFIA matrix** — a grid with **counters per
+        sub-transect** (tally +/- for adults / eggs / caterpillars / food-plant
+        per 50 m cell), not plain text fields. Align the existing QABB matrix to
+        the MaFIA counter style where it isn't already.
+      - Earlier note ("Christine method plus") — fold any extra protocol
+        fields/steps in once that protocol is specified.
 
 - [ ] **Monthly key-informant hunter interview** — a new monthly survey, one
       per key-informant hunter:
@@ -108,6 +123,19 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
 
 - [ ] **Annual update of new cash-crop gardens** — register/update newly
       established cash-crop (agroforestry) gardens each year.
+
+- [x] **Cash-crop garden mapping — owner + planting (done v86).** When mapping a
+      cash-crop garden, now captures the **owner's name**, **home zone → clan**
+      (clan ALWAYS from the picker, tiered to the owner's home zone), **village
+      of residence**, and the **crop's first planting year** (+ approximate
+      flag; asked plainly, no on-screen EUDR reason). Note the record keeps
+      **two clans**: `clan` = the land's clan (the mapping steward), and
+      `garden_owner.clan`/`.zone` = the **owner's own** affiliation — because a
+      farmer may work land in a different clan/zone from their own.
+- [ ] **Pre-load existing garden data to minimise re-mapping (future).** Sync
+      down already-known gardens (from prior mapping / GIS) so the steward
+      **confirms/updates** a garden rather than walking it again; pairs with the
+      clan-boundaries / spatial-data work.
 
 > These are survey/interview modules. Where they concern a specific
 > thing (a garden, a plot), consider putting them through the same
@@ -286,10 +314,27 @@ is coordinator-defined and syncs down like the other registries.
       **Calendar / Activities / Reports**, role-aware (empty headers hide).
       Community Data hidden; Patrol greyed "SOON"; Performance Monitoring at the
       bottom of Reports.
-- [ ] **Patrol module — TBC.** Likely a targeted **~8–10 km walk within each
-      clan** (where they have enough land), **once a month**, recording
-      **sightings and sounds** along the route. Shape: probably a tracked walk
-      (Field Mapping line mode) + timed sighting/sound entries. Spec to confirm.
+- [ ] **Patrol module — TBC.** A **FIXED walking route** per clan (~8–10 km,
+      where they have enough land), walked **once a month**. Fixed route chosen
+      because it's **safer for the steward** (planned, known path) and gives a
+      **repeatable observation** (same route and stations each month →
+      comparable sightings/sounds over time). Model = register → approve →
+      monitor, with guided navigation (reuse the MaFIA navigation code).
+      **Call it a "patrol route", never a "transect"** — people read transect
+      as a straight line and it will confuse them.
+      - **Define the route once** — map the path (Field Mapping line),
+        coordinator-approved, with **fixed observation stations** along it.
+        Planned at design time to **pass sacred sites** (to check for
+        disturbance + refresh the **red-band tree marking**) and stay **≥100 m
+        from disputed areas** — so safety is baked into the route, not computed
+        live.
+      - **Monthly patrol** — follow the fixed route with guided navigation,
+        stopping at each **fixed station** to record **sightings & sounds**
+        (stations give clean month-to-month trends).
+      - Optional **live ≥100 m disputed-area warning** as a backstop (warn,
+        never block). Sacred-site / disputed layers (`_sacred_sites`,
+        `_disputed_areas`) are **sensitive** → role-gated; useful for route
+        design + the warning, but not a hard blocker once the route is fixed.
 
 ## Mapping consolidation (done 2026-10-13, v83)
 

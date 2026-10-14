@@ -3093,7 +3093,23 @@ select.msel {
               <button type="button" class="weather-pill" data-rt="sports_team" onclick="distSetRecipType('sports_team')">Sports team</button>
               <button type="button" class="weather-pill" data-rt="school" onclick="distSetRecipType('school')">School</button>
               <button type="button" class="weather-pill" data-rt="cooperative" onclick="distSetRecipType('cooperative')">Cooperative</button>
+              <button type="button" class="weather-pill" data-rt="zone" onclick="distSetRecipType('zone')">Zone</button>
               <button type="button" class="weather-pill" data-rt="other" onclick="distSetRecipType('other')">Other</button>
+            </div>
+          </div>
+          <div class="form-group" id="distZoneGroup" style="display:none;">
+            <label class="form-label">Which zone is receiving? <span style="color:#B71C1C;">*</span></label>
+            <select id="distZone" class="form-input" style="font-size:0.8rem;padding:8px 11px;"></select>
+          </div>
+          <div id="distClanPickGroup" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Receiving clan — zone</label>
+              <select id="distClanZone" class="form-input" style="font-size:0.8rem;padding:8px 11px;" onchange="distClanZoneChanged()"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Receiving clan</label>
+              <select id="distClanPick" class="form-input" style="font-size:0.8rem;padding:8px 11px;" onchange="var c=document.getElementById('distClan'); if(c) c.value=this.value;"></select>
+              <div id="distClanPickHint" style="font-size:0.68rem;color:#888;margin-top:4px;"></div>
             </div>
           </div>
           <div class="form-group">
@@ -10075,6 +10091,9 @@ function initDistribution(){
   window._distRecipType='individual'; window._distPurpose='conservation_planting'; window._distDonor='European Union';
   window._distVerified=false; window._distItemSeq=0; window._distItemIds=[];
   ['distRecipient','distReceivedBy','distClan','distContact','distPurposeNote','distDonorOther','distNotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var dz=document.getElementById('distZone'); if(dz) dz.value='';
+  var dcz=document.getElementById('distClanZone'); if(dcz) dcz.value='';
+  try{ distClanZoneChanged(); }catch(e){}
   var cb=document.getElementById('distConfirmed'); if(cb) cb.checked=false;
   var dr=document.getElementById('distDonorRecognised'); if(dr) dr.checked=false;
   distSetRecipType('individual'); distSetPurpose('conservation_planting');
@@ -10117,7 +10136,52 @@ function distRetryGPS(){
   if(btn){ btn.disabled=true; btn.textContent='Acquiring…'; }
   captureGPS(_distApplyGps);
 }
-function distSetRecipType(v){ window._distRecipType=v; var box=document.getElementById('distRecipTypePills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-rt]'),function(b){ b.classList.toggle('active', b.getAttribute('data-rt')===v); }); }
+function distSetRecipType(v){
+  window._distRecipType=v;
+  var box=document.getElementById('distRecipTypePills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-rt]'),function(b){ b.classList.toggle('active', b.getAttribute('data-rt')===v); });
+  /* When the recipient is a Zone, ask which zone (picker). */
+  var zg=document.getElementById('distZoneGroup'); if(zg) zg.style.display=(v==='zone')?'block':'none';
+  if(v==='zone'){
+    var zs=document.getElementById('distZone');
+    if(zs && zs.options.length===0){
+      getZoneList(function(zones){
+        zs.innerHTML='<option value="">— choose zone —</option>';
+        zones.forEach(function(z){ var o=document.createElement('option'); o.value=z.id; o.textContent=z.id+' — '+z.name; zs.appendChild(o); });
+      });
+    }
+  }
+  /* When the recipient is a Clan group, offer the clan via a zone→clan picker
+     (clan names always from the list). The picked clan fills the Clan field;
+     the free-text Clan field remains as a fallback until the lists are seeded. */
+  var cpg=document.getElementById('distClanPickGroup'); if(cpg) cpg.style.display=(v==='clan_group')?'block':'none';
+  if(v==='clan_group'){
+    var cz=document.getElementById('distClanZone');
+    if(cz && cz.options.length===0){
+      getZoneList(function(zones){
+        cz.innerHTML='<option value="">— choose zone —</option>';
+        zones.forEach(function(z){ var o=document.createElement('option'); o.value=z.id; o.textContent=z.id+' — '+z.name; cz.appendChild(o); });
+        distClanZoneChanged();
+      });
+    }
+  }
+}
+function distClanZoneChanged(){
+  var cz=document.getElementById('distClanZone'), cp=document.getElementById('distClanPick'), hint=document.getElementById('distClanPickHint');
+  if(!cp) return;
+  var zid=cz?cz.value:'';
+  if(!zid){ cp.innerHTML='<option value="">— choose zone first —</option>'; if(hint) hint.textContent=''; return; }
+  getClanList(function(map){
+    var clans=(map&&map[zid])||[];
+    if(clans.length===0){
+      cp.innerHTML='<option value="">— no clans listed yet —</option>';
+      if(hint) hint.textContent='Clan list for this zone isn’t loaded yet — type the clan in the Clan field below.';
+    } else {
+      cp.innerHTML='<option value="">— choose clan —</option>';
+      clans.forEach(function(c){ var o=document.createElement('option'); o.value=c; o.textContent=c; cp.appendChild(o); });
+      if(hint) hint.textContent='';
+    }
+  });
+}
 function distRenderDonors(){
   var box=document.getElementById('distDonorPills'); if(!box) return;
   box.innerHTML=DIST_DONORS.map(function(d){ return '<button type="button" class="weather-pill'+(d===window._distDonor?' active':'')+'" data-donor="'+d.replace(/"/g,'&quot;')+'" onclick="distSetDonor(this.getAttribute(\'data-donor\'))">'+d+'</button>'; }).join('');
@@ -10182,13 +10246,20 @@ function submitDistribution(){
   if(!window._distPhotos || !window._distPhotos.handover || !window._distPhotos.receipt){ toast('Both the handover and receipt photos are required.'); return; }
   if(!window._distVideo){ toast('A short video of the handover is required.'); return; }
   if(!window._distVerified){ toast('Verify your fingerprint before submitting.'); return; }
+  /* Zone recipient — which zone is receiving (picker). */
+  var rZoneId='', rZoneLabel='';
+  if(window._distRecipType==='zone'){
+    var zsel=document.getElementById('distZone'); rZoneId=(zsel||{}).value||'';
+    if(!rZoneId){ toast('Choose which zone is receiving.'); return; }
+    rZoneLabel=(zsel&&zsel.selectedIndex>0)?zsel.options[zsel.selectedIndex].textContent:'';
+  }
   var now=trustedNow();
   var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var p=window._cachedProfile||{};
   var rec={
     survey_type:'distribution', record_uid:generateRecordId('DIST'),
     officer:{ name:p.name||'', steward_id:p.stewardId||'', role:p.role||'' },
-    recipient:{ name:recip.trim(), type:window._distRecipType||'', received_by:((document.getElementById('distReceivedBy')||{}).value||'').trim(), clan:((document.getElementById('distClan')||{}).value||'').trim(), contact:((document.getElementById('distContact')||{}).value||'').trim(), confirmed_receipt:!!(document.getElementById('distConfirmed')&&document.getElementById('distConfirmed').checked) },
+    recipient:{ name:recip.trim(), type:window._distRecipType||'', received_by:((document.getElementById('distReceivedBy')||{}).value||'').trim(), clan:((document.getElementById('distClan')||{}).value||'').trim(), zone_id:rZoneId, zone:rZoneLabel, contact:((document.getElementById('distContact')||{}).value||'').trim(), confirmed_receipt:!!(document.getElementById('distConfirmed')&&document.getElementById('distConfirmed').checked) },
     purpose_category:window._distPurpose||'', purpose:purposeNote.trim(),
     donor:(window._distDonor==='Other' ? (((document.getElementById('distDonorOther')||{}).value||'').trim()||'Other') : (window._distDonor||'')),
     donor_recognised:!!(document.getElementById('distDonorRecognised')&&document.getElementById('distDonorRecognised').checked),
@@ -10992,7 +11063,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v86'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v87'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

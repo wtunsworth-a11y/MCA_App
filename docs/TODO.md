@@ -116,12 +116,17 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
       module opens only when **trained AND real data ready** (both gates).
       Small synced registry (`_entitlements` / per-module `trained` list) — also
       the rollout control. (Applies to QABB, MaFIA, and future modules.)
-- [ ] **In-app training materials — host SEPARATELY, add later.** Do NOT embed
-      in `index.html` (already ~880 KB; would bloat every app update,
-      esp. images/video). Host as their own files/page, loaded on demand and
-      cached on their own, so material size is decoupled from app-update size.
-      **Vanilla first**, others later; best added once the app changes less
-      often.
+- [ ] **In-app training materials — separate upload, on-demand, cached.** Model:
+      materials are their **own files** (NOT in `index.html`), so they're never
+      part of an app update and don't bloat the ~880 KB app. A coordinator-
+      maintained **`_training.json`** (synced like zones/clans) lists what's
+      available per crop/module; the app shows a **Training / "Learn"** section
+      from it. Tapping a material **downloads it once** (needs signal) and
+      **caches it on that phone on its own** → only stewards who open it download
+      it (not pushed to all phones), and it's **offline after first view**.
+      **Host on Google Drive** (coordinator uploads + lists the link — no
+      redeploy). **Vanilla first** (start as images + text; video later — heavy,
+      one-time download at base). Best added once the app changes less often.
       - **Layout:** like the **MaFIA matrix** — a grid with **counters per
         sub-transect** (tally +/- for adults / eggs / caterpillars / food-plant
         per 50 m cell), not plain text fields. Align the existing QABB matrix to

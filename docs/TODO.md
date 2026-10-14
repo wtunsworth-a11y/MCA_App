@@ -124,6 +124,19 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
 - [ ] **Annual update of new cash-crop gardens** — register/update newly
       established cash-crop (agroforestry) gardens each year.
 
+- [x] **Cash-crop garden mapping — owner + planting (done v86).** When mapping a
+      cash-crop garden, now captures the **owner's name**, **home zone → clan**
+      (clan ALWAYS from the picker, tiered to the owner's home zone), **village
+      of residence**, and the **crop's first planting year** (+ approximate
+      flag; asked plainly, no on-screen EUDR reason). Note the record keeps
+      **two clans**: `clan` = the land's clan (the mapping steward), and
+      `garden_owner.clan`/`.zone` = the **owner's own** affiliation — because a
+      farmer may work land in a different clan/zone from their own.
+- [ ] **Pre-load existing garden data to minimise re-mapping (future).** Sync
+      down already-known gardens (from prior mapping / GIS) so the steward
+      **confirms/updates** a garden rather than walking it again; pairs with the
+      clan-boundaries / spatial-data work.
+
 > These are survey/interview modules. Where they concern a specific
 > thing (a garden, a plot), consider putting them through the same
 > **register → coordinator-approve → clan-ownership → monitor** pattern already

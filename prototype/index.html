@@ -2222,7 +2222,7 @@ select.msel {
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
           <div class="bar-title">QABB Butterfly Survey</div>
-          <div class="bar-subtitle">Transect Setup</div>
+          <div class="bar-subtitle">Breeding season — Jun · Jul · Aug</div>
         </div>
         <div class="top-logos"><div class="logo-ph" title="Managalas Conservation Foundation" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_MCF.png" alt="Managalas Conservation Foundation" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="European Union" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/Logo_EU_v1.png" alt="European Union" style="width:100%;height:100%;object-fit:contain;display:block;"></div><div class="logo-ph" title="CIFOR-ICRAF" style="background:#fff;padding:2px;overflow:hidden;"><img src="logos/CIFOR-ICRAF-logo.png" alt="CIFOR-ICRAF" style="width:100%;height:100%;object-fit:contain;display:block;"></div></div>
       </div>
@@ -2270,7 +2270,7 @@ select.msel {
             <div class="card" style="padding:12px 16px;">
               <div class="transect-row">
                 <span class="td-label"><span data-icon="butterfly" data-size="14"></span> Survey</span>
-                <span>QABB Transect #14</span>
+                <span>QABB — breeding season (Jun–Aug)</span>
               </div>
               <div class="transect-row">
                 <span class="td-label"><span data-icon="pin" data-size="14"></span> Start</span>
@@ -2339,13 +2339,14 @@ select.msel {
         <button class="back-btn" onclick="goBack()">←</button>
         <div>
           <div class="bar-title">QABB Survey</div>
-          <div class="bar-subtitle">Transect #14 — Recording</div>
+          <div class="bar-subtitle">Recording — 500 m transect</div>
         </div>
       </div>
       <div class="scroll-content">
         <div class="matrix-note" style="background:#e0f2f1;border-color:#80cbc4;color:#00695C;">
-          Record land use, Aristolochia vine count, and QABB sightings (adults, eggs, caterpillars) for each 50 m sub-transect. Scroll right for all 10 sub-transects.
+          The QABB count runs <strong>each month through the breeding season — June, July &amp; August</strong>. Record land use, Aristolochia (food-plant) vine count, and QABB sightings (adult butterflies, eggs, caterpillars) for each 50 m sub-transect. Scroll right for all 10 sub-transects.
         </div>
+        <div id="qabbCadenceNote" style="display:none;margin:8px 14px 0;padding:8px 11px;border-radius:10px;font-size:0.76rem;background:#FFF3E0;border:1px solid #FFCC80;color:#E65100;"></div>
 
         <div class="p14" style="padding-top:6px;padding-bottom:0;">
           <div class="card" style="padding:10px 14px;">
@@ -2395,9 +2396,9 @@ select.msel {
               <tr style="background:#e0f2f1;"><td style="position:sticky;left:0;z-index:3;background:#e0f2f1;font-weight:700;color:#00695C;padding:6px 8px;" colspan="11">LAND USE &amp; HABITAT</td></tr>
               <tr>
                 <td style="position:sticky;left:0;z-index:2;background:#fff;">Land Use</td>
-                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" value="gaden" placeholder="..."></td>
-                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" value="bus" placeholder="..."></td>
-                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" value="bus" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
+                <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
                 <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
                 <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
                 <td><input type="text" class="msel" style="width:60px;font-size:0.7rem;" placeholder="..."></td>
@@ -2408,24 +2409,24 @@ select.msel {
               </tr>
               <tr style="background:#e0f2f1;"><td style="position:sticky;left:0;z-index:3;background:#e0f2f1;font-weight:700;color:#00695C;padding:6px 8px;" colspan="11">HOST PLANT</td></tr>
               <tr>
-                <td style="position:sticky;left:0;z-index:2;background:#fff;">Aristolochia Vines</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">8</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">5</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td style="position:sticky;left:0;z-index:2;background:#fff;">Aristolochia vines<br><span style="font-weight:400;font-size:0.6rem;color:#888;">food plant</span></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
                 <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
               </tr>
               <tr style="background:#e0f2f1;"><td style="position:sticky;left:0;z-index:3;background:#e0f2f1;font-weight:700;color:#00695C;padding:6px 8px;" colspan="11">QABB SIGHTINGS</td></tr>
               <tr>
                 <td style="position:sticky;left:0;z-index:2;background:#fff;">Adult QABB</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">2</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
                 <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
               </tr>
               <tr>
                 <td style="position:sticky;left:0;z-index:2;background:#fff;">QABB Eggs</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">3</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
                 <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
               </tr>
               <tr>
                 <td style="position:sticky;left:0;z-index:2;background:#fff;">QABB Caterpillars</td>
-                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">2</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">1</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
+                <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
                 <td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td><td><div class="tally"><button class="tally-btn" onclick="tc(this,-1)">−</button><span class="tally-count">0</span><button class="tally-btn" onclick="tc(this,1)">+</button></div></td>
               </tr>
             </tbody>
@@ -9012,9 +9013,11 @@ function toggleActivityLayer(type) {
 let qabbVerified = false;
 let qabbArrived = false;
 
+var qabbStartGps = null;
 function initQabb() {
   qabbVerified = false;
   qabbArrived = false;
+  qabbStartGps = null;
   document.getElementById('qabbBeginBtn').disabled = true;
   document.getElementById('qabbFpBtn').classList.remove('verified');
   document.getElementById('qabbFpTxt').textContent = 'Tap to Verify Identity';
@@ -9037,6 +9040,7 @@ function qabbArrive() {
   btn.innerHTML = ''+icon('pin',13)+' Getting GPS…';
   captureGPS(function(gps, err) {
     qabbArrived = true;
+    qabbStartGps = gps || null;
     document.getElementById('qabbNavGateCard').classList.add('arrived');
     if (gps) {
       document.getElementById('qabbNavGateHint').textContent = '\u2713 At start point ('+gps.lat+', '+gps.lng+' \u00b1'+gps.accuracy+'m) \u2014 verify identity';
@@ -9072,6 +9076,24 @@ function initQabbMatrix() {
   document.getElementById('qabbEndAuto').textContent = 'set on submit';
   var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('qabbDate').textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+  /* Start every survey blank — clear the demo land-use text and zero all tallies. */
+  var table = document.querySelector('#screen-qabb-matrix .matrix-table');
+  if (table) {
+    table.querySelectorAll('input[type="text"]').forEach(function(i){ i.value=''; });
+    table.querySelectorAll('.tally-count').forEach(function(s){ s.textContent='0'; });
+  }
+  /* Weather back to the neutral default; notes cleared. */
+  try { wxQ('cloudy','sunny'); } catch(e){}
+  var nt = document.querySelector('#screen-qabb-matrix textarea'); if (nt) nt.value='';
+  /* Breeding-season cadence — soft reminder (never blocks) outside Jun–Aug. */
+  var cad = document.getElementById('qabbCadenceNote');
+  if (cad) {
+    if ([5,6,7].indexOf(now.getMonth()) >= 0) { cad.style.display='none'; }
+    else {
+      cad.style.display='block';
+      cad.innerHTML = '⚠ QABB is surveyed each month in the <strong>breeding season (June–August)</strong> — today is '+months[now.getMonth()]+'. Record only if this is a planned catch-up.';
+    }
+  }
 }
 
 function submitQabb() {
@@ -11006,11 +11028,32 @@ if ('serviceWorker' in navigator) {
       window.location.reload();
     });
   }
-  navigator.serviceWorker.register('sw.js').then(function(reg) {
+  /* A small, visible "update ready" banner so a new version isn't silent — the
+     steward can tap to apply it immediately (instead of waiting for the next
+     reopen). The new worker skipWaiting()s, so a tap just reloads. */
+  function _mcaShowUpdateBanner(){
+    if (document.getElementById('mcaUpdateBanner')) return;
+    var d=document.createElement('div');
+    d.id='mcaUpdateBanner';
+    d.style.cssText='position:fixed;left:10px;right:10px;bottom:14px;z-index:9999;background:#1B5E20;color:#fff;border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,0.3);font-size:0.82rem;';
+    d.innerHTML='<span style="flex:1;">A new version is ready.</span><button style="background:#fff;color:#1B5E20;border:none;border-radius:8px;padding:7px 14px;font-weight:700;font-size:0.8rem;">Update now</button>';
+    d.querySelector('button').onclick=function(){ window.location.reload(); };
+    document.body.appendChild(d);
+  }
+  /* updateViaCache:'none' — never serve the SW script itself from the HTTP
+     cache, so a new build is detected promptly on reopen/focus. */
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function(reg) {
     console.log('SW registered, scope:', reg.scope);
-    /* Check for a new version on every launch and whenever we regain focus. */
     try { reg.update(); } catch(e) {}
     document.addEventListener('visibilitychange', function(){ if (!document.hidden) { try { reg.update(); } catch(e) {} } });
+    /* When a new worker finishes installing while a version is already running,
+       surface the banner. */
+    reg.addEventListener('updatefound', function(){
+      var nw=reg.installing; if(!nw) return;
+      nw.addEventListener('statechange', function(){
+        if (nw.state==='installed' && navigator.serviceWorker.controller) _mcaShowUpdateBanner();
+      });
+    });
   }).catch(function(err) {
     console.log('SW registration failed:', err);
   });
@@ -11063,7 +11106,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v87'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v88'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -13186,12 +13229,26 @@ function collectMafiaData(){
 }
 
 function collectQabbData() {
+  var p = window._cachedProfile || {};
+  var wxOn = document.querySelector('#screen-qabb-matrix .weather-pill.active');
+  var notesEl = document.querySelector('#screen-qabb-matrix textarea');
   var data = {
     survey_type: 'qabb',
-    transect: 'QABB Transect #14',
+    uid: generateRecordId('QABB'),
+    transect: 'QABB — ' + (myClan() || 'clan'),
+    survey_year: new Date().getFullYear(),
+    cadence: 'seasonal_jun_aug',
+    survey_month: ['January','February','March','April','May','June','July','August','September','October','November','December'][new Date().getMonth()],
     date: document.getElementById('qabbDate') ? document.getElementById('qabbDate').textContent : '',
     start_time: document.getElementById('qabbStartTime') ? document.getElementById('qabbStartTime').value : '',
-    end_time: document.getElementById('qabbEndTime') ? document.getElementById('qabbEndTime').value : ''
+    end_time: document.getElementById('qabbEndTime') ? document.getElementById('qabbEndTime').value : '',
+    weather: wxOn ? wxOn.id.replace('qwx-','') : '',
+    start_gps: qabbStartGps || null,
+    gps_source: (qabbStartGps && qabbStartGps.source) || null,
+    location_missing: !qabbStartGps,
+    notes: notesEl ? (notesEl.value||'').trim() : '',
+    clan: myClan(),
+    steward: p.stewardId || ''
   };
   var table = document.querySelector('#screen-qabb-matrix .matrix-table');
   if (!table) return data;

@@ -88,10 +88,22 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
         fingerprint gate) → `screen-qabb-matrix` records land-use, Aristolochia
         vine count and QABB sightings (adults / eggs / caterpillars) across
         **10 × 50 m sub-transects = 500 m**.
-      - **Gap to close:** lock the cadence to **annual / July** (not monthly) in
-        compliance + the calendar; use a **fixed transect location** re-walked
-        each year (repeatability); confirm the four counts (butterflies,
-        caterpillars, eggs, food plants) are all present and labelled clearly.
+      - **Finished (v88):** dummy values **removed from the markup** and zeroed
+        on entry; cadence is **monthly through the breeding season — June, July
+        & August** (`cadence: seasonal_jun_aug`, `survey_month` stored; soft
+        reminder outside Jun–Aug, never blocks); record carries survey_year,
+        weather, notes, start GPS, clan + steward; food-plant row relabelled
+        "Aristolochia vines (food plant)"; fake "Transect #14" labels removed.
+      - **Still to do — real GPS navigation (spec):** preload **one transect
+        per clan** (start+end points) into a `_qabb_transects` registry (coord
+        seeds; synced down like clans). Steward walks to the **start point →
+        fingerprint → walks to the end doing counts along the way**. Transects
+        are repeated, so locations are roughly known. **GPS detects the current
+        50 m sub-transect** (project live position onto the start→end line →
+        along-track distance ÷ 50 → active ST1–ST10; highlight it) — there's no
+        500 m tape. Reuse the MaFIA nav helpers (`_haversine`, `_bearing`,
+        `geoDest`, watchPosition). Then wire QABB into **seasonal (Jun–Aug)**
+        compliance. Blocked on the preloaded transect points.
       - **Layout:** like the **MaFIA matrix** — a grid with **counters per
         sub-transect** (tally +/- for adults / eggs / caterpillars / food-plant
         per 50 m cell), not plain text fields. Align the existing QABB matrix to

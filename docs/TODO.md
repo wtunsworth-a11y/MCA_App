@@ -59,6 +59,29 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
 
 ---
 
+## Livelihood projects module (requested 2026-10-15)
+
+- [ ] **Livelihood project updates — MCF / project staff.** A section for MCF &
+      project staff to log **monthly updates (notes + photos)** on livelihood
+      projects. Structure: **type → site → monthly update**.
+      - **Types** (extensible): Layers/poultry · Piggery · Vegetable farm ·
+        Fish pond · Nursery · Meli (stingless-bee) hives · Other.
+      - **Sites** (instances of a type): e.g. *Koruwo layers barn*; *piggery* in
+        all zones; *vegetable farms* in Z2/Z3/Z5/Z7A/Z7B; **~80 clan-level fish
+        ponds (TBC)**; *Umuate massoy nursery*; *Meli hives* in Z1/Z2/Z4/Z9/Z10;
+        and others (list grows).
+      - **Update**: notes + photos (+ date PNG, who, zone/clan). Structured
+        per-type metrics (pigs, eggs/day, pond stock/harvest) = later.
+      - **Reporting**: **one monthly document per TYPE, across all sites** —
+        reuse the handover-PDF/media-extraction pattern (photos → Drive, readable
+        per-type doc/PDF with each site's month update), emailed to MCF/project.
+      - **Role-gated** to MCF / project staff.
+      - **Open:** (a) who adds sites — coordinator seeds + staff add in-app?
+        (b) notes+photos only now? (c) which roles may submit.
+      - Build shape mirrors water/facilities: `_livelihood_sites` registry +
+        `livelihood_updates` store (synced) + a client screen + an Apps Script
+        per-type monthly report.
+
 ## Current priorities (pilot)
 
 - [ ] **Findings reporting** — the monitoring *values* are captured and stored

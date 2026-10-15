@@ -1698,7 +1698,8 @@ select.msel {
               <option value="clan_steward">Clan Steward</option>
               <option value="zone_staff">Zone Staff</option>
               <option value="field_officer">Field Officer (Agricultural Extension)</option>
-              <option value="mcf_staff">Project / MCF Staff</option>
+              <option value="mcf_staff">MCF Staff</option>
+              <option value="project_staff">Project Staff (livelihood projects)</option>
               <option value="consultant">Visiting Consultant</option>
             </select>
           </div>
@@ -2028,6 +2029,10 @@ select.msel {
           <div class="module-tile" id="tile-distribution" data-fo="1" data-vc="1" style="display:none;" onclick="nav('screen-distribution')">
             <span class="module-emoji" data-icon="box" data-size="26"></span>
             <span class="module-name">Handover &amp; Distribution</span>
+          </div>
+          <div class="module-tile" id="tile-livelihood" style="display:none;" onclick="nav('screen-livelihood')">
+            <span class="module-emoji" data-icon="sprout" data-size="26"></span>
+            <span class="module-name">Livelihood Updates</span>
           </div>
 
           <div class="module-group-hdr">Reports</div>
@@ -3216,6 +3221,74 @@ select.msel {
           <button type="button" class="btn-outline" id="distFpBtn" style="width:100%;border-color:#00838F;color:#00838F;" onclick="distVerifyFp()"><span data-icon="lock" data-size="14"></span> <span id="distFpTxt">Verify my fingerprint to submit</span></button>
 
           <button class="btn-primary" style="background:#00838F;margin-top:12px;" id="distSubmitBtn" onclick="submitDistribution()" disabled>Save and close</button>
+          <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: LIVELIHOOD PROJECT UPDATE (project staff)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-livelihood">
+      <div class="top-bar" style="background:#827717;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Livelihood Updates</div><div class="bar-subtitle">Monthly update for a project site</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:24px;">
+          <div class="matrix-note" style="background:#F9FBE7;border-color:#E6EE9C;color:#555D00;font-size:0.76rem;">
+            <span data-icon="info" data-size="14"></span> Pick a project site and record this month's update — a short note under each heading, plus photos. One combined document per project type is produced each month.
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Project site <span style="color:#B71C1C;">*</span></div>
+          <div class="form-group">
+            <select id="lvhSite" class="form-input" style="font-size:0.82rem;" onchange="lvhSiteChanged()">
+              <option value="">— choose a site —</option>
+            </select>
+            <div id="lvhSiteMeta" style="font-size:0.72rem;color:#827717;margin-top:4px;font-weight:600;"></div>
+            <div id="lvhSiteEmpty" style="display:none;font-size:0.72rem;color:#999;margin-top:4px;">No project sites have loaded yet — connect to the internet once so the list can sync.</div>
+          </div>
+
+          <div class="section-label" style="padding-left:0;">This month's update</div>
+          <div class="matrix-note" style="background:#f5f5f5;border-color:#e0e0e0;color:#777;font-size:0.72rem;">Fill the headings that apply — leave the rest blank. Nothing is forced.</div>
+
+          <div class="form-group">
+            <label class="form-label">Structure &amp; status</label>
+            <textarea id="lvhStructure" class="form-input" style="min-height:52px;width:100%;font-size:0.82rem;" placeholder="Condition of the building / pens / ponds / plot — standing, needs repair, expanded…"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Signs of use</label>
+            <textarea id="lvhUse" class="form-input" style="min-height:52px;width:100%;font-size:0.82rem;" placeholder="Is it being worked? Who is active, how often, what's happening on site…"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Survival of plants / animals</label>
+            <textarea id="lvhSurvival" class="form-input" style="min-height:52px;width:100%;font-size:0.82rem;" placeholder="How many alive / lost, growth, health, births, harvest…"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stories of use &amp; function</label>
+            <textarea id="lvhStories" class="form-input" style="min-height:52px;width:100%;font-size:0.82rem;" placeholder="What people say — income, food, benefit, how it's used in the community…"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Issues arising</label>
+            <textarea id="lvhIssues" class="form-input" style="min-height:52px;width:100%;font-size:0.82rem;" placeholder="Problems, disputes, pests, disease, damage, anything going wrong…"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Inputs needed</label>
+            <textarea id="lvhInputs" class="form-input" style="min-height:52px;width:100%;font-size:0.82rem;" placeholder="What's required — feed, seed, repairs, training, tools, follow-up…"></textarea>
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Photos</div>
+          <div id="lvhPhotoList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;"></div>
+          <button type="button" class="btn-outline" style="width:100%;color:#827717;border-color:#C0CA33;font-size:0.82rem;" onclick="document.getElementById('lvhPhotoInput').click()"><span data-icon="camera" data-size="14"></span> Add a photo</button>
+          <input type="file" id="lvhPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="lvhAddPhoto(this)">
+
+          <div class="section-label" style="padding-left:0;">Location <span style="color:#999;font-weight:400;">(optional)</span></div>
+          <div class="card" style="padding:10px 14px;margin-bottom:10px;">
+            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> Location</span><span id="lvhGPS" style="font-size:0.78rem;color:#827717;font-weight:600;">—</span></div>
+            <button type="button" id="lvhGpsBtn" onclick="lvhCaptureGps()" style="margin-top:6px;width:100%;background:#fff;border:1px solid #827717;color:#827717;border-radius:8px;padding:8px;font-size:0.78rem;font-weight:600;cursor:pointer;"><span data-icon="pin" data-size="13"></span> Capture location</button>
+          </div>
+
+          <button class="btn-primary" style="background:#827717;margin-top:12px;" id="lvhSubmitBtn" onclick="submitLivelihood()">Save update</button>
           <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
         </div>
       </div>
@@ -5500,7 +5573,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-performance','screen-recent-activity',
   'screen-ack','screen-profile','screen-timesheet',
-  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-distribution','screen-data-export'
+  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-distribution','screen-livelihood','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -5556,6 +5629,7 @@ function showScreen(id) {
   if (id === 'screen-issue-reports') initIssueReports();
   if (id === 'screen-report-issue') initReportIssue();
   if (id === 'screen-distribution') initDistribution();
+  if (id === 'screen-livelihood') initLivelihood();
   if (id === 'screen-dashboard') renderDashboardStatus();
   if (id === 'screen-alerts') initDisturbances();
   if (id === 'screen-help') renderHelpCentre();
@@ -5882,7 +5956,7 @@ function updateDashHeader(profile) {
   if (greet) greet.textContent = timeGreeting() + ', ' + firstName + ' 👋';
   if (clan) {
     var role = profile.role || '';
-    clan.textContent = (role === 'mcf_staff') ? 'All MCA'
+    clan.textContent = (role === 'mcf_staff' || role === 'project_staff') ? 'All MCA'
       : (role === 'consultant') ? 'Visiting Consultant'
       : (profile.clan || 'Managalas Conservation Area') + (profile.zone ? ' | ' + profile.zone : '');
   }
@@ -5947,7 +6021,7 @@ function enrollRoleChanged() {
   var role = document.getElementById('enrollRole').value;
   var zg   = document.getElementById('enrollZoneGroup');
   var tg   = document.getElementById('enrollTopicsGroup');
-  zg.style.display = (role === 'mcf_staff' || role === 'consultant') ? 'none' : 'block';
+  zg.style.display = (role === 'mcf_staff' || role === 'project_staff' || role === 'consultant') ? 'none' : 'block';
   tg.style.display = (role === 'field_officer') ? 'block' : 'none';
   /* Clan is a clan-steward concept only — zone staff / field officers work
      across the zone, MCF staff are MCA-wide, consultants external. */
@@ -6001,7 +6075,7 @@ function enrollSaveProfile() {
     toast('Please fill all required fields (Name, ID' + (needsClan ? ', Clan' : '') + ').');
     return;
   }
-  if (role !== 'mcf_staff' && role !== 'consultant' && !zoneId) {
+  if (role !== 'mcf_staff' && role !== 'project_staff' && role !== 'consultant' && !zoneId) {
     toast('Please select a Zone.');
     return;
   }
@@ -7372,7 +7446,7 @@ function renderPerformance(){
   var MO=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var now=new Date(); var monLabel=MO[now.getMonth()]; var nextMon=MO[(now.getMonth()+1)%12];
   if(role==='field_officer'){ _perfTally(el, monLabel, 'field-officer'); return; }
-  if(role==='zone_staff'||role==='mcf_staff'||role==='consultant'){ _perfOversight(el, monLabel); return; }
+  if(role==='zone_staff'||role==='mcf_staff'||role==='project_staff'||role==='consultant'){ _perfOversight(el, monLabel); return; }
   _perfSteward(el, monLabel, nextMon);
 }
 function _perfSteward(el, monLabel, nextMon){
@@ -8465,7 +8539,7 @@ function alertAccess(){
     role:role,
     seesAll: isOversight() || fieldView,   /* interim until zone/clan boundaries exist */
     canVerify: !fieldView,                 /* field officers do not verify alerts */
-    scope: role==='mcf_staff' ? 'All MCA'
+    scope: (role==='mcf_staff'||role==='project_staff') ? 'All MCA'
          : role==='zone_staff' ? 'All zones'
          : fieldView ? 'Your zone'
          : (myClan()||'your clan')
@@ -9454,7 +9528,7 @@ function myClan(){ return (window._cachedProfile && window._cachedProfile.clan) 
    stewards stay restricted to their own clan. */
 function isOversight(){
   var role = (window._cachedProfile && window._cachedProfile.role) || '';
-  return role === 'mcf_staff' || role === 'zone_staff' || !!window._coordSecret;
+  return role === 'mcf_staff' || role === 'project_staff' || role === 'zone_staff' || !!window._coordSecret;
 }
 
 /* ── Registry list (steward view) ── */
@@ -10406,6 +10480,118 @@ function submitDistribution(){
   });
 }
 
+/* ── Livelihood project update (project staff) ───────────────────────────── */
+function initLivelihood(){
+  window._lvhPhotos = [];
+  window._lvhGps = null;
+  ['lvhStructure','lvhUse','lvhSurvival','lvhStories','lvhIssues','lvhInputs'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  var g=document.getElementById('lvhGPS'); if(g) g.textContent='—';
+  var sm=document.getElementById('lvhSiteMeta'); if(sm) sm.textContent='';
+  lvhRenderPhotos();
+  /* Populate the site picker from the synced registry, grouped by type */
+  var sel=document.getElementById('lvhSite'); var empty=document.getElementById('lvhSiteEmpty');
+  if(sel){
+    sel.innerHTML='<option value="">— choose a site —</option>';
+    getLivelihood(function(reg){
+      var sites=((reg&&reg.sites)||[]).filter(function(s){ return s && s.active!==false; });
+      if(sites.length===0){ if(empty) empty.style.display='block'; return; }
+      if(empty) empty.style.display='none';
+      /* group by type */
+      var byType={}; sites.forEach(function(s){ (byType[s.type||'Other']=byType[s.type||'Other']||[]).push(s); });
+      Object.keys(byType).sort().forEach(function(type){
+        var og=document.createElement('optgroup'); og.label=type;
+        byType[type].forEach(function(s){
+          var o=document.createElement('option'); o.value=s.id;
+          o.textContent=s.name||s.id;
+          o.setAttribute('data-type', s.type||'');
+          o.setAttribute('data-name', s.name||s.id);
+          o.setAttribute('data-zone', s.zone||'');
+          o.setAttribute('data-clan', s.clan||'');
+          og.appendChild(o);
+        });
+        sel.appendChild(og);
+      });
+    });
+  }
+}
+function lvhSiteChanged(){
+  var sel=document.getElementById('lvhSite'); var meta=document.getElementById('lvhSiteMeta');
+  if(!sel||!meta) return;
+  var o=sel.options[sel.selectedIndex];
+  if(!o||!o.value){ meta.textContent=''; return; }
+  var bits=[]; var t=o.getAttribute('data-type'); var z=o.getAttribute('data-zone'); var c=o.getAttribute('data-clan');
+  if(t) bits.push(t); if(z) bits.push(z); if(c) bits.push(c);
+  meta.textContent=bits.join(' · ');
+}
+function lvhAddPhoto(input){
+  var f=input.files&&input.files[0]; if(!f) return;
+  var reader=new FileReader();
+  reader.onload=function(e){ window._lvhPhotos.push(e.target.result); lvhRenderPhotos(); };
+  reader.readAsDataURL(f);
+  input.value='';
+}
+function lvhRenderPhotos(){
+  var box=document.getElementById('lvhPhotoList'); if(!box) return;
+  var ph=window._lvhPhotos||[];
+  if(ph.length===0){ box.innerHTML='<div style="font-size:0.72rem;color:#999;">No photos yet.</div>'; return; }
+  box.innerHTML=ph.map(function(src,i){
+    return '<div style="position:relative;width:78px;height:78px;border-radius:8px;overflow:hidden;border:1px solid #ddd;">'
+      +'<img src="'+src+'" style="width:100%;height:100%;object-fit:cover;" alt="photo '+(i+1)+'">'
+      +'<button type="button" onclick="lvhRemovePhoto('+i+')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:0.8rem;line-height:1;cursor:pointer;">×</button></div>';
+  }).join('');
+}
+function lvhRemovePhoto(i){ (window._lvhPhotos||[]).splice(i,1); lvhRenderPhotos(); }
+function lvhCaptureGps(){
+  var el=document.getElementById('lvhGPS'); var btn=document.getElementById('lvhGpsBtn');
+  if(el){ el.textContent='Acquiring…'; el.style.color='#888'; }
+  if(btn){ btn.disabled=true; btn.textContent='Acquiring…'; }
+  captureGPS(function(gps,err){
+    if(btn){ btn.disabled=false; btn.innerHTML='<span data-icon="pin" data-size="13"></span> Capture location'; try{ hydrateIcons(btn); }catch(e){} }
+    if(gps){ window._lvhGps=gps; if(el){ el.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'+(gps.source==='coarse'?' (approx)':''); el.style.color='#827717'; } }
+    else { window._lvhGps=null; if(el){ el.textContent=(err||'Location unavailable')+' — optional'; el.style.color='#E65100'; } }
+  });
+}
+function submitLivelihood(){
+  var sel=document.getElementById('lvhSite');
+  var o=sel?sel.options[sel.selectedIndex]:null;
+  if(!o||!o.value){ toast('Choose a project site first.'); return; }
+  var fields=[
+    ['Structure & status', (document.getElementById('lvhStructure')||{}).value],
+    ['Signs of use',       (document.getElementById('lvhUse')||{}).value],
+    ['Survival of plants / animals', (document.getElementById('lvhSurvival')||{}).value],
+    ['Stories of use & function', (document.getElementById('lvhStories')||{}).value],
+    ['Issues arising',     (document.getElementById('lvhIssues')||{}).value],
+    ['Inputs needed',      (document.getElementById('lvhInputs')||{}).value]
+  ].map(function(p){ return [p[0], (p[1]||'').trim()]; });
+  var filled=fields.filter(function(p){ return p[1]; });
+  if(filled.length===0 && (window._lvhPhotos||[]).length===0){ toast('Add a note under at least one heading, or a photo.'); return; }
+  /* Compose a readable notes block (only the headings that were filled) for the
+     per-type monthly document; also keep the fields individually. */
+  var notes=filled.map(function(p){ return p[0]+':\n'+p[1]; }).join('\n\n');
+  var now=trustedNow();
+  var p=window._cachedProfile||{};
+  var rec={
+    survey_type:'livelihood',
+    uid:(window._lvhUid=generateRecordId('LVH')), record_uid:window._lvhUid,
+    site_id:o.value, site_name:o.getAttribute('data-name')||o.textContent, type:o.getAttribute('data-type')||'',
+    site_zone:o.getAttribute('data-zone')||'', site_clan:o.getAttribute('data-clan')||'',
+    structure_status:fields[0][1], signs_of_use:fields[1][1], survival:fields[2][1],
+    stories:fields[3][1], issues:fields[4][1], inputs_needed:fields[5][1],
+    notes:notes,
+    photos:(window._lvhPhotos||[]).slice(),
+    gps:window._lvhGps||null, gps_source:(window._lvhGps&&window._lvhGps.source)||null, location_missing:!window._lvhGps,
+    recorded_at:now.toISOString(),
+    month:monthKey(now),
+    officer:{ name:p.name||'', steward_id:p.stewardId||'', role:p.role||'' }
+  };
+  var sb=document.getElementById('lvhSubmitBtn'); if(sb){ sb.disabled=true; sb.textContent='Saving…'; }
+  saveRecord('livelihood', rec, function(){
+    toast('Livelihood update saved ✓ — send data when you have signal');
+    if(sb){ sb.disabled=false; sb.textContent='Save update'; }
+    goBack();
+  });
+}
+
 function phenoOwnedByMyClan(p){ return isOversight() || !p.owner_clan || p.owner_clan===myClan() || p.owner_clan_2===myClan(); }
 
 function phenoRegistryRecord(r){ return { uid:r.uid, crop_type:r.crop_type, plant_num:r.plant_num, lat:r.lat, lng:r.lng, location_name:r.location_name, notes:r.notes, marker_type:r.marker_type||null, dbh_cm:(r.dbh_cm!=null?r.dbh_cm:null), dbh_date:r.dbh_date||null, established_date:r.established_date, device_time:r.device_time||null, clock_ok:(r.clock_ok!==undefined?r.clock_ok:null), status:r.status, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, approved_date:r.approved_date||null, inactive_reason:r.inactive_reason||null }; }
@@ -11166,8 +11352,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 14;
-var STORES = ['mafia','qabb','water','phenology','trees','meteo','conservation','followups','schedule','pheno_plots','training','auth','drafts','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions'];
+var DB_VERSION = 15;
+var STORES = ['mafia','qabb','water','phenology','trees','meteo','conservation','followups','schedule','pheno_plots','training','auth','drafts','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions','livelihood'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -11208,7 +11394,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v90'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v91'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11384,7 +11570,7 @@ function cacheStewardProfile() {
       if (trainingTile) {
         /* Training visible to: field officers, oversight (Project/MCF & Zone
            staff), and clan stewards granted topic authorisations */
-        var canTrain = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' || role === 'consultant' ||
+        var canTrain = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' || role === 'project_staff' || role === 'consultant' ||
                         (role === 'clan_steward' && authTopics.length > 0));
         trainingTile.style.display = canTrain ? '' : 'none';
       }
@@ -11392,8 +11578,14 @@ function cacheStewardProfile() {
          plain clan stewards). */
       var distTile = document.getElementById('tile-distribution');
       if (distTile) {
-        var canDist = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' || role === 'consultant');
+        var canDist = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' || role === 'project_staff' || role === 'consultant');
         distTile.style.display = canDist ? '' : 'none';
+      }
+      /* Livelihood projects — PROJECT STAFF ONLY (not MCF staff; monthly site
+         updates with guided notes + photos). */
+      var lvhTile = document.getElementById('tile-livelihood');
+      if (lvhTile) {
+        lvhTile.style.display = (role === 'project_staff') ? '' : 'none';
       }
       /* Focused dashboard for Field Officers — show only their tiles (marked
          data-fo), hide the rest so they aren't sidetracked. Their uploads are
@@ -11522,6 +11714,25 @@ function getClanList(callback) {
           } else { callback(cached || {}); }
         }).catch(function(){ callback(cached || {}); });
     } else { callback(cached || {}); }
+  });
+}
+/* ── Livelihood projects registry (coordinator-maintained; {types:[],sites:[]}).
+   Project staff pick a site from this list and file a monthly update. Cached in
+   the auth store like zones/clans; refreshed from the server when online. ── */
+function getLivelihood(callback) {
+  getAllRecords('auth', function(records) {
+    var cached = null;
+    if (records) records.forEach(function(r){ if (r.id === 'livelihood') cached = r.livelihood; });
+    if (UPLOAD_ENDPOINT && navigator.onLine) {
+      fetch(UPLOAD_ENDPOINT + '?action=livelihood')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if (d.status === 'ok' && d.livelihood) {
+            saveRecord('auth', {id:'livelihood', livelihood:d.livelihood, fetched:new Date().toISOString()}, function(){});
+            callback(d.livelihood);
+          } else { callback(cached || {types:[],sites:[]}); }
+        }).catch(function(){ callback(cached || {types:[],sites:[]}); });
+    } else { callback(cached || {types:[],sites:[]}); }
   });
 }
 /* ── Public holidays (national PNG; coordinator-maintained, cached in the auth
@@ -11832,7 +12043,8 @@ function renderUpdateProfileScreen() {
           '<option value="clan_steward"' + (profile.role==='clan_steward'?' selected':'') + '>Clan Steward</option>' +
           '<option value="zone_staff"'   + (profile.role==='zone_staff'?' selected':'')   + '>Zone Staff</option>' +
           '<option value="field_officer"'+ (profile.role==='field_officer'?' selected':'')+'>Field Officer (Agri. Extension)</option>' +
-          '<option value="mcf_staff"'    + (profile.role==='mcf_staff'?' selected':'')    + '>Project / MCF Staff</option>' +
+          '<option value="mcf_staff"'    + (profile.role==='mcf_staff'?' selected':'')    + '>MCF Staff</option>' +
+          '<option value="project_staff"'+ (profile.role==='project_staff'?' selected':'')+'>Project Staff (livelihood projects)</option>' +
           '<option value="consultant"'   + (profile.role==='consultant'?' selected':'')   + '>Visiting Consultant</option>' +
         '</select>' +
       '</div>' +
@@ -12106,7 +12318,7 @@ function syncAuthorisations(profile) {
         /* Re-run tile visibility */
         var role   = profile.role || 'clan_steward';
         var tile   = document.getElementById('tile-training');
-        var canTrain = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' || role === 'consultant' ||
+        var canTrain = (role === 'field_officer' || role === 'zone_staff' || role === 'mcf_staff' || role === 'project_staff' || role === 'consultant' ||
                         (role === 'clan_steward' && updated.length > 0));
         if (tile) tile.style.display = canTrain ? '' : 'none';
         /* Notify user if they now have new training access */
@@ -12164,7 +12376,8 @@ function loadProfileScreen() {
         'clan_steward': 'Clan Steward',
         'field_officer': 'Field Officer',
         'zone_staff': 'Zone Staff',
-        'mcf_staff': 'Project / MCF Staff',
+        'mcf_staff': 'MCF Staff',
+        'project_staff': 'Project Staff',
         'consultant': 'Visiting Consultant'
       })[profile.role] || profile.role || 'Clan Steward';
       /* Detail rows */
@@ -12173,7 +12386,7 @@ function loadProfileScreen() {
         var pr = profile.role || '';
         /* mcf_staff oversee all of MCA, consultants are external — neither is
            scoped to a clan/zone, so show "Coverage" instead of a clan + zone. */
-        var coverageRows = (pr === 'mcf_staff')
+        var coverageRows = (pr === 'mcf_staff' || pr === 'project_staff')
           ? '<div class="detail-row"><span class="dl">Coverage</span><span class="dv">All MCA</span></div>'
           : (pr === 'consultant')
           ? '<div class="detail-row"><span class="dl">Coverage</span><span class="dv">Visiting — no clan/zone</span></div>'
@@ -12227,7 +12440,7 @@ function initReportScreen(profile) {
   var sub   = document.getElementById('reportSub');
   var back  = document.getElementById('reportBackBtn');
 
-  if (role === 'mcf_staff') {
+  if (role === 'mcf_staff' || role === 'project_staff') {
     if (title) title.textContent = 'MCF Summary';
     if (sub)   sub.textContent   = 'All Zones';
     if (back)  back.onclick = function() { showScreen('screen-dashboard'); };
@@ -12266,7 +12479,7 @@ function fetchReport() {
   body.innerHTML = '<div style="text-align:center;padding:40px 0;color:#888;">Loading…</div>';
 
   var url;
-  if (role === 'mcf_staff') {
+  if (role === 'mcf_staff' || role === 'project_staff') {
     url = UPLOAD_ENDPOINT + '?action=mcf_report&period=' + _reportPeriod;
   } else {
     url = UPLOAD_ENDPOINT + '?action=zone_report&zone=' + encodeURIComponent(_reportProfile.zone_id || '') + '&period=' + _reportPeriod;
@@ -12315,7 +12528,7 @@ function renderReport(report, role) {
   if (range) range.textContent = (report.from || '') + ' → ' + (report.to || '');
   if (!body) return;
 
-  if (role === 'mcf_staff') {
+  if (role === 'mcf_staff' || role === 'project_staff') {
     renderMCFReport(report, body);
   } else {
     renderZoneReport(report, body);
@@ -12571,7 +12784,7 @@ function markStoreSynced(storeName, ids, cb) {
 
 /* ── Update per-module sync status on export screen ── */
 var DATA_STORES = ['mafia','qabb','water','phenology','pheno_plots',
-  'conservation','followups','freemap','trees','meteo','training','schedule','distributions'];
+  'conservation','followups','freemap','trees','meteo','training','schedule','distributions','livelihood'];
 
 /* ── Dashboard tile colours ───────────────────────────────────────────────
    Give each module its own colour (grouped into families so the grid reads as
@@ -12586,7 +12799,7 @@ var DASH_TILE_COLORS = {
   'Disturbance Alerts':'#C62828',
   'Activity Calendar':'#1565C0', 'Service Delivery Monitoring':'#00695C',
   'Meetings':'#5E35B1', 'Community Data':'#3949AB', 'Performance Monitoring':'#283593',
-  'Training':'#6A1B9A', 'Handover & Distribution':'#AD1457', 'Export Data':'#455A64'
+  'Training':'#6A1B9A', 'Handover & Distribution':'#AD1457', 'Livelihood Updates':'#827717', 'Export Data':'#455A64'
 };
 function colorDashTiles() {
   document.querySelectorAll('#screen-dashboard .module-tile').forEach(function(t) {

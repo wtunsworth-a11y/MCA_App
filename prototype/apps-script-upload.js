@@ -1406,6 +1406,61 @@ function buildMCFReport(period) {
 }
 
 /* ─── Receive upload from steward phone ─────────────────────────────── */
+/* ─── Enrolment registry (who has been created) ─────────────────────────
+ * _enrolments.json — one entry per stewardId. Written by the app's enrolment
+ * ping (enrol_ping, upload secret only) when a coordinator enrols someone and
+ * when anyone logs in while online, and back-filled from every data upload, so
+ * the coordinator has a LIVE roster of everyone created — including people who
+ * have enrolled but not yet uploaded any monitoring data. Read via
+ * GET ?action=enrolments. This is a convenience roster, not an auth source. */
+function loadEnrolments() {
+  try {
+    var folder = getDataFolder();
+    var fs = folder.getFilesByName('_enrolments.json');
+    if (fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString()) || {};
+  } catch(e) {}
+  return {};
+}
+function saveEnrolments(obj) {
+  var folder = getDataFolder();
+  var fs = folder.getFilesByName('_enrolments.json');
+  var json = JSON.stringify(obj || {}, null, 2);
+  if (fs.hasNext()) fs.next().setContent(json);
+  else folder.createFile('_enrolments.json', json, MimeType.PLAIN_TEXT);
+}
+/* Upsert one person. `uploaded` true marks that real data has arrived (set from
+ * the upload path); the ping alone leaves the prior upload flag untouched. */
+function registerEnrolment(rec, uploaded) {
+  if (!rec || !rec.stewardId) return { status:'error', message:'Missing stewardId' };
+  var map = loadEnrolments();
+  var id  = String(rec.stewardId);
+  var now = new Date().toISOString();
+  var prev = map[id] || {};
+  map[id] = {
+    stewardId:   id,
+    name:        rec.name    || prev.name    || '',
+    role:        rec.role    || prev.role    || '',
+    zone:        rec.zone    || prev.zone    || '',
+    zone_id:     rec.zone_id || prev.zone_id || '',
+    clan:        rec.clan    || prev.clan    || '',
+    village:     rec.village || prev.village || '',
+    enrolled_at: rec.enrolled_at || prev.enrolled_at || now,
+    first_seen:  prev.first_seen || now,
+    last_seen:   now,
+    app_build:   rec.app_build || prev.app_build || '',
+    has_uploaded: uploaded ? true : (prev.has_uploaded || false)
+  };
+  saveEnrolments(map);
+  return { status:'ok', message:'Enrolment recorded', stewardId:id };
+}
+function getEnrolments() {
+  var map = loadEnrolments();
+  var list = Object.keys(map).map(function(k){ return map[k]; });
+  list.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+  return ContentService.createTextOutput(JSON.stringify({ status:'ok', enrolments: list, count: list.length }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
 function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
@@ -1547,6 +1602,15 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    /* Enrolment ping — app reports who was created / logged in (upload secret
+     * only). Lets the coordinator see everyone enrolled, even before any data
+     * upload. */
+    if (body._action === 'enrol_ping') {
+      return ContentService
+        .createTextOutput(JSON.stringify(registerEnrolment(body.enrolment, false)))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     /* Disturbance registry — coordinator triage/assignment (coordinator key required) */
     if (body._action === 'update_disturbances') {
       var dzUpResult = updateDisturbances(body.disturbances);
@@ -1633,6 +1697,10 @@ function doPost(e) {
 
     subFolder.createFile(fileName, content, MimeType.PLAIN_TEXT);
 
+    /* Back-fill the enrolment roster from the upload's steward block (marks the
+     * person as having uploaded). Never fails the upload. */
+    try { if (body.steward && body.steward.stewardId) registerEnrolment(body.steward, true); } catch(e) {}
+
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'ok', file: fileName, records: body.record_count }))
       .setMimeType(ContentService.MimeType.JSON);
@@ -1663,6 +1731,7 @@ function doGet(e) {
   if (action === 'clans') { return getClans(); }
   if (action === 'holidays') { return getHolidays(); }
   if (action === 'livelihood') { return getLivelihood(); }
+  if (action === 'enrolments') { return getEnrolments(); }
   if (action === 'pheno_targets') { return getPhenoTargets(); }
 
   if (action === 'authorisations') {

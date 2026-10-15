@@ -1669,6 +1669,7 @@ select.msel {
           <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:10px;width:100%;" onclick="showScreen('screen-zone-config')"><span data-icon="gear" data-size="14"></span> Manage Zones</button>
           <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')"><span data-icon="clipboard" data-size="14"></span> Manage Training Topics</button>
           <button class="btn-outline" id="enrollUpdateProfileBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showUpdateProfile()"><span data-icon="edit" data-size="14"></span> Update Existing Profile</button>
+          <button class="btn-outline" id="enrollEnrolmentsBtn" style="display:none;margin-top:8px;width:100%;border-color:#6A1B9A;color:#6A1B9A;" onclick="nav('screen-enrolments')"><span data-icon="people" data-size="14"></span> Enrolled People</button>
           <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()"><span data-icon="mortarboard" data-size="14"></span> Grant Training Authorisation</button>
           <button class="btn-outline" id="enrollApproveWaterBtn" style="display:none;margin-top:8px;width:100%;border-color:#0277BD;color:#0277BD;" onclick="showScreen('screen-water-approve')"><span data-icon="spring" data-size="14"></span> Approve Water Sources</button>
           <button class="btn-outline" id="enrollApproveFacBtn" style="display:none;margin-top:8px;width:100%;border-color:#283593;color:#283593;" onclick="showScreen('screen-facility-approve')"><span data-icon="school" data-size="14"></span> Approve Facilities</button>
@@ -1878,6 +1879,26 @@ select.msel {
         </div>
         <div id="updateProfileBody">
           <div style="text-align:center;padding:30px;color:#999;font-size:0.82rem;">Loading current profile…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: ENROLLED PEOPLE (coordinator roster)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-enrolments">
+      <div class="top-bar" style="background:#6A1B9A;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Enrolled People</div><div class="bar-subtitle">Everyone created in the app</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:24px;">
+          <div class="matrix-note" style="background:#F3E5F5;border-color:#CE93D8;color:#4A148C;font-size:0.76rem;">
+            <span data-icon="info" data-size="14"></span> Everyone enrolled who has opened the app online at least once. A ⬆ means they have uploaded data; others are enrolled but haven't synced yet.
+          </div>
+          <div id="enrolmentsList">
+            <div style="text-align:center;padding:30px;color:#999;font-size:0.82rem;">Loading…</div>
+          </div>
         </div>
       </div>
     </div>
@@ -5558,7 +5579,7 @@ select.msel {
 /* ── Screen Registry & Stack ── */
 const ALL_SCREENS = [
   'screen-splash','screen-enroll','screen-zone-config','screen-topics-config',
-  'screen-grant-auth','screen-update-profile','screen-fingerprint',
+  'screen-grant-auth','screen-update-profile','screen-enrolments','screen-fingerprint',
   'screen-reports','screen-dashboard',
   'screen-mafia-setup','screen-mafia-matrix',
   'screen-qabb-setup','screen-qabb-matrix',
@@ -5630,6 +5651,7 @@ function showScreen(id) {
   if (id === 'screen-report-issue') initReportIssue();
   if (id === 'screen-distribution') initDistribution();
   if (id === 'screen-livelihood') initLivelihood();
+  if (id === 'screen-enrolments') renderEnrolments();
   if (id === 'screen-dashboard') renderDashboardStatus();
   if (id === 'screen-alerts') initDisturbances();
   if (id === 'screen-help') renderHelpCentre();
@@ -5986,6 +6008,7 @@ function enrollCheckPasscode() {
       document.getElementById('enrollManageZonesBtn').style.display = 'block';
       document.getElementById('enrollManageTopicsBtn').style.display = 'block';
       document.getElementById('enrollUpdateProfileBtn').style.display = 'block';
+      var _epb = document.getElementById('enrollEnrolmentsBtn'); if (_epb) _epb.style.display = 'block';
       document.getElementById('enrollGrantAuthBtn').style.display = 'block';
       document.getElementById('enrollApproveWaterBtn').style.display = 'block';
       document.getElementById('enrollApproveFacBtn').style.display = 'block';
@@ -6192,6 +6215,8 @@ function enrollFinish() {
     document.getElementById('edot4').classList.remove('active');
     document.getElementById('edot4').classList.add('done');
     updateDashHeader(enrolledProfile);
+    /* Tell the backend this person was created (live roster, pre-upload). */
+    try { postEnrolmentPing(record); } catch(e){}
   });
 }
 
@@ -6240,6 +6265,7 @@ function verifyFp() {
       updateDashHeader(profile);
       setTimeout(function() {
         cacheStewardProfile();
+        try { postEnrolmentPing(profile); } catch(e){}  /* keep the backend roster current */
         syncAuthorisations(profile);  /* fetch any new coordinator-granted authorisations */
         history = [];
         var role = profile.role || 'clan_steward';
@@ -11394,7 +11420,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v91'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v92'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11734,6 +11760,54 @@ function getLivelihood(callback) {
         }).catch(function(){ callback(cached || {types:[],sites:[]}); });
     } else { callback(cached || {types:[],sites:[]}); }
   });
+}
+/* ── Enrolment ping — tell the backend who was created / logged in, so the
+   coordinator has a live roster of everyone enrolled (even before any data
+   upload). Fire-and-forget; never blocks or surfaces an error. ── */
+function postEnrolmentPing(p){
+  try {
+    if (!p || !p.stewardId || !UPLOAD_ENDPOINT || !navigator.onLine) return;
+    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ _action:'enrol_ping', _secret:UPLOAD_SECRET, enrolment:{
+        stewardId:p.stewardId, name:p.name||'', role:p.role||'', zone:p.zone||'',
+        zone_id:p.zone_id||'', clan:p.clan||'', village:p.village||'',
+        enrolled_at:p.enrolled||p.enrolled_at||'', app_build:APP_BUILD
+      } }) }).catch(function(){});
+  } catch(e){}
+}
+/* Coordinator roster view — fetch and list everyone enrolled. */
+var _ENROL_ROLE_LABELS = { clan_steward:'Clan Steward', zone_staff:'Zone Staff', field_officer:'Field Officer', mcf_staff:'MCF Staff', project_staff:'Project Staff', consultant:'Visiting Consultant' };
+function renderEnrolments(){
+  var box = document.getElementById('enrolmentsList'); if(!box) return;
+  box.innerHTML = '<div style="text-align:center;padding:30px;color:#999;font-size:0.82rem;">Loading…</div>';
+  if(!UPLOAD_ENDPOINT || !navigator.onLine){ box.innerHTML = '<div class="matrix-note" style="background:#FFF8E1;border-color:#FFE082;color:#8D6E00;font-size:0.78rem;">You’re offline — connect to load the enrolled-people list.</div>'; return; }
+  fetch(UPLOAD_ENDPOINT + '?action=enrolments')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var list = (d && d.status==='ok' && d.enrolments) || [];
+      if(list.length===0){ box.innerHTML = '<div class="card" style="padding:18px;text-align:center;color:#888;font-size:0.85rem;">No one has pinged the backend yet. People appear here after they open the updated app online, or upload data.</div>'; return; }
+      /* group by role */
+      var byRole = {}; list.forEach(function(e){ var k=e.role||'other'; (byRole[k]=byRole[k]||[]).push(e); });
+      var order = ['mcf_staff','project_staff','zone_staff','field_officer','clan_steward','consultant','other'];
+      var seen = {}; var keys = order.filter(function(k){ return byRole[k]; }); Object.keys(byRole).forEach(function(k){ if(order.indexOf(k)===-1) keys.push(k); });
+      var h = '<div style="font-size:0.8rem;color:#555;margin:4px 0 10px;">'+list.length+' enrolled</div>';
+      keys.forEach(function(role){
+        var people = byRole[role]; if(!people) return;
+        h += '<div style="font-size:0.82rem;font-weight:700;color:#6A1B9A;margin:12px 0 6px;">'+(_ENROL_ROLE_LABELS[role]||role)+' <span style="font-weight:400;color:#999;">('+people.length+')</span></div>';
+        people.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); }).forEach(function(e){
+          var where = [e.zone||'', e.clan||''].filter(Boolean).join(' · ');
+          h += '<div class="card" style="padding:9px 12px;margin-bottom:6px;">'
+            + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">'
+            +   '<div style="font-weight:600;font-size:0.86rem;color:#222;">'+(e.name||'(no name)')+(e.has_uploaded?' <span title="has uploaded data" style="color:#2E7D32;">⬆</span>':'')+'</div>'
+            +   '<div style="font-size:0.7rem;color:#888;">'+(e.stewardId||'')+'</div>'
+            + '</div>'
+            + (where ? '<div style="font-size:0.72rem;color:#777;margin-top:2px;">'+where+'</div>' : '')
+            + '</div>';
+        });
+      });
+      box.innerHTML = h;
+    })
+    .catch(function(){ box.innerHTML = '<div class="matrix-note" style="background:#FFEBEE;border-color:#EF9A9A;color:#B71C1C;font-size:0.78rem;">Could not load the list — try again when you have a better connection.</div>'; });
 }
 /* ── Public holidays (national PNG; coordinator-maintained, cached in the auth
    store like zones/clans). Shown on the Activity Calendar for context and used
@@ -12101,6 +12175,8 @@ function saveUpdatedProfile(profileId) {
       status.style.color = '#1565C0';
       /* Refresh cached profile */
       window._cachedProfile = profile;
+      /* Propagate the new role/zone to the backend roster. */
+      try { postEnrolmentPing(profile); } catch(e){}
     });
   });
 }

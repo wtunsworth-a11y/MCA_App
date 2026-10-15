@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MCApp — Managalas Conservation Area</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1B5E20">
@@ -109,7 +109,10 @@ body {
   color: #fff;
   display: flex;
   align-items: center;
-  padding: 34px 16px 12px;
+  /* Top padding clears the status bar / notch. With viewport-fit=cover the
+     webview reaches the top edge, so honour the safe-area inset where it is
+     larger than our baseline 34px (e.g. a tall notch). */
+  padding: max(34px, env(safe-area-inset-top, 0px)) 16px 12px;
   min-height: 76px;
   flex-shrink: 0;
   gap: 8px;
@@ -142,7 +145,13 @@ body {
   background: #fff;
   border-top: 1px solid #e0e0e0;
   display: flex;
-  height: 60px;
+  /* 60px of bar + the Android gesture-nav inset below it. With a full-screen /
+     edge-to-edge TWA (viewport-fit=cover) the webview reaches the very bottom
+     edge, where the system gesture pill sits — without this padding the bar
+     hides behind it. env() is 0 on devices with no inset, so no visible change
+     there. */
+  height: calc(60px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   flex-shrink: 0;
   z-index: 10;
 }
@@ -11199,7 +11208,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v89'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v90'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

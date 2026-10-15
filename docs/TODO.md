@@ -77,13 +77,20 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
       - **Reporting**: **one monthly document per TYPE, across all sites** —
         reuse the handover-PDF/media-extraction pattern (photos → Drive, readable
         per-type doc/PDF with each site's month update), emailed to MCF/project.
-      - **Role-gated to MCF staff only** (the core team currently shares that
-        role). Sites: **coordinator seeds the known ones + MCF staff can add a
-        new site in-app**. Updates are **notes + photos** only for now (per-type
-        metrics later).
-      - Build shape mirrors water/facilities: `_livelihood_sites` registry +
-        `livelihood_updates` store (synced) + a client screen + an Apps Script
-        per-type monthly report.
+      - **Role-gated to `project_staff` only** (NOT general MCF staff — see role
+        split below). **Creation is coordinator-only** — the project types + sites
+        are a coordinator-maintained registry (defined by William via the backend
+        / here, like zones/clans); staff **cannot** add projects. Project staff
+        only **pick a site from the synced list and submit a monthly update**
+        (notes + photos; + auto date/who/zone/clan). Per-type metrics later.
+      - **Guided notes** — the update's notes field prompts for a fixed set of
+        headings so every site report is comparable: **structure / status**,
+        **signs of use**, **survival of plants / animals**, **stories of use &
+        function**, **issues arising**, **inputs needed**. (Free text under each;
+        no field is forced, per "no default-on-skip".)
+      - Build shape mirrors water/facilities: `_livelihood` registry +
+        `livelihood` store (synced) + a client screen + an Apps Script
+        per-type monthly report. *(Backend done — client building now.)*
 
 - [ ] **Separate "project team" role (consider).** Today the core team (William,
       Matilda, Russell, Mellie, Josh, + others as they join) all share the

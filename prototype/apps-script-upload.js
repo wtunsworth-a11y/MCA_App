@@ -1798,6 +1798,7 @@ function collectDistributions() {
         var stew = body.steward || {};
         for (var i = 0; i < dists.length; i++) {
           var rec = dists[i];
+          if (rec.is_training) continue;            /* never report practice handovers */
           var uid = rec.record_uid || rec.uid;
           if (!uid) continue;
           var prev = byUid[uid];
@@ -1821,6 +1822,67 @@ function _distItemsText(items) {
   }).join(' ; ');
 }
 
+/* Build a one-page, readable PDF for a single handover: the facts + the
+ * handover photo embedded (scaled down) + links to the receipt photo and the
+ * video (which stay as standalone Drive files). Idempotent by file name. */
+function _handoverPdf(handoversFolder, r, s) {
+  var uid = r.record_uid || r.uid;
+  var rp  = r.recipient || {}, o = r.officer || {};
+  var inst = _recInstant(r) ? new Date(_recInstant(r)) : new Date();
+  var safe = function(x){ return String(x||'').replace(/[^A-Za-z0-9_\-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40); };
+  var pdfName = 'Handover_' + (safe(rp.name) || 'recipient') + '_' + _pngDate(inst, 'yyyy-MM-dd') + '_' + String(uid).slice(-6) + '.pdf';
+  var existing = handoversFolder.getFilesByName(pdfName);
+  if (existing.hasNext()) return existing.next().getUrl();
+
+  var doc = DocumentApp.create('tmp_' + pdfName.replace('.pdf',''));
+  var b = doc.getBody();
+  b.appendParagraph('MCA — Handover / Distribution record').setHeading(DocumentApp.ParagraphHeading.HEADING1);
+  b.appendParagraph('Date (PNG): ' + _pngDate(inst, 'd MMM yyyy'));
+  b.appendParagraph('Officer: ' + (o.name || s.name || '') + (o.steward_id ? (' (' + o.steward_id + ')') : ''));
+  b.appendParagraph('Zone: ' + (s.zone || ''));
+
+  b.appendParagraph('Recipient').setHeading(DocumentApp.ParagraphHeading.HEADING2);
+  b.appendParagraph('Name: ' + (rp.name || ''));
+  b.appendParagraph('Type: ' + (rp.type || '') + (rp.zone ? (' — ' + rp.zone) : '') + (rp.clan ? (' — clan ' + rp.clan) : ''));
+  if (rp.received_by) b.appendParagraph('Received by: ' + rp.received_by);
+  b.appendParagraph('Receipt confirmed: ' + (rp.confirmed_receipt === true ? 'Yes' : 'No'));
+
+  b.appendParagraph('Items').setHeading(DocumentApp.ParagraphHeading.HEADING2);
+  var items = r.items || [];
+  if (items.length) {
+    var tbl = [['Item','Qty','Unit','Category']];
+    items.forEach(function(it){ tbl.push([ String(it.description||''), (it.quantity!=null?String(it.quantity):''), String(it.unit||''), String(it.category||'') ]); });
+    b.appendTable(tbl);
+  } else { b.appendParagraph('(none listed)'); }
+
+  b.appendParagraph('Purpose: ' + [r.purpose_category, r.purpose].filter(String).join(' — '));
+  b.appendParagraph('Donor: ' + (r.donor || '') + (r.donor_recognised === true ? ' (recognised at handover)' : ''));
+  var gps = (r.gps && r.gps.lat != null) ? (r.gps.lat + ', ' + r.gps.lng + (r.gps.accuracy ? (' ±' + r.gps.accuracy + 'm') : '')) : 'not recorded';
+  b.appendParagraph('GPS: ' + gps);
+
+  var ph = _dataUriToBlob(r.photo_handover, 'handover.jpg');
+  if (ph) {
+    b.appendParagraph('Handover photo').setHeading(DocumentApp.ParagraphHeading.HEADING2);
+    try { var img = b.appendImage(ph); var w = img.getWidth(); if (w > 420) { img.setHeight(Math.round(img.getHeight() * 420 / w)); img.setWidth(420); } }
+    catch (e) { b.appendParagraph('(photo could not be embedded — see link below)'); }
+  }
+
+  b.appendParagraph('Media files').setHeading(DocumentApp.ParagraphHeading.HEADING2);
+  var L = r._links || {};
+  var addLink = function(label, url){ if (!url) return; var p = b.appendParagraph(label + ' '); p.appendText(url).setLinkUrl(url); };
+  addLink('Handover photo (full):', L.handover);
+  addLink('Receipt photo:', L.receipt);
+  addLink('Video:', L.video);
+
+  b.appendParagraph('record_uid: ' + uid).editAsText().setFontSize(8).setForegroundColor('#999999');
+
+  doc.saveAndClose();
+  var pdfBlob = DriveApp.getFileById(doc.getId()).getAs('application/pdf').setName(pdfName);
+  var file = handoversFolder.createFile(pdfBlob);
+  try { DriveApp.getFileById(doc.getId()).setTrashed(true); } catch (e) {}  /* remove the temp Doc */
+  return file.getUrl();
+}
+
 function monthlyDistributionReport(period) {
   period = (typeof period === 'string') ? period : 'prevmonth';   /* trigger passes an event object */
   var cutoff, periodEnd;
@@ -1836,6 +1898,7 @@ function monthlyDistributionReport(period) {
   var folder       = getDataFolder();
   var mediaMonth   = getOrCreateFolder(ym, getOrCreateFolder('_media', folder));
   var reportsFolder= getOrCreateFolder('_reports', folder);
+  var handoversMonth = getOrCreateFolder(ym, getOrCreateFolder('handovers', reportsFolder));
 
   /* Fresh ledger for the month (replace any previous run for the same month). */
   var ssName = 'Distribution ledger ' + ym;
@@ -1843,7 +1906,7 @@ function monthlyDistributionReport(period) {
   while (old.hasNext()) { try { old.next().setTrashed(true); } catch(e){} }
   var ss = SpreadsheetApp.create(ssName);
   var sheet = ss.getActiveSheet();
-  sheet.appendRow(['Date (PNG)','Officer','Zone','Recipient','Recipient type','Received by','Recipient clan','Items','Purpose','Donor','Donor recognised','Confirmed receipt','GPS','Handover photo','Receipt photo','Video','record_uid']);
+  sheet.appendRow(['Date (PNG)','Officer','Zone','Recipient','Recipient type','Received by','Recipient clan','Items','Purpose','Donor','Donor recognised','Confirmed receipt','GPS','Handover PDF','Handover photo','Receipt photo','Video','record_uid']);
 
   rows.sort(function(a,b){ return _recInstant(a.rec) - _recInstant(b.rec); });
   rows.forEach(function(x){
@@ -1852,6 +1915,9 @@ function monthlyDistributionReport(period) {
     var hLink = _extractMedia(mediaMonth, uid, 'handover', r.photo_handover, 'jpg');
     var rLink = _extractMedia(mediaMonth, uid, 'receipt',  r.photo_receipt,  'jpg');
     var vLink = _extractMedia(mediaMonth, uid, 'video',    r.video,          'mp4');
+    r._links = { handover: hLink, receipt: rLink, video: vLink };
+    var pdfLink = '';
+    try { pdfLink = _handoverPdf(handoversMonth, r, s); } catch (e) { Logger.log('handover PDF failed for ' + uid + ': ' + e); }
     var gps = (r.gps && r.gps.lat != null) ? (r.gps.lat + ', ' + r.gps.lng + (r.gps.accuracy ? (' ±' + r.gps.accuracy + 'm') : '') + (r.gps_source ? (' (' + r.gps_source + ')') : '')) : '';
     sheet.appendRow([
       _pngDate(_recInstant(r) ? new Date(_recInstant(r)) : '', 'yyyy-MM-dd HH:mm'),
@@ -1863,7 +1929,7 @@ function monthlyDistributionReport(period) {
       r.donor || '',
       (r.donor_recognised === true ? 'Yes' : (r.donor_recognised === false ? 'No' : '')),
       (rp.confirmed_receipt === true ? 'Yes' : (rp.confirmed_receipt === false ? 'No' : '')),
-      gps, hLink, rLink, vLink, uid
+      gps, pdfLink, hLink, rLink, vLink, uid
     ]);
   });
 
@@ -1879,6 +1945,7 @@ function monthlyDistributionReport(period) {
   if (!to.length) to = REPORT_EMAILS.slice();
   to.forEach(function(email){
     try { mediaMonth.addViewer(email); } catch(e){}
+    try { handoversMonth.addViewer(email); } catch(e){}
     try { ssFile.addViewer(email); } catch(e){}
   });
 
@@ -1889,9 +1956,10 @@ function monthlyDistributionReport(period) {
     'Handovers: ' + rows.length,
     '',
     'Ledger (Google Sheet): ' + ss.getUrl(),
+    'One-page handover PDFs (photo + media links): ' + handoversMonth.getUrl(),
     'Photos & video for the month: ' + mediaMonth.getUrl(),
     '',
-    'Each row links to the handover photo, receipt photo and video.'
+    'Each ledger row links to its one-page PDF, the handover photo, receipt photo and video.'
   ].join('\n');
   to.forEach(function(email){ MailApp.sendEmail(email, 'MCA Distribution ledger — ' + ym, body); });
   Logger.log('Distribution ledger ' + ym + ': ' + rows.length + ' handovers → ' + to.join(', '));

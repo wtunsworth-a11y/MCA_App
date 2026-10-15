@@ -64,8 +64,9 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
 - [ ] **Livelihood project updates — MCF / project staff.** A section for MCF &
       project staff to log **monthly updates (notes + photos)** on livelihood
       projects. Structure: **type → site → monthly update**.
-      - **Types** (extensible): Layers/poultry · Piggery · Vegetable farm ·
-        Fish pond · Nursery · Meli (stingless-bee) hives · Other.
+      - **Types** (extensible): Layers/poultry · Church chicken project · Ducks ·
+        Piggery · Vegetable farm · Fish pond · Nursery · Meli (stingless-bee)
+        hives · Solar drier · Other.
       - **Sites** (instances of a type): e.g. *Koruwo layers barn*; *piggery* in
         all zones; *vegetable farms* in Z2/Z3/Z5/Z7A/Z7B; **~80 clan-level fish
         ponds (TBC)**; *Umuate massoy nursery*; *Meli hives* in Z1/Z2/Z4/Z9/Z10;

@@ -59,6 +59,47 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
 
 ---
 
+## Livelihood projects module (requested 2026-10-15)
+
+- [ ] **Livelihood project updates — MCF / project staff.** A section for MCF &
+      project staff to log **monthly updates (notes + photos)** on livelihood
+      projects. Structure: **type → site → monthly update**.
+      - **Types** — **coordinator-managed in-app** (editable registry, not
+        hardcoded, so new types need no code change). Starter list: Layers/poultry ·
+        Church chicken project · Ducks · Piggery · Vegetable farm · Fish pond ·
+        Nursery · Meli (stingless-bee) hives · Solar drier · Tourism / trek · Other.
+      - **Sites** (instances of a type): e.g. *Koruwo layers barn*; *piggery* in
+        all zones; *vegetable farms* in Z2/Z3/Z5/Z7A/Z7B; **~80 clan-level fish
+        ponds (TBC)**; *Umuate massoy nursery*; *Meli hives* in Z1/Z2/Z4/Z9/Z10;
+        *tourist trek* in Z4; and others (list grows).
+      - **Update**: notes + photos (+ date PNG, who, zone/clan). Structured
+        per-type metrics (pigs, eggs/day, pond stock/harvest) = later.
+      - **Reporting**: **one monthly document per TYPE, across all sites** —
+        reuse the handover-PDF/media-extraction pattern (photos → Drive, readable
+        per-type doc/PDF with each site's month update), emailed to MCF/project.
+      - **Role-gated to `project_staff` only** (NOT general MCF staff — see role
+        split below). **Creation is coordinator-only** — the project types + sites
+        are a coordinator-maintained registry (defined by William via the backend
+        / here, like zones/clans); staff **cannot** add projects. Project staff
+        only **pick a site from the synced list and submit a monthly update**
+        (notes + photos; + auto date/who/zone/clan). Per-type metrics later.
+      - **Guided notes** — the update's notes field prompts for a fixed set of
+        headings so every site report is comparable: **structure / status**,
+        **signs of use**, **survival of plants / animals**, **stories of use &
+        function**, **issues arising**, **inputs needed**. (Free text under each;
+        no field is forced, per "no default-on-skip".)
+      - Build shape mirrors water/facilities: `_livelihood` registry +
+        `livelihood` store (synced) + a client screen + an Apps Script
+        per-type monthly report. *(Backend done — client building now.)*
+
+- [ ] **Separate "project team" role (consider).** Today the core team (William,
+      Matilda, Russell, Mellie, Josh, + others as they join) all share the
+      generic **`mcf_staff`** role, so anything gated to MCF staff is open to all
+      of them. Worth a dedicated role (e.g. `project_team` / `mcf_core`) for the
+      named leads, distinct from general MCF staff, so access + reporting can be
+      scoped more tightly later. Touches the enrolment role list, role-based tile
+      filter, and reports. Not urgent; `mcf_staff` gating is fine for now.
+
 ## Current priorities (pilot)
 
 - [ ] **Findings reporting** — the monitoring *values* are captured and stored

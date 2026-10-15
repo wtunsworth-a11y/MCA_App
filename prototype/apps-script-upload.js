@@ -483,6 +483,51 @@ function seedHolidays() {
   ]);
   Logger.log('Seeded _holidays.json with the PNG 2026 national holidays — confirm against the Gazette and re-seed each year.');
 }
+
+/* ─── Livelihood projects ───────────────────────────────────────────────
+ * _livelihood.json — COORDINATOR-maintained (update_livelihood; or
+ * seedLivelihood() in the editor). The project types + sites that MCF staff
+ * log monthly notes+photos against. Staff cannot create projects — only the
+ * coordinator defines them here. Shape:
+ *   { "types": ["Piggery", ...],
+ *     "sites": [ { "id":"pig-z01", "type":"Piggery", "name":"Piggery — Zone 1",
+ *                  "zone":"Z01", "clan":"", "active":true }, ... ] }
+ * Synced down (GET ?action=livelihood); the per-type monthly report groups the
+ * updates by each site's type. */
+function loadLivelihood() {
+  try { var f=getDataFolder(); var fs=f.getFilesByName('_livelihood.json'); if(fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString())||{types:[],sites:[]}; } catch(e){}
+  return { types:[], sites:[] };
+}
+function saveLivelihood(obj) {
+  var f=getDataFolder(); var fs=f.getFilesByName('_livelihood.json'); var j=JSON.stringify(obj||{types:[],sites:[]},null,2);
+  if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_livelihood.json', j, MimeType.PLAIN_TEXT);
+}
+function getLivelihood() {
+  return ContentService.createTextOutput(JSON.stringify({ status:'ok', livelihood: loadLivelihood() })).setMimeType(ContentService.MimeType.JSON);
+}
+function updateLivelihood(obj) { saveLivelihood(obj||{types:[],sites:[]}); return { status:'ok', message:'Livelihood projects saved' }; }
+function seedLivelihood() {
+  /* Starter set from the project leads — edit/extend here or via update_livelihood.
+   * Fish ponds (~80, clan level) are TBC, so no sites seeded for them yet.
+   * Church chicken / Ducks / Solar drier: types ready, add sites when known. */
+  var types = ['Layers / poultry','Church chicken project','Ducks','Piggery','Vegetable farm','Fish pond','Nursery','Meli (stingless-bee) hives','Solar drier','Tourism / trek','Other'];
+  var sites = [
+    { id:'lay-koruwo',  type:'Layers / poultry',             name:'Koruwo layers barn',     zone:'',    clan:'Koruwo', active:true },
+    { id:'nur-umuate',  type:'Nursery',                      name:'Umuate massoy nursery',  zone:'',    clan:'',       active:true },
+    { id:'trek-z04',    type:'Tourism / trek',               name:'Tourist trek — Zone 4',  zone:'Z04', clan:'',       active:true }
+  ];
+  /* Piggery — all zones */
+  [['Z01','Zone 1'],['Z02','Zone 2'],['Z03','Zone 3'],['Z04','Zone 4'],['Z05','Zone 5'],['Z06','Zone 6'],['Z07A','Zone 7A'],['Z07B','Zone 7B'],['Z08','Zone 8'],['Z09','Zone 9'],['Z10','Zone 10']]
+    .forEach(function(z){ sites.push({ id:'pig-'+z[0].toLowerCase(), type:'Piggery', name:'Piggery — '+z[1], zone:z[0], clan:'', active:true }); });
+  /* Vegetable farms — Z2, Z3, Z5, Z7A, Z7B */
+  [['Z02','Zone 2'],['Z03','Zone 3'],['Z05','Zone 5'],['Z07A','Zone 7A'],['Z07B','Zone 7B']]
+    .forEach(function(z){ sites.push({ id:'veg-'+z[0].toLowerCase(), type:'Vegetable farm', name:'Vegetable farm — '+z[1], zone:z[0], clan:'', active:true }); });
+  /* Meli (stingless-bee) hives — Z1, Z2, Z4, Z9, Z10 */
+  [['Z01','Zone 1'],['Z02','Zone 2'],['Z04','Zone 4'],['Z09','Zone 9'],['Z10','Zone 10']]
+    .forEach(function(z){ sites.push({ id:'meli-'+z[0].toLowerCase(), type:'Meli (stingless-bee) hives', name:'Meli hives — '+z[1], zone:z[0], clan:'', active:true }); });
+  saveLivelihood({ types: types, sites: sites });
+  Logger.log('Seeded _livelihood.json: ' + types.length + ' types, ' + sites.length + ' sites. Edit/add via update_livelihood.');
+}
 function seedClans() {
   /* Fill each zone's clan names between the brackets, in the clans' own order,
    * exactly as they should appear and be stored (this string is what ownership
@@ -1375,7 +1420,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1554,6 +1599,10 @@ function doPost(e) {
     if (body._action === 'update_holidays') {
       return ContentService.createTextOutput(JSON.stringify(updateHolidays(body.holidays))).setMimeType(ContentService.MimeType.JSON);
     }
+    /* Livelihood projects (types + sites) — coordinator maintains it (coordinator key required) */
+    if (body._action === 'update_livelihood') {
+      return ContentService.createTextOutput(JSON.stringify(updateLivelihood(body.livelihood))).setMimeType(ContentService.MimeType.JSON);
+    }
 
     /* Normal steward data upload */
     var folder = getDataFolder();
@@ -1613,6 +1662,7 @@ function doGet(e) {
   if (action === 'roster') { return getRoster(); }
   if (action === 'clans') { return getClans(); }
   if (action === 'holidays') { return getHolidays(); }
+  if (action === 'livelihood') { return getLivelihood(); }
   if (action === 'pheno_targets') { return getPhenoTargets(); }
 
   if (action === 'authorisations') {
@@ -1972,6 +2022,95 @@ function installMonthlyDistributionTrigger() {
   });
   ScriptApp.newTrigger('monthlyDistributionReport').timeBased().onMonthDay(1).atHour(7).create();
   Logger.log('Monthly distribution trigger installed (1st of month, 7am PNG).');
+}
+
+/* ─── Livelihood projects — monthly report, one PDF per TYPE across all sites ──
+ * MCF staff log notes+photos per site (modules.livelihood). This groups the
+ * month's updates by each site's TYPE and builds one readable PDF per type
+ * (each site a section: notes + the first photo embedded, extra photos linked).
+ * Emailed to Matilda/comms. Reuses _saveMedia + _dataUriToBlob. */
+function collectLivelihoodUpdates() {
+  var folder = getDataFolder(); var byUid = {};
+  var zones = folder.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next(); if (zf.getName().charAt(0) === '_') continue;
+    var subs = zf.getFolders();
+    while (subs.hasNext()) {
+      var files = subs.next().getFilesByType(MimeType.PLAIN_TEXT);
+      while (files.hasNext()) {
+        var body; try { body = JSON.parse(files.next().getBlob().getDataAsString()); } catch(e){ continue; }
+        var arr = (body.modules && body.modules.livelihood) || []; if (!arr.length) continue;
+        var stew = body.steward || {};
+        for (var i = 0; i < arr.length; i++) {
+          var rec = arr[i]; var uid = rec.uid || rec.record_uid; if (!uid) continue;
+          var prev = byUid[uid]; if (prev && _recInstant(prev.rec) >= _recInstant(rec)) continue;
+          byUid[uid] = { rec: rec, steward: stew };
+        }
+      }
+    }
+  }
+  return Object.keys(byUid).map(function(k){ return byUid[k]; });
+}
+function livelihoodReports(period) {
+  period = (typeof period === 'string') ? period : 'prevmonth';
+  var cutoff, periodEnd;
+  if (period === 'monthly') { cutoff = currentMonthStart(); periodEnd = new Date(); }
+  else { cutoff = prevMonthStart(); periodEnd = prevMonthEnd(); }
+  var ym = _pngDate(cutoff, 'yyyy-MM');
+  var cutMs = cutoff.getTime(), endMs = periodEnd.getTime();
+  var updates = collectLivelihoodUpdates().filter(function(x){ var t = _recInstant(x.rec); return t >= cutMs && t <= endMs; });
+
+  var reg = loadLivelihood(); var siteById = {}; (reg.sites || []).forEach(function(s){ siteById[s.id] = s; });
+  var byType = {};
+  updates.forEach(function(x){ var r = x.rec; var site = siteById[r.site_id] || {}; var type = r.type || site.type || 'Other'; (byType[type] = byType[type] || []).push(x); });
+
+  var folder = getDataFolder();
+  var mediaMonth   = getOrCreateFolder(ym, getOrCreateFolder('livelihood', getOrCreateFolder('_media', folder)));
+  var reportsMonth = getOrCreateFolder(ym, getOrCreateFolder('livelihood', getOrCreateFolder('_reports', folder)));
+  var made = [];
+  Object.keys(byType).sort().forEach(function(type){
+    var list = byType[type]; list.sort(function(a,b){ return _recInstant(a.rec) - _recInstant(b.rec); });
+    var doc = DocumentApp.create('tmp_LVH_' + type.replace(/[^A-Za-z0-9]+/g,'-'));
+    var b = doc.getBody();
+    b.appendParagraph('MCA Livelihood — ' + type).setHeading(DocumentApp.ParagraphHeading.HEADING1);
+    b.appendParagraph('Month: ' + _pngDate(cutoff, 'MMMM yyyy') + ' (PNG time) · ' + list.length + ' update' + (list.length===1?'':'s'));
+    list.forEach(function(x){
+      var r = x.rec, s = x.steward; var site = siteById[r.site_id] || {};
+      b.appendParagraph((r.site_name || site.name || r.site_id || 'Site') + (site.zone ? (' — ' + site.zone) : '') + (site.clan ? (' — ' + site.clan) : '')).setHeading(DocumentApp.ParagraphHeading.HEADING2);
+      b.appendParagraph('Date (PNG): ' + _pngDate(_recInstant(r) ? new Date(_recInstant(r)) : new Date(), 'd MMM yyyy') + ' · by ' + ((s.name||'') + (s.stewardId ? (' (' + s.stewardId + ')') : '')));
+      b.appendParagraph(r.notes || '(no notes)');
+      var photos = r.photos || (r.photo ? [r.photo] : []);
+      photos.forEach(function(ph, i){
+        var url = _saveMedia(mediaMonth, 'LVH_' + (r.uid || 'x') + '_p' + (i+1) + '.jpg', ph);
+        if (i === 0) { var blob = _dataUriToBlob(ph, 'lvh.jpg'); if (blob) { try { var img = b.appendImage(blob); var w = img.getWidth(); if (w > 420) { img.setHeight(Math.round(img.getHeight()*420/w)); img.setWidth(420); } } catch(e){} } }
+        else if (url) { var p = b.appendParagraph('Photo ' + (i+1) + ': '); p.appendText(url).setLinkUrl(url); }
+      });
+    });
+    doc.saveAndClose();
+    var pdf = DriveApp.getFileById(doc.getId()).getAs('application/pdf').setName(type.replace(/[^A-Za-z0-9]+/g,'_') + '_' + ym + '.pdf');
+    var file = reportsMonth.createFile(pdf);
+    try { DriveApp.getFileById(doc.getId()).setTrashed(true); } catch(e){}
+    made.push({ type: type, url: file.getUrl(), n: list.length });
+  });
+
+  var rcp = loadRecipients(); var to = [];
+  if (rcp.field_reports_to) to.push(rcp.field_reports_to);
+  (rcp.comms || []).forEach(function(e){ if (e) to.push(e); });
+  if (!to.length) to = REPORT_EMAILS.slice();
+  to.forEach(function(email){ try { reportsMonth.addViewer(email); } catch(e){} try { mediaMonth.addViewer(email); } catch(e){} });
+  var lines = ['MCA — Livelihood projects monthly report', '', 'Month: ' + ym + ' (PNG time)', '', 'One PDF per project type (site updates + photos): ' + reportsMonth.getUrl(), ''];
+  made.forEach(function(p){ lines.push('• ' + p.type + ' — ' + p.n + ' update' + (p.n===1?'':'s') + ': ' + p.url); });
+  if (!made.length) lines.push('(no livelihood updates recorded this month)');
+  to.forEach(function(email){ MailApp.sendEmail(email, 'MCA Livelihood report — ' + ym, lines.join('\n')); });
+  Logger.log('Livelihood report ' + ym + ': ' + made.length + ' type-PDFs → ' + to.join(', '));
+  return { status: 'ok', month: ym, types: made.length, folder: reportsMonth.getUrl() };
+}
+function installLivelihoodReportsTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'livelihoodReports') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('livelihoodReports').timeBased().onMonthDay(1).atHour(8).create();
+  Logger.log('Monthly livelihood report trigger installed (1st of month, 8am PNG).');
 }
 
 /* ─── Per-consultant report (training given + sites visited) ─────────────

@@ -77,12 +77,21 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
       - **Reporting**: **one monthly document per TYPE, across all sites** —
         reuse the handover-PDF/media-extraction pattern (photos → Drive, readable
         per-type doc/PDF with each site's month update), emailed to MCF/project.
-      - **Role-gated** to MCF / project staff.
-      - **Open:** (a) who adds sites — coordinator seeds + staff add in-app?
-        (b) notes+photos only now? (c) which roles may submit.
+      - **Role-gated to MCF staff only** (the core team currently shares that
+        role). Sites: **coordinator seeds the known ones + MCF staff can add a
+        new site in-app**. Updates are **notes + photos** only for now (per-type
+        metrics later).
       - Build shape mirrors water/facilities: `_livelihood_sites` registry +
         `livelihood_updates` store (synced) + a client screen + an Apps Script
         per-type monthly report.
+
+- [ ] **Separate "project team" role (consider).** Today the core team (William,
+      Matilda, Russell, Mellie, Josh, + others as they join) all share the
+      generic **`mcf_staff`** role, so anything gated to MCF staff is open to all
+      of them. Worth a dedicated role (e.g. `project_team` / `mcf_core`) for the
+      named leads, distinct from general MCF staff, so access + reporting can be
+      scoped more tightly later. Touches the enrolment role list, role-based tile
+      filter, and reports. Not urgent; `mcf_staff` gating is fine for now.
 
 ## Current priorities (pilot)
 

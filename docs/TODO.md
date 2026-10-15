@@ -64,13 +64,14 @@ merged to `main` (Pages) through **SW v71 / `mca-steward-v71`**.
 - [ ] **Livelihood project updates — MCF / project staff.** A section for MCF &
       project staff to log **monthly updates (notes + photos)** on livelihood
       projects. Structure: **type → site → monthly update**.
-      - **Types** (extensible): Layers/poultry · Church chicken project · Ducks ·
-        Piggery · Vegetable farm · Fish pond · Nursery · Meli (stingless-bee)
-        hives · Solar drier · Other.
+      - **Types** — **coordinator-managed in-app** (editable registry, not
+        hardcoded, so new types need no code change). Starter list: Layers/poultry ·
+        Church chicken project · Ducks · Piggery · Vegetable farm · Fish pond ·
+        Nursery · Meli (stingless-bee) hives · Solar drier · Tourism / trek · Other.
       - **Sites** (instances of a type): e.g. *Koruwo layers barn*; *piggery* in
         all zones; *vegetable farms* in Z2/Z3/Z5/Z7A/Z7B; **~80 clan-level fish
         ponds (TBC)**; *Umuate massoy nursery*; *Meli hives* in Z1/Z2/Z4/Z9/Z10;
-        and others (list grows).
+        *tourist trek* in Z4; and others (list grows).
       - **Update**: notes + photos (+ date PNG, who, zone/clan). Structured
         per-type metrics (pigs, eggs/day, pond stock/harvest) = later.
       - **Reporting**: **one monthly document per TYPE, across all sites** —

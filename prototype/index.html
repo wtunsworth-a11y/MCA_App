@@ -1700,7 +1700,7 @@ select.msel {
               <option value="zone_staff">Zone Staff</option>
               <option value="field_officer">Field Officer (Agricultural Extension)</option>
               <option value="mcf_staff">MCF Staff</option>
-              <option value="project_staff">Project Staff (livelihood projects)</option>
+              <option value="project_staff">Project Staff</option>
               <option value="consultant">Visiting Consultant</option>
             </select>
           </div>
@@ -11420,7 +11420,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v92'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v93'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12113,12 +12113,12 @@ function renderUpdateProfileScreen() {
       '</div>' +
       '<div class="form-group">' +
         '<label class="form-label">Role</label>' +
-        '<select id="upRole" class="form-input">' +
+        '<select id="upRole" class="form-input" onchange="upRoleChanged()">' +
           '<option value="clan_steward"' + (profile.role==='clan_steward'?' selected':'') + '>Clan Steward</option>' +
           '<option value="zone_staff"'   + (profile.role==='zone_staff'?' selected':'')   + '>Zone Staff</option>' +
           '<option value="field_officer"'+ (profile.role==='field_officer'?' selected':'')+'>Field Officer (Agri. Extension)</option>' +
           '<option value="mcf_staff"'    + (profile.role==='mcf_staff'?' selected':'')    + '>MCF Staff</option>' +
-          '<option value="project_staff"'+ (profile.role==='project_staff'?' selected':'')+'>Project Staff (livelihood projects)</option>' +
+          '<option value="project_staff"'+ (profile.role==='project_staff'?' selected':'')+'>Project Staff</option>' +
           '<option value="consultant"'   + (profile.role==='consultant'?' selected':'')   + '>Visiting Consultant</option>' +
         '</select>' +
       '</div>' +
@@ -12126,7 +12126,7 @@ function renderUpdateProfileScreen() {
         '<label class="form-label">Zone</label>' +
         '<select id="upZoneSelect" class="form-input"><option value="">Loading…</option></select>' +
       '</div>' +
-      '<div class="form-group">' +
+      '<div class="form-group" id="upClanGroup">' +
         '<label class="form-label">Clan</label>' +
         '<input type="text" id="upClan" class="form-input" value="' + (profile.clan||'').replace(/"/g,'&quot;') + '">' +
       '</div>' +
@@ -12150,7 +12150,17 @@ function renderUpdateProfileScreen() {
         sel.appendChild(opt);
       });
     });
+    upRoleChanged();
   });
+}
+/* Zone/Clan apply only to field-based roles. MCF staff, Project staff and
+   consultants are not scoped to a zone/clan, so hide those fields for them
+   (mirrors the enrolment form). */
+function upRoleChanged() {
+  var role = (document.getElementById('upRole')||{}).value || '';
+  var noZone = (role === 'mcf_staff' || role === 'project_staff' || role === 'consultant');
+  var zg = document.getElementById('upZoneGroup'); if (zg) zg.style.display = noZone ? 'none' : 'block';
+  var cg = document.getElementById('upClanGroup'); if (cg) cg.style.display = (role === 'clan_steward') ? 'block' : 'none';
 }
 
 function saveUpdatedProfile(profileId) {
@@ -12161,6 +12171,12 @@ function saveUpdatedProfile(profileId) {
   var clan     = (document.getElementById('upClan').value || '').trim();
   var village  = (document.getElementById('upVillage').value || '').trim();
   var status   = document.getElementById('upStatus');
+
+  /* MCF / Project staff and consultants aren't scoped to a zone/clan — don't
+     persist stale values for them. Clan belongs to clan stewards only. */
+  var noZone = (role === 'mcf_staff' || role === 'project_staff' || role === 'consultant');
+  if (noZone) { zoneId = ''; zone = ''; }
+  if (role !== 'clan_steward') { clan = ''; }
 
   getAllRecords('auth', function(records) {
     var profile = records ? records.filter(function(r) { return r.id === profileId; })[0] : null;
@@ -12175,6 +12191,9 @@ function saveUpdatedProfile(profileId) {
       status.style.color = '#1565C0';
       /* Refresh cached profile */
       window._cachedProfile = profile;
+      /* Re-apply role-based dashboard tile visibility now, so a role change
+         (e.g. → Project Staff) shows/hides its tiles without a full re-login. */
+      try { cacheStewardProfile(); } catch(e){}
       /* Propagate the new role/zone to the backend roster. */
       try { postEnrolmentPing(profile); } catch(e){}
     });

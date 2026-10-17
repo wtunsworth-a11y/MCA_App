@@ -1670,6 +1670,7 @@ select.msel {
           <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')"><span data-icon="clipboard" data-size="14"></span> Manage Training Topics</button>
           <button class="btn-outline" id="enrollUpdateProfileBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showUpdateProfile()"><span data-icon="edit" data-size="14"></span> Update Existing Profile</button>
           <button class="btn-outline" id="enrollEnrolmentsBtn" style="display:none;margin-top:8px;width:100%;border-color:#6A1B9A;color:#6A1B9A;" onclick="nav('screen-enrolments')"><span data-icon="people" data-size="14"></span> Enrolled People</button>
+          <button class="btn-outline" id="enrollSetPriceBtn" style="display:none;margin-top:8px;width:100%;border-color:#5E35B1;color:#5E35B1;" onclick="nav('screen-set-price')"><span data-icon="linechart" data-size="14"></span> Set Vanilla Price</button>
           <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()"><span data-icon="mortarboard" data-size="14"></span> Grant Training Authorisation</button>
           <button class="btn-outline" id="enrollApproveWaterBtn" style="display:none;margin-top:8px;width:100%;border-color:#0277BD;color:#0277BD;" onclick="showScreen('screen-water-approve')"><span data-icon="spring" data-size="14"></span> Approve Water Sources</button>
           <button class="btn-outline" id="enrollApproveFacBtn" style="display:none;margin-top:8px;width:100%;border-color:#283593;color:#283593;" onclick="showScreen('screen-facility-approve')"><span data-icon="school" data-size="14"></span> Approve Facilities</button>
@@ -1998,6 +1999,10 @@ select.msel {
           </div>
 
           <div class="module-group-hdr">Activities</div>
+          <div class="module-tile" data-fo="1" data-vc="1" onclick="nav('screen-market-prices')">
+            <span class="module-emoji" data-icon="linechart" data-size="26"></span>
+            <span class="module-name">Market Prices</span>
+          </div>
           <div class="module-tile" data-fo="1" data-vc="1" onclick="nav('screen-freemap')">
             <span class="module-emoji" data-icon="pin" data-size="26"></span>
             <span class="module-name">Field Mapping</span>
@@ -3311,6 +3316,60 @@ select.msel {
 
           <button class="btn-primary" style="background:#827717;margin-top:12px;" id="lvhSubmitBtn" onclick="submitLivelihood()">Save update</button>
           <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: MARKET PRICES (world indicator — growers)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-market-prices">
+      <div class="top-bar" style="background:#B8860B;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Market Prices</div><div class="bar-subtitle">World market — an indicator only</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:24px;">
+          <div class="matrix-note" style="background:#FFF8E1;border-color:#FFE082;color:#8D6E00;font-size:0.76rem;">
+            <span data-icon="info" data-size="14"></span> These are <strong>world market prices</strong> — a guide to how the market is moving. They are <strong>not a local buying price</strong>: what a buyer pays at the gate is lower and depends on grade, drying and transport.
+          </div>
+          <div id="marketPricesList">
+            <div style="text-align:center;padding:30px;color:#999;font-size:0.82rem;">Loading market…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: SET INDICATIVE PRICE (coordinator — vanilla)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-set-price">
+      <div class="top-bar" style="background:#5E35B1;">
+        <button class="back-btn" onclick="showScreen('screen-enroll')">←</button>
+        <div><div class="bar-title">Indicative Price</div><div class="bar-subtitle">Vanilla (no world market)</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:24px;">
+          <div class="matrix-note" style="background:#EDE7F6;border-color:#B39DDB;color:#4527A0;font-size:0.76rem;">
+            <span data-icon="info" data-size="14"></span> Vanilla isn't traded on a world market, so there's no automatic price. Enter an <strong>indicative</strong> figure from your trade reports — it's shown to growers clearly marked as indicative, with this date. Each save adds a point to its trend.
+          </div>
+          <div class="form-group">
+            <label class="form-label">Commodity</label>
+            <input type="text" id="ipLabel" class="form-input" value="Vanilla">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Indicative price <span style="color:#B71C1C;">*</span></label>
+            <div style="display:flex;gap:8px;">
+              <input type="number" id="ipPrice" inputmode="decimal" step="any" min="0" class="form-input" style="flex:2;" placeholder="e.g. 50">
+              <input type="text" id="ipUnit" class="form-input" style="flex:1;" value="USD/kg">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Note <span style="color:#999;font-weight:400;">(optional)</span></label>
+            <input type="text" id="ipNote" class="form-input" placeholder="e.g. green vanilla, Oro, Oct 2026 trade report">
+          </div>
+          <button class="btn-primary" style="background:#5E35B1;margin-top:8px;" id="ipSaveBtn" onclick="saveIndicativePrice()">Save indicative price</button>
+          <div id="ipStatus" style="font-size:0.82rem;margin-top:10px;text-align:center;"></div>
         </div>
       </div>
     </div>
@@ -5594,7 +5653,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-performance','screen-recent-activity',
   'screen-ack','screen-profile','screen-timesheet',
-  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-distribution','screen-livelihood','screen-data-export'
+  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-distribution','screen-livelihood','screen-market-prices','screen-set-price','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -5652,6 +5711,7 @@ function showScreen(id) {
   if (id === 'screen-distribution') initDistribution();
   if (id === 'screen-livelihood') initLivelihood();
   if (id === 'screen-enrolments') renderEnrolments();
+  if (id === 'screen-market-prices') initMarketPrices();
   if (id === 'screen-dashboard') renderDashboardStatus();
   if (id === 'screen-alerts') initDisturbances();
   if (id === 'screen-help') renderHelpCentre();
@@ -6009,6 +6069,7 @@ function enrollCheckPasscode() {
       document.getElementById('enrollManageTopicsBtn').style.display = 'block';
       document.getElementById('enrollUpdateProfileBtn').style.display = 'block';
       var _epb = document.getElementById('enrollEnrolmentsBtn'); if (_epb) _epb.style.display = 'block';
+      var _spb = document.getElementById('enrollSetPriceBtn'); if (_spb) _spb.style.display = 'block';
       document.getElementById('enrollGrantAuthBtn').style.display = 'block';
       document.getElementById('enrollApproveWaterBtn').style.display = 'block';
       document.getElementById('enrollApproveFacBtn').style.display = 'block';
@@ -11420,7 +11481,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v93'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v94'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11808,6 +11869,127 @@ function renderEnrolments(){
       box.innerHTML = h;
     })
     .catch(function(){ box.innerHTML = '<div class="matrix-note" style="background:#FFEBEE;border-color:#EF9A9A;color:#B71C1C;font-size:0.78rem;">Could not load the list — try again when you have a better connection.</div>'; });
+}
+/* ── Market prices (world indicator; backend-fed, cached like a registry) ──
+   World reference only — NOT a local buying price. Fetched when online,
+   cached in the auth store, shown offline with an "as of" date. ── */
+function getMarketPrices(callback) {
+  getAllRecords('auth', function(records) {
+    var cached = null;
+    if (records) records.forEach(function(r){ if (r.id === 'prices') cached = r.prices; });
+    if (UPLOAD_ENDPOINT && navigator.onLine) {
+      fetch(UPLOAD_ENDPOINT + '?action=prices')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if (d.status === 'ok' && d.prices) {
+            saveRecord('auth', {id:'prices', prices:d.prices, fetched:new Date().toISOString()}, function(){});
+            callback(d.prices);
+          } else { callback(cached || {commodities:{}}); }
+        }).catch(function(){ callback(cached || {commodities:{}}); });
+    } else { callback(cached || {commodities:{}}); }
+  });
+}
+/* Tiny inline SVG trend line (no chart library — offline-safe). */
+function _priceSparkline(points, w, h, color) {
+  var pts = (points||[]).filter(function(p){ return p && p.v!=null && !isNaN(p.v); });
+  if (pts.length < 2) return '<div style="font-size:0.68rem;color:#aaa;">not enough history for a trend yet</div>';
+  var vals = pts.map(function(p){ return p.v; });
+  var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  var span = (max - min) || 1, pad = 3;
+  var dx = (w - pad*2) / (pts.length - 1);
+  var coords = pts.map(function(p,i){
+    var x = pad + i*dx;
+    var y = pad + (h - pad*2) * (1 - (p.v - min)/span);
+    return [x, y];
+  });
+  var line = coords.map(function(c,i){ return (i?'L':'M') + c[0].toFixed(1) + ' ' + c[1].toFixed(1); }).join(' ');
+  var area = 'M' + coords[0][0].toFixed(1) + ' ' + (h-pad).toFixed(1) + ' ' +
+             coords.map(function(c){ return 'L'+c[0].toFixed(1)+' '+c[1].toFixed(1); }).join(' ') +
+             ' L' + coords[coords.length-1][0].toFixed(1) + ' ' + (h-pad).toFixed(1) + ' Z';
+  var last = coords[coords.length-1];
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" style="display:block;">'
+    + '<path d="'+area+'" fill="'+color+'" opacity="0.12"/>'
+    + '<path d="'+line+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
+    + '<circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="2.6" fill="'+color+'"/>'
+    + '</svg>';
+}
+var _PRICE_ORDER = ['coffee','cocoa','vanilla','gold'];
+var _PRICE_COLORS = { coffee:'#6D4C41', cocoa:'#8D6E63', vanilla:'#7E57C2', gold:'#B8860B' };
+function initMarketPrices() {
+  var box = document.getElementById('marketPricesList'); if(!box) return;
+  box.innerHTML = '<div style="text-align:center;padding:30px;color:#999;font-size:0.82rem;">Loading market…</div>';
+  getMarketPrices(function(prices){
+    var com = (prices && prices.commodities) || {};
+    var keys = _PRICE_ORDER.filter(function(k){ return com[k]; });
+    Object.keys(com).forEach(function(k){ if(_PRICE_ORDER.indexOf(k)===-1) keys.push(k); });
+    if (keys.length === 0) {
+      box.innerHTML = '<div class="card" style="padding:18px;text-align:center;color:#888;font-size:0.85rem;">No prices yet. They appear once the market has been fetched and you have been online.</div>';
+      return;
+    }
+    var h = '';
+    keys.forEach(function(k){
+      var c = com[k]; if(!c) return;
+      var color = _PRICE_COLORS[k] || '#555';
+      var pts = c.points || [];
+      var changeHtml = '';
+      var usable = pts.filter(function(p){ return p && p.v!=null; });
+      if (usable.length >= 2) {
+        var a = usable[usable.length-2].v, b = (c.latest!=null?c.latest:usable[usable.length-1].v);
+        if (a) {
+          var pct = ((b - a)/a)*100;
+          var up = pct >= 0;
+          changeHtml = '<span style="font-size:0.74rem;font-weight:700;color:'+(up?'#2E7D32':'#C62828')+';">'
+            + (up?'▲':'▼') + ' ' + Math.abs(pct).toFixed(1) + '%</span>';
+        }
+      }
+      var priceTxt = (c.latest!=null) ? Number(c.latest).toLocaleString() : '—';
+      h += '<div class="card" style="padding:12px 14px;margin-bottom:10px;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">'
+        +   '<div>'
+        +     '<div style="font-weight:700;font-size:0.95rem;color:#222;">'+(c.label||k)
+        +       (c.indicative?' <span style="font-size:0.6rem;font-weight:700;background:#EDE7F6;color:#5E35B1;border-radius:4px;padding:1px 5px;vertical-align:middle;">INDICATIVE</span>':'')+'</div>'
+        +     '<div style="font-size:1.4rem;font-weight:800;color:'+color+';line-height:1.15;margin-top:2px;">'+priceTxt
+        +       ' <span style="font-size:0.72rem;font-weight:600;color:#777;">'+(c.unit||'')+'</span></div>'
+        +   '</div>'
+        +   '<div style="text-align:right;flex-shrink:0;">'+_priceSparkline(pts, 92, 40, color)
+        +     (changeHtml?('<div style="margin-top:3px;">'+changeHtml+'</div>'):'')+'</div>'
+        + '</div>'
+        + '<div style="font-size:0.66rem;color:#999;margin-top:7px;">'
+        +   (c.source||'') + ' · as of ' + (c.as_of||'—')
+        +   (c.indicative && c.note ? ('<br>'+String(c.note).replace(/</g,'&lt;')) : '')
+        + '</div>'
+        + '</div>';
+    });
+    box.innerHTML = h;
+  });
+}
+/* Coordinator saves a vanilla (or other non-traded) indicative figure. */
+function saveIndicativePrice() {
+  var price = (document.getElementById('ipPrice')||{}).value;
+  var status = document.getElementById('ipStatus');
+  if (price === '' || price == null || isNaN(parseFloat(price))) { if(status){ status.textContent='Enter a number for the price.'; status.style.color='#B71C1C'; } return; }
+  var body = {
+    _action:'update_indicative_price', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret,
+    key:'vanilla',
+    label:((document.getElementById('ipLabel')||{}).value||'Vanilla').trim(),
+    unit:((document.getElementById('ipUnit')||{}).value||'USD/kg').trim(),
+    price:parseFloat(price),
+    note:((document.getElementById('ipNote')||{}).value||'').trim()
+  };
+  var btn=document.getElementById('ipSaveBtn'); if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
+  if(status){ status.textContent=''; }
+  if (!UPLOAD_ENDPOINT || !navigator.onLine) { if(status){ status.textContent='You need to be online to save this.'; status.style.color='#E65100'; } if(btn){ btn.disabled=false; btn.textContent='Save indicative price'; } return; }
+  fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(body) })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(btn){ btn.disabled=false; btn.textContent='Save indicative price'; }
+      if (d && d.status==='ok') {
+        if(status){ status.textContent='✓ Saved — growers will see it on next sync.'; status.style.color='#2E7D32'; }
+        /* refresh the local cache so it shows immediately here too */
+        getMarketPrices(function(){});
+      } else { if(status){ status.textContent='✗ '+((d&&d.message)||'Could not save'); status.style.color='#B71C1C'; } }
+    })
+    .catch(function(){ if(btn){ btn.disabled=false; btn.textContent='Save indicative price'; } if(status){ status.textContent='Network error — try again.'; status.style.color='#B71C1C'; } });
 }
 /* ── Public holidays (national PNG; coordinator-maintained, cached in the auth
    store like zones/clans). Shown on the Activity Calendar for context and used
@@ -12894,7 +13076,7 @@ var DASH_TILE_COLORS = {
   'Disturbance Alerts':'#C62828',
   'Activity Calendar':'#1565C0', 'Service Delivery Monitoring':'#00695C',
   'Meetings':'#5E35B1', 'Community Data':'#3949AB', 'Performance Monitoring':'#283593',
-  'Training':'#6A1B9A', 'Handover & Distribution':'#AD1457', 'Livelihood Updates':'#827717', 'Export Data':'#455A64'
+  'Training':'#6A1B9A', 'Handover & Distribution':'#AD1457', 'Livelihood Updates':'#827717', 'Market Prices':'#B8860B', 'Export Data':'#455A64'
 };
 function colorDashTiles() {
   document.querySelectorAll('#screen-dashboard .module-tile').forEach(function(t) {

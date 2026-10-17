@@ -1461,6 +1461,101 @@ function getEnrolments() {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+/* ─── Market prices (world indicator) ──────────────────────────────────────
+ * _prices.json — a WORLD-MARKET reference, NOT a local buying price. A daily
+ * job (pricesUpdate) pulls coffee/cocoa/gold from a keyless finance endpoint
+ * and keeps ~2 years of monthly points for a trend line. Vanilla is NOT
+ * exchange-traded, so it has no feed — the coordinator sets an INDICATIVE
+ * figure (update_indicative_price), clearly flagged in the app. Served to all
+ * phones via GET ?action=prices and cached offline. ── */
+var PRICE_SYMBOLS = [
+  { key:'coffee', symbol:'KC=F', label:'Coffee (Arabica)', unit:'US¢/lb',  source:'ICE Arabica futures' },
+  { key:'cocoa',  symbol:'CC=F', label:'Cocoa',            unit:'USD/tonne',    source:'ICE cocoa futures' },
+  { key:'gold',   symbol:'GC=F', label:'Gold',             unit:'USD/oz',       source:'COMEX gold futures' }
+];
+function loadPrices() {
+  try { var f=getDataFolder(); var fs=f.getFilesByName('_prices.json'); if(fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString())||{commodities:{}}; } catch(e){}
+  return { commodities:{} };
+}
+function savePrices(o) {
+  var f=getDataFolder(); var fs=f.getFilesByName('_prices.json'); var j=JSON.stringify(o||{commodities:{}},null,2);
+  if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_prices.json', j, MimeType.PLAIN_TEXT);
+}
+function getPrices() {
+  return ContentService.createTextOutput(JSON.stringify({ status:'ok', prices: loadPrices() })).setMimeType(ContentService.MimeType.JSON);
+}
+/* Keyless finance chart endpoint → {latest, points:[{t:'yyyy-MM', v}], as_of}. */
+function _fetchPriceSeries(symbol) {
+  var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=2y&interval=1mo';
+  var resp = UrlFetchApp.fetch(url, { muteHttpExceptions:true, headers:{ 'User-Agent':'Mozilla/5.0' } });
+  if (resp.getResponseCode() !== 200) return null;
+  var d = JSON.parse(resp.getContentText());
+  var r = d && d.chart && d.chart.result && d.chart.result[0];
+  if (!r) return null;
+  var ts = r.timestamp || [];
+  var closes = (r.indicators && r.indicators.quote && r.indicators.quote[0] && r.indicators.quote[0].close) || [];
+  var points = [];
+  for (var i=0;i<ts.length;i++){ var v=closes[i]; if(v==null||isNaN(v)) continue; points.push({ t:_pngDate(new Date(ts[i]*1000),'yyyy-MM'), v:Math.round(v*100)/100 }); }
+  var latest = (r.meta && r.meta.regularMarketPrice!=null) ? r.meta.regularMarketPrice : (points.length ? points[points.length-1].v : null);
+  if (latest==null && points.length===0) return null;
+  return { latest:(latest!=null?Math.round(latest*100)/100:null), points:points, as_of:_pngDate(new Date(),'yyyy-MM-dd') };
+}
+function pricesUpdate() {
+  var store = loadPrices(); if(!store.commodities) store.commodities={};
+  var done=[], failed=[];
+  PRICE_SYMBOLS.forEach(function(s){
+    try {
+      var ser = _fetchPriceSeries(s.symbol);
+      if (ser && ser.latest!=null) {
+        store.commodities[s.key] = { key:s.key, label:s.label, unit:s.unit, source:s.source,
+          latest:ser.latest, points:ser.points, as_of:ser.as_of, indicative:false };
+        done.push(s.key);
+      } else { failed.push(s.key); }
+    } catch(e) { failed.push(s.key+' ('+e+')'); }
+  });
+  store.updated_at = new Date().toISOString();
+  savePrices(store);
+  Logger.log('Prices updated: ' + (done.join(', ')||'none') + (failed.length?(' | failed: '+failed.join(', ')):''));
+  return { status:'ok', updated:done, failed:failed };
+}
+/* Coordinator sets the vanilla (or any non-traded) indicative figure; each save
+ * appends/updates a monthly point so it builds its own small trend. */
+function updateIndicativePrice(body) {
+  var store = loadPrices(); if(!store.commodities) store.commodities={};
+  var key = body.key || 'vanilla';
+  var price = parseFloat(body.price);
+  if (isNaN(price)) return { status:'error', message:'A numeric price is required' };
+  var asOf = body.as_of || _pngDate(new Date(),'yyyy-MM-dd');
+  var cur = store.commodities[key] || { key:key, label:body.label||'Vanilla', unit:body.unit||'USD/kg', source:'Indicative (coordinator)', points:[] };
+  cur.label = body.label || cur.label || 'Vanilla';
+  cur.unit = body.unit || cur.unit || 'USD/kg';
+  cur.source = 'Indicative (coordinator)';
+  cur.latest = Math.round(price*100)/100;
+  cur.as_of = asOf;
+  cur.note = body.note || '';
+  cur.indicative = true;
+  cur.points = cur.points || [];
+  var mk = asOf.slice(0,7), found=false;
+  cur.points.forEach(function(p){ if(p.t===mk){ p.v=cur.latest; found=true; } });
+  if (!found) cur.points.push({ t:mk, v:cur.latest });
+  cur.points = cur.points.slice(-24);
+  store.commodities[key] = cur; store.updated_at = new Date().toISOString();
+  savePrices(store);
+  return { status:'ok', message:'Indicative price saved', key:key };
+}
+function installPricesTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){ if(t.getHandlerFunction()==='pricesUpdate') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('pricesUpdate').timeBased().everyDays(1).atHour(6).create();
+  return 'Prices trigger installed (daily ~06:00). Run pricesUpdate() once now to populate.';
+}
+function seedPrices() {
+  /* Starter vanilla indicative figure (edit the number to your latest trade
+   * reference), then pull the live markets. */
+  updateIndicativePrice({ key:'vanilla', label:'Vanilla', unit:'USD/kg', price:50, note:'Starter indicative figure — update from trade reports.' });
+  pricesUpdate();
+  Logger.log('Seeded _prices.json (vanilla indicative + live markets).');
+}
+
 function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
@@ -1475,7 +1570,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood', 'update_indicative_price'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1667,6 +1762,10 @@ function doPost(e) {
     if (body._action === 'update_livelihood') {
       return ContentService.createTextOutput(JSON.stringify(updateLivelihood(body.livelihood))).setMimeType(ContentService.MimeType.JSON);
     }
+    /* Indicative (non-traded) price — coordinator sets vanilla etc. */
+    if (body._action === 'update_indicative_price') {
+      return ContentService.createTextOutput(JSON.stringify(updateIndicativePrice(body))).setMimeType(ContentService.MimeType.JSON);
+    }
 
     /* Normal steward data upload */
     var folder = getDataFolder();
@@ -1732,6 +1831,7 @@ function doGet(e) {
   if (action === 'holidays') { return getHolidays(); }
   if (action === 'livelihood') { return getLivelihood(); }
   if (action === 'enrolments') { return getEnrolments(); }
+  if (action === 'prices') { return getPrices(); }
   if (action === 'pheno_targets') { return getPhenoTargets(); }
 
   if (action === 'authorisations') {

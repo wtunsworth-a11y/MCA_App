@@ -108,24 +108,65 @@ Each installs a time-based trigger. Install only the ones you want running now.
 
 ---
 
-## 7. Verify it worked
+## 7. Market prices (world indicator for growers)
+
+A world-market reference (coffee, cocoa, gold) with a vanilla **indicative**
+figure you set. Keyless source — **no API key needed**.
+
+1. Run **`seedPrices()`** once — sets a starter vanilla indicative figure and
+   pulls the live markets into `_prices.json`. (Edit the vanilla number inside
+   the function first if you like.)
+2. Run **`installPricesTrigger()`** once — daily ~06:00 refresh.
+3. Update the vanilla figure any time from the app: enrol screen → passcode →
+   **Set Vanilla Price**.
+
+After the redeploy (Step 1C), the **Market Prices** tile shows for everyone
+(growers included). If a market shows no trend, run `pricesUpdate()` once by
+hand and check the log — it keeps the last good data if a fetch fails.
+
+---
+
+## 8. Selfie verification for no-fingerprint phones (A2s)
+
+**No installer needed** — just the redeploy in Step 1C. After that:
+
+- Enrol an A2: on the biometric step, tap **"Use a face photo to verify
+  instead."** It stores a reference photo and marks that phone selfie-verified.
+- On selfie phones, login and every field gate capture a **face photo** instead
+  of a fingerprint. Fingerprint phones are unchanged (strict biometric gate).
+- Captures are queued offline and, on the next sync, written to
+  **`_gate_selfies/<stewardId>/`** in Drive for your review (reference photo +
+  each gate/login photo, tagged with the screen and time).
+- It's an **audit trail, not real-time prevention** — reviewable, which a shared
+  PIN is not.
+
+---
+
+## 9. Verify it worked
 
 - **Fire reports:** open `…/exec?action=disturbances` in a browser → should be
   JSON with a `disturbances` array (may be empty until the feed finds something).
 - **Livelihood:** `…/exec?action=livelihood` → JSON with `types` + `sites`.
 - **Roster:** `…/exec?action=enrolments` → JSON `enrolments` array (fills as
   people on v92+ open the app online).
+- **Market prices:** `…/exec?action=prices` → JSON with a `commodities` object
+  (coffee/cocoa/gold/vanilla).
+- **Selfies:** after an A2 enrolled with a face photo syncs, a
+  `_gate_selfies/<stewardId>/` folder appears in the data folder.
 
 If any of these returns an error or old data, you missed the **redeploy**
 (Step 1C) — do it and re-check.
 
 ---
 
-## 8. Rollout order (so it all lines up)
+## 10. Rollout order (so it all lines up)
 
-1. **Redeploy the backend** (Step 1) — switches on fire reports, livelihood, and
-   the roster together. Seed/install the extras you want (§2–§6).
+1. **Redeploy the backend** (Step 1) — switches on fire reports, livelihood, the
+   roster, market prices and selfie audit together. Seed/install the extras you
+   want (§2–§8).
 2. Get phones onto the **latest build** (open online, close, reopen). Check the
-   build number on the Profile screen.
+   build number on the Profile screen (should read `mca-steward-v95`+).
 3. Set **Will + Russell → Project Staff** (enrol screen → passcode → Update
    Profile → Role → Save). They then see **Livelihood Updates**.
+4. On each **A2**: enrol → on the biometric step tap **"Use a face photo to
+   verify instead."**

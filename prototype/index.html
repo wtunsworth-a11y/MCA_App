@@ -1956,7 +1956,7 @@ select.msel {
           </svg>
         </div>
 
-        <div class="fp-instruction">Touch to log in</div>
+        <div class="fp-instruction" id="fpInstruction">Touch to log in</div>
         <div class="fp-status" id="fpStatus"></div>
         <div class="fp-user" id="fpUser"></div>
       </div>
@@ -5717,6 +5717,7 @@ function showScreen(id) {
   if (id === 'screen-livelihood') initLivelihood();
   if (id === 'screen-enrolments') renderEnrolments();
   if (id === 'screen-market-prices') initMarketPrices();
+  if (id === 'screen-fingerprint') setupLoginScreen();
   if (id === 'screen-dashboard') renderDashboardStatus();
   if (id === 'screen-alerts') initDisturbances();
   if (id === 'screen-help') renderHelpCentre();
@@ -6316,13 +6317,19 @@ function enrollFinish() {
 }
 
 /* ── Fingerprint Login ── */
+/* Relabel the login prompt for selfie-verified phones (no fingerprint), so the
+   steward knows to take a photo rather than touch a sensor. */
+function setupLoginScreen() {
+  var instr = document.getElementById('fpInstruction');
+  getAllRecords('auth', function(records) {
+    var profile = (records && records.length > 0) ? records[0] : null;
+    var selfie = !!(profile && profile.verify_method === 'selfie');
+    if (instr) instr.textContent = selfie ? 'Tap to log in with your photo' : 'Touch to log in';
+  });
+}
 var fpBusy = false;
 function verifyFp() {
   if (fpBusy) return;
-  if (!navigator.credentials || !window.PublicKeyCredential) {
-    document.getElementById('fpStatus').textContent = 'Fingerprint not supported on this device.';
-    return;
-  }
   fpBusy = true;
   var ring   = document.getElementById('fpRing');
   var status = document.getElementById('fpStatus');
@@ -6363,6 +6370,14 @@ function verifyFp() {
           setTimeout(function(){ fpBusy = false; status.textContent = ''; user.textContent = ''; }, 400);
         }, 600);
       });
+      return;
+    }
+    /* Biometric profile but this device has no WebAuthn at all. */
+    if (!navigator.credentials || !window.PublicKeyCredential) {
+      ring.classList.remove('scanning');
+      status.textContent = 'This phone can’t read a fingerprint. Ask your coordinator to re-enrol it with a face photo.';
+      status.style.color = '#B71C1C';
+      fpBusy = false;
       return;
     }
     var allowList = [];
@@ -11594,7 +11609,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v95'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v96'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

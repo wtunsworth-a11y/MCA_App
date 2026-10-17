@@ -1494,8 +1494,11 @@ function _fetchPriceSeries(symbol) {
   if (!r) return null;
   var ts = r.timestamp || [];
   var closes = (r.indicators && r.indicators.quote && r.indicators.quote[0] && r.indicators.quote[0].close) || [];
-  var points = [];
-  for (var i=0;i<ts.length;i++){ var v=closes[i]; if(v==null||isNaN(v)) continue; points.push({ t:_pngDate(new Date(ts[i]*1000),'yyyy-MM'), v:Math.round(v*100)/100 }); }
+  /* One point per month (the chart endpoint can return both the month's close
+   * and a live partial-month candle — keep the latest value for each month). */
+  var byMonth = {};
+  for (var i=0;i<ts.length;i++){ var v=closes[i]; if(v==null||isNaN(v)) continue; byMonth[_pngDate(new Date(ts[i]*1000),'yyyy-MM')] = Math.round(v*100)/100; }
+  var points = Object.keys(byMonth).sort().map(function(mk){ return { t:mk, v:byMonth[mk] }; });
   var latest = (r.meta && r.meta.regularMarketPrice!=null) ? r.meta.regularMarketPrice : (points.length ? points[points.length-1].v : null);
   if (latest==null && points.length===0) return null;
   return { latest:(latest!=null?Math.round(latest*100)/100:null), points:points, as_of:_pngDate(new Date(),'yyyy-MM-dd') };

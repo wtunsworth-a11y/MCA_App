@@ -11609,7 +11609,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v96'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v97'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12058,7 +12058,8 @@ function initMarketPrices() {
     keys.forEach(function(k){
       var c = com[k]; if(!c) return;
       var color = _PRICE_COLORS[k] || '#555';
-      var pts = c.points || [];
+      /* Show a trailing 12-month window (points are monthly; backend keeps ~2y). */
+      var pts = (c.points || []).slice(-12);
       var changeHtml = '';
       var usable = pts.filter(function(p){ return p && p.v!=null; });
       if (usable.length >= 2) {

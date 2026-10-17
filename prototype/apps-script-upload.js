@@ -1800,6 +1800,27 @@ function doPost(e) {
      * person as having uploaded). Never fails the upload. */
     try { if (body.steward && body.steward.stewardId) registerEnrolment(body.steward, true); } catch(e) {}
 
+    /* Extract any gate/login face photos (selfie-verified phones) into a
+     * reviewable per-steward folder, so the coordinator has an audit trail
+     * without digging through the raw upload JSON. Never fails the upload. */
+    try {
+      var _gs = body.modules && body.modules.gate_selfies;
+      if (_gs && _gs.length) {
+        var gsRoot = getOrCreateFolder('_gate_selfies', getDataFolder());
+        var gsSid  = String((body.steward && body.steward.stewardId) || sid).replace(/[^A-Za-z0-9_-]/g,'_');
+        var gsFolder = getOrCreateFolder(gsSid, gsRoot);
+        for (var gi = 0; gi < _gs.length; gi++) {
+          var gsr = _gs[gi]; if (!gsr || !gsr.photo) continue;
+          var ctx = String(gsr.context || 'gate').replace(/[^A-Za-z0-9_-]/g,'_');
+          var when = (gsr.timestamp || new Date().toISOString()).replace(/[:.]/g,'-').slice(0,19);
+          var gname = ctx + '_' + when + '.jpg';
+          if (gsFolder.getFilesByName(gname).hasNext()) continue; /* idempotent */
+          var gblob = _dataUriToBlob(gsr.photo, gname);
+          if (gblob) gsFolder.createFile(gblob);
+        }
+      }
+    } catch(e) {}
+
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'ok', file: fileName, records: body.record_count }))
       .setMimeType(ContentService.MimeType.JSON);

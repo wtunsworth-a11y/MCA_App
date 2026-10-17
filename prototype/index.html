@@ -11609,7 +11609,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v97'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v98'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12041,6 +12041,7 @@ function _priceSparkline(points, w, h, color) {
     + '<circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="2.6" fill="'+color+'"/>'
     + '</svg>';
 }
+function _fmtPriceMonth(s){ if(!s) return ''; var m=String(s).split('-'); if(m.length<2) return s; var names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; var mi=parseInt(m[1],10)-1; return (names[mi]||m[1])+' '+m[0]; }
 var _PRICE_ORDER = ['coffee','cocoa','vanilla','gold'];
 var _PRICE_COLORS = { coffee:'#6D4C41', cocoa:'#8D6E63', vanilla:'#7E57C2', gold:'#B8860B' };
 function initMarketPrices() {
@@ -12058,8 +12059,12 @@ function initMarketPrices() {
     keys.forEach(function(k){
       var c = com[k]; if(!c) return;
       var color = _PRICE_COLORS[k] || '#555';
-      /* Show a trailing 12-month window (points are monthly; backend keeps ~2y). */
-      var pts = (c.points || []).slice(-12);
+      /* Full stored window (~2 years of monthly points). */
+      var pts = c.points || [];
+      /* Date range the trend line covers — stated under each graph. */
+      var spanTxt = '';
+      var spanPts = pts.filter(function(p){ return p && p.t; });
+      if (spanPts.length >= 2) spanTxt = _fmtPriceMonth(spanPts[0].t) + ' – ' + _fmtPriceMonth(spanPts[spanPts.length-1].t);
       var changeHtml = '';
       var usable = pts.filter(function(p){ return p && p.v!=null; });
       if (usable.length >= 2) {
@@ -12084,7 +12089,7 @@ function initMarketPrices() {
         +     (changeHtml?('<div style="margin-top:3px;">'+changeHtml+'</div>'):'')+'</div>'
         + '</div>'
         + '<div style="font-size:0.66rem;color:#999;margin-top:7px;">'
-        +   (c.source||'') + ' · as of ' + (c.as_of||'—')
+        +   (c.source||'') + (spanTxt ? (' · trend ' + spanTxt) : '') + ' · as of ' + (c.as_of||'—')
         +   (c.indicative && c.note ? ('<br>'+String(c.note).replace(/</g,'&lt;')) : '')
         + '</div>'
         + '</div>';

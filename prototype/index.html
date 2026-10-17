@@ -1747,6 +1747,11 @@ select.msel {
           </button>
           <div class="enroll-status" id="enrollThumb1Status"></div>
           <button class="enroll-next-btn" id="enrollThumb1Next" disabled onclick="enrollGoThumb2()">Continue →</button>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px dashed #ddd;">
+            <div style="font-size:0.72rem;color:#888;margin-bottom:6px;">This phone has <strong>no fingerprint sensor</strong> and the screen-lock prompt won't appear?</div>
+            <button class="btn-outline" id="enrollSelfieFallbackBtn" style="width:100%;border-color:#B8860B;color:#8D6E00;font-size:0.82rem;" onclick="enrollUseSelfie()"><span data-icon="camera" data-size="14"></span> Use a face photo to verify instead</button>
+            <div class="enroll-status" id="enrollSelfieStatus"></div>
+          </div>
         </div>
 
         <!-- STEP 4: Second thumb (optional — fingerprint devices only) -->
@@ -5994,6 +5999,8 @@ window._coordSecret = null;
 var enrolledProfile = null;    // set during enrollment, used in finish
 var enrollCred1Id   = null;    // base64url credential ID for thumb 1
 var enrollCred2Id   = null;    // base64url credential ID for thumb 2
+var enrollVerifyMethod = 'biometric';  // 'biometric' | 'selfie' (no-fingerprint phones)
+var enrollRefPhoto     = null;         // reference face photo (selfie method only)
 
 /* Convert ArrayBuffer to base64url string */
 function bufToB64(buf) {
@@ -6180,6 +6187,7 @@ function enrollSaveProfile() {
     });
   }
   enrolledProfile = { name: name, stewardId: sid, clan: clan, zone: zone, zone_id: zoneId, village: village, role: role, authorised_topics: authorisedTopics };
+  enrollCred1Id = null; enrollCred2Id = null; enrollVerifyMethod = 'biometric'; enrollRefPhoto = null;
   document.getElementById('enrollStep2').style.display = 'none';
   document.getElementById('enrollStep3').style.display = 'block';
   document.getElementById('edot2').classList.remove('active');
@@ -6244,6 +6252,23 @@ function enrollRegisterThumb(thumbNum) {
   });
 }
 
+/* ── Enrollment: no-fingerprint fallback — register a reference face photo and
+   mark this enrolment as selfie-verified. Used on phones (e.g. Redmi A2) with
+   no sensor where the device screen-lock prompt won't appear. ── */
+function enrollUseSelfie() {
+  var st = document.getElementById('enrollSelfieStatus');
+  if (st) { st.textContent = 'Opening camera — take a clear face photo of the steward…'; st.style.color = '#8D6E00'; }
+  selfieCapture(function(photo){
+    if (!photo) { if(st){ st.textContent = 'No photo taken — tap to try again.'; st.style.color = '#B71C1C'; } return; }
+    enrollVerifyMethod = 'selfie';
+    enrollRefPhoto = photo;
+    enrollCred1Id = null; enrollCred2Id = null;
+    if (st) { st.innerHTML = icon('checkcircle',14) + ' Face photo saved — this phone will verify with a photo. Finishing…'; st.style.color = '#2E7D32'; try{ hydrateIcons(st); }catch(e){} }
+    /* Selfie phones skip the second-thumb step. */
+    setTimeout(function(){ enrollFinish(); }, 700);
+  });
+}
+
 /* ── Enrollment: Step 3 complete → Step 4 ── */
 function enrollGoThumb2() {
   document.getElementById('enrollStep3').style.display = 'none';
@@ -6267,6 +6292,8 @@ function enrollFinish() {
     authorised_topics: enrolledProfile.authorised_topics || [],
     cred1:             enrollCred1Id,
     cred2:     enrollCred2Id,
+    verify_method: enrollVerifyMethod || 'biometric',
+    ref_photo:     (enrollVerifyMethod === 'selfie') ? enrollRefPhoto : null,
     enrolled:  new Date().toISOString()
   };
   saveRecord('auth', record, function() {
@@ -6278,6 +6305,13 @@ function enrollFinish() {
     updateDashHeader(enrolledProfile);
     /* Tell the backend this person was created (live roster, pre-upload). */
     try { postEnrolmentPing(record); } catch(e){}
+    /* Selfie method: queue the reference face photo for the coordinator's audit
+       trail (uploads with the next sync). cacheStewardProfile so gates/login
+       see the method straight away. */
+    if (record.verify_method === 'selfie' && enrollRefPhoto) {
+      window._cachedProfile = record;
+      try { queueGateSelfie('reference_enrolment', enrollRefPhoto, function(){}); } catch(e){}
+    }
   });
 }
 
@@ -6306,6 +6340,31 @@ function verifyFp() {
       return;
     }
     var profile = records[0];
+    /* Selfie-verified phone (no fingerprint): log in by taking a face photo. */
+    if (profile.verify_method === 'selfie') {
+      status.textContent = 'Take your photo to log in…';
+      selfieCapture(function(photo){
+        if (!photo) { ring.classList.remove('scanning'); status.textContent = 'Photo needed to log in — tap to try again'; status.style.color = '#B71C1C'; fpBusy = false; return; }
+        try { queueGateSelfie('login', photo, function(){}); } catch(e){}
+        ring.classList.remove('scanning');
+        status.textContent = 'Verified ✓'; status.style.color = '#2E7D32';
+        user.textContent = profile.name + ' | ' + profile.clan;
+        updateDashHeader(profile);
+        setTimeout(function() {
+          cacheStewardProfile();
+          try { postEnrolmentPing(profile); } catch(e){}
+          syncAuthorisations(profile);
+          history = [];
+          var role = profile.role || 'clan_steward';
+          var dest = (role === 'zone_staff' || role === 'mcf_staff') ? 'screen-reports' : 'screen-dashboard';
+          if (dest === 'screen-reports') initReportScreen(profile);
+          showScreen(dest);
+          try { clockCheckAtLogin(); } catch(e) {}
+          setTimeout(function(){ fpBusy = false; status.textContent = ''; user.textContent = ''; }, 400);
+        }, 600);
+      });
+      return;
+    }
     var allowList = [];
     if (profile.cred1) allowList.push({ id: b64ToBuf(profile.cred1), type: 'public-key' });
     if (profile.cred2) allowList.push({ id: b64ToBuf(profile.cred2), type: 'public-key' });
@@ -6350,23 +6409,77 @@ function verifyFp() {
   });
 }
 
-/* ── Shared WebAuthn verify (all field arrive-gates) ── */
-function webAuthnVerify(opts) {
-  /* opts: { btnId, txtId, verifiedFlag, setVerified, onSuccess } */
-  if (!navigator.credentials || !window.PublicKeyCredential) {
-    /* Hard requirement: a device with no platform authenticator CANNOT verify,
-       so the gate stays locked — the reading cannot proceed. (Previously this
-       failed open and let the reading through marked "unverified".) */
-    opts.setVerified(false);
-    if (opts.btnId) document.getElementById(opts.btnId).classList.remove('verified');
-    if (opts.txtId) document.getElementById(opts.txtId).innerHTML = ''+icon('warning',13)+' No fingerprint on this phone — cannot verify';
-    toast('This phone has no fingerprint sensor — a reading can only be done on an enrolled phone.');
-    return;
-  }
-  if (opts.txtId) document.getElementById(opts.txtId).textContent = 'Verifying…';
+/* ── Front-camera capture (file input → data URI). Simple + reliable on low-end
+   Android (no getUserMedia). Returns null if nothing was taken. ── */
+function selfieCapture(cb) {
+  try {
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*'; inp.setAttribute('capture', 'user');
+    inp.style.position = 'fixed'; inp.style.left = '-9999px';
+    inp.onchange = function() {
+      var f = inp.files && inp.files[0];
+      try { document.body.removeChild(inp); } catch(e){}
+      if (!f) { cb(null); return; }
+      var rd = new FileReader();
+      rd.onload = function(e){ cb(e.target.result); };
+      rd.onerror = function(){ cb(null); };
+      rd.readAsDataURL(f);
+    };
+    document.body.appendChild(inp);
+    inp.click();
+  } catch(e) { cb(null); }
+}
+/* Queue a gate/login face photo for the coordinator's audit trail. Stored like
+   any record and uploaded with the next sync (offline-safe). */
+function queueGateSelfie(context, photo, cb) {
+  if (!photo) { if(cb) cb(); return; }
+  var p = window._cachedProfile || {};
+  saveRecord('gate_selfies', {
+    survey_type: 'gate_selfie',
+    context: context || '',
+    photo: photo,
+    steward_id: p.stewardId || '',
+    steward_name: p.name || ''
+  }, function(){ if(cb) cb(); });
+}
 
+/* ── Shared identity verify for all field arrive-gates. Fingerprint phones use
+   the biometric gate (hard requirement). No-sensor phones enrolled with the
+   selfie method capture a face photo instead, which is queued for audit. ── */
+function webAuthnVerify(opts) {
+  /* opts: { btnId, txtId, setVerified, onSuccess, onFail } */
+  if (opts.txtId) { var t0=document.getElementById(opts.txtId); if(t0) t0.textContent = 'Checking…'; }
   getAllRecords('auth', function(records) {
-    var profile  = (records && records.length > 0) ? records[0] : null;
+    var profile = (records && records.length > 0) ? records[0] : null;
+
+    /* Selfie-verified phone: take a face photo at the gate. */
+    if (profile && profile.verify_method === 'selfie') {
+      if (opts.txtId) { var t1=document.getElementById(opts.txtId); if(t1) t1.textContent = 'Take your photo to verify…'; }
+      selfieCapture(function(photo){
+        if (!photo) {
+          opts.setVerified(false);
+          if (opts.txtId) { var t2=document.getElementById(opts.txtId); if(t2) t2.textContent = 'Photo needed to verify — tap to try again'; }
+          if (opts.onFail) opts.onFail(new Error('no photo'));
+          return;
+        }
+        try { queueGateSelfie(currentScreen || 'gate', photo, function(){}); } catch(e){}
+        opts.setVerified(true);
+        if (opts.btnId) { var b1=document.getElementById(opts.btnId); if(b1) b1.classList.add('verified'); }
+        if (opts.txtId) { var t3=document.getElementById(opts.txtId); if(t3) t3.textContent = '✓ Photo captured'; }
+        opts.onSuccess();
+      });
+      return;
+    }
+
+    /* Fingerprint phones: hard biometric requirement. */
+    if (!navigator.credentials || !window.PublicKeyCredential) {
+      opts.setVerified(false);
+      if (opts.btnId) { var b2=document.getElementById(opts.btnId); if(b2) b2.classList.remove('verified'); }
+      if (opts.txtId) { var t4=document.getElementById(opts.txtId); if(t4) t4.innerHTML = ''+icon('warning',13)+' No fingerprint on this phone — cannot verify'; }
+      toast('This phone has no fingerprint — ask your coordinator to re-enrol it with a face-photo check.');
+      return;
+    }
+    if (opts.txtId) { var t5=document.getElementById(opts.txtId); if(t5) t5.textContent = 'Verifying…'; }
     var allowList = [];
     if (profile && profile.cred1) allowList.push({ id: b64ToBuf(profile.cred1), type: 'public-key' });
     if (profile && profile.cred2) allowList.push({ id: b64ToBuf(profile.cred2), type: 'public-key' });
@@ -6381,11 +6494,11 @@ function webAuthnVerify(opts) {
       }
     }).then(function() {
       opts.setVerified(true);
-      if (opts.btnId) document.getElementById(opts.btnId).classList.add('verified');
-      if (opts.txtId) document.getElementById(opts.txtId).textContent = '✓ Identity Verified';
+      if (opts.btnId) { var b3=document.getElementById(opts.btnId); if(b3) b3.classList.add('verified'); }
+      if (opts.txtId) { var t6=document.getElementById(opts.txtId); if(t6) t6.textContent = '✓ Identity Verified'; }
       opts.onSuccess();
     }).catch(function(err) {
-      if (opts.txtId) document.getElementById(opts.txtId).textContent = '✗ Not recognised — try again';
+      if (opts.txtId) { var t7=document.getElementById(opts.txtId); if(t7) t7.textContent = '✗ Not recognised — try again'; }
       if (opts.onFail) opts.onFail(err);
     });
   });
@@ -11439,8 +11552,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 15;
-var STORES = ['mafia','qabb','water','phenology','trees','meteo','conservation','followups','schedule','pheno_plots','training','auth','drafts','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions','livelihood'];
+var DB_VERSION = 16;
+var STORES = ['mafia','qabb','water','phenology','trees','meteo','conservation','followups','schedule','pheno_plots','training','auth','drafts','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions','livelihood','gate_selfies'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -11481,7 +11594,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v94'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v95'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -13061,7 +13174,7 @@ function markStoreSynced(storeName, ids, cb) {
 
 /* ── Update per-module sync status on export screen ── */
 var DATA_STORES = ['mafia','qabb','water','phenology','pheno_plots',
-  'conservation','followups','freemap','trees','meteo','training','schedule','distributions','livelihood'];
+  'conservation','followups','freemap','trees','meteo','training','schedule','distributions','livelihood','gate_selfies'];
 
 /* ── Dashboard tile colours ───────────────────────────────────────────────
    Give each module its own colour (grouped into families so the grid reads as

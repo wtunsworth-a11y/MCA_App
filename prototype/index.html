@@ -3237,6 +3237,22 @@ select.msel {
             <div style="font-size:0.68rem;color:#999;margin-top:3px;">Keep it short — about <strong>10–20 seconds</strong> showing the items and the recipient receiving them. Long videos may be hard to upload on slow signal.</div>
           </div>
 
+          <div class="section-label" style="padding-left:0;">Undertaking Form</div>
+          <div class="matrix-note" style="background:#FFF3E0;border-color:#FFCC80;color:#E65100;font-size:0.76rem;">
+            <span data-icon="warning" data-size="14"></span> If these items are <strong>equipment to be used for work</strong>, an <strong>Undertaking Form must be completed and signed</strong> first. Tick below and take a photo of the completed form.
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;cursor:pointer;">
+              <input type="checkbox" id="distUndertaking" onchange="distUndertakingToggle()" style="margin-top:2px;width:16px;height:16px;">
+              <span>An <strong>Undertaking Form was completed</strong> for this handover.</span>
+            </label>
+          </div>
+          <div class="form-group" id="distUndertakingPhotoGroup" style="display:none;">
+            <label class="form-label" style="font-size:0.72rem;"><span data-icon="camera" data-size="13"></span> Photo of the completed Undertaking Form <span style="color:#B71C1C;">*</span></label>
+            <div id="distPhotoUndertakingBox" onclick="document.getElementById('distPhotoUndertaking').click()" style="width:100%;min-height:92px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#999;font-size:0.72rem;text-align:center;padding:10px;">Completed &amp; signed<br>Undertaking Form</div>
+            <input type="file" id="distPhotoUndertaking" accept="image/*" capture="environment" style="display:none;" onchange="distPhoto('undertaking',this)">
+          </div>
+
           <div class="form-group">
             <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;cursor:pointer;">
               <input type="checkbox" id="distConfirmed" style="margin-top:2px;width:16px;height:16px;">
@@ -10499,7 +10515,7 @@ var DIST_ITEM_CATS=['Seeds','Seedlings','Tools','Equipment','Materials','PPE / s
    time (the last entry, "Other", reveals a free-text box). */
 var DIST_DONORS=['European Union','Managalas Conservation Foundation','PNG Government','Other'];
 function initDistribution(){
-  window._distPhotos={handover:null,receipt:null};
+  window._distPhotos={handover:null,receipt:null,undertaking:null};
   window._distVideo=null; window._distVideoMeta='';
   window._distRecipType='individual'; window._distPurpose='conservation_planting'; window._distDonor='European Union';
   window._distVerified=false; window._distItemSeq=0; window._distItemIds=[];
@@ -10508,6 +10524,9 @@ function initDistribution(){
   var dcz=document.getElementById('distClanZone'); if(dcz) dcz.value='';
   try{ distClanZoneChanged(); }catch(e){}
   var cb=document.getElementById('distConfirmed'); if(cb) cb.checked=false;
+  var du=document.getElementById('distUndertaking'); if(du) du.checked=false;
+  var ubox=document.getElementById('distPhotoUndertakingBox'); if(ubox){ ubox.innerHTML='Completed &amp; signed<br>Undertaking Form'; ubox.style.borderColor='#ccc'; ubox.style.color='#999'; }
+  try{ distUndertakingToggle(); }catch(e){}
   var dr=document.getElementById('distDonorRecognised'); if(dr) dr.checked=false;
   distSetRecipType('individual'); distSetPurpose('conservation_planting');
   distRenderDonors(); distSetDonor('European Union');
@@ -10625,8 +10644,13 @@ function distRemoveItem(n){
 function distPhoto(slot,input){
   var f=input.files&&input.files[0]; if(!f) return;
   var reader=new FileReader();
-  reader.onload=function(e){ window._distPhotos[slot]=e.target.result; var box=document.getElementById('distPhoto'+(slot==='handover'?'Handover':'Receipt')+'Box'); if(box){ box.innerHTML='<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;" alt="'+slot+'">'; box.style.borderColor='#26A69A'; } };
+  reader.onload=function(e){ window._distPhotos[slot]=e.target.result; var box=document.getElementById('distPhoto'+(slot.charAt(0).toUpperCase()+slot.slice(1))+'Box'); if(box){ box.innerHTML='<img src="'+e.target.result+'" style="max-height:100%;max-width:100%;border-radius:8px;object-fit:cover;" alt="'+slot+'">'; box.style.borderColor='#26A69A'; } };
   reader.readAsDataURL(f);
+}
+function distUndertakingToggle(){
+  var cb=document.getElementById('distUndertaking');
+  var grp=document.getElementById('distUndertakingPhotoGroup');
+  if(grp) grp.style.display=(cb && cb.checked)?'block':'none';
 }
 function distVideo(input){
   var f=input.files&&input.files[0]; if(!f) return;
@@ -10658,6 +10682,10 @@ function submitDistribution(){
   if(items.length===0){ toast('Add at least one item (with a description).'); return; }
   if(!window._distPhotos || !window._distPhotos.handover || !window._distPhotos.receipt){ toast('Both the handover and receipt photos are required.'); return; }
   if(!window._distVideo){ toast('A short video of the handover is required.'); return; }
+  /* Undertaking Form: optional (project staff judge when it applies), but if
+     they tick "completed" we require the photo of it. */
+  var undertakingDone=!!(document.getElementById('distUndertaking')&&document.getElementById('distUndertaking').checked);
+  if(undertakingDone && !(window._distPhotos && window._distPhotos.undertaking)){ toast('Take a photo of the completed Undertaking Form (or untick it).'); return; }
   if(!window._distVerified){ toast('Verify your fingerprint before submitting.'); return; }
   /* Zone recipient — which zone is receiving (picker). */
   var rZoneId='', rZoneLabel='';
@@ -10682,6 +10710,8 @@ function submitDistribution(){
     location_missing:!window._distGps,
     date:now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear(),
     photo_handover:window._distPhotos.handover, photo_receipt:window._distPhotos.receipt,
+    undertaking_completed:undertakingDone,
+    undertaking_photo:(undertakingDone ? (window._distPhotos.undertaking||null) : null),
     video:window._distVideo, video_size:window._distVideoMeta,
     fingerprint_verified:true,
     notes:((document.getElementById('distNotes')||{}).value||'').trim(),
@@ -11609,7 +11639,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v98'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v99'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

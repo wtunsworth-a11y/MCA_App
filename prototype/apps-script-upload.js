@@ -2110,6 +2110,15 @@ function _handoverPdf(handoversFolder, r, s) {
     catch (e) { b.appendParagraph('(photo could not be embedded — see link below)'); }
   }
 
+  /* Undertaking Form (equipment-for-work handovers). */
+  b.appendParagraph('Undertaking Form: ' + (r.undertaking_completed === true ? 'Completed' : 'Not required / not completed'));
+  var uf = r.undertaking_completed === true ? _dataUriToBlob(r.undertaking_photo, 'undertaking.jpg') : null;
+  if (uf) {
+    b.appendParagraph('Undertaking Form (photo)').setHeading(DocumentApp.ParagraphHeading.HEADING2);
+    try { var uimg = b.appendImage(uf); var uw = uimg.getWidth(); if (uw > 420) { uimg.setHeight(Math.round(uimg.getHeight() * 420 / uw)); uimg.setWidth(420); } }
+    catch (e) { b.appendParagraph('(undertaking photo could not be embedded)'); }
+  }
+
   b.appendParagraph('Media files').setHeading(DocumentApp.ParagraphHeading.HEADING2);
   var L = r._links || {};
   var addLink = function(label, url){ if (!url) return; var p = b.appendParagraph(label + ' '); p.appendText(url).setLinkUrl(url); };
@@ -2149,7 +2158,7 @@ function monthlyDistributionReport(period) {
   while (old.hasNext()) { try { old.next().setTrashed(true); } catch(e){} }
   var ss = SpreadsheetApp.create(ssName);
   var sheet = ss.getActiveSheet();
-  sheet.appendRow(['Date (PNG)','Officer','Zone','Recipient','Recipient type','Received by','Recipient clan','Items','Purpose','Donor','Donor recognised','Confirmed receipt','GPS','Handover PDF','Handover photo','Receipt photo','Video','record_uid']);
+  sheet.appendRow(['Date (PNG)','Officer','Zone','Recipient','Recipient type','Received by','Recipient clan','Items','Purpose','Donor','Donor recognised','Confirmed receipt','Undertaking form','GPS','Handover PDF','Handover photo','Receipt photo','Video','record_uid']);
 
   rows.sort(function(a,b){ return _recInstant(a.rec) - _recInstant(b.rec); });
   rows.forEach(function(x){
@@ -2172,6 +2181,7 @@ function monthlyDistributionReport(period) {
       r.donor || '',
       (r.donor_recognised === true ? 'Yes' : (r.donor_recognised === false ? 'No' : '')),
       (rp.confirmed_receipt === true ? 'Yes' : (rp.confirmed_receipt === false ? 'No' : '')),
+      (r.undertaking_completed === true ? 'Yes' : ''),
       gps, pdfLink, hLink, rLink, vLink, uid
     ]);
   });

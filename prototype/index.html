@@ -2008,6 +2008,10 @@ select.msel {
             <span class="module-emoji" data-icon="linechart" data-size="26"></span>
             <span class="module-name">Market Prices</span>
           </div>
+          <div class="module-tile" id="tile-price-report" data-fo="1" style="display:none;" onclick="nav('screen-price-report')">
+            <span class="module-emoji" data-icon="tag" data-size="26"></span>
+            <span class="module-name">Local Price Report</span>
+          </div>
           <div class="module-tile" data-fo="1" data-vc="1" onclick="nav('screen-freemap')">
             <span class="module-emoji" data-icon="pin" data-size="26"></span>
             <span class="module-name">Field Mapping</span>
@@ -3391,6 +3395,94 @@ select.msel {
           </div>
           <button class="btn-primary" style="background:#5E35B1;margin-top:8px;" id="ipSaveBtn" onclick="saveIndicativePrice()">Save indicative price</button>
           <div id="ipStatus" style="font-size:0.82rem;margin-top:10px;text-align:center;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: LOCAL PRICE REPORT (project/zone staff + field officers)
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-price-report">
+      <div class="top-bar" style="background:#795548;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Local Price Report</div><div class="bar-subtitle">A sale you saw, or a buyer's price</div></div>
+      </div>
+      <div class="scroll-content">
+        <div class="p14" style="padding-bottom:24px;">
+          <div class="matrix-note" style="background:#EFEBE9;border-color:#BCAAA4;color:#4E342E;font-size:0.76rem;">
+            <span data-icon="info" data-size="14"></span> Record a <strong>real price</strong> you witnessed, or a <strong>price a buyer announced</strong>. This builds a local picture over time. (Massoy, coffee, cocoa, vanilla — not gold.)
+          </div>
+
+          <div class="section-label" style="padding-left:0;">What is this?</div>
+          <div id="prTypePills" style="display:flex;gap:6px;margin-bottom:10px;">
+            <button type="button" class="weather-pill active" data-prt="witnessed" onclick="prSetType('witnessed')">A sale I saw</button>
+            <button type="button" class="weather-pill" data-prt="announcement" onclick="prSetType('announcement')">A buyer's price</button>
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Commodity <span style="color:#B71C1C;">*</span></div>
+          <div id="prCommodityPills" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+            <button type="button" class="weather-pill active" data-prc="massoy" onclick="prSetCommodity('massoy')">Massoy</button>
+            <button type="button" class="weather-pill" data-prc="coffee" onclick="prSetCommodity('coffee')">Coffee</button>
+            <button type="button" class="weather-pill" data-prc="cocoa" onclick="prSetCommodity('cocoa')">Cocoa</button>
+            <button type="button" class="weather-pill" data-prc="vanilla" onclick="prSetCommodity('vanilla')">Vanilla</button>
+            <button type="button" class="weather-pill" data-prc="other" onclick="prSetCommodity('other')">Other</button>
+          </div>
+          <div class="form-group" id="prCommodityOtherGroup" style="display:none;">
+            <input type="text" id="prCommodityOther" class="form-input" placeholder="Which crop? (not gold)">
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Price <span style="color:#B71C1C;">*</span></div>
+          <div class="form-group">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span style="font-size:0.85rem;color:#555;font-weight:600;">K</span>
+              <input type="number" id="prPrice" inputmode="decimal" step="any" min="0" class="form-input" style="flex:2;" placeholder="Price in Kina">
+              <select id="prPriceUnit" class="form-input" style="flex:1;font-size:0.8rem;padding:8px;">
+                <option value="per_kg">per kg</option>
+                <option value="per_bag">per bag</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Volume <span style="color:#999;font-weight:400;">(if known)</span></div>
+          <div class="form-group">
+            <div style="display:flex;gap:8px;">
+              <input type="number" id="prVolume" inputmode="decimal" step="any" min="0" class="form-input" style="flex:2;" placeholder="How many">
+              <select id="prVolumeUnit" class="form-input" style="flex:1;font-size:0.8rem;padding:8px;">
+                <option value="kg">kg</option>
+                <option value="bags">bags</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Place <span style="color:#B71C1C;">*</span></label>
+            <input type="text" id="prPlace" class="form-input" placeholder="Village / market / roadside">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quality <span style="color:#999;font-weight:400;">(if stated)</span></label>
+            <input type="text" id="prQuality" class="form-input" placeholder="e.g. dry bean, wet parchment, green vanilla, grade…">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Buyer <span style="color:#999;font-weight:400;">(if known)</span></label>
+            <input type="text" id="prBuyer" class="form-input" placeholder="Name of the buyer / company">
+          </div>
+
+          <div class="section-label" style="padding-left:0;">Photo <span style="color:#999;font-weight:400;">(optional)</span></div>
+          <div id="prPhotoBox" onclick="document.getElementById('prPhotoInput').click()" style="width:100%;min-height:80px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#999;font-size:0.72rem;text-align:center;padding:10px;"><span data-icon="camera" data-size="20"></span>&nbsp; Photo of produce / price notice</div>
+          <input type="file" id="prPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="prPhoto(this)">
+
+          <div class="card" style="padding:10px 14px;margin:10px 0;">
+            <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> Location <span style="color:#999;font-weight:400;">(optional)</span></span><span id="prGPS" style="font-size:0.78rem;color:#795548;font-weight:600;">—</span></div>
+            <button type="button" id="prGpsBtn" onclick="prCaptureGps()" style="margin-top:6px;width:100%;background:#fff;border:1px solid #795548;color:#795548;border-radius:8px;padding:8px;font-size:0.78rem;font-weight:600;cursor:pointer;"><span data-icon="pin" data-size="13"></span> Capture location</button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Notes <span style="color:#999;font-weight:400;">(optional)</span></label>
+            <textarea id="prNotes" class="form-input" style="min-height:48px;width:100%;font-size:0.82rem;" placeholder="Anything else worth noting…"></textarea>
+          </div>
+
+          <button class="btn-primary" style="background:#795548;margin-top:8px;" id="prSaveBtn" onclick="submitPriceReport()">Save price report</button>
+          <button class="btn-outline" style="margin-top:8px;width:100%;color:#888;border-color:#ccc;" onclick="goBack()">Cancel</button>
         </div>
       </div>
     </div>
@@ -5674,7 +5766,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-performance','screen-recent-activity',
   'screen-ack','screen-profile','screen-timesheet',
-  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-distribution','screen-livelihood','screen-market-prices','screen-set-price','screen-data-export'
+  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-distribution','screen-livelihood','screen-market-prices','screen-set-price','screen-price-report','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -5733,6 +5825,7 @@ function showScreen(id) {
   if (id === 'screen-livelihood') initLivelihood();
   if (id === 'screen-enrolments') renderEnrolments();
   if (id === 'screen-market-prices') initMarketPrices();
+  if (id === 'screen-price-report') initPriceReport();
   if (id === 'screen-fingerprint') setupLoginScreen();
   if (id === 'screen-dashboard') renderDashboardStatus();
   if (id === 'screen-alerts') initDisturbances();
@@ -11597,8 +11690,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 16;
-var STORES = ['mafia','qabb','water','phenology','trees','meteo','conservation','followups','schedule','pheno_plots','training','auth','drafts','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions','livelihood','gate_selfies'];
+var DB_VERSION = 17;
+var STORES = ['mafia','qabb','water','phenology','trees','meteo','conservation','followups','schedule','pheno_plots','training','auth','drafts','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions','livelihood','gate_selfies','price_reports'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -11639,7 +11732,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v99'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v100'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11831,6 +11924,12 @@ function cacheStewardProfile() {
       var lvhTile = document.getElementById('tile-livelihood');
       if (lvhTile) {
         lvhTile.style.display = (role === 'project_staff') ? '' : 'none';
+      }
+      /* Local Price Report — project staff, zone staff, field officers (people
+         who move around and witness sales / buyer announcements). */
+      var prTile = document.getElementById('tile-price-report');
+      if (prTile) {
+        prTile.style.display = (role === 'project_staff' || role === 'zone_staff' || role === 'field_officer') ? '' : 'none';
       }
       /* Focused dashboard for Field Officers — show only their tiles (marked
          data-fo), hide the rest so they aren't sidetracked. Their uploads are
@@ -12154,6 +12253,72 @@ function saveIndicativePrice() {
       } else { if(status){ status.textContent='✗ '+((d&&d.message)||'Could not save'); status.style.color='#B71C1C'; } }
     })
     .catch(function(){ if(btn){ btn.disabled=false; btn.textContent='Save indicative price'; } if(status){ status.textContent='Network error — try again.'; status.style.color='#B71C1C'; } });
+}
+
+/* ── Local Price Report (witnessed sales / buyer announcements) ──────────── */
+function prSetType(v){ window._prType=v; var box=document.getElementById('prTypePills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-prt]'),function(b){ b.classList.toggle('active', b.getAttribute('data-prt')===v); }); }
+function prSetCommodity(v){
+  window._prCommodity=v;
+  var box=document.getElementById('prCommodityPills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-prc]'),function(b){ b.classList.toggle('active', b.getAttribute('data-prc')===v); });
+  var og=document.getElementById('prCommodityOtherGroup'); if(og) og.style.display=(v==='other')?'block':'none';
+}
+function prPhoto(input){
+  var f=input.files&&input.files[0]; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(e){ window._prPhoto=e.target.result; var box=document.getElementById('prPhotoBox'); if(box){ box.innerHTML='<img src="'+e.target.result+'" style="max-height:120px;max-width:100%;border-radius:8px;object-fit:cover;" alt="price">'; box.style.borderColor='#795548'; } };
+  rd.readAsDataURL(f);
+}
+function prCaptureGps(){
+  var el=document.getElementById('prGPS'); var btn=document.getElementById('prGpsBtn');
+  if(el){ el.textContent='Acquiring…'; el.style.color='#888'; }
+  if(btn){ btn.disabled=true; btn.textContent='Acquiring…'; }
+  captureGPS(function(gps,err){
+    if(btn){ btn.disabled=false; btn.innerHTML='<span data-icon="pin" data-size="13"></span> Capture location'; try{ hydrateIcons(btn); }catch(e){} }
+    if(gps){ window._prGps=gps; if(el){ el.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'+(gps.source==='coarse'?' (approx)':''); el.style.color='#795548'; } }
+    else { window._prGps=null; if(el){ el.textContent=(err||'Location unavailable')+' — optional'; el.style.color='#E65100'; } }
+  });
+}
+function initPriceReport(){
+  window._prType='witnessed'; window._prCommodity='massoy'; window._prPhoto=null; window._prGps=null;
+  prSetType('witnessed'); prSetCommodity('massoy');
+  ['prCommodityOther','prPrice','prVolume','prPlace','prQuality','prBuyer','prNotes'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  var pu=document.getElementById('prPriceUnit'); if(pu) pu.value='per_kg';
+  var vu=document.getElementById('prVolumeUnit'); if(vu) vu.value='kg';
+  var box=document.getElementById('prPhotoBox'); if(box){ box.innerHTML=icon('camera',20)+'&nbsp; Photo of produce / price notice'; box.style.borderColor='#ccc'; box.style.color='#999'; }
+  var g=document.getElementById('prGPS'); if(g){ g.textContent='—'; g.style.color='#795548'; }
+}
+function submitPriceReport(){
+  var price=(document.getElementById('prPrice')||{}).value;
+  if(price===''||price==null||isNaN(parseFloat(price))){ toast('Enter the price (in Kina).'); return; }
+  var commodity=window._prCommodity||'massoy';
+  var commodityOther=((document.getElementById('prCommodityOther')||{}).value||'').trim();
+  if(commodity==='other' && !commodityOther){ toast('Name the crop (not gold).'); return; }
+  var place=((document.getElementById('prPlace')||{}).value||'').trim();
+  if(!place){ toast('Where did you see this? Enter the place.'); return; }
+  var vol=(document.getElementById('prVolume')||{}).value;
+  var p=window._cachedProfile||{};
+  var rec={
+    survey_type:'price_report',
+    report_type:window._prType||'witnessed',
+    commodity:commodity, commodity_other:(commodity==='other'?commodityOther:''),
+    price:parseFloat(price), currency:'PGK',
+    price_unit:((document.getElementById('prPriceUnit')||{}).value||'per_kg'),
+    volume:(vol!==''&&vol!=null&&!isNaN(parseFloat(vol))?parseFloat(vol):null),
+    volume_unit:((document.getElementById('prVolumeUnit')||{}).value||'kg'),
+    place:place,
+    quality:((document.getElementById('prQuality')||{}).value||'').trim(),
+    buyer:((document.getElementById('prBuyer')||{}).value||'').trim(),
+    notes:((document.getElementById('prNotes')||{}).value||'').trim(),
+    photo:window._prPhoto||null,
+    gps:window._prGps||null, gps_source:(window._prGps&&window._prGps.source)||null, location_missing:!window._prGps,
+    officer:{ name:p.name||'', steward_id:p.stewardId||'', role:p.role||'', zone:p.zone||'' }
+  };
+  var sb=document.getElementById('prSaveBtn'); if(sb){ sb.disabled=true; sb.textContent='Saving…'; }
+  saveRecord('price_reports', rec, function(){
+    toast('Price report saved ✓ — send data when you have signal');
+    if(sb){ sb.disabled=false; sb.textContent='Save price report'; }
+    goBack();
+  });
 }
 /* ── Public holidays (national PNG; coordinator-maintained, cached in the auth
    store like zones/clans). Shown on the Activity Calendar for context and used
@@ -13225,7 +13390,7 @@ function markStoreSynced(storeName, ids, cb) {
 
 /* ── Update per-module sync status on export screen ── */
 var DATA_STORES = ['mafia','qabb','water','phenology','pheno_plots',
-  'conservation','followups','freemap','trees','meteo','training','schedule','distributions','livelihood','gate_selfies'];
+  'conservation','followups','freemap','trees','meteo','training','schedule','distributions','livelihood','gate_selfies','price_reports'];
 
 /* ── Dashboard tile colours ───────────────────────────────────────────────
    Give each module its own colour (grouped into families so the grid reads as
@@ -13240,7 +13405,7 @@ var DASH_TILE_COLORS = {
   'Disturbance Alerts':'#C62828',
   'Activity Calendar':'#1565C0', 'Service Delivery Monitoring':'#00695C',
   'Meetings':'#5E35B1', 'Community Data':'#3949AB', 'Performance Monitoring':'#283593',
-  'Training':'#6A1B9A', 'Handover & Distribution':'#AD1457', 'Livelihood Updates':'#827717', 'Market Prices':'#B8860B', 'Export Data':'#455A64'
+  'Training':'#6A1B9A', 'Handover & Distribution':'#AD1457', 'Livelihood Updates':'#827717', 'Market Prices':'#B8860B', 'Local Price Report':'#795548', 'Export Data':'#455A64'
 };
 function colorDashTiles() {
   document.querySelectorAll('#screen-dashboard .module-tile').forEach(function(t) {

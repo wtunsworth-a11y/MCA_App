@@ -2316,6 +2316,88 @@ function installLivelihoodReportsTrigger() {
   Logger.log('Monthly livelihood report trigger installed (1st of month, 8am PNG).');
 }
 
+/* ─── Local price reports — witnessed sales + buyer announcements ────────────
+ * Field staff record real local prices (massoy/coffee/cocoa/vanilla). This
+ * builds a monthly spreadsheet ledger for analysis (toward a fair local price),
+ * and emails it. Photos are left in the uploaded records; the ledger links the
+ * record_uid. ── */
+function collectPriceReports() {
+  var folder = getDataFolder(); var byUid = {};
+  var zones = folder.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next(); if (zf.getName().charAt(0) === '_') continue;
+    var subs = zf.getFolders();
+    while (subs.hasNext()) {
+      var files = subs.next().getFilesByType(MimeType.PLAIN_TEXT);
+      while (files.hasNext()) {
+        var body; try { body = JSON.parse(files.next().getBlob().getDataAsString()); } catch(e){ continue; }
+        var arr = (body.modules && body.modules.price_reports) || []; if (!arr.length) continue;
+        var stew = body.steward || {};
+        for (var i = 0; i < arr.length; i++) {
+          var rec = arr[i]; var uid = rec.record_uid || rec.uid; if (!uid) continue;
+          var prev = byUid[uid]; if (prev && _recInstant(prev.rec) >= _recInstant(rec)) continue;
+          byUid[uid] = { rec: rec, steward: stew };
+        }
+      }
+    }
+  }
+  return Object.keys(byUid).map(function(k){ return byUid[k]; });
+}
+function _prCommodityLabel(r) {
+  var m = { massoy:'Massoy', coffee:'Coffee', cocoa:'Cocoa', vanilla:'Vanilla', other:(r.commodity_other||'Other') };
+  return m[r.commodity] || r.commodity || '';
+}
+function localPricesReport(period) {
+  period = (typeof period === 'string') ? period : 'prevmonth';
+  var cutoff, periodEnd;
+  if (period === 'monthly') { cutoff = currentMonthStart(); periodEnd = new Date(); }
+  else { cutoff = prevMonthStart(); periodEnd = prevMonthEnd(); }
+  var ym = _pngDate(cutoff, 'yyyy-MM');
+  var cutMs = cutoff.getTime(), endMs = periodEnd.getTime();
+  var rows = collectPriceReports().filter(function(x){ var t = _recInstant(x.rec); return t >= cutMs && t <= endMs; });
+  rows.sort(function(a,b){ return _recInstant(a.rec) - _recInstant(b.rec); });
+
+  var folder = getDataFolder();
+  var reportsFolder = getOrCreateFolder(ym, getOrCreateFolder('local_prices', getOrCreateFolder('_reports', folder)));
+  var ss = SpreadsheetApp.create('MCA_Local_Prices_' + ym);
+  var sheet = ss.getActiveSheet(); sheet.setName('Prices');
+  sheet.appendRow(['Date (PNG)','Type','Commodity','Price (K)','Price unit','Volume','Volume unit','Place','Quality','Buyer','Officer','Role','Zone','GPS','record_uid']);
+  rows.forEach(function(x){
+    var r = x.rec, s = x.steward, o = r.officer || {};
+    var gps = (r.gps && r.gps.lat != null) ? (r.gps.lat + ', ' + r.gps.lng) : '';
+    sheet.appendRow([
+      _pngDate(_recInstant(r) ? new Date(_recInstant(r)) : '', 'yyyy-MM-dd HH:mm'),
+      (r.report_type === 'announcement' ? 'Buyer price' : 'Witnessed sale'),
+      _prCommodityLabel(r),
+      (r.price != null ? r.price : ''),
+      (r.price_unit === 'per_bag' ? 'per bag' : 'per kg'),
+      (r.volume != null ? r.volume : ''),
+      (r.volume_unit || ''),
+      r.place || '', r.quality || '', r.buyer || '',
+      (o.name || s.name || '') + (o.steward_id ? (' (' + o.steward_id + ')') : ''),
+      o.role || s.role || '', o.zone || s.zone || '',
+      gps, (r.record_uid || r.uid || '')
+    ]);
+  });
+  var ssFile = DriveApp.getFileById(ss.getId());
+  try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
+
+  var rcp = loadRecipients(); var to = [];
+  if (rcp.field_reports_to) to.push(rcp.field_reports_to);
+  (rcp.comms || []).forEach(function(e){ if (e) to.push(e); });
+  if (!to.length) to = REPORT_EMAILS.slice();
+  to.forEach(function(email){ try { ssFile.addViewer(email); } catch(e){} });
+  var lines = ['MCA — Local price reports', '', 'Month: ' + ym + ' (PNG time)', '', rows.length + ' report(s). Ledger: ' + ssFile.getUrl(), ''];
+  to.forEach(function(email){ try { MailApp.sendEmail(email, 'MCA Local prices — ' + ym, lines.join('\n')); } catch(e){} });
+  Logger.log('Local prices report ' + ym + ': ' + rows.length + ' rows → ' + to.join(', '));
+  return { status:'ok', rows: rows.length, url: ssFile.getUrl() };
+}
+function installLocalPricesTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){ if (t.getHandlerFunction() === 'localPricesReport') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('localPricesReport').timeBased().onMonthDay(1).atHour(8).create();
+  Logger.log('Monthly local-prices report trigger installed (1st of month, 8am PNG).');
+}
+
 /* ─── Per-consultant report (training given + sites visited) ─────────────
  * Each visiting consultant gets THEIR OWN report back — training they ran and
  * sites they visited (field maps) for the month — not a pooled one. Emailed to

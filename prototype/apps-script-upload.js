@@ -2361,7 +2361,7 @@ function localPricesReport(period) {
   var reportsFolder = getOrCreateFolder(ym, getOrCreateFolder('local_prices', getOrCreateFolder('_reports', folder)));
   var ss = SpreadsheetApp.create('MCA_Local_Prices_' + ym);
   var sheet = ss.getActiveSheet(); sheet.setName('Prices');
-  sheet.appendRow(['Date (PNG)','Type','Commodity','Price (K)','Price unit','Volume','Volume unit','Place','Quality','Buyer','Officer','Role','Zone','GPS','record_uid']);
+  sheet.appendRow(['Date (PNG)','Type','Commodity','Price (K)','Price unit','Volume','Volume unit','Place','Quality','Officer','Role','Zone','GPS','record_uid']);
   rows.forEach(function(x){
     var r = x.rec, s = x.steward, o = r.officer || {};
     var gps = (r.gps && r.gps.lat != null) ? (r.gps.lat + ', ' + r.gps.lng) : '';
@@ -2373,7 +2373,7 @@ function localPricesReport(period) {
       (r.price_unit === 'per_bag' ? 'per bag' : 'per kg'),
       (r.volume != null ? r.volume : ''),
       (r.volume_unit || ''),
-      r.place || '', r.quality || '', r.buyer || '',
+      r.place || '', r.quality || '',
       (o.name || s.name || '') + (o.steward_id ? (' (' + o.steward_id + ')') : ''),
       o.role || s.role || '', o.zone || s.zone || '',
       gps, (r.record_uid || r.uid || '')

@@ -3462,14 +3462,10 @@ select.msel {
             <label class="form-label">Quality <span style="color:#999;font-weight:400;">(if stated)</span></label>
             <input type="text" id="prQuality" class="form-input" placeholder="e.g. dry bean, wet parchment, green vanilla, grade…">
           </div>
-          <div class="form-group">
-            <label class="form-label">Buyer <span style="color:#999;font-weight:400;">(if known)</span></label>
-            <input type="text" id="prBuyer" class="form-input" placeholder="Name of the buyer / company">
-          </div>
 
-          <div class="section-label" style="padding-left:0;">Photo <span style="color:#999;font-weight:400;">(optional)</span></div>
-          <div id="prPhotoBox" onclick="document.getElementById('prPhotoInput').click()" style="width:100%;min-height:80px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#999;font-size:0.72rem;text-align:center;padding:10px;"><span data-icon="camera" data-size="20"></span>&nbsp; Photo of produce / price notice</div>
-          <input type="file" id="prPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="prPhoto(this)">
+          <div class="matrix-note" style="background:#F1F8E9;border-color:#C5E1A5;color:#33691E;font-size:0.72rem;margin:4px 0 10px;">
+            <span data-icon="info" data-size="13"></span> Record only the <strong>price and place</strong>. Do <strong>not</strong> name the buyer or the seller — this is about the market, not people.
+          </div>
 
           <div class="card" style="padding:10px 14px;margin:10px 0;">
             <div class="transect-row"><span class="td-label"><span data-icon="pin" data-size="14"></span> Location <span style="color:#999;font-weight:400;">(optional)</span></span><span id="prGPS" style="font-size:0.78rem;color:#795548;font-weight:600;">—</span></div>
@@ -11732,7 +11728,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v100'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v101'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12262,12 +12258,6 @@ function prSetCommodity(v){
   var box=document.getElementById('prCommodityPills'); if(box) Array.prototype.forEach.call(box.querySelectorAll('[data-prc]'),function(b){ b.classList.toggle('active', b.getAttribute('data-prc')===v); });
   var og=document.getElementById('prCommodityOtherGroup'); if(og) og.style.display=(v==='other')?'block':'none';
 }
-function prPhoto(input){
-  var f=input.files&&input.files[0]; if(!f) return;
-  var rd=new FileReader();
-  rd.onload=function(e){ window._prPhoto=e.target.result; var box=document.getElementById('prPhotoBox'); if(box){ box.innerHTML='<img src="'+e.target.result+'" style="max-height:120px;max-width:100%;border-radius:8px;object-fit:cover;" alt="price">'; box.style.borderColor='#795548'; } };
-  rd.readAsDataURL(f);
-}
 function prCaptureGps(){
   var el=document.getElementById('prGPS'); var btn=document.getElementById('prGpsBtn');
   if(el){ el.textContent='Acquiring…'; el.style.color='#888'; }
@@ -12279,12 +12269,11 @@ function prCaptureGps(){
   });
 }
 function initPriceReport(){
-  window._prType='witnessed'; window._prCommodity='massoy'; window._prPhoto=null; window._prGps=null;
+  window._prType='witnessed'; window._prCommodity='massoy'; window._prGps=null;
   prSetType('witnessed'); prSetCommodity('massoy');
-  ['prCommodityOther','prPrice','prVolume','prPlace','prQuality','prBuyer','prNotes'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  ['prCommodityOther','prPrice','prVolume','prPlace','prQuality','prNotes'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
   var pu=document.getElementById('prPriceUnit'); if(pu) pu.value='per_kg';
   var vu=document.getElementById('prVolumeUnit'); if(vu) vu.value='kg';
-  var box=document.getElementById('prPhotoBox'); if(box){ box.innerHTML=icon('camera',20)+'&nbsp; Photo of produce / price notice'; box.style.borderColor='#ccc'; box.style.color='#999'; }
   var g=document.getElementById('prGPS'); if(g){ g.textContent='—'; g.style.color='#795548'; }
 }
 function submitPriceReport(){
@@ -12307,9 +12296,7 @@ function submitPriceReport(){
     volume_unit:((document.getElementById('prVolumeUnit')||{}).value||'kg'),
     place:place,
     quality:((document.getElementById('prQuality')||{}).value||'').trim(),
-    buyer:((document.getElementById('prBuyer')||{}).value||'').trim(),
     notes:((document.getElementById('prNotes')||{}).value||'').trim(),
-    photo:window._prPhoto||null,
     gps:window._prGps||null, gps_source:(window._prGps&&window._prGps.source)||null, location_missing:!window._prGps,
     officer:{ name:p.name||'', steward_id:p.stewardId||'', role:p.role||'', zone:p.zone||'' }
   };

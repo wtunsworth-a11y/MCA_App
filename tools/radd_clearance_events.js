@@ -69,23 +69,28 @@ var patchCount = mask.connectedPixelCount(1024, true);      // eight-connected
 var bigPatches = patchCount.gte(MIN_PIXELS).selfMask();     // the >2 ha patches
 
 /* ── Vectorise each surviving patch into one polygon ────────────────────── */
+/* Vectorise at a COARSER scale (30 m) than the native 10 m. reduceToVectors at
+ * 10 m over the whole MCA exceeds EE's memory limit ("User memory limit
+ * exceeded"); 30 m keeps >2 ha patches intact while cutting the vertex count
+ * ~9x, and bestEffort lets EE coarsen further if a run is still too heavy. The
+ * >2 ha test itself already happened on the 10 m mask (bigPatches), so accuracy
+ * of the threshold is unaffected — only the polygon outline is a little coarser. */
 var events = bigPatches.reduceToVectors({
   geometry: AOI,
-  scale: 10,
+  scale: 30,
   eightConnected: true,
   geometryType: 'polygon',
   labelProperty: 'patch',
   maxPixels: 1e10,
-  bestEffort: false
+  bestEffort: true
 });
 
-/* Attach each event's own area (ha) and most-recent alert date. */
+/* Attach each event's own area (ha). We deliberately do NOT do a per-patch
+ * reduceRegion for the alert date here — that was the main memory hog and the
+ * backend doesn't require a per-event date. */
 events = events.map(function (f) {
-  var a  = f.geometry().area(10);                   // m², 10 m error margin
-  var dt = dateBand.reduceRegion({                  // latest YYDDD inside the patch
-    reducer: ee.Reducer.max(), geometry: f.geometry(), scale: 10, maxPixels: 1e9
-  }).get('Date');
-  return f.set({ area_ha: a.divide(10000), area_m2: a, date_yyddd: dt });
+  var a = f.geometry().area(30);                    // m², 30 m error margin (cheaper)
+  return f.set({ area_ha: a.divide(10000), area_m2: a });
 });
 
 /* Belt-and-braces: drop anything the vector area puts under the threshold. */

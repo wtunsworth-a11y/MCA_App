@@ -8784,7 +8784,10 @@ function distRegistryRecord(r){
 }
 function syncDisturbancesFromServer(cb){
   if(!UPLOAD_ENDPOINT||!navigator.onLine){ if(cb)cb(false); return; }
-  fetch(UPLOAD_ENDPOINT+'?action=disturbances')
+  /* Cache-buster + no-store: Apps Script GET responses are cacheable, so without
+     this the app can keep getting an old disturbance list (e.g. yesterday's
+     fires) instead of the freshly-raised ones. */
+  fetch(UPLOAD_ENDPOINT+'?action=disturbances&_='+Date.now(), {cache:'no-store'})
     .then(function(r){ return r.json(); })
     .then(function(d){
       if(!d||d.status!=='ok'||!d.disturbances){ if(cb)cb(false); return; }
@@ -11726,7 +11729,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v102'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v103'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12129,7 +12132,7 @@ function getMarketPrices(callback) {
     var cached = null;
     if (records) records.forEach(function(r){ if (r.id === 'prices') cached = r.prices; });
     if (UPLOAD_ENDPOINT && navigator.onLine) {
-      fetch(UPLOAD_ENDPOINT + '?action=prices')
+      fetch(UPLOAD_ENDPOINT + '?action=prices&_=' + Date.now(), {cache:'no-store'})
         .then(function(r){ return r.json(); })
         .then(function(d){
           if (d.status === 'ok' && d.prices) {

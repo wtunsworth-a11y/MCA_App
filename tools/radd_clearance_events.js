@@ -26,6 +26,8 @@ var MIN_PIXELS    = Math.ceil(MIN_HA / PIXEL_HA); // = 200 contiguous pixels
 var LOOKBACK_DAYS = 90;                           // how far back to look
 var HIGH_CONF_ONLY = true;                        // true = confirmed alerts only
 var DRIVE_FOLDER  = 'MCA_Stewards';               // export destination folder
+var GEOGRAPHY     = 'asia';                        // RADD tile for PNG (SE Asia & Pacific).
+                                                  // Valid values: 'asia', 'africa', 'sa'.
 
 /* Area of interest: the MCA boundary. Upload prototype/vendor/mca_boundary.geojson
  * as an EE asset and put its ID here, or draw/import a geometry named `AOI`. */
@@ -39,9 +41,16 @@ var AOI = ee.FeatureCollection('projects/YOUR_EE_PROJECT/assets/mca_boundary').g
  *   Date  : date of first detection, encoded YYDDD  (YY=year-2000, DDD=day-of-year)
  * Confirm the band names/encoding once in the Code Editor:
  *   print(ee.ImageCollection('projects/radar-wur/raddalert/v1').first()); */
-var radd = ee.ImageCollection('projects/radar-wur/raddalert/v1')
-             .filterMetadata('geography', 'equals', 'sea');   // SE Asia & Pacific (incl. PNG)
-var img  = radd.sort('system:time_end', false).mosaic();
+/* RADD v1 is an ImageCollection with a 'geography' property ('asia'/'africa'/
+ * 'sa') AND a 'layer' property ('alert' or 'forest_baseline'). You MUST filter
+ * to BOTH the right geography and the ALERT layer, or the collection is empty
+ * and .select() throws "Image with no bands". */
+var raddAlerts = ee.ImageCollection('projects/radar-wur/raddalert/v1')
+                   .filterMetadata('geography', 'equals', GEOGRAPHY)
+                   .filterMetadata('layer', 'contains', 'alert');
+print('RADD alert images for "' + GEOGRAPHY + '":', raddAlerts.size());  // must be > 0
+var img  = raddAlerts.sort('system:time_end', false).mosaic();
+print('Band names (expect Alert + Date):', img.bandNames());
 var alertBand = img.select('Alert');
 var dateBand  = img.select('Date');
 

@@ -91,10 +91,13 @@ events = events.map(function (f) {
 /* Belt-and-braces: drop anything the vector area puts under the threshold. */
 events = events.filter(ee.Filter.gte('area_ha', MIN_HA));
 
-print('Clearance events > ' + MIN_HA + ' ha (>= ' + MIN_PIXELS + ' contiguous pixels):', events.size());
+/* Do NOT print events.size() or add the events layer interactively: vectorising
+ * at 10 m over the whole AOI exceeds the Code Editor's small interactive memory
+ * limit ("User memory limit exceeded"). The EXPORT task below runs on batch
+ * infrastructure with far higher limits and handles it fine — just run it
+ * (Tasks → Run). The light RADD-alert mask is added hidden, for a quick peek. */
 Map.centerObject(AOI, 11);
-Map.addLayer(mask,        {palette: ['ffcc00']}, 'RADD alerts (masked)', false);
-Map.addLayer(events,      {color: 'red'},        'Clearance events > ' + MIN_HA + ' ha');
+Map.addLayer(mask, {palette: ['ffcc00']}, 'RADD alerts (masked)', false);
 
 /* ── Export GeoJSON for the app backend to consume ──────────────────────── */
 /* The backend reads _clearance_events.geojson from the MCA_Stewards Drive

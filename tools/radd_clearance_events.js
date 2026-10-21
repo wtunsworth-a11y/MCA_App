@@ -49,7 +49,12 @@ var raddAlerts = ee.ImageCollection('projects/radar-wur/raddalert/v1')
                    .filterMetadata('geography', 'equals', GEOGRAPHY)
                    .filterMetadata('layer', 'contains', 'alert');
 print('RADD alert images for "' + GEOGRAPHY + '":', raddAlerts.size());  // must be > 0
-var img  = raddAlerts.sort('system:time_end', false).mosaic();
+/* Use ONLY the latest alert raster. RADD alerts are cumulative — the newest
+ * version already contains every alert to date — so mosaicking all ~141 versions
+ * is unnecessary AND builds a computation graph so large it exceeds EE's memory
+ * limit before the job even runs (fast "User memory limit exceeded" fail). One
+ * image keeps the graph small. */
+var img  = raddAlerts.sort('system:time_start', false).first();
 print('Band names (expect Alert + Date):', img.bandNames());
 var alertBand = img.select('Alert');
 var dateBand  = img.select('Date');
@@ -64,9 +69,16 @@ var confMask = HIGH_CONF_ONLY ? alertBand.eq(3) : alertBand.gte(2);
 var recent   = dateBand.gte(cutoffCode);
 var mask     = confMask.and(recent).selfMask();     // 1 where a qualifying alert
 
+/* Sanity check: how many qualifying alert pixels fall inside the MCA box.
+ * 0 = nothing to export (not an error); a number = the feed found alerts. */
+print('Qualifying alert pixels in MCA (approx):',
+      mask.reduceRegion({ reducer: ee.Reducer.count(), geometry: AOI, scale: 100, maxPixels: 1e9 }).get('Alert'));
+
 /* ── Keep only big single events: >= MIN_PIXELS contiguous pixels ───────── */
-var patchCount = mask.connectedPixelCount(1024, true);      // eight-connected
-var bigPatches = patchCount.gte(MIN_PIXELS).selfMask();     // the >2 ha patches
+/* maxSize just has to exceed MIN_PIXELS (patches bigger than it still pass the
+ * >= MIN_PIXELS test); keeping it tight saves memory vs the old 1024. */
+var patchCount = mask.connectedPixelCount(MIN_PIXELS + 100, true);  // eight-connected
+var bigPatches = patchCount.gte(MIN_PIXELS).selfMask();             // the >2 ha patches
 
 /* ── Vectorise each surviving patch into one polygon ────────────────────── */
 /* Vectorise at a COARSER scale (30 m) than the native 10 m. reduceToVectors at

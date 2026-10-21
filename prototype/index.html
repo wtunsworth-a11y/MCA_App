@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MCApp — Managalas Conservation Area</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1B5E20">
@@ -109,10 +109,9 @@ body {
   color: #fff;
   display: flex;
   align-items: center;
-  /* Top padding clears the status bar / notch. With viewport-fit=cover the
-     webview reaches the top edge, so honour the safe-area inset where it is
-     larger than our baseline 34px (e.g. a tall notch). */
-  padding: max(34px, env(safe-area-inset-top, 0px)) 16px 12px;
+  /* 34px top clears the status bar. (We do NOT use viewport-fit=cover — see the
+     bottom-nav note — so the browser already reserves the status-bar area.) */
+  padding: 34px 16px 12px;
   min-height: 76px;
   flex-shrink: 0;
   gap: 8px;
@@ -145,13 +144,12 @@ body {
   background: #fff;
   border-top: 1px solid #e0e0e0;
   display: flex;
-  /* 60px of bar + the Android gesture-nav inset below it. With a full-screen /
-     edge-to-edge TWA (viewport-fit=cover) the webview reaches the very bottom
-     edge, where the system gesture pill sits — without this padding the bar
-     hides behind it. env() is 0 on devices with no inset, so no visible change
-     there. */
-  height: calc(60px + env(safe-area-inset-bottom, 0px));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* Keep this a plain 60px and do NOT add viewport-fit=cover to the viewport
+     meta: cover makes the webview draw under the Android navigation bar, and on
+     a 3-button-nav phone there is no safe-area inset to compensate, so this bar
+     ends up hidden behind the system buttons. Without cover the browser already
+     reserves the nav-bar area, so a plain 60px bar sits correctly above it. */
+  height: 60px;
   flex-shrink: 0;
   z-index: 10;
 }
@@ -11728,7 +11726,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v101'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v102'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

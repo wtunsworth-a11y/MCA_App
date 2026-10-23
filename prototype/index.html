@@ -6072,7 +6072,8 @@ window.addEventListener('load', () => {
 
   /* Refresh the trusted-time anchor from the server whenever we have signal. */
   try { pingServerTime(function(){}); } catch(e) {}
-  window.addEventListener('online', function(){ try { pingServerTime(function(){}); } catch(e){} });
+  try { flushPendingEnrolPing(); } catch(e) {}   /* retry any queued profile/enrol ping from a past offline change */
+  window.addEventListener('online', function(){ try { pingServerTime(function(){}); } catch(e){} try { flushPendingEnrolPing(); } catch(e){} });
   try { checkBrowserForInstall(); } catch(e) {}
 
   setTimeout(() => {
@@ -11732,7 +11733,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v104'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v105'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12082,15 +12083,38 @@ function getLivelihood(callback) {
 /* ── Enrolment ping — tell the backend who was created / logged in, so the
    coordinator has a live roster of everyone enrolled (even before any data
    upload). Fire-and-forget; never blocks or surfaces an error. ── */
+function _storePendingPing(e){ try{ localStorage.setItem('mcaPendingPing', JSON.stringify(e)); }catch(_){} }
+function _clearPendingPing(){ try{ localStorage.removeItem('mcaPendingPing'); }catch(_){} }
 function postEnrolmentPing(p){
   try {
-    if (!p || !p.stewardId || !UPLOAD_ENDPOINT || !navigator.onLine) return;
+    if (!p || !p.stewardId) return;
+    var enrolment = {
+      stewardId:p.stewardId, name:p.name||'', role:p.role||'', zone:p.zone||'',
+      zone_id:p.zone_id||'', clan:p.clan||'', village:p.village||'',
+      enrolled_at:p.enrolled||p.enrolled_at||'', app_build:APP_BUILD
+    };
+    /* Offline or no endpoint → remember it and retry when we're next online, so
+       a role/profile change always reaches the roster (not just on next login). */
+    if (!UPLOAD_ENDPOINT || !navigator.onLine) { _storePendingPing(enrolment); return; }
     fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ _action:'enrol_ping', _secret:UPLOAD_SECRET, enrolment:{
-        stewardId:p.stewardId, name:p.name||'', role:p.role||'', zone:p.zone||'',
-        zone_id:p.zone_id||'', clan:p.clan||'', village:p.village||'',
-        enrolled_at:p.enrolled||p.enrolled_at||'', app_build:APP_BUILD
-      } }) }).catch(function(){});
+      body: JSON.stringify({ _action:'enrol_ping', _secret:UPLOAD_SECRET, enrolment:enrolment }) })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if (d && d.status==='ok') _clearPendingPing(); else _storePendingPing(enrolment); })
+      .catch(function(){ _storePendingPing(enrolment); });
+  } catch(e){}
+}
+/* Retry a queued enrolment/profile ping when back online. */
+function flushPendingEnrolPing(){
+  try {
+    if (!UPLOAD_ENDPOINT || !navigator.onLine) return;
+    var raw; try{ raw = localStorage.getItem('mcaPendingPing'); }catch(e){ return; }
+    if (!raw) return;
+    var enrolment; try{ enrolment = JSON.parse(raw); }catch(e){ _clearPendingPing(); return; }
+    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ _action:'enrol_ping', _secret:UPLOAD_SECRET, enrolment:enrolment }) })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if (d && d.status==='ok') _clearPendingPing(); })
+      .catch(function(){});
   } catch(e){}
 }
 /* Coordinator roster view — fetch and list everyone enrolled. */

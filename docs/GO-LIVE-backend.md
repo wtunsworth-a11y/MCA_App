@@ -105,6 +105,7 @@ Each installs a time-based trigger. Install only the ones you want running now.
 | `installClanComplianceTrigger()` | Clan compliance rollup. |
 | `installAnnualComplianceTrigger()` | Annual compliance (fire/deforestation dimension). |
 | `installWaterQualityTrigger()` | Water quality trend report. |
+| `installUploadActivityTrigger()` | **Weekly** "what has been uploaded" digest — per steward, record counts by activity type, latest upload. **No photos/video.** Mondays ~7am PNG. Run `uploadActivityReport()` from the editor any time for an on-demand copy (`'weekly'` default, or `'monthly'`/`'all'`). |
 
 ---
 

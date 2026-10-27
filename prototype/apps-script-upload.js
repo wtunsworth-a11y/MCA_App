@@ -2398,6 +2398,184 @@ function installLocalPricesTrigger() {
   Logger.log('Monthly local-prices report trigger installed (1st of month, 8am PNG).');
 }
 
+/* ─── Upload activity report — "what has been uploaded" ──────────────────────
+ * A plain monitoring digest the coordinator can read at a glance: per steward,
+ * how many records came in, broken down by activity type, with the latest
+ * upload date — WITHOUT any of the heavy photo/video media. Emailed weekly.
+ *
+ * It must survive the big files (a handover carries a video and can be tens of
+ * MB), so it does NOT JSON.parse each bundle — parsing a 40 MB file inflates
+ * memory and can fail. Instead it scans the raw text for the light markers that
+ * every record carries ("record_uid", "survey_type") and the flat "steward"
+ * block, so counting costs almost nothing and never touches the base64 media.
+ * Files above UPLOAD_SCAN_MAX_MB are reported by name/size/date only (the
+ * stewardId is still recovered from the filename MCA_<id>_<date>.json).
+ *
+ * Totals are deduplicated by record_uid, so a record that was re-sent across
+ * two syncs (e.g. a duplicate upload) is counted once, not twice.
+ *
+ * Run uploadActivityReport() from the editor for the last 7 days, or
+ * uploadActivityReport('monthly') / uploadActivityReport('all'). Install the
+ * weekly trigger once with installUploadActivityTrigger(). */
+var UPLOAD_SCAN_MAX_MB = 25;   /* above this, report metadata only (no scan) */
+
+var MODULE_LABELS = {
+  freemap:'Field mapping', mafia:'MaFIA transect', water:'Water source',
+  distribution:'Handover / distribution', livelihood:'Livelihood update',
+  price_report:'Local price report', training:'Training', phenology:'Phenology',
+  issue:'Issue report', facility:'Facility', met:'Weather station'
+};
+function _moduleLabel(k){ return MODULE_LABELS[k] || (k ? (k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g,' ')) : 'Other'); }
+
+function _stewardIdFromFile(name) {
+  /* MCA_<stewardId>_<date>.json  — stewardId may contain _ so strip a trailing
+   * _<date> (YYYY-MM-DD, optionally with time) and the MCA_ prefix. */
+  var n = String(name || '').replace(/^MCA_/, '').replace(/\.json$/i, '');
+  return n.replace(/_\d{4}-\d{2}-\d{2}(?:[T_].*)?$/, '') || n;
+}
+
+function collectUploadActivity(cutMs) {
+  cutMs = cutMs || 0;
+  var folder = getDataFolder();
+  var files = [];                 /* one row per upload file, newest first */
+  var byStew = {};                /* stewardId -> aggregate across their files */
+  function stew(id){ return byStew[id] || (byStew[id] = { id:id, name:'', role:'', zone:'', files:0, uids:{}, types:{}, latest:0, mb:0 }); }
+
+  var zones = folder.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next(); if (zf.getName().charAt(0) === '_') continue;
+    var subs = zf.getFolders();
+    while (subs.hasNext()) {
+      var ff = subs.next().getFilesByType(MimeType.PLAIN_TEXT);
+      while (ff.hasNext()) {
+        var f = ff.next();
+        var created = f.getDateCreated();
+        if (created.getTime() < cutMs) continue;
+        var sizeMb = Math.round(f.getSize() / 104857.6) / 10;   /* 1 dp MB */
+        var row = { file:f.getName(), uploaded:created, sizeMB:sizeMb,
+                    steward:'', stewardId:_stewardIdFromFile(f.getName()),
+                    role:'', zone:'', types:{}, total:0, note:'' };
+        if (f.getSize() > UPLOAD_SCAN_MAX_MB * 1048576) {
+          row.note = 'large upload (' + sizeMb + ' MB, likely photos/video) — not scanned';
+          row.total = -1;                                       /* unknown */
+        } else {
+          try {
+            var s = f.getBlob().getDataAsString();
+            var m = s.match(/"steward"\s*:\s*\{([\s\S]*?)\}/);
+            if (m) {
+              var b = m[1];
+              var g = function(k){ var x = b.match(new RegExp('"' + k + '"\\s*:\\s*"([^"]*)"')); return x ? x[1] : ''; };
+              row.steward = g('name'); if (g('stewardId')) row.stewardId = g('stewardId');
+              row.role = g('role'); row.zone = g('zone');
+            }
+            var re = /"survey_type"\s*:\s*"([^"]+)"/g, mm, uidSet = {};
+            while ((mm = re.exec(s)) !== null) { row.types[mm[1]] = (row.types[mm[1]] || 0) + 1; }
+            var reu = /"record_uid"\s*:\s*"([^"]+)"/g;
+            while ((mm = reu.exec(s)) !== null) { uidSet[mm[1]] = row; }
+            row.total = Object.keys(uidSet).length;
+            if (!row.total) { var rc = s.match(/"record_count"\s*:\s*(\d+)/); if (rc) row.total = parseInt(rc[1], 10); }
+            row._uids = uidSet;                                 /* for steward dedup */
+          } catch (e) { row.note = 'could not read (' + String(e).slice(0, 60) + ')'; }
+        }
+        files.push(row);
+
+        var a = stew(row.stewardId);
+        a.files++; a.mb += sizeMb;
+        if (created.getTime() > a.latest) a.latest = created.getTime();
+        if (row.steward && !a.name) a.name = row.steward;
+        if (row.role && !a.role) a.role = row.role;
+        if (row.zone && !a.zone) a.zone = row.zone;
+        if (row._uids) { for (var u in row._uids) a.uids[u] = 1; delete row._uids; }
+        for (var t in row.types) a.types[t] = (a.types[t] || 0) + row.types[t];
+      }
+    }
+  }
+  files.sort(function(x, y){ return y.uploaded.getTime() - x.uploaded.getTime(); });
+  var stewards = Object.keys(byStew).map(function(k){
+    var a = byStew[k]; a.records = Object.keys(a.uids).length; delete a.uids; return a;
+  }).sort(function(x, y){ return y.latest - x.latest; });
+  return { files: files, stewards: stewards };
+}
+
+function _typeSummary(types) {
+  var keys = Object.keys(types); if (!keys.length) return '';
+  keys.sort(function(a, b){ return types[b] - types[a]; });
+  return keys.map(function(k){ return _moduleLabel(k) + ': ' + types[k]; }).join(' · ');
+}
+
+function uploadActivityReport(period) {
+  period = (typeof period === 'string') ? period : 'weekly';
+  var now = Date.now(), cutMs, label;
+  if (period === 'all')       { cutMs = 0;                       label = 'all uploads to date'; }
+  else if (period === 'monthly') { cutMs = now - 30 * 86400000;  label = 'last 30 days'; }
+  else                        { cutMs = now - 7 * 86400000;       label = 'last 7 days'; }
+
+  var data = collectUploadActivity(cutMs);
+  var files = data.files, stewards = data.stewards;
+  var fromTxt = (cutMs ? _pngDate(new Date(cutMs), 'd MMM yyyy') : 'start');
+  var toTxt   = _pngDate(new Date(now), 'd MMM yyyy');
+
+  /* Spreadsheet ledger — one row per upload file (no media) */
+  var folder = getDataFolder();
+  var tag = _pngDate(new Date(now), 'yyyy-MM-dd');
+  var reportsFolder = getOrCreateFolder(tag, getOrCreateFolder('uploads', getOrCreateFolder('_reports', folder)));
+  var ss = SpreadsheetApp.create('MCA_Uploads_' + tag);
+  var sheet = ss.getActiveSheet(); sheet.setName('Uploads');
+  sheet.appendRow(['Uploaded (PNG)','Steward','Steward ID','Role','Zone','Records','By activity','Size (MB)','File','Note']);
+  files.forEach(function(r){
+    sheet.appendRow([
+      _pngDate(r.uploaded, 'yyyy-MM-dd HH:mm'),
+      r.steward || '', r.stewardId || '', r.role || '', r.zone || '',
+      (r.total < 0 ? '?' : r.total), _typeSummary(r.types),
+      r.sizeMB, r.file, r.note
+    ]);
+  });
+  var ssFile = DriveApp.getFileById(ss.getId());
+  try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
+
+  /* Readable email body — per steward */
+  var totalFiles = files.length;
+  var totalRecords = stewards.reduce(function(s, a){ return s + a.records; }, 0);
+  var lines = [];
+  lines.push('MCA — Upload activity (' + label + ')');
+  lines.push('');
+  lines.push('Window: ' + fromTxt + ' – ' + toTxt + ' (PNG time)');
+  lines.push(stewards.length + ' steward(s), ' + totalFiles + ' upload(s), ' + totalRecords + ' record(s).');
+  lines.push('');
+  if (!stewards.length) {
+    lines.push('No uploads in this window.');
+  } else {
+    lines.push('By steward (most recent first):');
+    stewards.forEach(function(a){
+      var who = (a.name || a.id) + (a.name && a.id ? (' (' + a.id + ')') : '');
+      var meta = [a.role, a.zone].filter(Boolean).join(', ');
+      lines.push('• ' + who + (meta ? ' — ' + meta : ''));
+      var ts = _typeSummary(a.types);
+      lines.push('    ' + a.records + ' record(s)' + (ts ? ' — ' + ts : '') +
+                 ' · ' + a.files + ' upload(s) · last ' + _pngDate(new Date(a.latest), 'd MMM HH:mm'));
+    });
+  }
+  lines.push('');
+  lines.push('Full per-upload ledger (no photos/video): ' + ssFile.getUrl());
+
+  var rcp = loadRecipients(); var to = [];
+  if (rcp.field_reports_to) to.push(rcp.field_reports_to);
+  (rcp.comms || []).forEach(function(e){ if (e) to.push(e); });
+  if (!to.length) to = REPORT_EMAILS.slice();
+  /* dedupe recipients */
+  var seen = {}; to = to.filter(function(e){ e = String(e).trim(); if (!e || seen[e]) return false; seen[e] = 1; return true; });
+  to.forEach(function(email){ try { ssFile.addViewer(email); } catch(e){} });
+  to.forEach(function(email){ try { MailApp.sendEmail(email, 'MCA uploads — ' + toTxt + ' (' + label + ')', lines.join('\n')); } catch(e){} });
+  Logger.log('Upload activity report (' + label + '): ' + totalFiles + ' files, ' + totalRecords + ' records → ' + to.join(', '));
+  return { status:'ok', period: period, stewards: stewards.length, files: totalFiles, records: totalRecords, url: ssFile.getUrl() };
+}
+
+function installUploadActivityTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){ if (t.getHandlerFunction() === 'uploadActivityReport') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('uploadActivityReport').timeBased().everyWeeks(1).onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7).create();
+  Logger.log('Weekly upload-activity report trigger installed (Mondays ~7am PNG).');
+}
+
 /* ─── Per-consultant report (training given + sites visited) ─────────────
  * Each visiting consultant gets THEIR OWN report back — training they ran and
  * sites they visited (field maps) for the month — not a pooled one. Emailed to

@@ -10243,7 +10243,12 @@ function initPhenoPlots() {
   var c=document.getElementById('phenoPlotsContent');
   if(!c) return;
   c.innerHTML='<div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>';
-  getPhenoTargets(function(targets) {
+  /* Cache-first: draw from the phone immediately (targets + local plots), then
+     refresh the targets quietly in the background and re-render only if they
+     changed. The list never waits on the network. */
+  getPhenoTargets(renderPhenoPlots, renderPhenoPlots);
+}
+function renderPhenoPlots(targets) {
   getAllRecords('pheno_plots', function(plots) {
     var h='';
     PHENO_CROPS.forEach(function(cr) {
@@ -10280,8 +10285,7 @@ function initPhenoPlots() {
       });
       h+='</div>';
     });
-    c.innerHTML=h;
-  });
+    var cc=document.getElementById('phenoPlotsContent'); if(cc) cc.innerHTML=h;
   });
 }
 
@@ -11733,7 +11737,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v105'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v106'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -11997,22 +12001,36 @@ function getZoneList(callback) {
   });
 }
 
+/* fetch() that can't hang: aborts after `ms` (default 4s) so a weak signal —
+   where navigator.onLine is true but the connection stalls — can never hold up
+   a screen. Used for the "refresh in the background" registry calls. */
+function _fetchTimeout(url, ms) {
+  var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var t = setTimeout(function(){ if (ctrl) { try { ctrl.abort(); } catch(_){} } }, ms || 4000);
+  return fetch(url, ctrl ? { signal: ctrl.signal } : {})
+    .then(function(r){ clearTimeout(t); return r; },
+          function(e){ clearTimeout(t); throw e; });
+}
 /* Phenology per-clan target counts (coordinator-set; default 5). Cached in the
-   'auth' store like zones, refreshed from the server when online. */
-function getPhenoTargets(callback) {
+   'auth' store like zones. CACHE-FIRST: the callback fires IMMEDIATELY with the
+   cached targets (or {} → default of 5) so the plot screen never waits on the
+   network to draw. A background refresh — hard-capped by _fetchTimeout so a weak
+   signal can't stall it — then calls onFresh ONLY if the server's numbers differ
+   from what we drew, to re-render quietly. This step needs no network at all. */
+function getPhenoTargets(callback, onFresh) {
   getAllRecords('auth', function(records) {
     var cached = null;
     if (records) records.forEach(function(r){ if (r.id === 'pheno_targets') cached = r.targets; });
-    if (UPLOAD_ENDPOINT && navigator.onLine) {
-      fetch(UPLOAD_ENDPOINT + '?action=pheno_targets')
-        .then(function(r){ return r.json(); })
-        .then(function(d){
-          if (d.status === 'ok' && d.pheno_targets) {
-            saveRecord('auth', {id:'pheno_targets', targets:d.pheno_targets, fetched:new Date().toISOString()}, function(){});
-            callback(d.pheno_targets);
-          } else { callback(cached || {}); }
-        }).catch(function(){ callback(cached || {}); });
-    } else { callback(cached || {}); }
+    callback(cached || {});                      /* draw straight away from cache */
+    if (!UPLOAD_ENDPOINT || !navigator.onLine) return;
+    _fetchTimeout(UPLOAD_ENDPOINT + '?action=pheno_targets', 4000)
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (d && d.status === 'ok' && d.pheno_targets) {
+          saveRecord('auth', {id:'pheno_targets', targets:d.pheno_targets, fetched:new Date().toISOString()}, function(){});
+          if (onFresh && JSON.stringify(d.pheno_targets) !== JSON.stringify(cached || {})) onFresh(d.pheno_targets);
+        }
+      }).catch(function(){ /* offline / slow / aborted — the cached view already shows */ });
   });
 }
 /* How many plants of a species a clan should establish. Default 5; a clan the

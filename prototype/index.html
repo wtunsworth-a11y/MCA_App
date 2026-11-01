@@ -2917,6 +2917,13 @@ select.msel {
                 <button class="weather-pill" id="pwx-sunny" onclick="wxP('sunny','cloudy')"><span data-icon="sun" data-size="14"></span> Sunny</button>
               </span>
             </div>
+            <div class="transect-row">
+              <span class="td-label"><span data-icon="pin" data-size="14"></span> Location</span>
+              <span id="phenoRecGPS" style="font-size:0.74rem;color:#888;">Acquiring GPS…</span>
+            </div>
+          </div>
+          <div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#2E7D32;font-size:0.72rem;padding:8px 12px;margin:0 0 10px;">
+            Record at the trees. Your location is saved with the reading so the visit is on the record. No signal is fine — it saves anyway and is flagged for review.
           </div>
 
           <div id="phenoPlantCards">
@@ -2944,7 +2951,7 @@ select.msel {
       </div>
       <div class="scroll-content">
         <div class="matrix-note" style="background:#fff3e0;border-color:#ffcc80;color:#E65100;">
-          Register the set number of plants of each crop (standard 5; more for some clans). Each plant may be in a different location. Plants must be approved by Zone Staff before monitoring begins.
+          Register up to 5 plants of each crop. <strong>Keep all the plants you monitor close together in one small area</strong> — not spread across the land — so a monthly visit is quick. Choose plants <strong>only on your own clan's land</strong>; if a crop is not present on clan land, leave it out. Do as many crops as you can manage — some or all, your choice. A month's monitoring should take <strong>no more than one day — ideally half a day, done alongside another task.</strong> Plants must be approved by Zone Staff before monitoring begins.
         </div>
         <div id="phenoPlotsContent" class="p14" style="padding-bottom:20px;">
           <div style="padding:40px 20px;text-align:center;">
@@ -10129,8 +10136,9 @@ var PHENO_CROPS = [
   {key:'vanilla', label:'Vanilla', emoji:''+icon('leaf',13)+''},
   {key:'cocoa',   label:'Cocoa',   emoji:''+icon('cocoa',13)+''},
   {key:'coffee',  label:'Coffee',  emoji:''+icon('coffee',13)+''},
-  {key:'okari',   label:'Okari',   emoji:''+icon('nut',13)+''},
-  {key:'massoy',  label:'Massoy',  emoji:''+icon('tree',13)+''}
+  {key:'okari',     label:'Okari',      emoji:''+icon('nut',13)+''},
+  {key:'massoy',    label:'Massoy',     emoji:''+icon('tree',13)+''},
+  {key:'breadfruit',label:'Breadfruit', emoji:''+icon('tree',13)+''}
 ];
 var phenoEditCrop='', phenoEditPlantNum=0, phenoEditReplacesId=null;
 var phenoInactiveId=null, phenoInactiveReason='', phenoPhotoTaken=false;
@@ -10153,9 +10161,9 @@ var PHENO_PHASE_GROUPS=[
     {k:'recent_drop',     label:'Recent fruit/seed drop'} ]}
 ];
 var PHENO_HEALTH=['good','fair','poor'];
-/* Okari & Massoy are trees → painted mark + DBH (baseline + annual).
+/* Okari, Massoy & Breadfruit are trees → painted mark + DBH (baseline + annual).
    Vanilla/cocoa/coffee are cash crops → a metal tag (= the Plant #). */
-var PHENO_TREES=['okari','massoy'];
+var PHENO_TREES=['okari','massoy','breadfruit'];
 function _isPhenoTree(crop){ return PHENO_TREES.indexOf(crop)>=0; }
 window._phenoObsPhotos={}; /* plotId -> dataURL (optional monitoring photo) */
 window._phenoPhases={};    /* plotId -> {phaseKey:true} active set this visit */
@@ -10981,6 +10989,16 @@ function initPhenoRecord() {
   var hh=String(now.getHours()).padStart(2,'0');
   var mm=String(now.getMinutes()).padStart(2,'0');
   if(document.getElementById('phenoTime')) document.getElementById('phenoTime').value=hh+':'+mm;
+  /* Proof of visit: grab one GPS fix for the session. All monitored plants
+     should sit in one small area, so a single fix at the cluster records that
+     the steward was there. Never blocks the save (resilience rule). */
+  window._phenoRecGps=null;
+  var rg=document.getElementById('phenoRecGPS');
+  if(rg){ rg.innerHTML=''+icon('pin',13)+' Acquiring GPS…'; rg.style.color='#888'; }
+  captureGPS(function(gps,err){
+    if(gps){ window._phenoRecGps=gps; if(rg){ rg.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'; rg.style.color='#2E6B38'; } }
+    else { if(rg){ rg.innerHTML=''+icon('warning',13)+' '+err+' — saves anyway, flagged for review'; rg.style.color='#E65100'; } }
+  });
   var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   if(document.getElementById('phenoDate')) document.getElementById('phenoDate').textContent=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
   var container=document.getElementById('phenoPlantCards');
@@ -11066,36 +11084,48 @@ function submitAllPhenoObs() {
   var genNotes=(document.getElementById('phenoGeneralNotes')||{}).value||'';
   var cards=document.querySelectorAll('#phenoPlantCards [data-plot-id]');
   if(cards.length===0){toast('No approved plants to record.');return;}
-  var count=0,total=cards.length;
-  cards.forEach(function(card){
-    var plotId=parseInt(card.getAttribute('data-plot-id'));
-    var crop=card.getAttribute('data-crop');
-    var plantNum=parseInt(card.getAttribute('data-plant-num'));
-    var set=(window._phenoPhases&&window._phenoPhases[plotId])||{};
-    var phases=Object.keys(set).filter(function(k){return set[k];});
-    var health='';
-    PHENO_HEALTH.forEach(function(h){var el=document.getElementById('hp-'+plotId+'-'+h);if(el&&el.classList.contains('active'))health=h;});
-    var notes=(document.getElementById('pnotes-'+plotId)||{}).value||'';
-    var photo=(window._phenoObsPhotos&&window._phenoObsPhotos[plotId])||null;
-    var dbhEl=document.getElementById('dbh-'+plotId);
-    var dbh=(dbhEl&&dbhEl.value!=='')?parseFloat(dbhEl.value):null;
-    var rec={
-      survey_type:'phenology',record_uid:generateRecordId('PHO'),date:date,time:time,weather:weather,
-      plot_id:plotId,crop_type:crop,plant_num:plantNum,
-      phenophases:phases, phase:(phases[0]||''), health:health,
-      notes:notes,general_notes:genNotes,
-      photo:photo, dbh_cm:(dbh!=null&&dbh>0?dbh:null),
-      device_time:stamp.device_time, clock_offset_ms:stamp.clock_offset_ms, clock_ok:stamp.clock_ok
-    };
-    saveRecord('phenology',rec,function(){
-      /* An annual DBH re-measure updates the tree's registry record too */
-      if(dbh!=null&&dbh>0&&_isPhenoTree(crop)){
-        getAllRecords('pheno_plots',function(plots){
-          var pl=plots.find(function(p){return p.id===plotId;});
-          if(pl){pl.dbh_cm=dbh;pl.dbh_date=date;pl.synced=false;updateRecord('pheno_plots',pl,function(){});}
-        });
+  /* Proof of visit: the one fix taken when the screen opened, stamped on every
+     reading, with the straight-line distance from each plant's established
+     point. No fix → saved anyway, location_missing flagged for review. */
+  var recGps=window._phenoRecGps||null;
+  getAllRecords('pheno_plots',function(plots){
+    var plotBy={}; plots.forEach(function(p){ plotBy[p.id]=p; });
+    var count=0,total=cards.length;
+    cards.forEach(function(card){
+      var plotId=parseInt(card.getAttribute('data-plot-id'));
+      var crop=card.getAttribute('data-crop');
+      var plantNum=parseInt(card.getAttribute('data-plant-num'));
+      var set=(window._phenoPhases&&window._phenoPhases[plotId])||{};
+      var phases=Object.keys(set).filter(function(k){return set[k];});
+      var health='';
+      PHENO_HEALTH.forEach(function(h){var el=document.getElementById('hp-'+plotId+'-'+h);if(el&&el.classList.contains('active'))health=h;});
+      var notes=(document.getElementById('pnotes-'+plotId)||{}).value||'';
+      var photo=(window._phenoObsPhotos&&window._phenoObsPhotos[plotId])||null;
+      var dbhEl=document.getElementById('dbh-'+plotId);
+      var dbh=(dbhEl&&dbhEl.value!=='')?parseFloat(dbhEl.value):null;
+      var plot=plotBy[plotId]||{};
+      var distM=null;
+      if(recGps && plot.lat!=null && plot.lng!=null){
+        distM=Math.round(_haversine({lat:parseFloat(recGps.lat),lon:parseFloat(recGps.lng)},{lat:parseFloat(plot.lat),lon:parseFloat(plot.lng)}));
       }
-      count++;if(count===total)toast('Saved '+count+' plant observation'+(count>1?'s':'')+' ✓');
+      var rec={
+        survey_type:'phenology',record_uid:generateRecordId('PHO'),date:date,time:time,weather:weather,
+        plot_id:plotId,crop_type:crop,plant_num:plantNum,
+        phenophases:phases, phase:(phases[0]||''), health:health,
+        notes:notes,general_notes:genNotes,
+        photo:photo, dbh_cm:(dbh!=null&&dbh>0?dbh:null),
+        gps:recGps, gps_source:(recGps&&recGps.source)||null, location_missing:!recGps,
+        dist_m:distM, visit_far:(distM!=null && distM>150),
+        device_time:stamp.device_time, clock_offset_ms:stamp.clock_offset_ms, clock_ok:stamp.clock_ok
+      };
+      saveRecord('phenology',rec,function(){
+        /* An annual DBH re-measure updates the tree's registry record too */
+        if(dbh!=null&&dbh>0&&_isPhenoTree(crop)){
+          var pl=plotBy[plotId];
+          if(pl){pl.dbh_cm=dbh;pl.dbh_date=date;pl.synced=false;updateRecord('pheno_plots',pl,function(){});}
+        }
+        count++;if(count===total)toast('Saved '+count+' plant observation'+(count>1?'s':'')+' ✓');
+      });
     });
   });
 }
@@ -11737,7 +11767,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v106'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v107'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

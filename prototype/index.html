@@ -2913,17 +2913,13 @@ select.msel {
             <div class="transect-row">
               <span class="td-label"><span data-icon="cloud" data-size="14"></span> Weather</span>
               <span>
-                <button class="weather-pill active" id="pwx-cloudy" onclick="wxP('cloudy','sunny')"><span data-icon="cloud" data-size="14"></span> Cloudy</button>
+                <button class="weather-pill" id="pwx-cloudy" onclick="wxP('cloudy','sunny')"><span data-icon="cloud" data-size="14"></span> Cloudy</button>
                 <button class="weather-pill" id="pwx-sunny" onclick="wxP('sunny','cloudy')"><span data-icon="sun" data-size="14"></span> Sunny</button>
               </span>
             </div>
-            <div class="transect-row">
-              <span class="td-label"><span data-icon="pin" data-size="14"></span> Location</span>
-              <span id="phenoRecGPS" style="font-size:0.74rem;color:#888;">Acquiring GPS…</span>
-            </div>
           </div>
           <div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#2E7D32;font-size:0.72rem;padding:8px 12px;margin:0 0 10px;">
-            Record at the trees. Your location is saved with the reading so the visit is on the record. No signal is fine — it saves anyway and is flagged for review.
+            Record each tree <strong>at the tree</strong>. Each one saves its own GPS location, so every tree is logged where it stands — even if they are spread apart. No signal is fine: it saves anyway, flagged for review.
           </div>
 
           <div id="phenoPlantCards">
@@ -10989,21 +10985,15 @@ function initPhenoRecord() {
   var hh=String(now.getHours()).padStart(2,'0');
   var mm=String(now.getMinutes()).padStart(2,'0');
   if(document.getElementById('phenoTime')) document.getElementById('phenoTime').value=hh+':'+mm;
-  /* Proof of visit: grab one GPS fix for the session. All monitored plants
-     should sit in one small area, so a single fix at the cluster records that
-     the steward was there. Never blocks the save (resilience rule). */
-  window._phenoRecGps=null;
-  var rg=document.getElementById('phenoRecGPS');
-  if(rg){ rg.innerHTML=''+icon('pin',13)+' Acquiring GPS…'; rg.style.color='#888'; }
-  captureGPS(function(gps,err){
-    if(gps){ window._phenoRecGps=gps; if(rg){ rg.textContent=gps.lat+'°, '+gps.lng+'°  ±'+gps.accuracy+'m'; rg.style.color='#2E6B38'; } }
-    else { if(rg){ rg.innerHTML=''+icon('warning',13)+' '+err+' — saves anyway, flagged for review'; rg.style.color='#E65100'; } }
-  });
   var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   if(document.getElementById('phenoDate')) document.getElementById('phenoDate').textContent=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
   var container=document.getElementById('phenoPlantCards');
   if(!container) return;
-  window._phenoPhases={}; window._phenoObsPhotos={};
+  /* Proof of visit — ONE GPS fix PER TREE, not one for the session: a steward
+     who spreads the trees out still gets each tree logged where it stands. A
+     tree's fix is auto-acquired the moment they start recording it (they are
+     at it then) and can be re-captured manually. Never blocks the save. */
+  window._phenoPhases={}; window._phenoObsPhotos={}; window._phenoObsGps={}; window._phenoObsGpsBusy={}; window._phenoPlotLoc={};
   container.innerHTML='<div style="padding:30px 20px;text-align:center;"><div class="spinner-dots"><span></span><span></span><span></span></div></div>';
   getAllRecords('pheno_plots',function(plots){
     var approved=plots.filter(function(p){return p.status==='approved' && phenoOwnedByMyClan(p);});
@@ -11018,10 +11008,15 @@ function initPhenoRecord() {
       h+='<div style="font-size:0.88rem;font-weight:700;color:#E65100;margin:12px 0 6px;">'+cr.emoji+' '+cr.label+'</div>';
       ca.forEach(function(plot){
         var pid=plot.id;
+        window._phenoPlotLoc[pid]={lat:plot.lat,lng:plot.lng};
         h+='<div class="card" data-plot-id="'+pid+'" data-crop="'+cr.key+'" data-plant-num="'+plot.plant_num+'" style="padding:10px 14px;margin-bottom:8px;">';
         h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
         h+='<span style="font-size:0.82rem;font-weight:700;">Plant '+plot.plant_num+'</span>';
         h+='<span style="font-size:0.7rem;color:#888;">'+(plot.location_name||(plot.lat+'°S'))+'</span>';
+        h+='</div>';
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">';
+        h+='<span id="pgps-'+pid+'" style="font-size:0.7rem;color:#999;">'+icon('pin',13)+' GPS not captured yet</span>';
+        h+='<button class="btn-sm-export" style="background:#0277BD;color:#fff;padding:4px 10px;font-size:0.68rem;flex-shrink:0;" onclick="phenoCaptureTreeGps('+pid+')">'+icon('pin',12)+' Capture at tree</button>';
         h+='</div>';
         h+='<div style="font-size:0.72rem;font-weight:600;color:#555;margin-bottom:2px;">Phenophases present now <span style="font-weight:400;color:#999;">(tap all that apply)</span></div>';
         PHENO_PHASE_GROUPS.forEach(function(grp){
@@ -11051,7 +11046,39 @@ function initPhenoRecord() {
   });
 }
 
+/* Capture (or re-capture) a fresh GPS fix AT this tree. Shows the straight-line
+   distance from the tree's established mark and warns if it's far (they may have
+   recorded away from the tree). Best-effort: never blocks saving. */
+function phenoCaptureTreeGps(plotId){
+  if(window._phenoObsGpsBusy[plotId]) return;
+  window._phenoObsGpsBusy[plotId]=true;
+  var el=document.getElementById('pgps-'+plotId);
+  if(el){ el.innerHTML=''+icon('pin',13)+' Acquiring GPS…'; el.style.color='#888'; }
+  captureGPS(function(gps,err){
+    window._phenoObsGpsBusy[plotId]=false;
+    if(gps){
+      window._phenoObsGps[plotId]=gps;
+      var loc=window._phenoPlotLoc[plotId]||{};
+      var dist=null;
+      if(loc.lat!=null && loc.lng!=null) dist=Math.round(_haversine({lat:parseFloat(gps.lat),lon:parseFloat(gps.lng)},{lat:parseFloat(loc.lat),lon:parseFloat(loc.lng)}));
+      var far=(dist!=null && dist>150);
+      if(el){
+        el.innerHTML=''+icon('pin',13)+' '+gps.lat+'°, '+gps.lng+'° ±'+gps.accuracy+'m'+(dist!=null?(' · '+dist+' m from mark'+(far?' '+icon('warning',12):'')):'');
+        el.style.color=far?'#E65100':'#2E6B38';
+      }
+    } else {
+      if(el){ el.innerHTML=''+icon('warning',13)+' '+err+' — saves anyway, flagged'; el.style.color='#E65100'; }
+    }
+  });
+}
+/* First time a steward touches a tree's card they are standing at it, so grab
+   its fix automatically — no extra tap — unless one is already taken/underway. */
+function _phenoAutoGps(plotId){
+  if(window._phenoObsGps[plotId]||window._phenoObsGpsBusy[plotId]) return;
+  phenoCaptureTreeGps(plotId);
+}
 function togglePhenoPhase(plotId,phase){
+  _phenoAutoGps(plotId);
   if(!window._phenoPhases[plotId]) window._phenoPhases[plotId]={};
   var set=window._phenoPhases[plotId];
   set[phase]=!set[phase];
@@ -11071,6 +11098,7 @@ function phenoObsPhoto(plotId,input){
   reader.readAsDataURL(file);
 }
 function setHealthPlot(plotId,val){
+  _phenoAutoGps(plotId);
   PHENO_HEALTH.forEach(function(h){var el=document.getElementById('hp-'+plotId+'-'+h);if(el)el.classList.toggle('active',h===val);});
 }
 
@@ -11080,14 +11108,16 @@ function submitAllPhenoObs() {
   var date=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
   var stamp=clockStamp();
   var time=(document.getElementById('phenoTime')||{}).value||'';
-  var weather=(document.getElementById('pwx-sunny')&&document.getElementById('pwx-sunny').classList.contains('active'))?'sunny':'cloudy';
+  /* Weather is blank until tapped — a skipped answer stays empty, never a
+     silent "Cloudy" default (data-integrity rule: no default-on-skip). */
+  var weather=(document.getElementById('pwx-sunny')&&document.getElementById('pwx-sunny').classList.contains('active'))?'sunny'
+             :(document.getElementById('pwx-cloudy')&&document.getElementById('pwx-cloudy').classList.contains('active'))?'cloudy':'';
   var genNotes=(document.getElementById('phenoGeneralNotes')||{}).value||'';
   var cards=document.querySelectorAll('#phenoPlantCards [data-plot-id]');
   if(cards.length===0){toast('No approved plants to record.');return;}
-  /* Proof of visit: the one fix taken when the screen opened, stamped on every
-     reading, with the straight-line distance from each plant's established
-     point. No fix → saved anyway, location_missing flagged for review. */
-  var recGps=window._phenoRecGps||null;
+  /* Proof of visit: each tree carries ITS OWN fix (auto-grabbed when the steward
+     started recording it, or captured manually), with the distance from that
+     tree's established mark. No fix → saved anyway, location_missing flagged. */
   getAllRecords('pheno_plots',function(plots){
     var plotBy={}; plots.forEach(function(p){ plotBy[p.id]=p; });
     var count=0,total=cards.length;
@@ -11104,9 +11134,10 @@ function submitAllPhenoObs() {
       var dbhEl=document.getElementById('dbh-'+plotId);
       var dbh=(dbhEl&&dbhEl.value!=='')?parseFloat(dbhEl.value):null;
       var plot=plotBy[plotId]||{};
+      var treeGps=(window._phenoObsGps&&window._phenoObsGps[plotId])||null;
       var distM=null;
-      if(recGps && plot.lat!=null && plot.lng!=null){
-        distM=Math.round(_haversine({lat:parseFloat(recGps.lat),lon:parseFloat(recGps.lng)},{lat:parseFloat(plot.lat),lon:parseFloat(plot.lng)}));
+      if(treeGps && plot.lat!=null && plot.lng!=null){
+        distM=Math.round(_haversine({lat:parseFloat(treeGps.lat),lon:parseFloat(treeGps.lng)},{lat:parseFloat(plot.lat),lon:parseFloat(plot.lng)}));
       }
       var rec={
         survey_type:'phenology',record_uid:generateRecordId('PHO'),date:date,time:time,weather:weather,
@@ -11114,7 +11145,7 @@ function submitAllPhenoObs() {
         phenophases:phases, phase:(phases[0]||''), health:health,
         notes:notes,general_notes:genNotes,
         photo:photo, dbh_cm:(dbh!=null&&dbh>0?dbh:null),
-        gps:recGps, gps_source:(recGps&&recGps.source)||null, location_missing:!recGps,
+        gps:treeGps, gps_source:(treeGps&&treeGps.source)||null, location_missing:!treeGps,
         dist_m:distM, visit_far:(distM!=null && distM>150),
         device_time:stamp.device_time, clock_offset_ms:stamp.clock_offset_ms, clock_ok:stamp.clock_ok
       };
@@ -11767,7 +11798,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v107'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v108'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

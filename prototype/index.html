@@ -2930,6 +2930,8 @@ select.msel {
             <textarea class="form-input" style="min-height:60px;width:100%;font-size:0.78rem;" id="phenoGeneralNotes" placeholder="Overall site conditions, pest activity, recent weather impact…"></textarea>
           </div>
           <button class="btn-primary" style="background:#E65100;" onclick="submitAllPhenoObs()">Save All Plant Observations</button>
+          <button class="btn-outline" style="width:100%;margin-top:8px;" onclick="cancelPhenoRecord()">Cancel — I'm not at the site yet</button>
+          <p style="font-size:0.7rem;color:#888;margin-top:6px;text-align:center;">Cancel leaves without saving. Nothing is recorded until you tap Save.</p>
         </div>
       </div>
     </div>
@@ -10236,11 +10238,35 @@ function initPheno() {
     h += '</div>';
     h += '<button class="btn-outline" style="width:100%;margin-bottom:8px;" onclick="nav(\'screen-pheno-plots\')">'+icon('folder',13)+' Manage Plots</button>';
     var canRec=approved.length>0;
-    h += '<button class="btn-primary" style="background:#E65100;width:100%;"'+(canRec?'':' disabled')+' onclick="nav(\'screen-pheno-record\')">'+(canRec?'Begin Monthly Observations':'No approved plants yet')+'</button>';
-    if(!canRec) h+='<p style="font-size:0.72rem;color:#888;margin-top:6px;text-align:center;">Establish and get plants approved first</p>';
-    var inner=document.getElementById('phenoSummaryInner');
-    if(inner) inner.innerHTML=h;
+    /* One-off per month: if this month's observations are already saved, the
+       monitoring is shown as DONE (green tick, no re-entry) rather than offering
+       a redo. Opens again automatically next month. */
+    getAllRecords('phenology', function(obs){
+      var monthsL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+      var nowP=trustedNow(); var mk=monthKey(nowP); var monName=monthsL[nowP.getMonth()];
+      var doneThisMonth = canRec && obs.some(function(r){ return _phenoRecMonth(r)===mk; });
+      if(!canRec){
+        h += '<button class="btn-primary" style="background:#E65100;width:100%;" disabled>No approved plants yet</button>';
+        h += '<p style="font-size:0.72rem;color:#888;margin-top:6px;text-align:center;">Establish and get plants approved first</p>';
+      } else if(doneThisMonth){
+        h += '<div class="matrix-note" style="background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#2E7D32;">'+icon('check',18)+'</span> <span><strong>'+monName+' monitoring complete.</strong> Nothing more to do for this month.</span></div>';
+        h += '<button class="btn-primary" style="background:#2E7D32;width:100%;opacity:0.85;" disabled>'+icon('check',14)+' Completed for '+monName+'</button>';
+        h += '<p style="font-size:0.72rem;color:#888;margin-top:6px;text-align:center;">Opens again on the 1st of next month.</p>';
+      } else {
+        h += '<button class="btn-primary" style="background:#E65100;width:100%;" onclick="nav(\'screen-pheno-record\')">Begin Monthly Observations</button>';
+      }
+      var inner=document.getElementById('phenoSummaryInner');
+      if(inner) inner.innerHTML=h;
+    });
   });
+}
+/* Month (YYYY-MM) a phenology reading belongs to — the stored month key first,
+   then recorded_at, then the human date string as a last resort. */
+function _phenoRecMonth(r){
+  if(r && r.month) return r.month;
+  if(r && r.recorded_at){ var d=new Date(r.recorded_at); if(!isNaN(d.getTime())) return monthKey(d); }
+  if(r && r.date){ var d2=new Date(r.date); if(!isNaN(d2.getTime())) return monthKey(d2); }
+  return '';
 }
 
 function initPhenoPlots() {
@@ -11147,6 +11173,7 @@ function submitAllPhenoObs() {
         photo:photo, dbh_cm:(dbh!=null&&dbh>0?dbh:null),
         gps:treeGps, gps_source:(treeGps&&treeGps.source)||null, location_missing:!treeGps,
         dist_m:distM, visit_far:(distM!=null && distM>150),
+        recorded_at:now.toISOString(), month:monthKey(now),
         device_time:stamp.device_time, clock_offset_ms:stamp.clock_offset_ms, clock_ok:stamp.clock_ok
       };
       saveRecord('phenology',rec,function(){
@@ -11161,6 +11188,13 @@ function submitAllPhenoObs() {
   });
 }
 
+/* Leave the recording screen WITHOUT saving — for a steward who opened it out of
+   curiosity before reaching the site. Nothing is written; clear the in-progress
+   buffers so a later real visit starts clean. */
+function cancelPhenoRecord(){
+  window._phenoPhases={}; window._phenoObsPhotos={}; window._phenoObsGps={}; window._phenoObsGpsBusy={}; window._phenoPlotLoc={};
+  goBack();
+}
 function wxP(on, off) { document.getElementById('pwx-'+on).classList.add('active'); document.getElementById('pwx-'+off).classList.remove('active'); }
 
 
@@ -11798,7 +11832,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v108'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v109'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

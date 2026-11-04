@@ -5697,6 +5697,41 @@ select.msel {
                   <span class="sync-badge-sent" id="sync-sent-schedule" style="display:none;"></span>
                 </div>
               </div>
+              <div class="sync-row" id="sync-row-freemap">
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="map" data-size="16"></span><span class="sync-name">Field Mapping</span></div>
+                <div class="sync-row-counts">
+                  <span class="sync-badge-new" id="sync-new-freemap" style="display:none;"></span>
+                  <span class="sync-badge-sent" id="sync-sent-freemap" style="display:none;"></span>
+                </div>
+              </div>
+              <div class="sync-row" id="sync-row-distributions">
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="box" data-size="16"></span><span class="sync-name">Handover &amp; Distribution</span></div>
+                <div class="sync-row-counts">
+                  <span class="sync-badge-new" id="sync-new-distributions" style="display:none;"></span>
+                  <span class="sync-badge-sent" id="sync-sent-distributions" style="display:none;"></span>
+                </div>
+              </div>
+              <div class="sync-row" id="sync-row-livelihood">
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="sprout" data-size="16"></span><span class="sync-name">Livelihood Updates</span></div>
+                <div class="sync-row-counts">
+                  <span class="sync-badge-new" id="sync-new-livelihood" style="display:none;"></span>
+                  <span class="sync-badge-sent" id="sync-sent-livelihood" style="display:none;"></span>
+                </div>
+              </div>
+              <div class="sync-row" id="sync-row-price_reports">
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="money" data-size="16"></span><span class="sync-name">Local Price Reports</span></div>
+                <div class="sync-row-counts">
+                  <span class="sync-badge-new" id="sync-new-price_reports" style="display:none;"></span>
+                  <span class="sync-badge-sent" id="sync-sent-price_reports" style="display:none;"></span>
+                </div>
+              </div>
+              <div class="sync-row" id="sync-row-gate_selfies">
+                <div class="sync-row-label"><span class="sync-emoji" data-icon="camera" data-size="16"></span><span class="sync-name">Verification Photos</span></div>
+                <div class="sync-row-counts">
+                  <span class="sync-badge-new" id="sync-new-gate_selfies" style="display:none;"></span>
+                  <span class="sync-badge-sent" id="sync-sent-gate_selfies" style="display:none;"></span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -11832,7 +11867,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v111'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v112'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

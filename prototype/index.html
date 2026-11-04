@@ -11832,7 +11832,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v109'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v110'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12084,7 +12084,7 @@ function getZoneList(callback) {
         .then(function(d) {
           if (d.status === 'ok' && d.zones) {
             /* Cache in IndexedDB */
-            saveRecord('auth', {id:'zones', zones: d.zones, fetched: new Date().toISOString()}, function(){});
+            updateRecord('auth', {id:'zones', zones: d.zones, fetched: new Date().toISOString()}, function(){});
             callback(d.zones);
           } else {
             callback(cached || DEFAULT_ZONE_LIST);
@@ -12122,7 +12122,7 @@ function getPhenoTargets(callback, onFresh) {
       .then(function(r){ return r.json(); })
       .then(function(d){
         if (d && d.status === 'ok' && d.pheno_targets) {
-          saveRecord('auth', {id:'pheno_targets', targets:d.pheno_targets, fetched:new Date().toISOString()}, function(){});
+          updateRecord('auth', {id:'pheno_targets', targets:d.pheno_targets, fetched:new Date().toISOString()}, function(){});
           if (onFresh && JSON.stringify(d.pheno_targets) !== JSON.stringify(cached || {})) onFresh(d.pheno_targets);
         }
       }).catch(function(){ /* offline / slow / aborted — the cached view already shows */ });
@@ -12167,7 +12167,7 @@ function getClanList(callback) {
         .then(function(r){ return r.json(); })
         .then(function(d){
           if (d.status === 'ok' && d.clans) {
-            saveRecord('auth', {id:'clans', clans:d.clans, fetched:new Date().toISOString()}, function(){});
+            updateRecord('auth', {id:'clans', clans:d.clans, fetched:new Date().toISOString()}, function(){});
             callback(d.clans);
           } else { callback(cached || {}); }
         }).catch(function(){ callback(cached || {}); });
@@ -12186,7 +12186,7 @@ function getLivelihood(callback) {
         .then(function(r){ return r.json(); })
         .then(function(d){
           if (d.status === 'ok' && d.livelihood) {
-            saveRecord('auth', {id:'livelihood', livelihood:d.livelihood, fetched:new Date().toISOString()}, function(){});
+            updateRecord('auth', {id:'livelihood', livelihood:d.livelihood, fetched:new Date().toISOString()}, function(){});
             callback(d.livelihood);
           } else { callback(cached || {types:[],sites:[]}); }
         }).catch(function(){ callback(cached || {types:[],sites:[]}); });
@@ -12276,7 +12276,7 @@ function getMarketPrices(callback) {
         .then(function(r){ return r.json(); })
         .then(function(d){
           if (d.status === 'ok' && d.prices) {
-            saveRecord('auth', {id:'prices', prices:d.prices, fetched:new Date().toISOString()}, function(){});
+            updateRecord('auth', {id:'prices', prices:d.prices, fetched:new Date().toISOString()}, function(){});
             callback(d.prices);
           } else { callback(cached || {commodities:{}}); }
         }).catch(function(){ callback(cached || {commodities:{}}); });
@@ -12481,7 +12481,7 @@ function getHolidays(callback){
         .then(function(d){
           if(d.status==='ok' && d.holidays && d.holidays.length){
             _holidaysCache = d.holidays;
-            saveRecord('auth', {id:'holidays', holidays:d.holidays, fetched:new Date().toISOString()}, function(){});
+            updateRecord('auth', {id:'holidays', holidays:d.holidays, fetched:new Date().toISOString()}, function(){});
             if(callback) callback(d.holidays);
           } else { if(callback) callback(_holidaysCache); }
         }).catch(function(){ if(callback) callback(_holidaysCache); });
@@ -12562,7 +12562,7 @@ function zoneConfigSave() {
   btn.textContent = 'Saving…';
 
   /* Save to IndexedDB immediately */
-  saveRecord('auth', {id:'zones', zones: _editZones, fetched: new Date().toISOString()}, function() {});
+  updateRecord('auth', {id:'zones', zones: _editZones, fetched: new Date().toISOString()}, function() {});
 
   /* Also push to Drive if endpoint is configured */
   if (UPLOAD_ENDPOINT) {
@@ -12638,7 +12638,7 @@ function getTopicList(callback) {
         .then(function(r) { return r.json(); })
         .then(function(d) {
           if (d.status === 'ok' && d.topics) {
-            saveRecord('auth', {id:'topics', topics: d.topics, fetched: new Date().toISOString()}, function(){});
+            updateRecord('auth', {id:'topics', topics: d.topics, fetched: new Date().toISOString()}, function(){});
             callback(d.topics);
           } else { callback(cached || DEFAULT_TOPIC_LIST); }
         }).catch(function() { callback(cached || DEFAULT_TOPIC_LIST); });
@@ -12705,7 +12705,7 @@ function topicsConfigSave() {
   var status = document.getElementById('topicsConfigStatus');
   var btn    = document.getElementById('topicsConfigSaveBtn');
   btn.disabled = true; btn.textContent = 'Saving…';
-  saveRecord('auth', {id:'topics', topics: _editTopics, fetched: new Date().toISOString()}, function(){});
+  updateRecord('auth', {id:'topics', topics: _editTopics, fetched: new Date().toISOString()}, function(){});
   if (UPLOAD_ENDPOINT) {
     fetch(UPLOAD_ENDPOINT, {
       method: 'POST',
@@ -12825,7 +12825,11 @@ function saveUpdatedProfile(profileId) {
     profile.zone    = zone;
     profile.clan    = clan;
     profile.village = village;
-    saveRecord('auth', profile, function() {
+    /* MUST be updateRecord (put), NOT saveRecord (add): the profile already
+       exists in the auth store, and add() throws on an existing key, so the
+       change silently never persisted and the role reverted on next read. */
+    updateRecord('auth', profile, function(ok) {
+      if (!ok) { status.textContent = '✗ Could not save — try again'; status.style.color = '#B71C1C'; return; }
       status.textContent = '✓ Profile updated for ' + profile.name;
       status.style.color = '#1565C0';
       /* Refresh cached profile */

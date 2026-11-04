@@ -1482,7 +1482,19 @@ function savePrices(o) {
   if(fs.hasNext()) fs.next().setContent(j); else f.createFile('_prices.json', j, MimeType.PLAIN_TEXT);
 }
 function getPrices() {
-  return ContentService.createTextOutput(JSON.stringify({ status:'ok', prices: loadPrices() })).setMimeType(ContentService.MimeType.JSON);
+  /* Vanilla (and any coordinator "indicative" figure) is intentionally NOT
+   * served with the world-market indicator: vanilla isn't exchange-traded, so
+   * a manual per-kg figure isn't comparable to the coffee/cocoa futures shown
+   * here. Strip it at serve time so a stale _prices.json never surfaces it. */
+  var store = loadPrices();
+  var out = { commodities:{}, updated_at: store.updated_at };
+  var com = store.commodities || {};
+  Object.keys(com).forEach(function(k){
+    var c = com[k];
+    if (k === 'vanilla' || (c && c.indicative)) return;
+    out.commodities[k] = c;
+  });
+  return ContentService.createTextOutput(JSON.stringify({ status:'ok', prices: out })).setMimeType(ContentService.MimeType.JSON);
 }
 /* Keyless finance chart endpoint → {latest, points:[{t:'yyyy-MM', v}], as_of}. */
 function _fetchPriceSeries(symbol) {
@@ -1552,11 +1564,10 @@ function installPricesTrigger() {
   return 'Prices trigger installed (daily ~06:00). Run pricesUpdate() once now to populate.';
 }
 function seedPrices() {
-  /* Starter vanilla indicative figure (edit the number to your latest trade
-   * reference), then pull the live markets. */
-  updateIndicativePrice({ key:'vanilla', label:'Vanilla', unit:'USD/kg', price:50, note:'Starter indicative figure — update from trade reports.' });
+  /* World markets only (coffee, cocoa). Vanilla is deliberately excluded — it
+   * isn't exchange-traded, so it isn't comparable to the futures shown here. */
   pricesUpdate();
-  Logger.log('Seeded _prices.json (vanilla indicative + live markets).');
+  Logger.log('Seeded _prices.json (world markets: coffee, cocoa).');
 }
 
 function doPost(e) {

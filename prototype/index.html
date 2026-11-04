@@ -1668,7 +1668,6 @@ select.msel {
           <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')"><span data-icon="clipboard" data-size="14"></span> Manage Training Topics</button>
           <button class="btn-outline" id="enrollUpdateProfileBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showUpdateProfile()"><span data-icon="edit" data-size="14"></span> Update Existing Profile</button>
           <button class="btn-outline" id="enrollEnrolmentsBtn" style="display:none;margin-top:8px;width:100%;border-color:#6A1B9A;color:#6A1B9A;" onclick="nav('screen-enrolments')"><span data-icon="people" data-size="14"></span> Enrolled People</button>
-          <button class="btn-outline" id="enrollSetPriceBtn" style="display:none;margin-top:8px;width:100%;border-color:#5E35B1;color:#5E35B1;" onclick="nav('screen-set-price')"><span data-icon="linechart" data-size="14"></span> Set Vanilla Price</button>
           <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()"><span data-icon="mortarboard" data-size="14"></span> Grant Training Authorisation</button>
           <button class="btn-outline" id="enrollApproveWaterBtn" style="display:none;margin-top:8px;width:100%;border-color:#0277BD;color:#0277BD;" onclick="showScreen('screen-water-approve')"><span data-icon="spring" data-size="14"></span> Approve Water Sources</button>
           <button class="btn-outline" id="enrollApproveFacBtn" style="display:none;margin-top:8px;width:100%;border-color:#283593;color:#283593;" onclick="showScreen('screen-facility-approve')"><span data-icon="school" data-size="14"></span> Approve Facilities</button>
@@ -6221,7 +6220,6 @@ function enrollCheckPasscode() {
       document.getElementById('enrollManageTopicsBtn').style.display = 'block';
       document.getElementById('enrollUpdateProfileBtn').style.display = 'block';
       var _epb = document.getElementById('enrollEnrolmentsBtn'); if (_epb) _epb.style.display = 'block';
-      var _spb = document.getElementById('enrollSetPriceBtn'); if (_spb) _spb.style.display = 'block';
       document.getElementById('enrollGrantAuthBtn').style.display = 'block';
       document.getElementById('enrollApproveWaterBtn').style.display = 'block';
       document.getElementById('enrollApproveFacBtn').style.display = 'block';
@@ -11867,7 +11865,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v112'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v113'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12343,15 +12341,20 @@ function _priceSparkline(points, w, h, color) {
     + '</svg>';
 }
 function _fmtPriceMonth(s){ if(!s) return ''; var m=String(s).split('-'); if(m.length<2) return s; var names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; var mi=parseInt(m[1],10)-1; return (names[mi]||m[1])+' '+m[0]; }
-var _PRICE_ORDER = ['coffee','cocoa','vanilla','gold'];
-var _PRICE_COLORS = { coffee:'#6D4C41', cocoa:'#8D6E63', vanilla:'#7E57C2', gold:'#B8860B' };
+/* World-market indicator shows only exchange-traded commodities. Vanilla is
+   excluded on purpose — it isn't traded on a world market, so a per-kg figure
+   isn't comparable here (the backend also strips it from the feed). */
+var _PRICE_ORDER = ['coffee','cocoa'];
+var _PRICE_COLORS = { coffee:'#6D4C41', cocoa:'#8D6E63' };
 function initMarketPrices() {
   var box = document.getElementById('marketPricesList'); if(!box) return;
   box.innerHTML = '<div style="text-align:center;padding:30px;color:#999;font-size:0.82rem;">Loading market…</div>';
   getMarketPrices(function(prices){
     var com = (prices && prices.commodities) || {};
     var keys = _PRICE_ORDER.filter(function(k){ return com[k]; });
-    Object.keys(com).forEach(function(k){ if(_PRICE_ORDER.indexOf(k)===-1) keys.push(k); });
+    /* Append any other traded commodity the feed sends, but never vanilla or a
+       coordinator "indicative" figure (belt-and-braces if a stale cache has it). */
+    Object.keys(com).forEach(function(k){ if(_PRICE_ORDER.indexOf(k)===-1 && k!=='vanilla' && !(com[k]&&com[k].indicative)) keys.push(k); });
     if (keys.length === 0) {
       box.innerHTML = '<div class="card" style="padding:18px;text-align:center;color:#888;font-size:0.85rem;">No prices yet. They appear once the market has been fetched and you have been online.</div>';
       return;

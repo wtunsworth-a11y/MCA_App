@@ -529,27 +529,27 @@ function seedLivelihood() {
   Logger.log('Seeded _livelihood.json: ' + types.length + ' types, ' + sites.length + ' sites. Edit/add via update_livelihood.');
 }
 function seedClans() {
-  /* Fill each zone's clan names between the brackets, in the clans' own order,
-   * exactly as they should appear and be stored (this string is what ownership
-   * routing, compliance and reports all match on — keep spelling consistent).
-   * Leave a zone [] if it has no clan stewards yet. Keys are the zone_ids from
-   * the app's zone list (Z01–Z10, with Z07 split into Z07A/Z07B). Re-run this
-   * in the Apps Script editor after editing, or push the same map via
-   * update_clans. Example: "Z05": ["Kubi", "Bigaije"]  */
+  /* Run once in the Apps Script editor to (re)populate _clans.json. Keys are
+   * zone_ids (Z01–Z10, Z07 split into Z07A/Z07B). To update later, edit the map
+   * and re-run, or push the same map via update_clans.
+   * Authoritative clan list by zone — Kiara Combined Forum, 30–31 Oct 2026
+   * (182 unique clans; the source's 185 counted a few clans listed in more than
+   * one village). Keep spelling consistent — ownership routing, compliance and
+   * reports all match on these names. */
   saveClans({
-    "Z01":  [],   // Zone 1
-    "Z02":  [],   // Zone 2
-    "Z03":  [],   // Zone 3
-    "Z04":  [],   // Zone 4
-    "Z05":  [],   // Zone 5
-    "Z06":  [],   // Zone 6
-    "Z07A": [],   // Zone 7A
-    "Z07B": [],   // Zone 7B
-    "Z08":  [],   // Zone 8
-    "Z09":  [],   // Zone 9
-    "Z10":  []    // Zone 10
+    "Z01": ["Akare", "Dahari", "Deobi", "Kanamane", "Moeko", "Roiko", "Sako", "Sanae", "Uva", "Uvuombiro", "Vajamo"],
+    "Z02": ["Asigi", "Asoro", "Bujevi", "Garinko", "Juaiko", "Kasaki", "Kasiko", "Kavako", "Manoiko", "Mazanko", "Muanari", "Nituri", "Riko", "Rondi", "Sukadi", "Tamaru", "Tuko", "Uagi", "Zabiko"],
+    "Z03": ["Abriz", "Abunraez", "Aguoenikol", "Anunaniz", "Arinikol", "Diari", "Doiko", "Giroko", "Gumuri", "Kakol", "Koegire", "Kuani", "Kukuko", "Majai", "Managi", "Muaigi", "Muamutu", "Nui", "Sawasi", "Sirieg", "Zai"],
+    "Z04": ["Asio", "Averi", "Bidani", "Bie", "Bumeba", "Mikari", "Mudi", "Orero", "Ruvari", "Suaisime", "Udiri"],
+    "Z05": ["Ajabi", "Bonool", "Ceuse", "Dajoje", "Danam", "Daudau", "Dohol", "Guruije", "Ikole", "Jiwara", "Kubiol", "Marovekol", "Mejekan", "Mesaje", "Niboije", "Osena", "Samoije", "Sarusa", "Venikol"],
+    "Z06": ["Ahusura", "Ajanija", "Asinakura", "Awakura", "Iko'ura", "Irumija", "Kajanija", "Kui", "Manamko'ra", "Manukwiora", "Mareura", "Mera'Ora", "Midada", "Mighunija", "Muaturaina", "Nahara'Ora", "Namakura", "Narija", "Nupa'Ora", "Pakura", "Pena'Ora", "Sahiruta", "Sanarija", "Siaja'ora", "Ueura", "Umudi", "Urimukura"],
+    "Z07A": ["Ajokol", "Azabi", "Borori", "Bumol", "Butarat", "Daralkol", "Dokap", "Ginagi", "Kawowoki", "Kawuri", "Kawuribaru", "Kuhanakol", "Kuskol", "Settlers", "Tagul"],
+    "Z07B": ["Abuankol", "Azabe", "Bajanei", "Binugkol", "Ginagi", "Jarigi", "Manag", "Marang", "Marijabinkol", "Murai", "Nahalkol", "Natang", "Settlers", "Sugulkol", "Wohukol"],
+    "Z08": ["Aduanakol", "Aneji", "Asackol", "Asuan", "Bagia", "Duribip", "Gubai", "Gumuyudae", "Karira", "Kinun", "Madukol", "Masuabip", "Momokol", "Mugaikol", "Nagabaru", "Nituri", "Riribodae", "Salakin", "Saruan", "Suhikol", "Titkol", "Uekol", "Uremkol", "Uwana"],
+    "Z09": ["Auha", "Baroi", "Ihomo", "Javejave", "Kita", "Kobara", "Mahake", "Mo-oni", "Na-a", "Tabuwai", "Torua", "Umatei", "Warama"],
+    "Z10": ["Agabije", "Aimapa", "Dahoraje", "Kuwanije", "Misaje", "Salkol", "Suhinraje"]
   });
-  Logger.log('Seeded _clans.json with 11 zone keys — fill each zone’s clan names then re-run seedClans() (or push via update_clans). Keys are zone_ids.');
+  Logger.log('Seeded _clans.json — 182 clans across 11 zones (Kiara Forum, Oct 2026). Served to the app via ?action=clans for the enrolment / attendance clan pick-lists.');
 }
 
 /* ─── Expected clan-steward roster ──────────────────────────────────────
@@ -1877,7 +1877,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-05.2 — + resumable direct-to-Drive for large media (video)';
+var BACKEND_VERSION = '2026-11-05.3 — + 182 clans by zone (Kiara Forum); run seedClans()';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {

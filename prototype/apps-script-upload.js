@@ -1448,6 +1448,8 @@ function registerEnrolment(rec, uploaded) {
     first_seen:  prev.first_seen || now,
     last_seen:   now,
     app_build:   rec.app_build || prev.app_build || '',
+    verify_method: rec.verify_method || prev.verify_method || '',
+    consent_at:  rec.consent_at || prev.consent_at || '',
     has_uploaded: uploaded ? true : (prev.has_uploaded || false)
   };
   saveEnrolments(map);

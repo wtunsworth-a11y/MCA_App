@@ -1733,6 +1733,27 @@ select.msel {
           <button class="enroll-next-btn" onclick="enrollSaveProfile()">Continue →</button>
         </div>
 
+        <!-- CONSENT: biometric use (read + agree before registering) -->
+        <div id="enrollConsent" style="display:none;">
+          <div class="enroll-section-title">Consent — using your fingerprint or face</div>
+          <div class="enroll-section-sub">Please read this to the steward in their own language before they agree.</div>
+          <div class="card" style="padding:14px 16px;margin:8px 0 12px;font-size:0.86rem;line-height:1.6;color:#333;">
+            <p style="margin:0 0 10px;font-weight:700;">Why this app records your fingerprint or face photo</p>
+            <ul style="margin:0 0 10px;padding-left:18px;">
+              <li style="margin-bottom:7px;">When you log in, the app checks your <strong>fingerprint</strong>, or a <strong>photo of your face</strong>, to make sure it is really you.</li>
+              <li style="margin-bottom:7px;">This is so the person who was <strong>trained</strong> and is <strong>paid</strong> for this work is the one doing it.</li>
+              <li style="margin-bottom:7px;">Your fingerprint stays on <strong>this phone only</strong>. A photo of your face is kept with your records so the coordinator can confirm it is you.</li>
+              <li style="margin-bottom:0;">Your face photo and your records are used only for this project.</li>
+            </ul>
+            <p style="margin:0;color:#555;">If anything is not clear, ask your coordinator before you agree.</p>
+          </div>
+          <label style="display:flex;gap:10px;align-items:flex-start;font-size:0.88rem;color:#333;margin-bottom:12px;cursor:pointer;">
+            <input type="checkbox" id="enrollConsentCheck" style="margin-top:3px;flex:0 0 auto;transform:scale(1.3);" onchange="var b=document.getElementById('enrollConsentBtn'); if(b) b.disabled=!this.checked;">
+            <span>I have read and understood this, and I <strong>agree</strong> to use my fingerprint or face photo to verify me for this work.</span>
+          </label>
+          <button class="enroll-next-btn" id="enrollConsentBtn" disabled onclick="enrollConsentAgree()">I agree — continue →</button>
+        </div>
+
         <!-- STEP 3: Primary biometric -->
         <div id="enrollStep3" style="display:none;">
           <div class="enroll-section-title">Register Primary Biometric</div>
@@ -6385,10 +6406,19 @@ function enrollSaveProfile() {
   }
   enrolledProfile = { name: name, stewardId: sid, clan: clan, zone: zone, zone_id: zoneId, village: village, role: role, authorised_topics: authorisedTopics };
   enrollCred1Id = null; enrollCred2Id = null; enrollVerifyMethod = 'biometric'; enrollRefPhoto = null;
+  /* Consent gate — the steward reads and agrees to biometric verification
+     BEFORE any fingerprint/face is registered. */
   document.getElementById('enrollStep2').style.display = 'none';
-  document.getElementById('enrollStep3').style.display = 'block';
+  document.getElementById('enrollConsent').style.display = 'block';
+  var _cc = document.getElementById('enrollConsentCheck'); if (_cc) _cc.checked = false;
+  var _cb = document.getElementById('enrollConsentBtn'); if (_cb) _cb.disabled = true;
   document.getElementById('edot2').classList.remove('active');
   document.getElementById('edot2').classList.add('done');
+}
+function enrollConsentAgree() {
+  if (enrolledProfile) enrolledProfile.consent = { agreed: true, at: new Date().toISOString(), version: '1' };
+  document.getElementById('enrollConsent').style.display = 'none';
+  document.getElementById('enrollStep3').style.display = 'block';
   document.getElementById('edot3').classList.add('active');
 }
 
@@ -6491,6 +6521,7 @@ function enrollFinish() {
     cred2:     enrollCred2Id,
     verify_method: enrollVerifyMethod || 'biometric',
     ref_photo:     (enrollVerifyMethod === 'selfie') ? enrollRefPhoto : null,
+    consent:   (enrolledProfile && enrolledProfile.consent) || null,
     enrolled:  new Date().toISOString()
   };
   saveRecord('auth', record, function() {
@@ -11945,7 +11976,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v117'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v118'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12317,7 +12348,8 @@ function postEnrolmentPing(p){
     var enrolment = {
       stewardId:p.stewardId, name:p.name||'', role:p.role||'', zone:p.zone||'',
       zone_id:p.zone_id||'', clan:p.clan||'', village:p.village||'',
-      enrolled_at:p.enrolled||p.enrolled_at||'', app_build:APP_BUILD
+      enrolled_at:p.enrolled||p.enrolled_at||'', app_build:APP_BUILD,
+      verify_method:p.verify_method||'', consent_at:(p.consent&&p.consent.at)||''
     };
     /* Offline or no endpoint → remember it and retry when we're next online, so
        a role/profile change always reaches the roster (not just on next login). */

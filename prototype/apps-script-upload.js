@@ -2390,6 +2390,31 @@ function localPricesReport(period) {
       gps, (r.record_uid || r.uid || '')
     ]);
   });
+  /* Analysis tab: grouped by commodity + unit (never mixing per-kg and per-bag),
+     witnessed vs buyer-announced, with min/avg/max — the beginning of a local
+     fair-price picture. It fills out as more reports accumulate. */
+  var an = ss.insertSheet('By commodity');
+  an.appendRow(['Commodity','Price unit','Reports','Witnessed','Buyer-announced','Min (K)','Avg (K)','Max (K)','Places']);
+  var groups = {};
+  rows.forEach(function(x){
+    var r = x.rec;
+    var unit = (r.price_unit === 'per_bag' ? 'per bag' : 'per kg');
+    var key = _prCommodityLabel(r) + '||' + unit;
+    var g = groups[key] || (groups[key] = { commodity:_prCommodityLabel(r), unit:unit, n:0, wit:0, ann:0, prices:[], places:{} });
+    g.n++; if (r.report_type === 'announcement') g.ann++; else g.wit++;
+    if (r.price != null && !isNaN(r.price)) g.prices.push(Number(r.price));
+    if (r.place) g.places[r.place] = 1;
+  });
+  var gkeys = Object.keys(groups).sort();
+  gkeys.forEach(function(k){
+    var g = groups[k], ps = g.prices;
+    var min = ps.length ? Math.min.apply(null, ps) : '';
+    var max = ps.length ? Math.max.apply(null, ps) : '';
+    var avg = ps.length ? Math.round(ps.reduce(function(a,b){ return a+b; }, 0) / ps.length * 100) / 100 : '';
+    an.appendRow([g.commodity, g.unit, g.n, g.wit, g.ann, min, avg, max, Object.keys(g.places).join(', ')]);
+  });
+  if (!gkeys.length) an.appendRow(['(no price reports in this period)','','','','','','','','']);
+
   var ssFile = DriveApp.getFileById(ss.getId());
   try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
 
@@ -2398,7 +2423,7 @@ function localPricesReport(period) {
   (rcp.comms || []).forEach(function(e){ if (e) to.push(e); });
   if (!to.length) to = REPORT_EMAILS.slice();
   to.forEach(function(email){ try { ssFile.addViewer(email); } catch(e){} });
-  var lines = ['MCA — Local price reports', '', 'Month: ' + ym + ' (PNG time)', '', rows.length + ' report(s). Ledger: ' + ssFile.getUrl(), ''];
+  var lines = ['MCA — Local price reports', '', 'Month: ' + ym + ' (PNG time)', '', rows.length + ' report(s). Two tabs: full ledger + "By commodity" analysis.', '', 'Workbook: ' + ssFile.getUrl(), ''];
   to.forEach(function(email){ try { MailApp.sendEmail(email, 'MCA Local prices — ' + ym, lines.join('\n')); } catch(e){} });
   Logger.log('Local prices report ' + ym + ': ' + rows.length + ' rows → ' + to.join(', '));
   return { status:'ok', rows: rows.length, url: ssFile.getUrl() };
@@ -2450,7 +2475,7 @@ function collectUploadActivity(cutMs) {
   var folder = getDataFolder();
   var files = [];                 /* one row per upload file, newest first */
   var byStew = {};                /* stewardId -> aggregate across their files */
-  function stew(id){ return byStew[id] || (byStew[id] = { id:id, name:'', role:'', zone:'', files:0, uids:{}, types:{}, latest:0, mb:0 }); }
+  function stew(id){ return byStew[id] || (byStew[id] = { id:id, name:'', role:'', zone:'', files:0, uids:{}, types:{}, latest:0, mb:0, highlights:[] }); }
 
   var zones = folder.getFolders();
   while (zones.hasNext()) {
@@ -2465,7 +2490,7 @@ function collectUploadActivity(cutMs) {
         var sizeMb = Math.round(f.getSize() / 104857.6) / 10;   /* 1 dp MB */
         var row = { file:f.getName(), uploaded:created, sizeMB:sizeMb,
                     steward:'', stewardId:_stewardIdFromFile(f.getName()),
-                    role:'', zone:'', types:{}, total:0, note:'' };
+                    role:'', zone:'', types:{}, total:0, note:'', highlights:[] };
         if (f.getSize() > UPLOAD_SCAN_MAX_MB * 1048576) {
           row.note = 'large upload (' + sizeMb + ' MB, likely photos/video) — not scanned';
           row.total = -1;                                       /* unknown */
@@ -2486,6 +2511,21 @@ function collectUploadActivity(cutMs) {
             row.total = Object.keys(uidSet).length;
             if (!row.total) { var rc = s.match(/"record_count"\s*:\s*(\d+)/); if (rc) row.total = parseInt(rc[1], 10); }
             row._uids = uidSet;                                 /* for steward dedup */
+            /* Light content highlights: look only at the first ~1.5 KB after each
+               survey_type marker (fields sit before any photo blob), so this stays
+               cheap and never touches the base64 media. Capped per upload. */
+            var parts = s.split('"survey_type"');
+            for (var pi = 1; pi < parts.length && row.highlights.length < 6; pi++) {
+              var blk = parts[pi].slice(0, 1500);
+              var gt = function(k){ var x = blk.match(new RegExp('"' + k + '"\\s*:\\s*"([^"]*)"')); return x ? x[1] : ''; };
+              var gnum = function(k){ var x = blk.match(new RegExp('"' + k + '"\\s*:\\s*([0-9.]+)')); return x ? x[1] : ''; };
+              var st = (blk.match(/^\s*:\s*"([^"]+)"/) || [])[1] || '';
+              if (st === 'price_report')      row.highlights.push('price · ' + gt('commodity') + ' ' + gnum('price') + '/' + (gt('price_unit') === 'per_bag' ? 'bag' : 'kg'));
+              else if (st === 'freemap')      row.highlights.push('map (' + (gt('map_type') || '?') + ') · ' + (gt('title') || gt('category_label') || '—'));
+              else if (st === 'livelihood')   row.highlights.push('livelihood · ' + (gt('site_name') || '—'));
+              else if (st === 'training')     row.highlights.push('training · ' + (gt('topic') || gt('topic_name') || '—'));
+              else if (st === 'distribution') row.highlights.push('handover · ' + (gt('item') || gt('activity') || '—'));
+            }
           } catch (e) { row.note = 'could not read (' + String(e).slice(0, 60) + ')'; }
         }
         files.push(row);
@@ -2498,6 +2538,9 @@ function collectUploadActivity(cutMs) {
         if (row.zone && !a.zone) a.zone = row.zone;
         if (row._uids) { for (var u in row._uids) a.uids[u] = 1; delete row._uids; }
         for (var t in row.types) a.types[t] = (a.types[t] || 0) + row.types[t];
+        for (var hi = 0; hi < row.highlights.length && a.highlights.length < 8; hi++) {
+          if (a.highlights.indexOf(row.highlights[hi]) < 0) a.highlights.push(row.highlights[hi]);
+        }
       }
     }
   }
@@ -2564,6 +2607,7 @@ function uploadActivityReport(period) {
       var ts = _typeSummary(a.types);
       lines.push('    ' + a.records + ' record(s)' + (ts ? ' — ' + ts : '') +
                  ' · ' + a.files + ' upload(s) · last ' + _pngDate(new Date(a.latest), 'd MMM HH:mm'));
+      if (a.highlights && a.highlights.length) lines.push('    e.g. ' + a.highlights.join('  |  '));
     });
   }
   lines.push('');
@@ -3500,4 +3544,32 @@ function installFreemapExportTrigger(){
   ScriptApp.getProjectTriggers().forEach(function(t){ if(t.getHandlerFunction()==='freemapExportReport') ScriptApp.deleteTrigger(t); });
   ScriptApp.newTrigger('freemapExportReport').timeBased().everyWeeks(1).onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7).create();
   Logger.log('Weekly field-maps export trigger installed (Mondays ~7am PNG).');
+}
+
+/* ─── Turn on all the reports at once ───────────────────────────────────────
+ * One call installs every reporting trigger so the data stops sitting idle and
+ * starts arriving in inboxes on a schedule. Idempotent: each install*Trigger()
+ * removes its own existing trigger first, so running this again just refreshes
+ * them. Data feeds (prices, disturbances) are NOT touched here — install those
+ * separately (installPricesTrigger / installDisturbanceFeedTrigger). */
+function installAllReportTriggers() {
+  var jobs = [
+    ['Distribution',     installMonthlyDistributionTrigger],
+    ['Livelihood',       installLivelihoodReportsTrigger],
+    ['Local prices',     installLocalPricesTrigger],
+    ['Consultant',       installConsultantReportsTrigger],
+    ['Field officer',    installFieldOfficerReportsTrigger],
+    ['Clan compliance',  installClanComplianceTrigger],
+    ['Annual compliance',installAnnualComplianceTrigger],
+    ['Water quality',    installWaterQualityTrigger],
+    ['Upload activity',  installUploadActivityTrigger],
+    ['Field maps',       installFreemapExportTrigger]
+  ];
+  var done = [], failed = [];
+  jobs.forEach(function(j){
+    try { j[1](); done.push(j[0]); }
+    catch (e) { failed.push(j[0] + ' (' + e + ')'); }
+  });
+  Logger.log('Report triggers installed: ' + done.length + ' ok' + (failed.length ? (', ' + failed.length + ' failed: ' + failed.join(', ')) : ''));
+  return { status:'ok', installed: done, failed: failed };
 }

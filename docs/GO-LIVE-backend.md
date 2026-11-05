@@ -105,7 +105,12 @@ Each installs a time-based trigger. Install only the ones you want running now.
 | `installClanComplianceTrigger()` | Clan compliance rollup. |
 | `installAnnualComplianceTrigger()` | Annual compliance (fire/deforestation dimension). |
 | `installWaterQualityTrigger()` | Water quality trend report. |
-| `installUploadActivityTrigger()` | **Weekly** "what has been uploaded" digest — per steward, record counts by activity type, latest upload. **No photos/video.** Mondays ~7am PNG. Run `uploadActivityReport()` from the editor any time for an on-demand copy (`'weekly'` default, or `'monthly'`/`'all'`). |
+| `installUploadActivityTrigger()` | **Weekly** "what has been uploaded" digest — per steward, record counts by activity type, a few content highlights, latest upload. **No photos/video.** Mondays ~7am PNG. Run `uploadActivityReport()` any time (`'weekly'` default, or `'monthly'`/`'all'`). |
+| `installFreemapExportTrigger()` | **Weekly** field‑mapping export — every mapped point/line/area → a **KML** (opens in Google Earth) and a **GeoJSON** (QGIS/database), in `_reports/field_maps/<date>/`, plus a summary. Mondays ~7am PNG. Run `freemapExportReport()` any time. |
+
+**Shortcut — turn them all on at once:** run **`installAllReportTriggers()`** once. It installs every reporting trigger in this table (idempotent — safe to re‑run). Data feeds (`installPricesTrigger`, `installDisturbanceFeedTrigger`) are separate and not touched by it.
+
+The **local‑prices** workbook now has two tabs: the full ledger plus a **"By commodity"** analysis (witnessed vs buyer‑announced, min/avg/max, never mixing per‑kg and per‑bag) — the start of a local fair‑price picture.
 
 ---
 

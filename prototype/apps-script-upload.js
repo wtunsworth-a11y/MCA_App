@@ -1866,9 +1866,21 @@ function doPost(e) {
 }
 
 /* ─── GET endpoint: ping, zones, reports ───────────────────────────── */
+/* ── Backend version — BUMP THIS whenever you paste a new copy, so you can
+ * always confirm what is actually deployed. Check it two ways:
+ *   • open  <your web-app URL>?action=version  in a browser, or
+ *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
+ * If this doesn't match the file you were given, the deploy is stale. */
+var BACKEND_VERSION = '2026-11-05.1 — media-separated uploads · reports suite · consent · idempotent files';
+function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
+
 function doGet(e) {
   var action = (e.parameter && e.parameter.action) || 'ping';
 
+  if (action === 'version') {
+    return ContentService.createTextOutput(JSON.stringify({ status:'ok', version: BACKEND_VERSION }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
   if (action === 'zones')  { return getZoneList();  }
   if (action === 'topics') { return getTopicList(); }
   if (action === 'water_sources') { return getWaterSources(); }

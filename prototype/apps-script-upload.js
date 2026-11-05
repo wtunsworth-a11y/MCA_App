@@ -1787,6 +1787,12 @@ function doPost(e) {
     if (body._action === 'media') {
       return ContentService.createTextOutput(JSON.stringify(storeMediaFile(body))).setMimeType(ContentService.MimeType.JSON);
     }
+    /* Mint a RESUMABLE upload session for a LARGE file (video). The phone then
+     * streams the file straight to Drive on the returned URL, bypassing the
+     * ~50 MB request limit of this relay. */
+    if (body._action === 'media_session') {
+      return ContentService.createTextOutput(JSON.stringify(createMediaSession(body))).setMimeType(ContentService.MimeType.JSON);
+    }
 
     /* Normal steward data upload */
     var folder = getDataFolder();
@@ -1871,7 +1877,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-05.1 — media-separated uploads · reports suite · consent · idempotent files';
+var BACKEND_VERSION = '2026-11-05.2 — + resumable direct-to-Drive for large media (video)';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {
@@ -2083,6 +2089,51 @@ function storeMediaFile(body) {
     var url  = _saveMedia(mediaFolder, name, body.data);   /* idempotent */
     if (!url) return { status: 'error', message: 'bad media data' };
     return { status: 'ok', file: name, url: url };
+  } catch (err) {
+    return { status: 'error', message: err.toString() };
+  }
+}
+
+/* Mint a RESUMABLE Drive upload session for one large file (video) and return
+ * the session URL. The phone streams the bytes straight to Drive on that URL
+ * (chunked, resumable), so a big file never passes through this script's ~50 MB
+ * request limit. Idempotent: if the file already exists, say so and the phone
+ * skips re-uploading it.
+ * Needs the Drive OAuth scope — already granted because the script uses
+ * DriveApp. If session init returns 401/403, add
+ * "https://www.googleapis.com/auth/drive" to the manifest's oauthScopes and
+ * re-authorise once. */
+function createMediaSession(body) {
+  try {
+    if (!body || !body.name) return { status: 'error', message: 'missing name' };
+    var folder = getDataFolder();
+    var zoneId   = (body.steward && body.steward.zone_id) || '';
+    var zoneName = (body.steward && body.steward.zone)    || '';
+    var zoneDir  = zoneId ? (zoneId + '_' + zoneName.replace(/\s+/g, '_')) : 'Unzoned';
+    var zoneFolder  = getOrCreateFolder(zoneDir, folder);
+    var sid         = (body.steward && body.steward.stewardId) || 'UNKNOWN';
+    var stewardName = (body.steward && body.steward.name)      || 'Unknown';
+    var subFolder   = getOrCreateFolder(sid + '_' + stewardName.replace(/\s+/g, '_'), zoneFolder);
+    var mediaFolder = getOrCreateFolder('media', subFolder);
+    var name = String(body.name).replace(/[^A-Za-z0-9_.\-]/g, '_');
+    var ex = mediaFolder.getFilesByName(name);
+    if (ex.hasNext()) return { status: 'ok', existed: true, file: name, url: ex.next().getUrl() };
+    var mime  = body.mimeType || 'application/octet-stream';
+    var token = ScriptApp.getOAuthToken();
+    var meta  = { name: name, parents: [mediaFolder.getId()], mimeType: mime };
+    var resp = UrlFetchApp.fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable', {
+      method: 'post',
+      contentType: 'application/json; charset=UTF-8',
+      headers: { 'Authorization': 'Bearer ' + token, 'X-Upload-Content-Type': mime },
+      payload: JSON.stringify(meta),
+      muteHttpExceptions: true
+    });
+    var code = resp.getResponseCode();
+    if (code < 200 || code >= 300) return { status: 'error', message: 'session init ' + code + ': ' + String(resp.getContentText()).slice(0, 180) };
+    var hdr = resp.getAllHeaders() || {};
+    var loc = hdr['Location'] || hdr['location'] || '';
+    if (!loc) return { status: 'error', message: 'no session URL returned by Drive' };
+    return { status: 'ok', session: loc, file: name };
   } catch (err) {
     return { status: 'error', message: err.toString() };
   }

@@ -10901,14 +10901,13 @@ function distUndertakingToggle(){
 function distVideo(input){
   var f=input.files&&input.files[0]; if(!f) return;
   var mb=f.size/1048576;
-  var reader=new FileReader();
-  reader.onload=function(e){
-    window._distVideo=e.target.result; window._distVideoMeta=mb.toFixed(1)+' MB';
-    var box=document.getElementById('distVideoBox');
-    if(box){ box.innerHTML=icon('checkcircle',18)+'&nbsp; Video attached ('+window._distVideoMeta+')'; box.style.borderColor='#26A69A'; box.style.color='#00695C'; }
-    if(mb>35) toast('That video is large ('+window._distVideoMeta+') — it may be slow to upload. A 10–20s clip is best.');
-  };
-  reader.readAsDataURL(f);
+  /* Keep the File/Blob itself — NOT a base64 data URI. Base64 would inflate it
+     ~33% and a big video would overwhelm the phone's memory. Stored as a Blob,
+     it rides to Drive by resumable direct upload at full quality. */
+  window._distVideo=f; window._distVideoMeta=mb.toFixed(1)+' MB';
+  var box=document.getElementById('distVideoBox');
+  if(box){ box.innerHTML=icon('checkcircle',18)+'&nbsp; Video attached ('+window._distVideoMeta+')'; box.style.borderColor='#26A69A'; box.style.color='#00695C'; }
+  if(mb>80) toast('Large video ('+window._distVideoMeta+') — it uploads straight to Drive and may take a while on slow signal.');
 }
 function distVerifyFp(){
   webAuthnVerify({ btnId:'distFpBtn', txtId:'distFpTxt', setVerified:function(v){ window._distVerified=v; var sb=document.getElementById('distSubmitBtn'); if(sb) sb.disabled=!v; }, onSuccess:function(){ var sb=document.getElementById('distSubmitBtn'); if(sb) sb.disabled=false; } });
@@ -11976,7 +11975,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v119'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v120'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -14058,6 +14057,9 @@ function _buildUploadManifest() {
             var r = c.value;
             if (r && !r.synced) {
               var bytes = 0; try { bytes = JSON.stringify(r).length; } catch(_) { bytes = 0; }
+              /* JSON.stringify ignores Blob bytes (a stored video) — add them so
+                 the size shown in the list is real. */
+              try { var _mb=[]; _collectMedia(r,_mb); for (var _j=0;_j<_mb.length;_j++){ var _v=_mb[_j].obj[_mb[_j].key]; if (_v instanceof Blob) bytes += _v.size; } } catch(_e){}
               manifest.push({ store: store, id: c.primaryKey, label: _recLabelFrom(store, r),
                               bytes: bytes, uid: (r.record_uid || r.uid || ('id'+c.primaryKey)) });
             }
@@ -14119,7 +14121,7 @@ function _uploadOne(i) {
   _uploadRecord(m, function(ok){
     if (ok) { m._done=true; _setRowStat(i,'✓','#A5D6A7'); _rowDone(i); _afterUploadsSettle(); }
     else { _setRowStat(i,'✗','#EF9A9A'); if (b) { b.disabled=false; b.textContent='Retry'; } }
-  });
+  }, function(pct){ _setRowStat(i, pct+'%', '#FFF59D'); });
 }
 
 function _uploadSelected() {
@@ -14147,7 +14149,7 @@ function _uploadSelected() {
       else { failed++; _setRowStat(i,'✗','#EF9A9A'); if (b) { b.disabled=false; b.textContent='Retry'; } }
       if (bar) bar.style.width = Math.round(done/total*100) + '%';
       step();
-    });
+    }, function(pct){ _setRowStat(i, pct+'%', '#FFF59D'); });
   }
   step();
 }
@@ -14183,13 +14185,15 @@ function _getOneRecord(store, id, cb) {
   });
 }
 
-/* Walk a record and list every embedded photo/video (data: URI), wherever it
-   sits — a field, an array, a nested object (handover slots, gate selfies…). */
+/* Walk a record and list every embedded photo/video — a data: URI string OR a
+   Blob/File (a large video is stored as a Blob to avoid base64 memory bloat) —
+   wherever it sits (field, array, nested object, handover slots, gate selfies). */
 function _collectMedia(node, out) {
-  if (node == null) return;
+  if (node == null || node instanceof Blob) return;
   if (Array.isArray(node)) {
     for (var i=0;i<node.length;i++){ var v=node[i];
       if (typeof v==='string' && /^data:(image|video)\//.test(v)) out.push({obj:node,key:i});
+      else if (v instanceof Blob) out.push({obj:node,key:i});
       else if (v && typeof v==='object') _collectMedia(v, out);
     }
     return;
@@ -14197,35 +14201,45 @@ function _collectMedia(node, out) {
   if (typeof node==='object') {
     for (var k in node){ if(!Object.prototype.hasOwnProperty.call(node,k)) continue; var v2=node[k];
       if (typeof v2==='string' && /^data:(image|video)\//.test(v2)) out.push({obj:node,key:k});
+      else if (v2 instanceof Blob) out.push({obj:node,key:k});
       else if (v2 && typeof v2==='object') _collectMedia(v2, out);
     }
   }
 }
 
-/* Upload ONE record: its photos first (each as its own full-quality file), then
-   the small text record referencing them. One photo in memory at a time. */
-function _uploadRecord(item, cb) {
+/* Media this size or bigger goes DIRECT to Drive (resumable), bypassing the
+   ~50 MB relay limit; smaller media rides the relay as its own file. */
+var RESUMABLE_MIN_BYTES = 10 * 1048576;
+
+/* Upload ONE record: its media first (each as its own full-quality file — small
+   ones via the relay, large ones / videos streamed DIRECT to Drive), then the
+   small text record referencing them. One media item in memory at a time. */
+function _uploadRecord(item, cb, onProgress) {
   _getOneRecord(item.store, item.id, function(rec) {
     if (!rec) { cb(false); return; }
     if (rec.clock_ok === false) {
       try { var br = _computeDateBracket(rec); rec.date_review = br; window._dateReviewQueue.push(_dateReviewEntry(item.store, rec, br, window._uploadProfile||{})); } catch(_){}
     }
     /* gate/login selfies keep their photo embedded so the backend still files
-       them in the dedicated _gate_selfies/ audit folder (they're small face
-       photos — no memory concern); everything else separates its media. */
+       them in the dedicated _gate_selfies/ audit folder (they're small). */
     var media = []; if (item.store !== 'gate_selfies') _collectMedia(rec, media);
     var mi = 0, n = 0;
     function nextMedia() {
       if (mi >= media.length) return sendChunk();
       var loc = media[mi++];
       var val = loc.obj[loc.key];
-      var ext = /^data:video\//.test(val) ? 'mp4' : 'jpg';
-      var name = String(item.uid).replace(/[^A-Za-z0-9_-]/g,'_') + '_' + (n++) + '.' + ext;
-      _postMedia(name, val, item.uid, function(ok, savedName){
-        if (!ok) { cb(false); return; }         /* a photo failed → whole record fails; retry later */
-        loc.obj[loc.key] = { _media: (savedName || name) };   /* swap the blob for a reference, freeing it */
-        nextMedia();
-      });
+      var isBlob = (val instanceof Blob);
+      var size   = isBlob ? val.size : Math.floor((val.length || 0) * 0.75);
+      var mime   = isBlob ? (val.type || 'application/octet-stream') : (((val.match(/^data:([^;]+)/) || [])[1]) || 'application/octet-stream');
+      var name   = String(item.uid).replace(/[^A-Za-z0-9_-]/g,'_') + '_' + (n++) + '.' + _extFromMime(mime);
+      function done(ok, savedName){ if (!ok) { cb(false); return; } loc.obj[loc.key] = { _media:(savedName || name) }; nextMedia(); }
+      if (isBlob || size >= RESUMABLE_MIN_BYTES) {
+        var blob = isBlob ? val : _dataUriToBlobCli(val);
+        if (!blob) { cb(false); return; }
+        _resumableUpload(name, mime, blob, item.uid, done, onProgress);
+      } else {
+        _postMedia(name, val, item.uid, done);
+      }
     }
     function sendChunk() {
       var mods = {}; mods[item.store] = [rec];
@@ -14253,6 +14267,95 @@ function _postMedia(name, dataUri, recordUid, cb) {
   }
   function retry() { if (tries < max) setTimeout(attempt, 1000 * Math.pow(2, tries)); else cb(false); }
   attempt();
+}
+
+/* ── Resumable DIRECT-to-Drive upload for large media (video) ──────────────
+   The script mints an upload session (action media_session); the phone PUTs the
+   bytes straight to Drive on that URL, in 8 MB chunks, resuming after a drop —
+   no base64, no relay size limit. Relies on CORS being allowed on Google's
+   upload endpoint: verify on a real phone. If it's blocked, large media simply
+   won't go up (small files via the relay are unaffected). */
+function _resumableUpload(name, mime, blob, recordUid, cb, onProgress) {
+  var body = JSON.stringify({ _action:'media_session', _secret:UPLOAD_SECRET, steward: window._uploadSteward, record_uid: recordUid, name: name, mimeType: mime });
+  _postJsonAction(body, function(d){
+    if (!d) { cb(false); return; }
+    if (d.status === 'ok' && d.existed) { if (onProgress) onProgress(100); cb(true, d.file); return; }
+    if (d.status !== 'ok' || !d.session) { cb(false); return; }
+    _putResumable(d.session, blob, function(ok){ cb(ok, d.file || name); }, onProgress);
+  });
+}
+function _postJsonAction(body, cb) {
+  var tries = 0, max = 3;
+  function attempt() { tries++;
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var to = setTimeout(function(){ if (ctrl){ try{ctrl.abort();}catch(_){} } }, 30000);
+    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: body, signal: ctrl?ctrl.signal:undefined })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ clearTimeout(to); cb(d); })
+      .catch(function(){ clearTimeout(to); if (tries<max) setTimeout(attempt, 1000*Math.pow(2,tries)); else cb(null); });
+  }
+  attempt();
+}
+function _putResumable(uri, blob, cb, onProgress) {
+  var CHUNK = 8 * 1048576, total = blob.size, offset = 0, tries = 0;
+  function send() {
+    var end = Math.min(offset + CHUNK, total);
+    var part = blob.slice(offset, end);
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var to = setTimeout(function(){ if (ctrl){ try{ctrl.abort();}catch(_){} } }, 120000);
+    fetch(uri, { method:'PUT', headers:{ 'Content-Range':'bytes '+offset+'-'+(end-1)+'/'+total }, body: part, signal: ctrl?ctrl.signal:undefined })
+      .then(function(r){ clearTimeout(to);
+        if (r.status === 200 || r.status === 201) { if (onProgress) onProgress(100); cb(true); return; }
+        if (r.status === 308) {
+          tries = 0;
+          var range = r.headers.get('Range');
+          var m = range && range.match(/-(\d+)\s*$/);
+          offset = m ? (parseInt(m[1],10) + 1) : end;
+          if (onProgress) onProgress(Math.min(99, Math.round(offset / total * 100)));
+          send(); return;
+        }
+        retry();
+      })
+      .catch(function(){ clearTimeout(to); retry(); });
+  }
+  function retry() {
+    tries++;
+    if (tries > 4) { cb(false); return; }
+    setTimeout(function(){ _resumeQuery(uri, total, function(off){
+      if (off < 0) { cb(false); return; }
+      if (off >= total) { cb(true); return; }
+      offset = off; send();
+    }); }, 1000 * Math.pow(2, tries));
+  }
+  send();
+}
+function _resumeQuery(uri, total, cb) {
+  var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var to = setTimeout(function(){ if (ctrl){ try{ctrl.abort();}catch(_){} } }, 30000);
+  fetch(uri, { method:'PUT', headers:{ 'Content-Range':'bytes */'+total }, signal: ctrl?ctrl.signal:undefined })
+    .then(function(r){ clearTimeout(to);
+      if (r.status === 200 || r.status === 201) { cb(total); return; }
+      if (r.status === 308) { var range = r.headers.get('Range'); var m = range && range.match(/-(\d+)\s*$/); cb(m ? parseInt(m[1],10)+1 : 0); return; }
+      cb(-1);
+    })
+    .catch(function(){ clearTimeout(to); cb(-1); });
+}
+function _dataUriToBlobCli(uri) {
+  try { var m = String(uri).match(/^data:([^;]+);base64,([\s\S]*)$/); if (!m) return null;
+    var bin = atob(m[2]), len = bin.length, arr = new Uint8Array(len);
+    for (var i=0;i<len;i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: m[1] });
+  } catch (e) { return null; }
+}
+function _extFromMime(mime) {
+  var m = (mime || '').toLowerCase();
+  if (m.indexOf('jpeg')>=0 || m.indexOf('jpg')>=0) return 'jpg';
+  if (m.indexOf('png')>=0)  return 'png';
+  if (m.indexOf('webm')>=0) return 'webm';
+  if (m.indexOf('mp4')>=0)  return 'mp4';
+  if (m.indexOf('quicktime')>=0 || m.indexOf('mov')>=0) return 'mov';
+  if (m.indexOf('3gpp')>=0) return '3gp';
+  return (m.split('/')[1] || 'bin').replace(/[^a-z0-9]/g,'').slice(0,5) || 'bin';
 }
 
 /* POST one small text record file, 45s timeout + 3 tries with backoff. */

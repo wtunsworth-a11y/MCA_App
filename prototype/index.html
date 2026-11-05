@@ -3870,6 +3870,7 @@ select.msel {
           </div>
           <div class="version">v1.0.0-prototype &nbsp;|&nbsp; MCApp</div>
           <div class="version" id="appBuildLine" style="margin-top:-8px;"></div>
+          <button class="btn-outline" id="checkUpdateBtn" style="width:100%;margin-bottom:8px;border-color:#1B5E20;color:#1B5E20;" onclick="checkForAppUpdate()"><span data-icon="upload" data-size="14"></span> Check for updates</button>
           <button class="btn-outline-red" onclick="toast('Logging out…');setTimeout(()=>{showScreen('screen-fingerprint')},950)">Logout</button>
         </div>
       </div>
@@ -11817,6 +11818,32 @@ function submitMeteo() {
 }
 
 
+/* Manual "check for updates" — field officers (and the coordinator) can pull
+   the newest build on demand instead of waiting for the app to notice on focus.
+   Asks the service worker to re-check: a new version applies and reloads,
+   otherwise we confirm they are already on the latest build. */
+function checkForAppUpdate(){
+  var btn=document.getElementById('checkUpdateBtn');
+  var reset=function(){ if(btn){ btn.disabled=false; btn.innerHTML=''+icon('upload',13)+' Check for updates'; } };
+  if(!('serviceWorker' in navigator)){ toast('Updates are not supported on this browser.'); return; }
+  if(!navigator.onLine){ toast('You’re offline — connect to the internet to check.'); return; }
+  if(btn){ btn.disabled=true; btn.textContent='Checking…'; }
+  navigator.serviceWorker.getRegistration().then(function(reg){
+    if(!reg){ reset(); toast('Reopen the app online once to enable updates.'); return; }
+    if(reg.waiting){ reg.waiting.postMessage({type:'SKIP_WAITING'}); toast('Update found — restarting…'); return; }
+    var applying=false;
+    reg.addEventListener('updatefound', function(){
+      var nw=reg.installing; if(!nw) return;
+      nw.addEventListener('statechange', function(){
+        if(nw.state==='installed' && navigator.serviceWorker.controller){ applying=true; nw.postMessage({type:'SKIP_WAITING'}); toast('Update found — restarting…'); }
+      });
+    });
+    reg.update().then(function(){
+      setTimeout(function(){ if(!applying && !reg.waiting && !reg.installing){ reset(); toast('You’re on the latest (' + APP_BUILD + ').'); } }, 3000);
+    }).catch(function(){ reset(); toast('Could not check — try again.'); });
+  }).catch(function(){ reset(); toast('Could not check — try again.'); });
+}
+
 /* ══════════════════════════════════════
    PWA: Service Worker Registration
 ══════════════════════════════════════ */
@@ -11911,7 +11938,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v114'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v115'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

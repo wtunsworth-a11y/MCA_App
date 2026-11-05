@@ -5609,6 +5609,31 @@ select.msel {
                 <button type="button" class="btn btn-primary" style="flex:1.4;" onclick="addParticipant()">Add to register</button>
               </div>
             </div>
+
+            <!-- No-attendance toggle -->
+            <div id="trainingNoShowToggle" style="text-align:center;margin-top:12px;padding-top:10px;border-top:1px dashed #E0D6EC;">
+              <button type="button" style="font-size:0.78rem;color:#B45309;background:none;border:none;padding:4px;cursor:pointer;" onclick="trainingMarkNoShow()">No one turned up to this session?</button>
+            </div>
+
+            <!-- No-attendance panel -->
+            <div id="trainingNoShowPanel" style="display:none;border:1px solid #F0C98A;background:#FDF6EC;border-radius:10px;padding:12px;margin-top:10px;">
+              <div style="font-weight:700;font-size:0.84rem;color:#B45309;margin-bottom:4px;">⚠ No participants attended</div>
+              <div style="font-size:0.74rem;color:#8a6a3a;margin-bottom:10px;line-height:1.4;">Record that the session was arranged but no one came. A photo at the venue and your location are still captured below.</div>
+              <label class="form-label">What happened?</label>
+              <div id="noShowReasonPills" style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px;">
+                <button type="button" class="weather-pill" data-r="Rain / bad weather" style="font-size:0.73rem;padding:5px 9px;" onclick="noShowSetReason('Rain / bad weather',this)">Rain / bad weather</button>
+                <button type="button" class="weather-pill" data-r="Community event or funeral" style="font-size:0.73rem;padding:5px 9px;" onclick="noShowSetReason('Community event or funeral',this)">Community event or funeral</button>
+                <button type="button" class="weather-pill" data-r="Clashed with another activity" style="font-size:0.73rem;padding:5px 9px;" onclick="noShowSetReason('Clashed with another activity',this)">Clashed with another activity</button>
+                <button type="button" class="weather-pill" data-r="Venue not available" style="font-size:0.73rem;padding:5px 9px;" onclick="noShowSetReason('Venue not available',this)">Venue not available</button>
+                <button type="button" class="weather-pill" data-r="Participants did not come" style="font-size:0.73rem;padding:5px 9px;" onclick="noShowSetReason('Participants did not come',this)">Participants did not come</button>
+                <button type="button" class="weather-pill" data-r="Other" style="font-size:0.73rem;padding:5px 9px;" onclick="noShowSetReason('Other',this)">Other</button>
+              </div>
+              <div class="form-group" style="margin-bottom:6px;">
+                <label class="form-label">Notes <span style="color:#999;font-weight:400;">(what happened)</span></label>
+                <textarea id="noShowNotes" class="form-input" rows="2" placeholder="Briefly describe what happened"></textarea>
+              </div>
+              <button type="button" style="font-size:0.76rem;color:#5C3D7A;background:none;border:none;padding:4px;cursor:pointer;" onclick="trainingUnmarkNoShow()">↩ People did come — go back to the register</button>
+            </div>
           </div>
 
           <!-- Materials provided (field officer only) -->
@@ -15060,7 +15085,8 @@ function loadTrainingSessions(filter) {
       var emoji = TRAINING_TYPES[r.type||'Other'] || icon('document',16);
       var paxTotal = (parseInt(r.pax_female)||0) + (parseInt(r.pax_male)||0);
       var youth = parseInt(r.pax_youth)||0;
-      h += '<div style="background:#fff;border:1px solid #eee;border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:4px solid #5C3D7A;">';
+      var noShow = (r.outcome === 'no_attendance' || r.attendance_status === 'no_attendance');
+      h += '<div style="background:#fff;border:1px solid #eee;border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:4px solid '+(noShow?'#B45309':'#5C3D7A')+';">';
       h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">';
       h += '<div style="font-size:1.2rem;flex-shrink:0;">' + emoji + '</div>';
       h += '<div style="flex:1;">';
@@ -15073,9 +15099,14 @@ function loadTrainingSessions(filter) {
       h += '</div>';
       h += '</div>';
       h += '<div style="text-align:right;flex-shrink:0;">';
-      h += '<div style="font-size:1.1rem;font-weight:800;color:#5C3D7A;">' + paxTotal + '</div>';
-      h += '<div style="font-size:0.6rem;color:#aaa;">participants</div>';
-      if (youth > 0) h += '<div style="font-size:0.65rem;color:#888;margin-top:2px;">' + youth + ' youth</div>';
+      if (noShow) {
+        h += '<div style="font-size:0.66rem;font-weight:700;color:#B45309;background:#FDF6EC;border:1px solid #F0C98A;border-radius:999px;padding:2px 8px;white-space:nowrap;">No attendance</div>';
+        if (r.no_show_reason) h += '<div style="font-size:0.62rem;color:#8a6a3a;margin-top:4px;max-width:120px;">' + _esc(r.no_show_reason) + '</div>';
+      } else {
+        h += '<div style="font-size:1.1rem;font-weight:800;color:#5C3D7A;">' + paxTotal + '</div>';
+        h += '<div style="font-size:0.6rem;color:#aaa;">participants</div>';
+        if (youth > 0) h += '<div style="font-size:0.65rem;color:#888;margin-top:2px;">' + youth + ' youth</div>';
+      }
       h += '</div></div>';
       if (r.trainer_name) {
         h += '<div style="font-size:0.72rem;color:#666;margin-top:6px;border-top:1px solid #f0f0f0;padding-top:6px;">';
@@ -15240,6 +15271,7 @@ function initTrainingRecord() {
      signatures if the screen was left and re-entered), then render. */
   _trainingRoster = _loadRosterDraft();
   partCancelAdd();            /* ensure the add-form starts closed + cleared */
+  trainingUnmarkNoShow();     /* start in normal (attendance) mode */
   renderRegister();
   /* Populate the zone picker in the add-form (clans are tiered off it). */
   var pz = document.getElementById('partZone');
@@ -15485,6 +15517,44 @@ function _clearRosterDraft(){ try{ localStorage.removeItem(ROSTER_DRAFT_KEY); }c
 /* Back-compat shim: a few callers still invoke updatePaxTotal(). */
 function updatePaxTotal() { renderRegister(); }
 
+/* ── No-attendance ("failed event") ──────────────────────────────────────
+   A session was arranged but no participants came. We still require the live
+   venue photo + GPS already captured for every record (that is the evidence
+   the trainer was actually there), plus a plain description of what happened.
+   The record is flagged for independent verification on the backend — the
+   form never shows that, per the project's "ask the question, not the
+   consequence" rule. ───────────────────────────────────────────────────── */
+window._trainingNoShow = false;
+window._noShowReason = '';
+
+function trainingMarkNoShow() {
+  if (_trainingRoster.length > 0) {
+    toast('This session already has participants — remove them to mark no-attendance.');
+    return;
+  }
+  window._trainingNoShow = true;
+  _setVisible('trainingRosterList', false);
+  _setVisible('trainingAddBtn', false);
+  _setVisible('trainingAddForm', false);
+  _setVisible('trainingNoShowToggle', false);
+  _setVisible('trainingNoShowPanel', true);
+}
+function trainingUnmarkNoShow() {
+  window._trainingNoShow = false;
+  window._noShowReason = '';
+  var n = document.getElementById('noShowNotes'); if (n) n.value = '';
+  document.querySelectorAll('#noShowReasonPills .weather-pill').forEach(function(b){ b.classList.remove('active'); b.style.background=''; b.style.color=''; });
+  _setVisible('trainingNoShowPanel', false);
+  _setVisible('trainingRosterList', true);
+  _setVisible('trainingAddBtn', true);
+  _setVisible('trainingNoShowToggle', true);
+}
+function noShowSetReason(r, btn) {
+  window._noShowReason = r;
+  document.querySelectorAll('#noShowReasonPills .weather-pill').forEach(function(b){ b.classList.remove('active'); b.style.background=''; b.style.color=''; });
+  btn.classList.add('active'); btn.style.background='#B45309'; btn.style.color='#fff';
+}
+
 function selectTrainingType(type, btn) {
   selectedTrainingType = type;
   document.querySelectorAll('#trainingTypePills .weather-pill').forEach(function(b) {
@@ -15521,12 +15591,22 @@ function submitTrainingRecord() {
   if (!type)  { toast('Please select a training type'); return; }
   if (!topic) { toast('Please enter the session topic'); return; }
   if (!date)  { toast('Please select a date'); return; }
-  /* A live photo is required for EVERY training record (proof it happened). */
-  if (!_trainingPhotoData) { toast('A live photo of the training is required.'); return; }
-  /* At least one participant must be in the register (attendance is the record). */
-  if (_trainingRoster.length === 0) { toast('Add at least one participant to the register.'); return; }
+  /* A live photo is required for EVERY training record — including a no-show,
+     where the venue photo + GPS are the evidence the trainer was there. */
+  if (!_trainingPhotoData) {
+    toast(window._trainingNoShow ? 'A live photo at the venue is required.' : 'A live photo of the training is required.');
+    return;
+  }
 
-  var t = registerTotals();
+  var noShow = !!window._trainingNoShow;
+  if (noShow) {
+    if (!window._noShowReason) { toast('Choose what happened (no participants).'); return; }
+  } else {
+    /* At least one participant must be in the register (attendance is the record). */
+    if (_trainingRoster.length === 0) { toast('Add at least one participant, or tap “No one turned up”.'); return; }
+  }
+
+  var t = noShow ? { total:0, female:0, male:0, youth:0, middle:0, older:0 } : registerTotals();
   var record = {
     type: type,
     topic: topic,
@@ -15535,6 +15615,12 @@ function submitTrainingRecord() {
     trainer_name: (document.getElementById('trainerName').value||'').trim(),
     trainer_org: (document.getElementById('trainerOrg').value||'').trim(),
     location: (document.getElementById('trainingLocation').value||'').trim(),
+    /* Outcome: held vs arranged-but-no-attendance (flagged for verification). */
+    outcome: noShow ? 'no_attendance' : 'held',
+    attendance_status: noShow ? 'no_attendance' : 'held',
+    no_show_reason: noShow ? window._noShowReason : '',
+    no_show_notes: noShow ? (document.getElementById('noShowNotes').value||'').trim() : '',
+    needs_verification: noShow,
     /* Counts derived from the digital register (reports use these; names held for audit) */
     pax_total: t.total,
     pax_female: t.female,
@@ -15542,7 +15628,7 @@ function submitTrainingRecord() {
     pax_youth: t.youth,
     pax_middle: t.middle,
     pax_older: t.older,
-    participants: _trainingRoster.slice(),
+    participants: noShow ? [] : _trainingRoster.slice(),
     materials: selectedMaterials.slice(),
     topics_covered: (document.getElementById('trainingTopics').value||'').trim(),
     outcomes: (document.getElementById('trainingOutcomes').value||'').trim(),
@@ -15562,7 +15648,7 @@ function submitTrainingRecord() {
 
   saveRecord('training', record, function() {
     clearDraft('screen-training-record');
-    toast('Training session saved ✓');
+    toast(noShow ? 'No-attendance record saved ✓' : 'Training session saved ✓');
     /* Clear form */
     ['trainingTopic','trainingDuration','trainerName','trainerOrg','trainingLocation',
      'trainingTopics','trainingOutcomes',
@@ -15578,8 +15664,8 @@ function submitTrainingRecord() {
     document.querySelectorAll('#screen-training-record .weather-pill[onclick^="toggleMaterial"]').forEach(function(b) {
       b.classList.remove('active'); b.style.background = ''; b.style.color = '';
     });
-    /* Reset the register for the next session */
-    _trainingRoster = []; _clearRosterDraft(); partCancelAdd(); renderRegister();
+    /* Reset the register + no-show state for the next session */
+    _trainingRoster = []; _clearRosterDraft(); partCancelAdd(); trainingUnmarkNoShow(); renderRegister();
     /* Go back to list */
     setTimeout(function() { nav('screen-training-setup'); }, 800);
   });

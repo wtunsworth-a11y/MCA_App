@@ -1839,6 +1839,11 @@ function doPost(e) {
      * person as having uploaded). Never fails the upload. */
     try { if (body.steward && body.steward.stewardId) registerEnrolment(body.steward, true); } catch(e) {}
 
+    /* A no-attendance ("failed") training event → queue it for independent
+     * verification by the field-reports lead and send one alert. Never fails
+     * the upload. */
+    try { queueNoAttendanceVerification(body); } catch(e) {}
+
     /* Extract any gate/login face photos (selfie-verified phones) into a
      * reviewable per-steward folder, so the coordinator has an audit trail
      * without digging through the raw upload JSON. Never fails the upload. */
@@ -1877,7 +1882,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-05.3 — + 182 clans by zone (Kiara Forum); run seedClans()';
+var BACKEND_VERSION = '2026-11-05.4 — no-attendance verification queue + alert to field-reports lead';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {
@@ -2046,6 +2051,98 @@ function _pngDate(d, fmt) {
   var dt = (d instanceof Date) ? d : new Date(d);
   if (isNaN(dt.getTime())) return '';
   return Utilities.formatDate(dt, 'Pacific/Port_Moresby', fmt || 'yyyy-MM-dd');
+}
+
+/* ─── No-attendance verification queue ──────────────────────────────────
+ * A training session can be recorded as "arranged but no one came"
+ * (outcome:'no_attendance'). Because that is a paid activity with nothing to
+ * show for it, each such record is queued for INDEPENDENT verification by the
+ * field-reports lead (Matilda) — she confirms with the community what actually
+ * happened. The record still carries the trainer's LIVE venue photo + GPS, so
+ * the evidence that they were physically there is already attached.
+ *
+ * Each event becomes one task file in _verification_queue/ (named by chunk_uid,
+ * so a retried upload never re-queues or re-alerts). A newly-queued event also
+ * sends ONE alert email to the verifier. Recipient: _recipients.json
+ * field_reports_to, else REPORT_EMAILS (the review address) until Matilda's is
+ * set. Never throws — a failure here must not fail the upload. */
+function queueNoAttendanceVerification(body) {
+  try {
+    var mods = body && body.modules;
+    var recs = mods && mods.training;
+    if (!recs || !recs.length) return;
+    var sid  = (body.steward && body.steward.stewardId) || 'UNKNOWN';
+    var sName = (body.steward && body.steward.name) || '';
+    var zName = (body.steward && body.steward.zone) || '';
+    var zId   = (body.steward && body.steward.zone_id) || '';
+    var baseUid = body.chunk_uid ? String(body.chunk_uid).replace(/[^A-Za-z0-9_-]/g,'_') : ('' + Date.now());
+
+    for (var i = 0; i < recs.length; i++) {
+      var r = recs[i] || {};
+      if (r.outcome !== 'no_attendance' && r.attendance_status !== 'no_attendance' && !r.needs_verification) continue;
+      if (r.outcome === 'held') continue;
+
+      var qFolder = getOrCreateFolder('_verification_queue', getDataFolder());
+      var qName = 'VQ_' + sid + '_' + baseUid + (recs.length > 1 ? ('_' + i) : '') + '.json';
+      if (qFolder.getFilesByName(qName).hasNext()) continue; /* already queued + alerted */
+
+      var gps = r.gps || null;
+      var mapLink = (gps && gps.lat != null && gps.lng != null) ? ('https://maps.google.com/?q=' + gps.lat + ',' + gps.lng) : '';
+      var photoWhen = r.photo_captured_at ? _pngDate(new Date(r.photo_captured_at), 'd MMM yyyy, HH:mm') + ' (PNG)' : '';
+      var sessionDate = r.date ? _pngDate(new Date(r.date), 'd MMM yyyy') : '';
+
+      var task = {
+        status: 'open',
+        queued_at: new Date().toISOString(),
+        queued_png: _pngDate(new Date(), 'd MMM yyyy, HH:mm') + ' (PNG)',
+        steward_id: sid,
+        trainer_name: r.trainer_name || sName,
+        trainer_org: r.trainer_org || '',
+        zone_id: zId, zone: zName,
+        topic: r.topic || '', type: r.type || '',
+        session_date: r.date || '', session_date_png: sessionDate,
+        location: r.location || '',
+        reason: r.no_show_reason || '',
+        notes: r.no_show_notes || '',
+        gps: gps,
+        map_link: mapLink,
+        photo_captured_at: r.photo_captured_at || '',
+        photo_when_png: photoWhen,
+        photo_on_session_date: (r.photo_on_session_date === true),
+        location_missing: (r.location_missing === true),
+        chunk_uid: body.chunk_uid || ''
+      };
+      qFolder.createFile(qName, JSON.stringify(task, null, 2), MimeType.PLAIN_TEXT);
+
+      /* One alert per newly-queued event. Neutral, factual — asks the lead to
+       * confirm independently; does not pre-judge. */
+      try {
+        var rcp = loadRecipients() || {};
+        var to  = rcp.field_reports_to || (REPORT_EMAILS && REPORT_EMAILS[0]) || '';
+        if (to) {
+          var L = [];
+          L.push('A training session was recorded as ARRANGED BUT NO ONE ATTENDED.');
+          L.push('Please confirm independently with the community what happened.');
+          L.push('');
+          L.push('Trainer:   ' + (task.trainer_name || '(unknown)') + (task.trainer_org ? ' · ' + task.trainer_org : ''));
+          L.push('Steward ID: ' + sid);
+          L.push('Zone:      ' + (task.zone || task.zone_id || '(unknown)'));
+          L.push('Topic:     ' + (task.type ? task.type + ' — ' : '') + (task.topic || '(none given)'));
+          L.push('Date:      ' + (task.session_date_png || task.session_date || '(unknown)'));
+          L.push('Location:  ' + (task.location || '(none given)'));
+          L.push('Reason given: ' + (task.reason || '(none)'));
+          if (task.notes) L.push('Notes:     ' + task.notes);
+          L.push('');
+          L.push('Evidence captured on the phone:');
+          L.push('  Venue photo taken: ' + (task.photo_when_png || '(no timestamp)') + (task.photo_on_session_date ? '' : '  ⚠ not on the session date'));
+          L.push('  Location: ' + (task.map_link || (task.location_missing ? '(no GPS fix — flagged)' : '(none)')));
+          L.push('');
+          L.push('This event is in the _verification_queue folder on Drive (file ' + qName + ').');
+          MailApp.sendEmail(to, 'MCA — verify a no-attendance training event (' + (task.zone || task.zone_id || '') + ')', L.join('\n'));
+        }
+      } catch (mailErr) { /* queued file remains; alert can be resent from the queue */ }
+    }
+  } catch (e) { /* never fail the upload */ }
 }
 
 function _dataUriToBlob(uri, name) {
@@ -3659,6 +3756,45 @@ function installFreemapExportTrigger(){
  * removes its own existing trigger first, so running this again just refreshes
  * them. Data feeds (prices, disturbances) are NOT touched here — install those
  * separately (installPricesTrigger / installDisturbanceFeedTrigger). */
+/* ─── No-attendance verification digest ─────────────────────────────────
+ * Safety net for the per-event alert: once a week, email the field-reports
+ * lead every OPEN no-attendance event still in _verification_queue, so none
+ * is forgotten even if an immediate alert was missed. Mark an item done by
+ * setting "status":"closed" in its queue file (or deleting it). */
+function verificationQueueReport() {
+  var folder = getDataFolder();
+  var open = [];
+  var qFolders = folder.getFoldersByName('_verification_queue');
+  if (qFolders.hasNext()) {
+    var files = qFolders.next().getFiles();
+    while (files.hasNext()) {
+      var f = files.next();
+      try { var t = JSON.parse(f.getBlob().getDataAsString()); if (t && t.status !== 'closed') open.push(t); } catch(e) {}
+    }
+  }
+  var rcp = loadRecipients() || {};
+  var to  = rcp.field_reports_to || (REPORT_EMAILS && REPORT_EMAILS[0]) || '';
+  if (!to) { Logger.log('verificationQueueReport: no recipient set'); return { status:'ok', open: open.length, sent:false }; }
+  if (open.length === 0) { Logger.log('verificationQueueReport: nothing open'); return { status:'ok', open:0, sent:false }; }
+
+  open.sort(function(a,b){ return (b.queued_at||'').localeCompare(a.queued_at||''); });
+  var L = ['Open no-attendance training events awaiting independent verification:', ''];
+  open.forEach(function(t, i){
+    L.push((i+1) + '. ' + (t.session_date_png || t.session_date || '') + ' — ' + (t.type ? t.type + ': ' : '') + (t.topic || '(no topic)'));
+    L.push('   Trainer: ' + (t.trainer_name || '(unknown)') + ' · Zone: ' + (t.zone || t.zone_id || '') + ' · Location: ' + (t.location || '(none)'));
+    L.push('   Reason given: ' + (t.reason || '(none)') + (t.notes ? ' — ' + t.notes : ''));
+    L.push('   Venue photo: ' + (t.photo_when_png || '(no timestamp)') + (t.photo_on_session_date ? '' : ' ⚠ not on session date') + ' · ' + (t.map_link || '(no GPS)'));
+    L.push('');
+  });
+  L.push('To close an item, set "status":"closed" in its file in the _verification_queue folder on Drive.');
+  try { MailApp.sendEmail(to, 'MCA — no-attendance events to verify (' + open.length + ' open)', L.join('\n')); } catch(e) {}
+  return { status:'ok', open: open.length, sent:true };
+}
+function installVerificationDigestTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){ if (t.getHandlerFunction() === 'verificationQueueReport') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('verificationQueueReport').timeBased().everyWeeks(1).onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7).create();
+}
+
 function installAllReportTriggers() {
   var jobs = [
     ['Distribution',     installMonthlyDistributionTrigger],
@@ -3670,7 +3806,8 @@ function installAllReportTriggers() {
     ['Annual compliance',installAnnualComplianceTrigger],
     ['Water quality',    installWaterQualityTrigger],
     ['Upload activity',  installUploadActivityTrigger],
-    ['Field maps',       installFreemapExportTrigger]
+    ['Field maps',       installFreemapExportTrigger],
+    ['No-attendance digest', installVerificationDigestTrigger]
   ];
   var done = [], failed = [];
   jobs.forEach(function(j){

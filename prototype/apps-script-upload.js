@@ -3368,3 +3368,136 @@ function installWaterQualityTrigger() {
   ScriptApp.newTrigger('waterQualityReport').timeBased().onMonthDay(1).atHour(8).create();
   Logger.log('Monthly water-quality trigger installed (1st of month, 8am PNG).');
 }
+
+/* ─── Field-mapping export — freemap uploads → map files people can open ─────
+ * Field officers' biggest output is field mapping (points, walked lines, and
+ * area polygons: gardens, tracks, water points, problems). The raw JSON bundles
+ * aren't viewable, so this turns every freemap record into TWO map files in
+ * Drive — a KML (opens straight in Google Earth / Maps) and a GeoJSON (loads
+ * into QGIS, a database, or a Leaflet map) — plus a one-page summary email.
+ * Photos are deliberately left out of the export (they stay in the source
+ * records); this is the geometry + attributes, so the data can be read and used.
+ *
+ * Run freemapExportReport() from the editor any time, or install the weekly
+ * trigger with installFreemapExportTrigger(). */
+function _xml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _fmMeasure(r){
+  if (r.map_type==='area'){ var ha=(r.area_ha!=null?r.area_ha:0); var m2=(r.area_m2!=null?r.area_m2:Math.round(ha*10000)); return (ha<0.1)?(m2+' m2'):(ha.toFixed(1)+' ha'); }
+  if (r.map_type==='line'){ return (r.length_m||0)+' m'; }
+  return 'point';
+}
+function _fmLonLat(p){ return (p.lon!=null?p.lon:p.lng)+','+p.lat+',0'; }
+function collectFreemap() {
+  var folder = getDataFolder(); var byUid = {};
+  var zones = folder.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next(); if (zf.getName().charAt(0)==='_') continue;
+    var subs = zf.getFolders();
+    while (subs.hasNext()) {
+      var files = subs.next().getFilesByType(MimeType.PLAIN_TEXT);
+      while (files.hasNext()) {
+        var body; try { body = JSON.parse(files.next().getBlob().getDataAsString()); } catch(e){ continue; }
+        var arr = (body.modules && body.modules.freemap) || []; if (!arr.length) continue;
+        var stew = body.steward || {};
+        for (var i=0;i<arr.length;i++){
+          var r = arr[i]; var uid = r.record_uid || r.uid; if (!uid || byUid[uid]) continue;
+          if (r.photo) r.photo = null;                 /* drop media from the export */
+          r._steward_name = stew.name || '';
+          r._steward_id = r.steward || stew.stewardId || '';
+          r._zone = stew.zone || '';
+          byUid[uid] = r;
+        }
+      }
+    }
+  }
+  return Object.keys(byUid).map(function(k){ return byUid[k]; });
+}
+function _freemapKml(recs){
+  var out = ['<?xml version="1.0" encoding="UTF-8"?>',
+    '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>',
+    '<name>MCA Field Maps - '+_pngDate(new Date(),'yyyy-MM-dd')+'</name>',
+    '<Style id="pt"><IconStyle><color>ff578b2e</color></IconStyle></Style>',
+    '<Style id="ln"><LineStyle><color>ff5c6900</color><width>3</width></LineStyle></Style>',
+    '<Style id="ar"><LineStyle><color>ffa86e0b</color><width>2</width></LineStyle><PolyStyle><color>554caf50</color></PolyStyle></Style>'];
+  recs.forEach(function(r){
+    var pts = r.points || []; if (!pts.length) return;
+    var who = (r._steward_name||r._steward_id||'')+(r._steward_id?(' ('+r._steward_id+')'):'');
+    var desc = [
+      (r.category_label||r.category||''),
+      'Mapped by: '+who,
+      'Zone: '+(r._zone||r.clan||''),
+      'Date: '+_pngDate(r.recorded_at?new Date(r.recorded_at):new Date(),'yyyy-MM-dd'),
+      'Size: '+_fmMeasure(r),
+      r.crops?('Crops: '+r.crops):'',
+      (r.garden_owner&&r.garden_owner.name)?('Owner: '+r.garden_owner.name+(r.garden_owner.village?(' - '+r.garden_owner.village):'')):'',
+      r.track_type?('Track: '+r.track_type):'',
+      r.description?('Notes: '+r.description):''
+    ].filter(String).join('\n');
+    out.push('<Placemark><name>'+_xml(r.title||r.category_label||'(untitled)')+'</name>');
+    out.push('<description>'+_xml(desc)+'</description>');
+    if (r.map_type==='area' && pts.length>=3){
+      var ring = pts.map(_fmLonLat); ring.push(_fmLonLat(pts[0]));
+      out.push('<styleUrl>#ar</styleUrl><Polygon><outerBoundaryIs><LinearRing><coordinates>'+ring.join(' ')+'</coordinates></LinearRing></outerBoundaryIs></Polygon>');
+    } else if (r.map_type==='line' && pts.length>=2){
+      out.push('<styleUrl>#ln</styleUrl><LineString><coordinates>'+pts.map(_fmLonLat).join(' ')+'</coordinates></LineString>');
+    } else {
+      out.push('<styleUrl>#pt</styleUrl><Point><coordinates>'+_fmLonLat(pts[0])+'</coordinates></Point>');
+    }
+    out.push('</Placemark>');
+  });
+  out.push('</Document></kml>');
+  return out.join('\n');
+}
+function _freemapGeoJson(recs){
+  var ll=function(p){ return [ Number(p.lon!=null?p.lon:p.lng), Number(p.lat) ]; };
+  var feats = [];
+  recs.forEach(function(r){
+    var pts=r.points||[]; if(!pts.length) return;
+    var type, coords;
+    if (r.map_type==='area' && pts.length>=3){ type='Polygon'; var ring=pts.map(ll); ring.push(ll(pts[0])); coords=[ring]; }
+    else if (r.map_type==='line' && pts.length>=2){ type='LineString'; coords=pts.map(ll); }
+    else { type='Point'; coords=ll(pts[0]); }
+    feats.push({ type:'Feature', geometry:{ type:type, coordinates:coords }, properties:{
+      title:r.title||'', category:r.category_label||r.category||'', map_type:r.map_type||'',
+      steward:r._steward_name||'', steward_id:r._steward_id||'', zone:r._zone||'', clan:r.clan||'',
+      date:_pngDate(r.recorded_at?new Date(r.recorded_at):new Date(),'yyyy-MM-dd'),
+      measure:_fmMeasure(r), crops:r.crops||'', track_type:r.track_type||'', notes:r.description||''
+    }});
+  });
+  return JSON.stringify({ type:'FeatureCollection', features:feats }, null, 1);
+}
+function freemapExportReport(){
+  var recs = collectFreemap();
+  var stamp = _pngDate(new Date(),'yyyy-MM-dd');
+  var folder = getDataFolder();
+  var out = getOrCreateFolder(stamp, getOrCreateFolder('field_maps', getOrCreateFolder('_reports', folder)));
+  var kmlFile = out.createFile('MCA_FieldMaps_'+stamp+'.kml', _freemapKml(recs), 'application/vnd.google-earth.kml+xml');
+  var gjFile  = out.createFile('MCA_FieldMaps_'+stamp+'.geojson', _freemapGeoJson(recs), 'application/json');
+  var byType={}, byCat={}, byStew={};
+  recs.forEach(function(r){
+    var t=r.map_type||'point'; byType[t]=(byType[t]||0)+1;
+    var c=r.category_label||r.category||'other'; byCat[c]=(byCat[c]||0)+1;
+    var s=(r._steward_name||r._steward_id||'?'); byStew[s]=(byStew[s]||0)+1;
+  });
+  var rcp=loadRecipients(); var to=[];
+  if (rcp.field_reports_to) to.push(rcp.field_reports_to);
+  (rcp.comms||[]).forEach(function(e){ if(e) to.push(e); });
+  if (!to.length) to=REPORT_EMAILS.slice();
+  var seen={}; to=to.filter(function(e){ e=String(e).trim(); if(!e||seen[e]) return false; seen[e]=1; return true; });
+  to.forEach(function(e){ try{ kmlFile.addViewer(e); }catch(_){} try{ gjFile.addViewer(e); }catch(_){} });
+  var fmt=function(o){ return Object.keys(o).map(function(k){return k+': '+o[k];}).join(' · ') || '(none)'; };
+  var lines=['MCA - Field maps export','', stamp+' (PNG time)','', recs.length+' mapped feature(s).','',
+    'By kind: '+fmt(byType),
+    'By category: '+fmt(byCat),
+    'By mapper: '+fmt(byStew),'',
+    'Open in Google Earth (KML): '+kmlFile.getUrl(),
+    'Load into QGIS / database (GeoJSON): '+gjFile.getUrl()];
+  to.forEach(function(e){ try{ MailApp.sendEmail(e,'MCA Field maps - '+stamp+' ('+recs.length+' features)', lines.join('\n')); }catch(_){} });
+  Logger.log('Field maps export '+stamp+': '+recs.length+' features -> '+to.join(', '));
+  return { status:'ok', features:recs.length, kml:kmlFile.getUrl(), geojson:gjFile.getUrl() };
+}
+function installFreemapExportTrigger(){
+  ScriptApp.getProjectTriggers().forEach(function(t){ if(t.getHandlerFunction()==='freemapExportReport') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('freemapExportReport').timeBased().everyWeeks(1).onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7).create();
+  Logger.log('Weekly field-maps export trigger installed (Mondays ~7am PNG).');
+}

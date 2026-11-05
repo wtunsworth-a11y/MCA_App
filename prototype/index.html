@@ -1664,17 +1664,17 @@ select.msel {
           </div>
           <div class="enroll-status" id="enrollPassStatus"></div>
           <button class="enroll-next-btn" id="enrollPassBtn" onclick="enrollCheckPasscode()">Verify →</button>
-          <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:10px;width:100%;" onclick="showScreen('screen-zone-config')"><span data-icon="gear" data-size="14"></span> Manage Zones</button>
-          <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')"><span data-icon="clipboard" data-size="14"></span> Manage Training Topics</button>
-          <button class="btn-outline" id="enrollUpdateProfileBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showUpdateProfile()"><span data-icon="edit" data-size="14"></span> Update Existing Profile</button>
-          <button class="btn-outline" id="enrollEnrolmentsBtn" style="display:none;margin-top:8px;width:100%;border-color:#6A1B9A;color:#6A1B9A;" onclick="nav('screen-enrolments')"><span data-icon="people" data-size="14"></span> Enrolled People</button>
-          <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()"><span data-icon="mortarboard" data-size="14"></span> Grant Training Authorisation</button>
-          <button class="btn-outline" id="enrollApproveWaterBtn" style="display:none;margin-top:8px;width:100%;border-color:#0277BD;color:#0277BD;" onclick="showScreen('screen-water-approve')"><span data-icon="spring" data-size="14"></span> Approve Water Sources</button>
-          <button class="btn-outline" id="enrollApproveFacBtn" style="display:none;margin-top:8px;width:100%;border-color:#283593;color:#283593;" onclick="showScreen('screen-facility-approve')"><span data-icon="school" data-size="14"></span> Approve Facilities</button>
+          <button class="btn-outline" id="enrollApproveFacBtn" style="display:none;margin-top:10px;width:100%;border-color:#283593;color:#283593;" onclick="showScreen('screen-facility-approve')"><span data-icon="school" data-size="14"></span> Approve Facilities</button>
           <button class="btn-outline" id="enrollApproveMetBtn" style="display:none;margin-top:8px;width:100%;border-color:#37474F;color:#37474F;" onclick="showScreen('screen-met-approve')"><span data-icon="cloudrain" data-size="14"></span> Approve Met Stations</button>
           <button class="btn-outline" id="enrollApproveTreeBtn" style="display:none;margin-top:8px;width:100%;border-color:#E65100;color:#E65100;" onclick="showScreen('screen-pheno-approve')"><span data-icon="tree" data-size="14"></span> Approve Trees</button>
+          <button class="btn-outline" id="enrollApproveWaterBtn" style="display:none;margin-top:8px;width:100%;border-color:#0277BD;color:#0277BD;" onclick="showScreen('screen-water-approve')"><span data-icon="spring" data-size="14"></span> Approve Water Sources</button>
           <button class="btn-outline" id="enrollDateReviewBtn" style="display:none;margin-top:8px;width:100%;border-color:#00695C;color:#00695C;" onclick="showScreen('screen-date-review')"><span data-icon="calendar" data-size="14"></span> Date Review</button>
+          <button class="btn-outline" id="enrollEnrolmentsBtn" style="display:none;margin-top:8px;width:100%;border-color:#6A1B9A;color:#6A1B9A;" onclick="nav('screen-enrolments')"><span data-icon="people" data-size="14"></span> Enrolled People</button>
+          <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()"><span data-icon="mortarboard" data-size="14"></span> Grant Training Authorisation</button>
           <button class="btn-outline" id="enrollIssuesBtn" style="display:none;margin-top:8px;width:100%;border-color:#AD1457;color:#AD1457;" onclick="showScreen('screen-issue-reports')"><span data-icon="warning" data-size="14"></span> Issue Reports</button>
+          <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')"><span data-icon="clipboard" data-size="14"></span> Manage Training Topics</button>
+          <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-zone-config')"><span data-icon="gear" data-size="14"></span> Manage Zones</button>
+          <button class="btn-outline" id="enrollUpdateProfileBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showUpdateProfile()"><span data-icon="edit" data-size="14"></span> Update Existing Profile</button>
         </div>
 
         <!-- STEP 2: Profile -->
@@ -11976,7 +11976,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v118'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v119'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

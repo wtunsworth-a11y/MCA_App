@@ -11945,7 +11945,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v116'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v117'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -14178,7 +14178,10 @@ function _uploadRecord(item, cb) {
     if (rec.clock_ok === false) {
       try { var br = _computeDateBracket(rec); rec.date_review = br; window._dateReviewQueue.push(_dateReviewEntry(item.store, rec, br, window._uploadProfile||{})); } catch(_){}
     }
-    var media = []; _collectMedia(rec, media);
+    /* gate/login selfies keep their photo embedded so the backend still files
+       them in the dedicated _gate_selfies/ audit folder (they're small face
+       photos — no memory concern); everything else separates its media. */
+    var media = []; if (item.store !== 'gate_selfies') _collectMedia(rec, media);
     var mi = 0, n = 0;
     function nextMedia() {
       if (mi >= media.length) return sendChunk();

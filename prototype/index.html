@@ -5604,6 +5604,15 @@ select.msel {
             <button id="sendAllBtn" onclick="sendAllData()" style="background:#fff;color:#1B5E20;border:none;border-radius:10px;padding:13px 28px;font-size:1rem;font-weight:800;cursor:pointer;width:100%;">
               <span data-icon="upload" data-size="14"></span> Send All New Records
             </button>
+            <!-- Live upload progress: each record goes up as its own small file -->
+            <div id="uploadProgress" style="display:none;margin-top:12px;text-align:left;">
+              <div style="color:#fff;font-size:0.82rem;font-weight:700;margin-bottom:6px;"><span id="upCount">0 of 0</span> sent · <span id="upRemain">0</span> to go</div>
+              <div style="height:8px;background:rgba(255,255,255,0.22);border-radius:4px;overflow:hidden;margin-bottom:5px;">
+                <div id="upBar" style="height:100%;width:0%;background:#A5D6A7;border-radius:4px;transition:width .25s;"></div>
+              </div>
+              <div id="upHint" style="color:rgba(255,255,255,0.75);font-size:0.68rem;margin-bottom:8px;">Keep this screen open — it keeps going even on a slow signal. No need to restart.</div>
+              <div id="upList" style="max-height:220px;overflow-y:auto;background:rgba(0,0,0,0.15);border-radius:8px;"></div>
+            </div>
             <div style="color:rgba(255,255,255,0.6);font-size:0.7rem;margin-top:8px;" id="lastSentLine"></div>
           </div>
 
@@ -6229,9 +6238,11 @@ function enrollCheckPasscode() {
       document.getElementById('enrollIssuesBtn').style.display = 'block';
       document.getElementById('enrollPassStatus').textContent = '✓ Coordinator verified. Choose an action.';
       document.getElementById('enrollPassStatus').style.color = '#2E7D32';
-      /* Pre-load zones and topics ready for step 2 */
+      /* Pre-load zones and topics ready for step 2, and the live roster so a
+         duplicate ID/name can be caught as the coordinator types. */
       loadZonesForEnrollment();
       loadTopicsForEnrollment();
+      fetchEnrolRoster();
     } else {
       document.getElementById('enrollPassStatus').textContent = '✗ Incorrect passcode. Contact your coordinator.';
       document.getElementById('enrollPassStatus').style.color = '#B71C1C';
@@ -6274,18 +6285,35 @@ function enrollRoleChanged() {
 var KNOWN_IDS = [
   // 'MCA-7A-001', 'MCA-7B-014', ...  ← paste existing IDs here
 ];
-function _idTaken(id){
-  id = (id||'').trim().toUpperCase();
-  for (var i=0;i<KNOWN_IDS.length;i++){ if ((KNOWN_IDS[i]||'').trim().toUpperCase() === id) return true; }
-  return false;
+function _idInKnownList(id){ id=(id||'').trim().toUpperCase(); for(var i=0;i<KNOWN_IDS.length;i++){ if((KNOWN_IDS[i]||'').trim().toUpperCase()===id) return true; } return false; }
+function _idTaken(id){ return _idInKnownList(id) || !!_rosterHolder(id); }
+
+/* Live roster, fetched when the enrol screen is unlocked (enrolment is online),
+   so a duplicate ID or name is caught before it creates two half-people. */
+window._enrolRoster = window._enrolRoster || [];
+function fetchEnrolRoster(cb){
+  if(!UPLOAD_ENDPOINT || !navigator.onLine){ if(cb) cb(window._enrolRoster); return; }
+  fetch(UPLOAD_ENDPOINT + '?action=enrolments')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var list=(d&&d.status==='ok'&&d.enrolments)||[];
+      window._enrolRoster=list;
+      try{ updateRecord('auth',{id:'enrolments',enrolments:list,fetched:new Date().toISOString()},function(){}); }catch(_){}
+      if(cb) cb(list);
+    })
+    .catch(function(){ if(cb) cb(window._enrolRoster); });
 }
+function _rosterHolder(id){ id=(id||'').trim().toUpperCase(); var r=window._enrolRoster||[]; for(var i=0;i<r.length;i++){ if(String(r[i].stewardId||'').trim().toUpperCase()===id) return r[i]; } return null; }
+function _rosterByName(nameKey, excludeId){ excludeId=(excludeId||'').trim().toUpperCase(); var r=window._enrolRoster||[]; for(var i=0;i<r.length;i++){ if(String(r[i].name||'').trim().toLowerCase()===nameKey && String(r[i].stewardId||'').trim().toUpperCase()!==excludeId) return r[i]; } return null; }
 /* Live feedback as the coordinator types the ID. */
 function enrollCheckId(){
   var el=document.getElementById('enrollStewardId'), st=document.getElementById('enrollIdStatus');
   if(!el||!st) return;
   var sid=(el.value||'').trim().toUpperCase();
   if(!sid){ st.textContent=''; return; }
-  if(_idTaken(sid)){ st.textContent='✗ '+sid+' is already in use — choose a different ID.'; st.style.color='#B71C1C'; return; }
+  if(_idInKnownList(sid)){ st.textContent='✗ '+sid+' is already in use — choose a different ID.'; st.style.color='#B71C1C'; return; }
+  var _h=_rosterHolder(sid);
+  if(_h){ st.innerHTML='ℹ '+sid+' already belongs to <strong>'+(_h.name||'someone')+'</strong>'+(_h.zone?(' ('+_h.zone+')'):'')+' — reuse it only if you are replacing THEIR phone.'; st.style.color='#E65100'; return; }
   if(!/^MCA-[A-Z0-9]+-\d{1,3}$/.test(sid)){ st.textContent='△ Suggested format: MCA-<Zone>-<NN> (e.g. MCA-7B-01).'; st.style.color='#E65100'; return; }
   st.textContent='✓ '+sid+' looks unique.'; st.style.color='#2E7D32';
 }
@@ -6313,14 +6341,32 @@ function enrollSaveProfile() {
     toast('Please select a Zone.');
     return;
   }
-  /* Duplicate-ID guard — the Steward ID is the key for records, Drive
-     folders, authorisations and PAY, so it must be unique. Checked offline
-     against the shipped known-ID list. */
-  if (_idTaken(sid)) {
+  /* Duplicate guard against the LIVE roster (enrolment is online). The Steward
+     ID keys records, Drive folders and authorisations, so it must be unique PER
+     PERSON — but re-enrolling the SAME person on a new phone SHOULD reuse their
+     ID. So warn and let the coordinator decide, rather than hard-block. */
+  var nameKey = name.trim().toLowerCase();
+  if (_idInKnownList(sid)) {
     var st = document.getElementById('enrollIdStatus');
     if (st) { st.textContent = '✗ ' + sid + ' is already in use — choose a different, unique ID.'; st.style.color = '#B71C1C'; }
     toast('ID ' + sid + ' already exists — pick a unique one.');
     return;
+  }
+  var idHolder = _rosterHolder(sid);
+  if (idHolder) {
+    if ((idHolder.name || '').trim().toLowerCase() === nameKey) {
+      if (!confirm('ID ' + sid + ' already belongs to ' + idHolder.name + (idHolder.zone ? (' (' + idHolder.zone + ')') : '') + '.\n\nAre you REPLACING their phone? Reusing the same ID keeps all their history joined up.\n\nOK = replace device    Cancel = stop')) return;
+    } else {
+      var st2 = document.getElementById('enrollIdStatus');
+      if (st2) { st2.textContent = '✗ ' + sid + ' already belongs to ' + idHolder.name + ' — IDs must be unique. Use a different ID.'; st2.style.color = '#B71C1C'; }
+      toast('ID ' + sid + ' belongs to ' + idHolder.name + ' — use a different ID.');
+      return;
+    }
+  } else {
+    var sameName = _rosterByName(nameKey, sid);
+    if (sameName) {
+      if (!confirm('Someone named "' + name + '" is already enrolled as ' + sameName.stewardId + (sameName.zone ? (' (' + sameName.zone + ')') : '') + '.\n\nSame person getting a new phone? Go back and use their existing ID ' + sameName.stewardId + ' — not a new one — so their records stay together.\n\nA different person who happens to share the name? OK to continue.\n\nOK = continue    Cancel = go back and fix')) return;
+    }
   }
   /* Collect authorised topics for field officers */
   var authorisedTopics = [];
@@ -11865,7 +11911,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v113'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v114'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -13878,159 +13924,178 @@ function updateRecordCounts() {
 
 /* ── Bundle all unsynced records and share as JSON ── */
 function sendAllData() {
+  if (!UPLOAD_ENDPOINT) { toast('Upload is not set up on this phone.'); return; }
+  if (!navigator.onLine) { toast('No signal — connect to the internet and try again.'); return; }
   /* Capture the last verified-online time BEFORE we refresh it, so any
      clock-flagged records get an accurate date bracket; then refresh from the
      server and run the upload. */
-  var prevA=_loadTimeAnchor();
+  var prevA = _loadTimeAnchor();
   window._uploadPrevEarliestMs = prevA ? prevA.serverMs : null;
   window._dateReviewQueue = [];
-  if(navigator.onLine && UPLOAD_ENDPOINT){ pingServerTime(function(){ _sendAllDataInner(); }); }
-  else { _sendAllDataInner(); }
+  pingServerTime(function(){ _runChunkedUpload(); });
 }
-function _sendAllDataInner() {
+
+/* Upload every unsynced record as its OWN small file, straight into the
+   steward's Drive folder, one at a time, with a progress bar. Each file is
+   named by the record's uid, so a retry overwrites it (never a duplicate) and a
+   dropped connection only costs that one small record, not the whole send. No
+   share-sheet fallback — data goes to Drive, not to the coordinator's inbox. */
+function _runChunkedUpload() {
   var btn = document.getElementById('sendAllBtn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Preparing…'; }
-
+  if (btn) { btn.disabled = true; btn.innerHTML = ''+icon('upload',13)+' Preparing…'; }
   getAllRecords('auth', function(authRecs) {
-    var profile = (authRecs && authRecs.length > 0) ? authRecs[0] : {};
-    var bundle = {
-      _secret:        UPLOAD_SECRET,   /* checked in the request BODY by the backend */
-      export_version: '1',
-      exported_at:    new Date().toISOString(),
-      steward: {
-        name:      profile.name      || 'Unknown',
-        stewardId: profile.stewardId || 'UNKNOWN',
-        clan:      profile.clan      || '',
-        zone:      profile.zone      || '',
-        zone_id:   profile.zone_id   || '',
-        village:   profile.village   || '',
-        role:      profile.role      || 'clan_steward'
-      },
-      modules: {},
-      record_count: 0
+    var profile = (authRecs && authRecs[0]) || {};
+    var steward = {
+      name:      profile.name      || 'Unknown',
+      stewardId: profile.stewardId || 'UNKNOWN',
+      clan:      profile.clan      || '',
+      zone:      profile.zone      || '',
+      zone_id:   profile.zone_id   || '',
+      village:   profile.village   || '',
+      role:      profile.role      || 'clan_steward'
     };
-
-    var storesDone = 0;
-    var syncTasks  = [];   // [{storeName, ids}]
-
-    DATA_STORES.forEach(function(name) {
-      getAllRecords(name, function(records) {
-        var unsynced = (records || []).filter(function(r) { return !r.synced; });
-        if (unsynced.length > 0) {
-          /* Clock-flagged records → attach a date bracket (rides to Drive) and
-             queue a Date Review item for the coordinator. */
-          unsynced.forEach(function(r){
-            if (r.clock_ok === false) {
-              var br = _computeDateBracket(r);
-              r.date_review = br;
-              window._dateReviewQueue.push(_dateReviewEntry(name, r, br, profile));
-            }
-          });
-          bundle.modules[name] = unsynced;
-          bundle.record_count += unsynced.length;
-          syncTasks.push({ storeName: name, ids: unsynced.map(function(r){ return r.id; }) });
-        }
+    var items = [], storesDone = 0;
+    DATA_STORES.forEach(function(store) {
+      getAllRecords(store, function(records) {
+        (records || []).forEach(function(r) {
+          if (r.synced) return;
+          if (r.clock_ok === false) {
+            var br = _computeDateBracket(r); r.date_review = br;
+            window._dateReviewQueue.push(_dateReviewEntry(store, r, br, profile));
+          }
+          items.push({ store: store, id: r.id, rec: r });
+        });
         storesDone++;
-
-        if (storesDone === DATA_STORES.length) {
-          if (bundle.record_count === 0) {
-            toast('No new records to send.');
-            if (btn) { btn.disabled = false; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
-            return;
-          }
-
-          var json     = JSON.stringify(bundle, null, 2);
-          var sid      = (profile.stewardId || 'STEWARD').replace(/[^A-Z0-9-]/gi, '');
-          var dateStr  = new Date().toISOString().slice(0, 10);
-          var fileName = 'MCA_' + sid + '_' + dateStr + '.json';
-          var file     = new File([json], fileName, { type: 'application/json' });
-
-          /* POST directly to Google Apps Script endpoint if configured */
-          if (UPLOAD_ENDPOINT) {
-            fetch(UPLOAD_ENDPOINT, {
-              method: 'POST',
-              /* text/plain = a "simple" CORS request, so no preflight (Apps
-                 Script can't answer preflight). The backend reads the raw body
-                 regardless of content-type. Secret travels in the body. */
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: json
-            }).then(function(res) { return res.json(); })
-              .then(function(result) {
-                if (result && result.status === 'ok') {
-                  var pending = syncTasks.length || 1;
-                  function doneSync() { pending--; if (pending === 0) {
-                    updateRecordCounts();
-                    /* Data is confirmed on Drive — now free the media from records
-                       that have been synced longer than the 1-month fallback window. */
-                    purgeOldSyncedMedia(function(res){ if (res && res.records > 0) { try { localStorage.setItem('mcaLastPurge', new Date().toISOString()); } catch(e){} } });
-                  } }
-                  if (syncTasks.length === 0) { doneSync(); return; }
-                  syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, doneSync); });
-                  var nowTs = new Date().toISOString();
-                  try { localStorage.setItem('mcaLastSync', nowTs); } catch(e) {}
-                  var lastLine = document.getElementById('lastSentLine');
-                  if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
-                  toast(bundle.record_count + ' records uploaded to MCA Drive ✓');
-                  if (btn) { btn.disabled = false; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
-                  /* Same moment they upload: push any held verifications and
-                     pull down freshly detected disturbance tasks. */
-                  flushUnsyncedVerifications(function(){ syncDisturbancesFromServer(function(){ renderDashDisturb(); }); });
-                  /* Flag any clock-uncertain records for coordinator date review,
-                     and push any queued issue reports. */
-                  if (window._dateReviewQueue && window._dateReviewQueue.length) {
-                    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ _action:'register_date_review', _secret:UPLOAD_SECRET, items: window._dateReviewQueue }) }).catch(function(){});
-                  }
-                  flushIssues(function(){});
-                } else {
-                  toast('Upload error — falling back to share');
-                  tryShare();
-                }
-              }).catch(function() {
-                toast('No signal — falling back to share sheet');
-                tryShare();
-              });
-            return;
-          }
-
-          function tryShare() {
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              navigator.share({ files: [file], title: 'MCA Steward Data — ' + sid, text: bundle.record_count + ' records from ' + profile.clan })
-                .then(function() {
-                  var pending = syncTasks.length || 1;
-                  function done() { pending--; if (pending === 0) { updateRecordCounts(); } }
-                  if (syncTasks.length === 0) { done(); return; }
-                  syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, done); });
-                  try { localStorage.setItem('mcaLastSync', new Date().toISOString()); } catch(e) {}
-                  var lastLine = document.getElementById('lastSentLine');
-                  if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
-                  toast(bundle.record_count + ' records sent ✓');
-                })
-                .catch(function(err) {
-                  if (err.name !== 'AbortError') toast('Share failed — try again');
-                })
-                .finally(function() {
-                  if (btn) { btn.disabled = false; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
-                });
-            } else {
-              /* Fallback: download the file */
-              var url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
-              var a   = document.createElement('a');
-              a.href = url; a.download = fileName;
-              document.body.appendChild(a); a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-              try { localStorage.setItem('mcaLastSync', new Date().toISOString()); } catch(e) {}
-              syncTasks.forEach(function(t) { markStoreSynced(t.storeName, t.ids, null); });
-              updateRecordCounts();
-              toast(bundle.record_count + ' records saved — transfer the file to your coordinator');
-              if (btn) { btn.disabled = false; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
-            }
-          }
-          tryShare();
-        }
+        if (storesDone === DATA_STORES.length) _startUploadQueue(steward, items);
       });
     });
   });
+}
+
+function _fmtBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (Math.round(n / 102.4) / 10) + ' KB';
+  return (Math.round(n / 104857.6) / 10) + ' MB';
+}
+function _recLabel(item) {
+  var r = item.rec;
+  var base = _STORE_LABELS[item.store] || (item.store.charAt(0).toUpperCase() + item.store.slice(1).replace(/_/g,' '));
+  var nm = r.title || r.name || r.site_name || r.location_name || r.topic || r.commodity || '';
+  return base + (nm ? (' — ' + String(nm).slice(0, 28)) : '');
+}
+
+function _startUploadQueue(steward, items) {
+  var btn   = document.getElementById('sendAllBtn');
+  var panel = document.getElementById('uploadProgress');
+  if (!items || items.length === 0) {
+    toast('No new records to send.');
+    if (panel) panel.style.display = 'none';
+    if (btn) { btn.disabled = false; btn.onclick = sendAllData; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
+    return;
+  }
+  var list = document.getElementById('upList');
+  if (list) {
+    var h = '';
+    items.forEach(function(it, i) {
+      it._bytes = (JSON.stringify(it.rec) || '').length;
+      h += '<div class="up-item" style="display:flex;align-items:center;gap:8px;padding:5px 6px;border-bottom:1px solid rgba(255,255,255,0.08);font-size:0.72rem;color:#fff;">'
+        +   '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _recLabel(it) + '</span>'
+        +   '<span style="color:rgba(255,255,255,0.6);flex:0 0 auto;">' + _fmtBytes(it._bytes) + '</span>'
+        +   '<span class="up-stat" id="upstat-' + i + '" style="flex:0 0 auto;width:20px;text-align:center;color:rgba(255,255,255,0.5);">•</span>'
+        + '</div>';
+    });
+    list.innerHTML = h;
+  }
+  if (panel) panel.style.display = 'block';
+  if (btn) { btn.disabled = true; btn.innerHTML = ''+icon('upload',13)+' Sending…'; }
+
+  var total = items.length, sent = 0, failed = 0, idx = 0;
+  window._uploadFailedItems = [];
+  function setStat(i, sym, color) { var el = document.getElementById('upstat-' + i); if (el) { el.textContent = sym; el.style.color = color; } }
+  function setBar() {
+    var done = sent + failed;
+    var bar = document.getElementById('upBar'), cnt = document.getElementById('upCount'), rem = document.getElementById('upRemain');
+    if (bar) bar.style.width = Math.round(done / total * 100) + '%';
+    if (cnt) cnt.textContent = sent + ' of ' + total;
+    if (rem) rem.textContent = (total - done);
+  }
+  setBar();
+
+  function next() {
+    if (idx >= total) return finish();
+    var i = idx++, it = items[i];
+    setStat(i, '↑', '#FFF59D');
+    var mods = {}; mods[it.store] = [it.rec];
+    var body = JSON.stringify({
+      _secret: UPLOAD_SECRET, export_version: '1', exported_at: new Date().toISOString(),
+      steward: steward, chunk_uid: (it.rec.record_uid || it.rec.uid || ('id' + it.id)),
+      modules: mods, record_count: 1
+    });
+    _postChunk(body, function(ok) {
+      if (ok) { sent++; setStat(i, '✓', '#A5D6A7'); markStoreSynced(it.store, [it.id], function(){}); }
+      else    { failed++; setStat(i, '✗', '#EF9A9A'); window._uploadFailedItems.push(it); }
+      setBar();
+      next();
+    });
+  }
+
+  function finish() {
+    updateRecordCounts();
+    try { localStorage.setItem('mcaLastSync', new Date().toISOString()); } catch(e) {}
+    var lastLine = document.getElementById('lastSentLine');
+    if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
+    if (sent > 0) {
+      purgeOldSyncedMedia(function(res){ if (res && res.records > 0) { try { localStorage.setItem('mcaLastPurge', new Date().toISOString()); } catch(e){} } });
+      flushUnsyncedVerifications(function(){ syncDisturbancesFromServer(function(){ renderDashDisturb(); }); });
+      if (window._dateReviewQueue && window._dateReviewQueue.length) {
+        fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ _action:'register_date_review', _secret:UPLOAD_SECRET, items: window._dateReviewQueue }) }).catch(function(){});
+      }
+      flushIssues(function(){});
+    }
+    var hint = document.getElementById('upHint');
+    if (failed === 0) {
+      toast(sent + ' record' + (sent === 1 ? '' : 's') + ' uploaded ✓');
+      if (hint) { hint.textContent = 'All ' + sent + ' sent ✓ — safe to leave.'; hint.style.color = '#A5D6A7'; }
+      if (btn) { btn.disabled = false; btn.onclick = sendAllData; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
+    } else {
+      toast(sent + ' sent, ' + failed + ' still to go');
+      if (hint) { hint.textContent = failed + ' could not send yet — tap Retry failed. Already-sent ones are not resent.'; hint.style.color = '#FFCC80'; }
+      if (btn) { btn.disabled = false; btn.onclick = _retryFailedUploads; btn.innerHTML = ''+icon('upload',13)+' Retry failed (' + failed + ')'; }
+    }
+  }
+  next();
+}
+
+function _retryFailedUploads() {
+  var items = (window._uploadFailedItems || []).slice();
+  var btn = document.getElementById('sendAllBtn');
+  if (btn) btn.onclick = sendAllData;
+  if (!items.length) { sendAllData(); return; }
+  getAllRecords('auth', function(authRecs) {
+    var profile = (authRecs && authRecs[0]) || {};
+    var steward = {
+      name: profile.name||'Unknown', stewardId: profile.stewardId||'UNKNOWN', clan: profile.clan||'',
+      zone: profile.zone||'', zone_id: profile.zone_id||'', village: profile.village||'', role: profile.role||'clan_steward'
+    };
+    _startUploadQueue(steward, items);
+  });
+}
+
+/* POST one small record file, with a 45s timeout and up to 3 tries (2s/4s/8s
+   backoff) so a satellite handoff or brief drop re-sends just that one file. */
+function _postChunk(body, cb) {
+  var tries = 0, max = 3;
+  function attempt() {
+    tries++;
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var to = setTimeout(function(){ if (ctrl) { try { ctrl.abort(); } catch(_){} } }, 45000);
+    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: body, signal: ctrl ? ctrl.signal : undefined })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ clearTimeout(to); if (d && d.status === 'ok') cb(true); else retry(); })
+      .catch(function(){ clearTimeout(to); retry(); });
+  }
+  function retry() { if (tries < max) setTimeout(attempt, 1000 * Math.pow(2, tries)); else cb(false); }
+  attempt();
 }
 
 /* ══════════════════════════════════════

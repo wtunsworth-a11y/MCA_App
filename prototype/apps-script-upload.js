@@ -1796,19 +1796,31 @@ function doPost(e) {
     var subName     = sid + '_' + stewardName.replace(/\s+/g,'_');
     var subFolder   = getOrCreateFolder(subName, zoneFolder);
 
-    /* File name: MCA-[ID]_[Date].json — deduplicated by timestamp */
-    var dateStr  = new Date().toISOString().slice(0, 10);
-    var fileName = 'MCA_' + sid + '_' + dateStr + '.json';
-    var content  = JSON.stringify(body, null, 2);
+    /* Minify on disk — the app sends many small per-record files now, so there
+     * is no need to pretty-print each one. */
+    var content = JSON.stringify(body);
 
-    /* If a file for today exists, add time suffix */
-    var existing = subFolder.getFilesByName(fileName);
-    if (existing.hasNext()) {
-      var ts = new Date().toISOString().slice(0,16).replace(':','h');
-      fileName = 'MCA_' + sid + '_' + ts + '.json';
+    /* Per-record chunk uploads carry chunk_uid: name the file by it so a RETRY
+     * (or a half-success over a weak link) OVERWRITES the same file instead of
+     * making a duplicate — idempotent. A legacy full-bundle upload (no
+     * chunk_uid) keeps the old date-named behaviour. */
+    var fileName;
+    var chunkUid = body.chunk_uid ? String(body.chunk_uid).replace(/[^A-Za-z0-9_-]/g, '_') : '';
+    if (chunkUid) {
+      fileName = 'MCA_' + sid + '_' + chunkUid + '.json';
+      var exC = subFolder.getFilesByName(fileName);
+      if (exC.hasNext()) { exC.next().setContent(content); }
+      else { subFolder.createFile(fileName, content, MimeType.PLAIN_TEXT); }
+    } else {
+      var dateStr = new Date().toISOString().slice(0, 10);
+      fileName = 'MCA_' + sid + '_' + dateStr + '.json';
+      var existing = subFolder.getFilesByName(fileName);
+      if (existing.hasNext()) {
+        var ts = new Date().toISOString().slice(0,16).replace(':','h');
+        fileName = 'MCA_' + sid + '_' + ts + '.json';
+      }
+      subFolder.createFile(fileName, content, MimeType.PLAIN_TEXT);
     }
-
-    subFolder.createFile(fileName, content, MimeType.PLAIN_TEXT);
 
     /* Back-fill the enrolment roster from the upload's steward block (marks the
      * person as having uploaded). Never fails the upload. */

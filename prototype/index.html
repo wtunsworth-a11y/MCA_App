@@ -5522,24 +5522,93 @@ select.msel {
             <input type="text" id="trainingLocation" class="form-input" placeholder="Village, community hall, etc.">
           </div>
 
-          <!-- Participants -->
+          <!-- Participants — digital attendance register -->
           <div class="card" style="padding:12px 14px;margin-bottom:12px;">
-            <div style="font-weight:700;font-size:0.82rem;margin-bottom:10px;color:#5C3D7A;"><span data-icon="people" data-size="14"></span> Participants</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-              <div>
-                <label class="form-label" style="color:#555;">Women</label>
-                <input type="number" id="paxFemale" class="form-input" placeholder="0" min="0" style="text-align:center;">
+            <div style="font-weight:700;font-size:0.82rem;margin-bottom:4px;color:#5C3D7A;"><span data-icon="people" data-size="14"></span> Attendance register</div>
+            <div style="font-size:0.74rem;color:#888;margin-bottom:10px;line-height:1.4;">Add each participant: name, gender, age band and a signature on the screen. Reports show counts only — names and signatures are kept for audit.</div>
+
+            <!-- Live totals (derived from the register) -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">
+              <div style="background:#F3EEF8;border-radius:8px;padding:8px 4px;text-align:center;">
+                <div id="regTotal" style="font-size:1.15rem;font-weight:800;color:#5C3D7A;line-height:1;">0</div>
+                <div style="font-size:0.62rem;color:#888;margin-top:3px;text-transform:uppercase;letter-spacing:.03em;">Total</div>
               </div>
-              <div>
-                <label class="form-label" style="color:#555;">Men</label>
-                <input type="number" id="paxMale" class="form-input" placeholder="0" min="0" style="text-align:center;">
+              <div style="background:#FBF0E6;border-radius:8px;padding:8px 4px;text-align:center;">
+                <div id="regFemale" style="font-size:1.15rem;font-weight:800;color:#9C5410;line-height:1;">0</div>
+                <div style="font-size:0.62rem;color:#888;margin-top:3px;text-transform:uppercase;letter-spacing:.03em;">Female</div>
               </div>
-              <div>
-                <label class="form-label" style="color:#555;">Youth (&lt;25)</label>
-                <input type="number" id="paxYouth" class="form-input" placeholder="0" min="0" style="text-align:center;">
+              <div style="background:#EDF2F7;border-radius:8px;padding:8px 4px;text-align:center;">
+                <div id="regMale" style="font-size:1.15rem;font-weight:800;color:#2C5282;line-height:1;">0</div>
+                <div style="font-size:0.62rem;color:#888;margin-top:3px;text-transform:uppercase;letter-spacing:.03em;">Male</div>
+              </div>
+              <div style="background:#EAF3EA;border-radius:8px;padding:8px 4px;text-align:center;">
+                <div id="regYouth" style="font-size:1.15rem;font-weight:800;color:#2E6B38;line-height:1;">0</div>
+                <div style="font-size:0.62rem;color:#888;margin-top:3px;text-transform:uppercase;letter-spacing:.03em;">Youth</div>
               </div>
             </div>
-            <div style="margin-top:8px;font-size:0.78rem;color:#888;">Total: <strong id="paxTotal" style="color:#5C3D7A;">0</strong> participants</div>
+
+            <!-- Added participants -->
+            <div id="trainingRosterList"></div>
+
+            <!-- Add button -->
+            <button type="button" id="trainingAddBtn" class="btn btn-secondary" style="width:100%;margin-top:4px;" onclick="partShowAddForm()"><span data-icon="plus" data-size="14"></span> Add participant</button>
+
+            <!-- Add-participant form (hidden until opened) -->
+            <div id="trainingAddForm" style="display:none;border:1px solid #E0D6EC;border-radius:10px;padding:12px;margin-top:10px;background:#FCFAFE;">
+              <div class="form-group" style="margin-bottom:10px;">
+                <label class="form-label">Name</label>
+                <input type="text" id="partName" class="form-input" placeholder="Participant's full name" autocomplete="off">
+              </div>
+
+              <div class="form-group" style="margin-bottom:10px;">
+                <label class="form-label">Gender</label>
+                <div id="partGenderPills" style="display:flex;gap:8px;">
+                  <button type="button" class="weather-pill" data-g="F" style="flex:1;" onclick="partSetGender('F',this)">Female</button>
+                  <button type="button" class="weather-pill" data-g="M" style="flex:1;" onclick="partSetGender('M',this)">Male</button>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:10px;">
+                <label class="form-label">Age band</label>
+                <div id="partAgePills" style="display:flex;gap:6px;">
+                  <button type="button" class="weather-pill" data-a="youth"  style="flex:1;font-size:0.72rem;padding:6px 4px;" onclick="partSetAge('youth',this)">Youth<br><span style="font-size:0.6rem;color:#999;">15–30</span></button>
+                  <button type="button" class="weather-pill" data-a="middle" style="flex:1;font-size:0.72rem;padding:6px 4px;" onclick="partSetAge('middle',this)">Middle<br><span style="font-size:0.6rem;color:#999;">31–50</span></button>
+                  <button type="button" class="weather-pill" data-a="older"  style="flex:1;font-size:0.72rem;padding:6px 4px;" onclick="partSetAge('older',this)">Older<br><span style="font-size:0.6rem;color:#999;">51+</span></button>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="form-group" style="margin-bottom:10px;">
+                  <label class="form-label">Zone <span style="color:#999;font-weight:400;">(of the land)</span></label>
+                  <select id="partZone" class="form-input" onchange="partZoneChanged()"><option value="">— choose zone —</option></select>
+                </div>
+                <div class="form-group" style="margin-bottom:10px;">
+                  <label class="form-label">Village</label>
+                  <input type="text" id="partVillage" class="form-input" placeholder="Village" autocomplete="off">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:10px;">
+                <label class="form-label">Clan</label>
+                <select id="partClan" class="form-input" onchange="partClanChanged()"><option value="">— choose zone first —</option></select>
+                <input type="text" id="partClanOther" class="form-input" placeholder="Type the clan name" style="display:none;margin-top:6px;" autocomplete="off">
+                <div id="partClanHint" style="font-size:0.72rem;color:#888;margin-top:4px;"></div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:6px;">
+                <label class="form-label">Signature</label>
+                <canvas id="partSigCanvas" style="width:100%;height:120px;border:1px dashed #B9A9CE;border-radius:8px;background:#fff;touch-action:none;display:block;"></canvas>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+                  <span id="partSigHint" style="font-size:0.72rem;color:#888;">Sign with a finger above.</span>
+                  <button type="button" class="btn-link" style="font-size:0.74rem;color:#5C3D7A;background:none;border:none;padding:4px;" onclick="partClearSig()">Clear</button>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <button type="button" class="btn btn-secondary" style="flex:1;" onclick="partCancelAdd()">Cancel</button>
+                <button type="button" class="btn btn-primary" style="flex:1.4;" onclick="addParticipant()">Add to register</button>
+              </div>
+            </div>
           </div>
 
           <!-- Materials provided (field officer only) -->
@@ -11977,7 +12046,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v121'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v122'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -15167,11 +15236,19 @@ function initTrainingRecord() {
   document.querySelectorAll('#screen-training-record .weather-pill[onclick^="toggleMaterial"]').forEach(function(b) {
     b.classList.remove('active'); b.style.background = ''; b.style.color = '';
   });
-  ['paxFemale','paxMale','paxYouth'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) { el.value = ''; el.oninput = updatePaxTotal; }
-  });
-  updatePaxTotal();
+  /* Restore any in-progress register (resilience: never lose captured names /
+     signatures if the screen was left and re-entered), then render. */
+  _trainingRoster = _loadRosterDraft();
+  partCancelAdd();            /* ensure the add-form starts closed + cleared */
+  renderRegister();
+  /* Populate the zone picker in the add-form (clans are tiered off it). */
+  var pz = document.getElementById('partZone');
+  if (pz) {
+    getZoneList(function(zones){
+      pz.innerHTML = '<option value="">— choose zone —</option>';
+      zones.forEach(function(z){ var o=document.createElement('option'); o.value=z.id; o.textContent=z.id+' — '+z.name; pz.appendChild(o); });
+    });
+  }
 }
 
 function _setVisible(id, show) {
@@ -15203,12 +15280,210 @@ function _buildAuthorisedPills(authorisedIds) {
   });
 }
 
-function updatePaxTotal() {
-  var f = parseInt(document.getElementById('paxFemale').value)||0;
-  var m = parseInt(document.getElementById('paxMale').value)||0;
-  var tot = document.getElementById('paxTotal');
-  if (tot) tot.textContent = f + m;
+/* ══════════════════════════════════════
+   DIGITAL ATTENDANCE REGISTER
+   Per-participant capture: name, gender, age band, clan (zone-tiered + Other),
+   village, zone and an on-screen signature. Reports use the COUNTS only
+   (gender + youth/middle/older); names + signatures are held for audit.
+══════════════════════════════════════ */
+var _trainingRoster = [];               /* [{name,gender,age_band,zone,clan,village,signature,added_at}] */
+var ROSTER_DRAFT_KEY = 'mcaTrainingRoster';
+window._partGender = '';
+window._partAge = '';
+window._partSigDrawn = false;
+
+/* Totals derived from the roster — the single source of truth for attendance. */
+function registerTotals() {
+  var t = { total:_trainingRoster.length, female:0, male:0, youth:0, middle:0, older:0 };
+  _trainingRoster.forEach(function(p){
+    if (p.gender === 'F') t.female++; else if (p.gender === 'M') t.male++;
+    if (p.age_band === 'youth') t.youth++; else if (p.age_band === 'middle') t.middle++; else if (p.age_band === 'older') t.older++;
+  });
+  return t;
 }
+
+function renderRegister() {
+  var t = registerTotals();
+  var set = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
+  set('regTotal', t.total); set('regFemale', t.female); set('regMale', t.male); set('regYouth', t.youth);
+  /* keep legacy paxTotal if present anywhere */
+  var legacy = document.getElementById('paxTotal'); if (legacy) legacy.textContent = t.total;
+
+  var list = document.getElementById('trainingRosterList');
+  if (!list) return;
+  if (_trainingRoster.length === 0) {
+    list.innerHTML = '<div style="font-size:0.76rem;color:#aaa;text-align:center;padding:10px 0;">No participants added yet.</div>';
+    return;
+  }
+  var gLabel = { F:'Female', M:'Male' }, aLabel = { youth:'Youth', middle:'Middle', older:'Older' };
+  list.innerHTML = _trainingRoster.map(function(p, i){
+    var meta = [gLabel[p.gender]||'', aLabel[p.age_band]||'', p.clan||''].filter(Boolean).join(' · ');
+    var sig = p.signature ? '<img src="'+p.signature+'" alt="signature" style="height:22px;width:auto;max-width:70px;object-fit:contain;vertical-align:middle;margin-left:4px;opacity:.8;">' : '<span style="font-size:0.66rem;color:#C62828;">no signature</span>';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid #EEE8F4;">' +
+             '<div style="flex:1;min-width:0;">' +
+               '<div style="font-size:0.84rem;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (i+1) + '. ' + _esc(p.name) + '</div>' +
+               '<div style="font-size:0.72rem;color:#888;">' + _esc(meta) + '</div>' +
+             '</div>' +
+             '<div>' + sig + '</div>' +
+             '<button type="button" aria-label="Remove" style="background:none;border:none;color:#C62828;font-size:1.1rem;line-height:1;padding:4px 8px;cursor:pointer;" onclick="removeParticipant(' + i + ')">&times;</button>' +
+           '</div>';
+  }).join('');
+}
+
+function _esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+/* ── Add-participant form ── */
+function partShowAddForm() {
+  var f = document.getElementById('trainingAddForm'), b = document.getElementById('trainingAddBtn');
+  if (f) f.style.display = '';
+  if (b) b.style.display = 'none';
+  /* Default the zone/village to the previous participant's (same training, usually
+     the same place) so the recorder isn't re-picking every time. */
+  var last = _trainingRoster[_trainingRoster.length - 1];
+  if (last) {
+    var pz = document.getElementById('partZone'); if (pz && !pz.value) { pz.value = last.zone_id || ''; partZoneChanged(); }
+    var pv = document.getElementById('partVillage'); if (pv && !pv.value) pv.value = last.village || '';
+  }
+  _initSigPad();
+  var nm = document.getElementById('partName'); if (nm) nm.focus();
+}
+
+function partCancelAdd() {
+  var f = document.getElementById('trainingAddForm'), b = document.getElementById('trainingAddBtn');
+  if (f) f.style.display = 'none';
+  if (b) b.style.display = '';
+  /* Clear the entry fields (but keep the roster intact). */
+  ['partName','partVillage','partClanOther'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  var pc = document.getElementById('partClanOther'); if (pc) pc.style.display = 'none';
+  window._partGender = ''; window._partAge = '';
+  document.querySelectorAll('#partGenderPills .weather-pill, #partAgePills .weather-pill').forEach(function(el){ el.classList.remove('active'); el.style.background=''; el.style.color=''; });
+  partClearSig();
+}
+
+function partSetGender(g, btn) {
+  window._partGender = g;
+  document.querySelectorAll('#partGenderPills .weather-pill').forEach(function(b){ b.classList.remove('active'); b.style.background=''; b.style.color=''; });
+  btn.classList.add('active'); btn.style.background='#5C3D7A'; btn.style.color='#fff';
+}
+function partSetAge(a, btn) {
+  window._partAge = a;
+  document.querySelectorAll('#partAgePills .weather-pill').forEach(function(b){ b.classList.remove('active'); b.style.background=''; b.style.color=''; });
+  btn.classList.add('active'); btn.style.background='#5C3D7A'; btn.style.color='#fff';
+}
+
+function partZoneChanged() {
+  var pz=document.getElementById('partZone'), cp=document.getElementById('partClan'),
+      other=document.getElementById('partClanOther'), hint=document.getElementById('partClanHint');
+  if (other) { other.style.display='none'; other.value=''; }
+  if (!cp) return;
+  var zid = pz ? pz.value : '';
+  if (!zid) { cp.innerHTML='<option value="">— choose zone first —</option>'; if(hint) hint.textContent=''; return; }
+  getClanList(function(map){
+    var clans = (map && map[zid]) || [];
+    cp.innerHTML = '<option value="">— choose clan —</option>';
+    clans.forEach(function(c){ var o=document.createElement('option'); o.value=c; o.textContent=c; cp.appendChild(o); });
+    var o2=document.createElement('option'); o2.value='__other__'; o2.textContent='Other — type the name'; cp.appendChild(o2);
+    if (hint) hint.textContent = clans.length ? '' : 'No clans listed for this zone yet — choose Other and type the name.';
+  });
+}
+function partClanChanged() {
+  var cp=document.getElementById('partClan'), other=document.getElementById('partClanOther');
+  if (!other) return;
+  if (cp && cp.value === '__other__') { other.style.display=''; other.focus(); }
+  else { other.style.display='none'; other.value=''; }
+}
+
+/* ── Signature pad (canvas) ── */
+function _initSigPad() {
+  var c = document.getElementById('partSigCanvas');
+  if (!c || c._wired) { partClearSig(); return; }
+  /* Size the backing store to the element's CSS pixels × DPR for a crisp line. */
+  var rect = c.getBoundingClientRect();
+  var dpr = window.devicePixelRatio || 1;
+  c.width = Math.max(1, Math.round(rect.width * dpr));
+  c.height = Math.max(1, Math.round(rect.height * dpr));
+  var ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.lineWidth = 2; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#1b2b4b';
+  var drawing=false, last=null;
+  function pos(ev){
+    var r=c.getBoundingClientRect();
+    var p=(ev.touches&&ev.touches[0])||ev;
+    return { x:p.clientX-r.left, y:p.clientY-r.top };
+  }
+  function start(ev){ ev.preventDefault(); drawing=true; last=pos(ev); }
+  function move(ev){ if(!drawing) return; ev.preventDefault(); var p=pos(ev); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; window._partSigDrawn=true; var h=document.getElementById('partSigHint'); if(h) h.textContent='Signature captured.'; }
+  function end(ev){ drawing=false; }
+  c.addEventListener('mousedown',start); c.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
+  c.addEventListener('touchstart',start,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',end);
+  c._wired = true;
+  partClearSig();
+}
+function partClearSig() {
+  var c = document.getElementById('partSigCanvas');
+  if (c && c.getContext) { var ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); }
+  window._partSigDrawn = false;
+  var h=document.getElementById('partSigHint'); if(h) h.textContent='Sign with a finger above.';
+}
+function _sigDataUrl() {
+  var c = document.getElementById('partSigCanvas');
+  if (!c || !window._partSigDrawn) return '';
+  try { return c.toDataURL('image/png'); } catch(e){ return ''; }
+}
+
+function addParticipant() {
+  var name = (document.getElementById('partName').value||'').trim();
+  var zoneSel = document.getElementById('partZone');
+  var zoneId = zoneSel ? zoneSel.value : '';
+  var zoneTxt = zoneSel && zoneSel.selectedIndex>0 ? zoneSel.options[zoneSel.selectedIndex].text : '';
+  var clanSel = document.getElementById('partClan');
+  var clan = clanSel ? clanSel.value : '';
+  if (clan === '__other__') clan = (document.getElementById('partClanOther').value||'').trim();
+  var village = (document.getElementById('partVillage').value||'').trim();
+  var sig = _sigDataUrl();
+
+  if (!name)              { toast('Enter the participant’s name'); return; }
+  if (!window._partGender){ toast('Choose gender'); return; }
+  if (!window._partAge)   { toast('Choose an age band'); return; }
+  if (!sig)               { toast('Capture the participant’s signature'); return; }
+
+  _trainingRoster.push({
+    name: name,
+    gender: window._partGender,
+    age_band: window._partAge,
+    zone_id: zoneId,
+    zone: zoneTxt,
+    clan: clan,
+    village: village,
+    signature: sig,
+    added_at: new Date().toISOString()
+  });
+  _saveRosterDraft();
+  renderRegister();
+  /* Reset for the next person, keep the form open (fast repeat entry). */
+  document.getElementById('partName').value = '';
+  window._partGender=''; window._partAge='';
+  document.querySelectorAll('#partGenderPills .weather-pill, #partAgePills .weather-pill').forEach(function(el){ el.classList.remove('active'); el.style.background=''; el.style.color=''; });
+  var cp=document.getElementById('partClan'); if(cp) cp.value='';
+  var co=document.getElementById('partClanOther'); if(co){ co.style.display='none'; co.value=''; }
+  partClearSig();
+  var nm=document.getElementById('partName'); if(nm) nm.focus();
+  toast('Added ✓ ('+_trainingRoster.length+')');
+}
+
+function removeParticipant(i) {
+  if (i<0 || i>=_trainingRoster.length) return;
+  _trainingRoster.splice(i,1);
+  _saveRosterDraft();
+  renderRegister();
+}
+
+function _saveRosterDraft(){ try{ localStorage.setItem(ROSTER_DRAFT_KEY, JSON.stringify(_trainingRoster)); }catch(e){} }
+function _loadRosterDraft(){ try{ var r=localStorage.getItem(ROSTER_DRAFT_KEY); return r?JSON.parse(r):[]; }catch(e){ return []; } }
+function _clearRosterDraft(){ try{ localStorage.removeItem(ROSTER_DRAFT_KEY); }catch(e){} }
+
+/* Back-compat shim: a few callers still invoke updatePaxTotal(). */
+function updatePaxTotal() { renderRegister(); }
 
 function selectTrainingType(type, btn) {
   selectedTrainingType = type;
@@ -15248,13 +15523,10 @@ function submitTrainingRecord() {
   if (!date)  { toast('Please select a date'); return; }
   /* A live photo is required for EVERY training record (proof it happened). */
   if (!_trainingPhotoData) { toast('A live photo of the training is required.'); return; }
-  /* Awareness mode also needs attendance. */
-  if (_trainingMode === 'awareness') {
-    var f = parseInt(document.getElementById('paxFemale').value)||0;
-    var m = parseInt(document.getElementById('paxMale').value)||0;
-    if (f + m === 0) { toast('Please record attendance (women + men)'); return; }
-  }
+  /* At least one participant must be in the register (attendance is the record). */
+  if (_trainingRoster.length === 0) { toast('Add at least one participant to the register.'); return; }
 
+  var t = registerTotals();
   var record = {
     type: type,
     topic: topic,
@@ -15263,9 +15535,14 @@ function submitTrainingRecord() {
     trainer_name: (document.getElementById('trainerName').value||'').trim(),
     trainer_org: (document.getElementById('trainerOrg').value||'').trim(),
     location: (document.getElementById('trainingLocation').value||'').trim(),
-    pax_female: parseInt(document.getElementById('paxFemale').value)||0,
-    pax_male: parseInt(document.getElementById('paxMale').value)||0,
-    pax_youth: parseInt(document.getElementById('paxYouth').value)||0,
+    /* Counts derived from the digital register (reports use these; names held for audit) */
+    pax_total: t.total,
+    pax_female: t.female,
+    pax_male: t.male,
+    pax_youth: t.youth,
+    pax_middle: t.middle,
+    pax_older: t.older,
+    participants: _trainingRoster.slice(),
     materials: selectedMaterials.slice(),
     topics_covered: (document.getElementById('trainingTopics').value||'').trim(),
     outcomes: (document.getElementById('trainingOutcomes').value||'').trim(),
@@ -15288,7 +15565,7 @@ function submitTrainingRecord() {
     toast('Training session saved ✓');
     /* Clear form */
     ['trainingTopic','trainingDuration','trainerName','trainerOrg','trainingLocation',
-     'paxFemale','paxMale','paxYouth','trainingTopics','trainingOutcomes',
+     'trainingTopics','trainingOutcomes',
      'trainingFollowup','trainingChallenges','trainingNotes'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.value = '';
@@ -15301,7 +15578,8 @@ function submitTrainingRecord() {
     document.querySelectorAll('#screen-training-record .weather-pill[onclick^="toggleMaterial"]').forEach(function(b) {
       b.classList.remove('active'); b.style.background = ''; b.style.color = '';
     });
-    document.getElementById('paxTotal').textContent = '0';
+    /* Reset the register for the next session */
+    _trainingRoster = []; _clearRosterDraft(); partCancelAdd(); renderRegister();
     /* Go back to list */
     setTimeout(function() { nav('screen-training-setup'); }, 800);
   });

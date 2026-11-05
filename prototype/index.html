@@ -5557,15 +5557,17 @@ select.msel {
             </div>
           </div>
 
-          <!-- Photo (required for awareness, optional for field officer) -->
+          <!-- Live photo — REQUIRED for every training record -->
           <div class="form-group" id="trainingPhotoGroup">
-            <label class="form-label">Photo <span id="trainingPhotoRequired" style="color:#e53935;display:none;">*</span></label>
+            <label class="form-label">Live photo <span id="trainingPhotoRequired" style="color:#e53935;">*</span></label>
+            <div style="font-size:0.72rem;color:#888;margin-bottom:6px;">Take a photo <strong>now, at the training</strong>. An old photo from the gallery is rejected, and its time must fall on the session date.</div>
             <button type="button" class="btn-outline" onclick="trainingTriggerPhoto()" style="width:100%;margin-bottom:8px;"><span data-icon="camera" data-size="14"></span> Take Photo</button>
             <div id="trainingPhotoPreview" style="display:none;">
               <img id="trainingPhotoImg" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin-bottom:6px;">
               <button type="button" class="btn-outline" onclick="trainingClearPhoto()" style="font-size:0.75rem;padding:5px 10px;color:#B71C1C;border-color:#B71C1C;">Remove</button>
             </div>
             <input type="file" id="trainingPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="handleTrainingPhoto(this)">
+            <div id="trainingGpsStatus" style="font-size:0.72rem;color:#888;margin-top:8px;"></div>
           </div>
 
           <!-- Key topics covered (field officer only) -->
@@ -11975,7 +11977,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v120'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v121'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -15043,6 +15045,16 @@ function trainingTriggerPhoto() {
 function handleTrainingPhoto(input) {
   var file = input.files && input.files[0];
   if (!file) return;
+  /* Live-photo guard: the file's own timestamp must be about NOW. An old photo
+     picked from the gallery (taken well before the session) is rejected, so a
+     trainer can't attach a photo from another day. */
+  var lm = file.lastModified || Date.now();
+  if (Date.now() - lm > 6 * 3600 * 1000) {
+    input.value = '';
+    toast('That photo was not taken just now — take a LIVE photo at the training.');
+    return;
+  }
+  window._trainingPhotoTime = lm;
   var reader = new FileReader();
   reader.onload = function(e) {
     _trainingPhotoData = e.target.result;
@@ -15079,9 +15091,17 @@ function initTrainingRecord() {
     return;
   }
 
-  /* Reset photo */
-  _trainingPhotoData = null;
+  /* Reset photo + live-photo time + location */
+  _trainingPhotoData = null; window._trainingPhotoTime = null; window._trainingGps = null;
   trainingClearPhoto();
+  /* Auto-capture GPS so training events can later be mapped. Never blocks the
+     record (resilience) — saved without it, flagged for review, if no fix. */
+  var _tgEl = document.getElementById('trainingGpsStatus');
+  if (_tgEl) { _tgEl.innerHTML = ''+icon('pin',13)+' Acquiring location…'; _tgEl.style.color = '#888'; }
+  captureGPS(function(gps, err){
+    if (gps) { window._trainingGps = gps; if (_tgEl) { _tgEl.innerHTML = ''+icon('pin',13)+' '+gps.lat+'°, '+gps.lng+'° ±'+gps.accuracy+'m'; _tgEl.style.color = '#2E6B38'; } }
+    else { if (_tgEl) { _tgEl.innerHTML = ''+icon('warning',13)+' '+err+' — saved without location, flagged'; _tgEl.style.color = '#E65100'; } }
+  });
 
   /* Set today's date */
   var dateEl = document.getElementById('trainingDate');
@@ -15127,7 +15147,7 @@ function initTrainingRecord() {
     _setVisible('trainingChallengesGroup', true);
     _setVisible('trainingPhotoGroup', true);
     var req = document.getElementById('trainingPhotoRequired');
-    if (req) req.style.display = 'none';
+    if (req) req.style.display = 'inline';   /* a live photo is required for EVERY training record */
     var bar = document.querySelector('#screen-training-record .bar-title');
     if (bar) bar.textContent = 'Record Training Session';
     var sub = document.querySelector('#screen-training-record .bar-subtitle');
@@ -15226,12 +15246,13 @@ function submitTrainingRecord() {
   if (!type)  { toast('Please select a training type'); return; }
   if (!topic) { toast('Please enter the session topic'); return; }
   if (!date)  { toast('Please select a date'); return; }
-  /* Awareness mode: require attendance and photo */
+  /* A live photo is required for EVERY training record (proof it happened). */
+  if (!_trainingPhotoData) { toast('A live photo of the training is required.'); return; }
+  /* Awareness mode also needs attendance. */
   if (_trainingMode === 'awareness') {
     var f = parseInt(document.getElementById('paxFemale').value)||0;
     var m = parseInt(document.getElementById('paxMale').value)||0;
     if (f + m === 0) { toast('Please record attendance (women + men)'); return; }
-    if (!_trainingPhotoData) { toast('A photo is required for awareness sessions'); return; }
   }
 
   var record = {
@@ -15252,6 +15273,12 @@ function submitTrainingRecord() {
     challenges: (document.getElementById('trainingChallenges').value||'').trim(),
     notes: (document.getElementById('trainingNotes').value||'').trim(),
     photo: _trainingPhotoData || null,
+    photo_captured_at: window._trainingPhotoTime ? new Date(window._trainingPhotoTime).toISOString() : null,
+    photo_png_date: window._trainingPhotoTime ? new Date(window._trainingPhotoTime + 10*3600000).toISOString().slice(0,10) : '',
+    photo_on_session_date: window._trainingPhotoTime ? (new Date(window._trainingPhotoTime + 10*3600000).toISOString().slice(0,10) === date) : false,
+    gps: window._trainingGps || null,
+    gps_source: (window._trainingGps && window._trainingGps.source) || null,
+    location_missing: !window._trainingGps,
     session_mode: _trainingMode,
     recorded_at: new Date().toISOString()
   };

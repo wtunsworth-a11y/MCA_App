@@ -1780,6 +1780,11 @@ function doPost(e) {
     if (body._action === 'update_indicative_price') {
       return ContentService.createTextOutput(JSON.stringify(updateIndicativePrice(body))).setMimeType(ContentService.MimeType.JSON);
     }
+    /* One full-quality photo/video, uploaded as its own file (the record that
+     * references it comes separately as a small text file). */
+    if (body._action === 'media') {
+      return ContentService.createTextOutput(JSON.stringify(storeMediaFile(body))).setMimeType(ContentService.MimeType.JSON);
+    }
 
     /* Normal steward data upload */
     var folder = getDataFolder();
@@ -2042,6 +2047,31 @@ function _saveMedia(folder, name, dataUri) {
 }
 function _extractMedia(folder, uid, slot, dataUri, ext) {
   return _saveMedia(folder, 'DIST_' + uid + '_' + slot + '.' + ext, dataUri);
+}
+
+/* Store ONE full-quality photo/video (uploaded on its own, ahead of the small
+ * text record that references it) in the steward's media/ subfolder. Idempotent
+ * by filename, so a retry reuses the existing file instead of duplicating.
+ * Returns the Drive file name + URL so the client can keep a link. */
+function storeMediaFile(body) {
+  try {
+    if (!body || !body.data || !body.name) return { status: 'error', message: 'missing media' };
+    var folder   = getDataFolder();
+    var zoneId   = (body.steward && body.steward.zone_id) || '';
+    var zoneName = (body.steward && body.steward.zone)    || '';
+    var zoneDir  = zoneId ? (zoneId + '_' + zoneName.replace(/\s+/g, '_')) : 'Unzoned';
+    var zoneFolder = getOrCreateFolder(zoneDir, folder);
+    var sid         = (body.steward && body.steward.stewardId) || 'UNKNOWN';
+    var stewardName = (body.steward && body.steward.name)      || 'Unknown';
+    var subFolder   = getOrCreateFolder(sid + '_' + stewardName.replace(/\s+/g, '_'), zoneFolder);
+    var mediaFolder = getOrCreateFolder('media', subFolder);
+    var name = String(body.name).replace(/[^A-Za-z0-9_.\-]/g, '_');
+    var url  = _saveMedia(mediaFolder, name, body.data);   /* idempotent */
+    if (!url) return { status: 'error', message: 'bad media data' };
+    return { status: 'ok', file: name, url: url };
+  } catch (err) {
+    return { status: 'error', message: err.toString() };
+  }
 }
 
 /* Walk every steward subfolder, gather distribution records, dedup by

@@ -5605,14 +5605,21 @@ select.msel {
             <button id="sendAllBtn" onclick="sendAllData()" style="background:#fff;color:#1B5E20;border:none;border-radius:10px;padding:13px 28px;font-size:1rem;font-weight:800;cursor:pointer;width:100%;">
               <span data-icon="upload" data-size="14"></span> Send All New Records
             </button>
-            <!-- Live upload progress: each record goes up as its own small file -->
+            <!-- Review manifest: pick files to send; each goes up as its own file -->
             <div id="uploadProgress" style="display:none;margin-top:12px;text-align:left;">
-              <div style="color:#fff;font-size:0.82rem;font-weight:700;margin-bottom:6px;"><span id="upCount">0 of 0</span> sent · <span id="upRemain">0</span> to go</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;color:#fff;font-size:0.76rem;">
+                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" id="upSelectAll" checked onclick="_uploadToggleAll(this.checked)"> Select all</label>
+                <span id="upTotals" style="margin-left:auto;color:rgba(255,255,255,0.85);font-weight:700;"></span>
+              </div>
               <div style="height:8px;background:rgba(255,255,255,0.22);border-radius:4px;overflow:hidden;margin-bottom:5px;">
                 <div id="upBar" style="height:100%;width:0%;background:#A5D6A7;border-radius:4px;transition:width .25s;"></div>
               </div>
-              <div id="upHint" style="color:rgba(255,255,255,0.75);font-size:0.68rem;margin-bottom:8px;">Keep this screen open — it keeps going even on a slow signal. No need to restart.</div>
-              <div id="upList" style="max-height:220px;overflow-y:auto;background:rgba(0,0,0,0.15);border-radius:8px;"></div>
+              <div id="upHint" style="color:rgba(255,255,255,0.75);font-size:0.68rem;margin-bottom:8px;"></div>
+              <div id="upList" style="max-height:240px;overflow-y:auto;background:rgba(0,0,0,0.15);border-radius:8px;"></div>
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <button id="upSendSelBtn" onclick="_uploadSelected()" style="flex:1;background:#fff;color:#1B5E20;border:none;border-radius:9px;padding:11px;font-weight:800;font-size:0.9rem;cursor:pointer;">Send selected</button>
+                <button id="upCancelBtn" onclick="_cancelUploadManifest()" style="flex:0 0 auto;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:9px;padding:11px 16px;font-weight:700;font-size:0.9rem;cursor:pointer;">Close</button>
+              </div>
             </div>
             <div style="color:rgba(255,255,255,0.6);font-size:0.7rem;margin-top:8px;" id="lastSentLine"></div>
           </div>
@@ -11938,7 +11945,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v115'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mca-steward-v116'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -13602,11 +13609,22 @@ function getAllRecords(storeName, cb) {
 }
 
 
-/* ── Count unsynced (synced !== true) records in a store ── */
+/* ── Count unsynced (synced !== true) records in a store ──
+   Uses a cursor so records are read ONE AT A TIME and released — never loading
+   every photo-laden record into memory at once (which could crash a low-RAM
+   phone just by opening the Send screen). */
 function countUnsyncedRecords(storeName, cb) {
-  getAllRecords(storeName, function(records) {
-    var unsynced = (records || []).filter(function(r) { return !r.synced; });
-    cb(unsynced.length, records.length);
+  openDB(function(db) {
+    if (!db) { cb(0, 0); return; }
+    var total = 0, unsynced = 0;
+    var tx = db.transaction(storeName, 'readonly');
+    var req = tx.objectStore(storeName).openCursor();
+    req.onsuccess = function(e) {
+      var c = e.target.result;
+      if (c) { total++; if (!c.value.synced) unsynced++; c.continue(); }
+    };
+    tx.oncomplete = function(){ cb(unsynced, total); };
+    tx.onerror = function(){ cb(unsynced, total); };
   });
 }
 
@@ -13949,54 +13967,24 @@ function updateRecordCounts() {
   });
 }
 
-/* ── Bundle all unsynced records and share as JSON ── */
+/* ───────────── Upload: review manifest + per-record, media separate ─────────
+ * Press Send → a list of the files waiting to go, each with its SIZE. The user
+ * can send them one at a time (Send on a row) or tick several and "Send
+ * selected", so time-sensitive data can go first without waiting for the rest.
+ *
+ * Each record is uploaded as its OWN small text file, and its photos/videos go
+ * up FIRST as their own FULL-QUALITY files (no shrinking, no base64 bloat on the
+ * server) with the record keeping only a reference. Everything is streamed ONE
+ * record / ONE photo at a time, so a low-memory phone never holds it all at once
+ * (that is what crashed the old all-in-one bundle). Idempotent by uid, so a
+ * retry overwrites instead of duplicating. No share-sheet fallback. */
 function sendAllData() {
   if (!UPLOAD_ENDPOINT) { toast('Upload is not set up on this phone.'); return; }
   if (!navigator.onLine) { toast('No signal — connect to the internet and try again.'); return; }
-  /* Capture the last verified-online time BEFORE we refresh it, so any
-     clock-flagged records get an accurate date bracket; then refresh from the
-     server and run the upload. */
   var prevA = _loadTimeAnchor();
   window._uploadPrevEarliestMs = prevA ? prevA.serverMs : null;
   window._dateReviewQueue = [];
-  pingServerTime(function(){ _runChunkedUpload(); });
-}
-
-/* Upload every unsynced record as its OWN small file, straight into the
-   steward's Drive folder, one at a time, with a progress bar. Each file is
-   named by the record's uid, so a retry overwrites it (never a duplicate) and a
-   dropped connection only costs that one small record, not the whole send. No
-   share-sheet fallback — data goes to Drive, not to the coordinator's inbox. */
-function _runChunkedUpload() {
-  var btn = document.getElementById('sendAllBtn');
-  if (btn) { btn.disabled = true; btn.innerHTML = ''+icon('upload',13)+' Preparing…'; }
-  getAllRecords('auth', function(authRecs) {
-    var profile = (authRecs && authRecs[0]) || {};
-    var steward = {
-      name:      profile.name      || 'Unknown',
-      stewardId: profile.stewardId || 'UNKNOWN',
-      clan:      profile.clan      || '',
-      zone:      profile.zone      || '',
-      zone_id:   profile.zone_id   || '',
-      village:   profile.village   || '',
-      role:      profile.role      || 'clan_steward'
-    };
-    var items = [], storesDone = 0;
-    DATA_STORES.forEach(function(store) {
-      getAllRecords(store, function(records) {
-        (records || []).forEach(function(r) {
-          if (r.synced) return;
-          if (r.clock_ok === false) {
-            var br = _computeDateBracket(r); r.date_review = br;
-            window._dateReviewQueue.push(_dateReviewEntry(store, r, br, profile));
-          }
-          items.push({ store: store, id: r.id, rec: r });
-        });
-        storesDone++;
-        if (storesDone === DATA_STORES.length) _startUploadQueue(steward, items);
-      });
-    });
-  });
+  pingServerTime(function(){ _buildUploadManifest(); });
 }
 
 function _fmtBytes(n) {
@@ -14004,112 +13992,235 @@ function _fmtBytes(n) {
   if (n < 1048576) return (Math.round(n / 102.4) / 10) + ' KB';
   return (Math.round(n / 104857.6) / 10) + ' MB';
 }
-function _recLabel(item) {
-  var r = item.rec;
-  var base = _STORE_LABELS[item.store] || (item.store.charAt(0).toUpperCase() + item.store.slice(1).replace(/_/g,' '));
-  var nm = r.title || r.name || r.site_name || r.location_name || r.topic || r.commodity || '';
+function _recLabelFrom(store, r) {
+  var base = _STORE_LABELS[store] || (store.charAt(0).toUpperCase() + store.slice(1).replace(/_/g,' '));
+  var nm = (r && (r.title || r.name || r.site_name || r.location_name || r.topic || r.commodity)) || '';
   return base + (nm ? (' — ' + String(nm).slice(0, 28)) : '');
 }
+function _escTxt(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function _startUploadQueue(steward, items) {
-  var btn   = document.getElementById('sendAllBtn');
-  var panel = document.getElementById('uploadProgress');
-  if (!items || items.length === 0) {
-    toast('No new records to send.');
-    if (panel) panel.style.display = 'none';
-    if (btn) { btn.disabled = false; btn.onclick = sendAllData; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
-    return;
-  }
-  var list = document.getElementById('upList');
-  if (list) {
-    var h = '';
-    items.forEach(function(it, i) {
-      it._bytes = (JSON.stringify(it.rec) || '').length;
-      h += '<div class="up-item" style="display:flex;align-items:center;gap:8px;padding:5px 6px;border-bottom:1px solid rgba(255,255,255,0.08);font-size:0.72rem;color:#fff;">'
-        +   '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _recLabel(it) + '</span>'
-        +   '<span style="color:rgba(255,255,255,0.6);flex:0 0 auto;">' + _fmtBytes(it._bytes) + '</span>'
-        +   '<span class="up-stat" id="upstat-' + i + '" style="flex:0 0 auto;width:20px;text-align:center;color:rgba(255,255,255,0.5);">•</span>'
-        + '</div>';
-    });
-    list.innerHTML = h;
-  }
-  if (panel) panel.style.display = 'block';
-  if (btn) { btn.disabled = true; btn.innerHTML = ''+icon('upload',13)+' Sending…'; }
-
-  var total = items.length, sent = 0, failed = 0, idx = 0;
-  window._uploadFailedItems = [];
-  function setStat(i, sym, color) { var el = document.getElementById('upstat-' + i); if (el) { el.textContent = sym; el.style.color = color; } }
-  function setBar() {
-    var done = sent + failed;
-    var bar = document.getElementById('upBar'), cnt = document.getElementById('upCount'), rem = document.getElementById('upRemain');
-    if (bar) bar.style.width = Math.round(done / total * 100) + '%';
-    if (cnt) cnt.textContent = sent + ' of ' + total;
-    if (rem) rem.textContent = (total - done);
-  }
-  setBar();
-
-  function next() {
-    if (idx >= total) return finish();
-    var i = idx++, it = items[i];
-    setStat(i, '↑', '#FFF59D');
-    var mods = {}; mods[it.store] = [it.rec];
-    var body = JSON.stringify({
-      _secret: UPLOAD_SECRET, export_version: '1', exported_at: new Date().toISOString(),
-      steward: steward, chunk_uid: (it.rec.record_uid || it.rec.uid || ('id' + it.id)),
-      modules: mods, record_count: 1
-    });
-    _postChunk(body, function(ok) {
-      if (ok) { sent++; setStat(i, '✓', '#A5D6A7'); markStoreSynced(it.store, [it.id], function(){}); }
-      else    { failed++; setStat(i, '✗', '#EF9A9A'); window._uploadFailedItems.push(it); }
-      setBar();
-      next();
-    });
-  }
-
-  function finish() {
-    updateRecordCounts();
-    try { localStorage.setItem('mcaLastSync', new Date().toISOString()); } catch(e) {}
-    var lastLine = document.getElementById('lastSentLine');
-    if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
-    if (sent > 0) {
-      purgeOldSyncedMedia(function(res){ if (res && res.records > 0) { try { localStorage.setItem('mcaLastPurge', new Date().toISOString()); } catch(e){} } });
-      flushUnsyncedVerifications(function(){ syncDisturbancesFromServer(function(){ renderDashDisturb(); }); });
-      if (window._dateReviewQueue && window._dateReviewQueue.length) {
-        fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ _action:'register_date_review', _secret:UPLOAD_SECRET, items: window._dateReviewQueue }) }).catch(function(){});
-      }
-      flushIssues(function(){});
-    }
-    var hint = document.getElementById('upHint');
-    if (failed === 0) {
-      toast(sent + ' record' + (sent === 1 ? '' : 's') + ' uploaded ✓');
-      if (hint) { hint.textContent = 'All ' + sent + ' sent ✓ — safe to leave.'; hint.style.color = '#A5D6A7'; }
-      if (btn) { btn.disabled = false; btn.onclick = sendAllData; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; }
-    } else {
-      toast(sent + ' sent, ' + failed + ' still to go');
-      if (hint) { hint.textContent = failed + ' could not send yet — tap Retry failed. Already-sent ones are not resent.'; hint.style.color = '#FFCC80'; }
-      if (btn) { btn.disabled = false; btn.onclick = _retryFailedUploads; btn.innerHTML = ''+icon('upload',13)+' Retry failed (' + failed + ')'; }
-    }
-  }
-  next();
-}
-
-function _retryFailedUploads() {
-  var items = (window._uploadFailedItems || []).slice();
+/* Read records ONE AT A TIME via a cursor so the phone never holds every
+   photo-laden record in memory at once. Builds a lightweight manifest (store,
+   id, label, size) — not the record bodies. */
+function _buildUploadManifest() {
   var btn = document.getElementById('sendAllBtn');
-  if (btn) btn.onclick = sendAllData;
-  if (!items.length) { sendAllData(); return; }
+  if (btn) { btn.disabled = true; btn.innerHTML = ''+icon('upload',13)+' Reading…'; }
   getAllRecords('auth', function(authRecs) {
     var profile = (authRecs && authRecs[0]) || {};
-    var steward = {
+    window._uploadProfile = profile;
+    window._uploadSteward = {
       name: profile.name||'Unknown', stewardId: profile.stewardId||'UNKNOWN', clan: profile.clan||'',
       zone: profile.zone||'', zone_id: profile.zone_id||'', village: profile.village||'', role: profile.role||'clan_steward'
     };
-    _startUploadQueue(steward, items);
+    var manifest = [], si = 0;
+    function nextStore() {
+      if (si >= DATA_STORES.length) { if (btn) { btn.disabled = false; btn.innerHTML = ''+icon('upload',13)+' Send All New Records'; } return _showUploadManifest(manifest); }
+      var store = DATA_STORES[si++];
+      openDB(function(db) {
+        if (!db) { nextStore(); return; }
+        var tx = db.transaction(store, 'readonly');
+        var req = tx.objectStore(store).openCursor();
+        req.onsuccess = function(e) {
+          var c = e.target.result;
+          if (c) {
+            var r = c.value;
+            if (r && !r.synced) {
+              var bytes = 0; try { bytes = JSON.stringify(r).length; } catch(_) { bytes = 0; }
+              manifest.push({ store: store, id: c.primaryKey, label: _recLabelFrom(store, r),
+                              bytes: bytes, uid: (r.record_uid || r.uid || ('id'+c.primaryKey)) });
+            }
+            c.continue();
+          }
+        };
+        tx.oncomplete = function(){ nextStore(); };
+        tx.onerror = function(){ nextStore(); };
+      });
+    }
+    nextStore();
   });
 }
 
-/* POST one small record file, with a 45s timeout and up to 3 tries (2s/4s/8s
-   backoff) so a satellite handoff or brief drop re-sends just that one file. */
+function _showUploadManifest(manifest) {
+  window._uploadManifest = manifest;
+  var panel = document.getElementById('uploadProgress');
+  if (!manifest.length) {
+    toast('No new records to send.');
+    if (panel) panel.style.display = 'none';
+    return;
+  }
+  var total = 0; manifest.forEach(function(m){ total += m.bytes; });
+  var tot = document.getElementById('upTotals');
+  if (tot) tot.textContent = manifest.length + ' file' + (manifest.length>1?'s':'') + ' · ' + _fmtBytes(total);
+  var LARGE = 8 * 1048576;   /* flag anything that may struggle on a field link */
+  var list = document.getElementById('upList');
+  if (list) {
+    list.innerHTML = manifest.map(function(m, i){
+      var big = m.bytes >= LARGE;
+      return '<div class="up-item" style="display:flex;align-items:center;gap:8px;padding:6px;border-bottom:1px solid rgba(255,255,255,0.08);font-size:0.72rem;color:#fff;">'
+        + '<input type="checkbox" class="up-check" id="upchk-'+i+'" checked style="flex:0 0 auto;">'
+        + '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_escTxt(m.label)+'</span>'
+        + (big ? '<span style="flex:0 0 auto;font-size:0.6rem;font-weight:700;background:#E65100;color:#fff;border-radius:4px;padding:1px 5px;">large</span>' : '')
+        + '<span style="color:rgba(255,255,255,0.65);flex:0 0 auto;">'+_fmtBytes(m.bytes)+'</span>'
+        + '<button id="upsend-'+i+'" onclick="_uploadOne('+i+')" style="flex:0 0 auto;background:rgba(255,255,255,0.9);color:#1B5E20;border:none;border-radius:6px;padding:3px 9px;font-weight:700;font-size:0.7rem;cursor:pointer;">Send</button>'
+        + '<span class="up-stat" id="upstat-'+i+'" style="flex:0 0 auto;width:16px;text-align:center;color:rgba(255,255,255,0.5);">•</span>'
+        + '</div>';
+    }).join('');
+  }
+  var bar = document.getElementById('upBar'); if (bar) bar.style.width = '0%';
+  var sa = document.getElementById('upSelectAll'); if (sa) sa.checked = true;
+  var hint = document.getElementById('upHint');
+  if (hint) { hint.textContent = 'Tick the ones to send now, or Send selected. Big files take longer — the bar shows progress. No need to restart.'; hint.style.color = 'rgba(255,255,255,0.75)'; }
+  if (panel) panel.style.display = 'block';
+}
+
+function _uploadToggleAll(checked){
+  var man = window._uploadManifest || [];
+  for (var i=0;i<man.length;i++){ if (man[i] && man[i]._done) continue; var c=document.getElementById('upchk-'+i); if (c) c.checked = checked; }
+}
+function _setRowStat(i, sym, color){ var el=document.getElementById('upstat-'+i); if(el){ el.textContent=sym; el.style.color=color; } }
+function _rowDone(i){ var b=document.getElementById('upsend-'+i); if(b){ b.disabled=true; b.textContent='Sent'; b.style.opacity='0.5'; } var c=document.getElementById('upchk-'+i); if(c){ c.checked=false; c.disabled=true; } }
+
+function _uploadOne(i) {
+  var m = (window._uploadManifest||[])[i]; if (!m || m._done) return;
+  var b = document.getElementById('upsend-'+i); if (b) { b.disabled=true; b.textContent='…'; }
+  _setRowStat(i, '↑', '#FFF59D');
+  _uploadRecord(m, function(ok){
+    if (ok) { m._done=true; _setRowStat(i,'✓','#A5D6A7'); _rowDone(i); _afterUploadsSettle(); }
+    else { _setRowStat(i,'✗','#EF9A9A'); if (b) { b.disabled=false; b.textContent='Retry'; } }
+  });
+}
+
+function _uploadSelected() {
+  var man = window._uploadManifest || [];
+  var queue = [];
+  for (var i=0;i<man.length;i++){ var c=document.getElementById('upchk-'+i); if (man[i] && !man[i]._done && c && c.checked) queue.push(i); }
+  if (!queue.length) { toast('Tick at least one file to send.'); return; }
+  var selBtn = document.getElementById('upSendSelBtn'); if (selBtn) { selBtn.disabled=true; selBtn.textContent='Sending…'; }
+  var total = queue.length, done = 0, failed = 0, qi = 0;
+  var bar = document.getElementById('upBar'); if (bar) bar.style.width = '0%';
+  function step() {
+    if (qi >= queue.length) {
+      if (selBtn) { selBtn.disabled=false; selBtn.textContent='Send selected'; }
+      var hint = document.getElementById('upHint');
+      if (hint) { if (failed===0) { hint.textContent='All sent ✓ — safe to leave.'; hint.style.color='#A5D6A7'; } else { hint.textContent=(done-failed)+' sent, '+failed+' failed — tap Retry on the red rows.'; hint.style.color='#FFCC80'; } }
+      _afterUploadsSettle();
+      return;
+    }
+    var i = queue[qi++], m = man[i];
+    var b = document.getElementById('upsend-'+i); if (b) { b.disabled=true; b.textContent='…'; }
+    _setRowStat(i, '↑', '#FFF59D');
+    _uploadRecord(m, function(ok){
+      done++;
+      if (ok) { m._done=true; _setRowStat(i,'✓','#A5D6A7'); _rowDone(i); }
+      else { failed++; _setRowStat(i,'✗','#EF9A9A'); if (b) { b.disabled=false; b.textContent='Retry'; } }
+      if (bar) bar.style.width = Math.round(done/total*100) + '%';
+      step();
+    });
+  }
+  step();
+}
+
+function _cancelUploadManifest(){ var p=document.getElementById('uploadProgress'); if(p) p.style.display='none'; updateRecordCounts(); }
+
+/* Housekeeping after uploads settle — debounced so a burst of single sends
+   only triggers it once. */
+function _afterUploadsSettle(){
+  updateRecordCounts();
+  try { localStorage.setItem('mcaLastSync', new Date().toISOString()); } catch(e){}
+  var lastLine = document.getElementById('lastSentLine'); if (lastLine) lastLine.textContent = 'Last sent: ' + new Date().toLocaleTimeString();
+  clearTimeout(window._afterUploadT);
+  window._afterUploadT = setTimeout(function(){
+    purgeOldSyncedMedia(function(res){ if (res && res.records > 0) { try { localStorage.setItem('mcaLastPurge', new Date().toISOString()); } catch(e){} } });
+    flushUnsyncedVerifications(function(){ syncDisturbancesFromServer(function(){ renderDashDisturb(); }); });
+    if (window._dateReviewQueue && window._dateReviewQueue.length) {
+      fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ _action:'register_date_review', _secret:UPLOAD_SECRET, items: window._dateReviewQueue }) }).catch(function(){});
+      window._dateReviewQueue = [];
+    }
+    flushIssues(function(){});
+  }, 1200);
+}
+
+/* Fetch a single record by id (keeps peak memory to one record). */
+function _getOneRecord(store, id, cb) {
+  openDB(function(db){
+    if (!db) { cb(null); return; }
+    var tx = db.transaction(store, 'readonly');
+    var r = tx.objectStore(store).get(id);
+    r.onsuccess = function(){ cb(r.result); };
+    r.onerror = function(){ cb(null); };
+  });
+}
+
+/* Walk a record and list every embedded photo/video (data: URI), wherever it
+   sits — a field, an array, a nested object (handover slots, gate selfies…). */
+function _collectMedia(node, out) {
+  if (node == null) return;
+  if (Array.isArray(node)) {
+    for (var i=0;i<node.length;i++){ var v=node[i];
+      if (typeof v==='string' && /^data:(image|video)\//.test(v)) out.push({obj:node,key:i});
+      else if (v && typeof v==='object') _collectMedia(v, out);
+    }
+    return;
+  }
+  if (typeof node==='object') {
+    for (var k in node){ if(!Object.prototype.hasOwnProperty.call(node,k)) continue; var v2=node[k];
+      if (typeof v2==='string' && /^data:(image|video)\//.test(v2)) out.push({obj:node,key:k});
+      else if (v2 && typeof v2==='object') _collectMedia(v2, out);
+    }
+  }
+}
+
+/* Upload ONE record: its photos first (each as its own full-quality file), then
+   the small text record referencing them. One photo in memory at a time. */
+function _uploadRecord(item, cb) {
+  _getOneRecord(item.store, item.id, function(rec) {
+    if (!rec) { cb(false); return; }
+    if (rec.clock_ok === false) {
+      try { var br = _computeDateBracket(rec); rec.date_review = br; window._dateReviewQueue.push(_dateReviewEntry(item.store, rec, br, window._uploadProfile||{})); } catch(_){}
+    }
+    var media = []; _collectMedia(rec, media);
+    var mi = 0, n = 0;
+    function nextMedia() {
+      if (mi >= media.length) return sendChunk();
+      var loc = media[mi++];
+      var val = loc.obj[loc.key];
+      var ext = /^data:video\//.test(val) ? 'mp4' : 'jpg';
+      var name = String(item.uid).replace(/[^A-Za-z0-9_-]/g,'_') + '_' + (n++) + '.' + ext;
+      _postMedia(name, val, item.uid, function(ok, savedName){
+        if (!ok) { cb(false); return; }         /* a photo failed → whole record fails; retry later */
+        loc.obj[loc.key] = { _media: (savedName || name) };   /* swap the blob for a reference, freeing it */
+        nextMedia();
+      });
+    }
+    function sendChunk() {
+      var mods = {}; mods[item.store] = [rec];
+      var body = JSON.stringify({ _secret: UPLOAD_SECRET, export_version:'1', exported_at:new Date().toISOString(),
+        steward: window._uploadSteward, chunk_uid: item.uid, modules: mods, record_count: 1 });
+      _postChunk(body, function(ok){ if (ok) markStoreSynced(item.store, [item.id], function(){}); cb(ok); });
+    }
+    nextMedia();
+  });
+}
+
+/* POST one full-quality photo/video as its own file. 90s timeout (media are
+   bigger) + 3 tries with backoff. */
+function _postMedia(name, dataUri, recordUid, cb) {
+  var body = JSON.stringify({ _action:'media', _secret:UPLOAD_SECRET, steward: window._uploadSteward, record_uid: recordUid, name: name, data: dataUri });
+  var tries = 0, max = 3;
+  function attempt() {
+    tries++;
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var to = setTimeout(function(){ if (ctrl) { try { ctrl.abort(); } catch(_){} } }, 90000);
+    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: body, signal: ctrl ? ctrl.signal : undefined })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ clearTimeout(to); if (d && d.status === 'ok') cb(true, d.file); else retry(); })
+      .catch(function(){ clearTimeout(to); retry(); });
+  }
+  function retry() { if (tries < max) setTimeout(attempt, 1000 * Math.pow(2, tries)); else cb(false); }
+  attempt();
+}
+
+/* POST one small text record file, 45s timeout + 3 tries with backoff. */
 function _postChunk(body, cb) {
   var tries = 0, max = 3;
   function attempt() {

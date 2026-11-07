@@ -42,6 +42,7 @@
     --good:#2e7d32; --good-soft:#e7f2e8;
     --bad:#b4440e; --bad-soft:#f8e7dc; --bad-ink:#8f3509;
     --warn:#b45309; --warn-soft:#fbf0e1;
+    --c-van:#245a2b; --c-cof:#8a5a2b; --c-coc:#6a3fa0;
     --serif:'Source Serif 4',Georgia,serif;
     --sans:'IBM Plex Sans',system-ui,sans-serif;
     --mono:'IBM Plex Mono',ui-monospace,monospace;
@@ -54,6 +55,7 @@
     --good:#67b56d; --good-soft:#1b2a1e;
     --bad:#e78a52; --bad-soft:#2f2016; --bad-ink:#f0a176;
     --warn:#e0a35c; --warn-soft:#2d2114;
+    --c-van:#6bbf72; --c-cof:#ca9a5e; --c-coc:#b89ae0;
     color-scheme:dark;
   }}
   :root[data-theme="dark"]{
@@ -64,6 +66,7 @@
     --good:#67b56d; --good-soft:#1b2a1e;
     --bad:#e78a52; --bad-soft:#2f2016; --bad-ink:#f0a176;
     --warn:#e0a35c; --warn-soft:#2d2114;
+    --c-van:#6bbf72; --c-cof:#ca9a5e; --c-coc:#b89ae0;
     color-scheme:dark;
   }
   *{box-sizing:border-box}
@@ -116,6 +119,22 @@
   .shot .open{color:var(--forest)}
   .note{font-size:.82rem;color:var(--muted);background:var(--panel);border:1px solid var(--rule);border-left:3px solid var(--forest);border-radius:6px;padding:11px 14px;margin-top:14px}
   .foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);font-size:.78rem;color:var(--faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .controls{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:11px 14px;margin:20px 0 4px}
+  .controls .presets{display:flex;gap:6px;flex-wrap:wrap}
+  .controls .presets button{font-family:var(--sans);font-size:.78rem;font-weight:600;border:1px solid var(--rule-bold);background:var(--page);color:var(--muted);border-radius:999px;padding:5px 13px;cursor:pointer}
+  .controls .presets button.on{background:var(--forest);color:#fff;border-color:var(--forest)}
+  .controls .range{display:flex;gap:12px;flex-wrap:wrap;font-size:.76rem;color:var(--muted)}
+  .controls .range label{display:flex;gap:6px;align-items:center}
+  .controls .range input{font-family:var(--mono);font-size:.76rem;border:1px solid var(--rule-bold);border-radius:7px;padding:4px 7px;background:var(--page);color:var(--ink)}
+  .chartwrap{border:1px solid var(--rule);border-radius:10px;padding:10px 6px 2px;background:var(--panel);margin-top:4px}
+  .chartwrap svg{width:100%;height:auto;display:block}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:8px 2px 2px;font-size:.78rem;color:var(--muted)}
+  .legend .lg{display:flex;align-items:center;gap:6px}
+  .legend .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .legend .lg-note{font-size:.72rem;color:var(--faint);margin-left:auto}
+  th.tc,td.tc{text-align:center;width:46px}
+  .tr{font-size:.9rem;font-weight:700}
+  .tr.up{color:var(--good)} .tr.down{color:var(--bad)} .tr.flat{color:var(--faint)} .tr.none{color:var(--rule-bold)}
   .seg{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 2px}
   .seg button{font-family:var(--sans);font-size:.8rem;font-weight:600;border:1px solid var(--rule-bold);background:var(--page);color:var(--muted);border-radius:999px;padding:5px 14px;cursor:pointer}
   .seg button.on{background:var(--forest);color:#fff;border-color:var(--forest)}
@@ -190,15 +209,91 @@ function thumb(practice, stageName, caption){
 }
 
 /* ---- render ---- */
+/* ---- date filtering (all data is in the page, so filtering is instant) ---- */
+const STATE={from:'',to:'',preset:'all'};
+const auditDate=a=>pngDate(a.recorded_at);
+const DATES=AUDITS.map(auditDate).filter(Boolean).sort();
+const MIN_D=DATES[0]||'', MAX_D=DATES[DATES.length-1]||'';
+function inRange(a){ const d=auditDate(a); if(!d) return false; if(STATE.from&&d<STATE.from) return false; if(STATE.to&&d>STATE.to) return false; return true; }
+function currentAudits(){ return AUDITS.filter(inRange); }
+function setPreset(p){
+  STATE.preset=p; STATE.to='';
+  if(p==='all'){ STATE.from=''; }
+  else if(p==='ytd'){ STATE.from=(MAX_D||'').slice(0,4)+'-01-01'; }
+  else { const m={'3m':3,'6m':6,'12m':12}[p]||3; const d=new Date((MAX_D||new Date().toISOString().slice(0,10))+'T00:00:00'); d.setMonth(d.getMonth()-m); STATE.from=d.toISOString().slice(0,10); }
+  render();
+}
+function setRange(){ const f=document.getElementById('fromD'), t=document.getElementById('toD'); STATE.from=f?f.value:''; STATE.to=t?t.value:''; STATE.preset='custom'; render(); }
+
+/* ---- change over time: monthly mean score per commodity ---- */
+const COM_COLOR={vanilla:'var(--c-van)',coffee:'var(--c-cof)',cocoa:'var(--c-coc)'};
+function ym(d){ return d.slice(0,7); }
+function monthlySeries(audits){
+  const by={}, monthsSet=new Set(), names={};
+  for(const a of audits){ const k=ym(auditDate(a)); if(!k) continue; monthsSet.add(k); names[a.commodity]=a.commodity_name;
+    const cm=by[a.commodity]||(by[a.commodity]={}); const s=cm[k]||(cm[k]={sum:0,n:0});
+    for(const r of (a.responses||[])){ if(r.value==null) continue; s.sum+=r.value/2; s.n++; } }
+  const months=[...monthsSet].sort();
+  const series=COM_ORDER.filter(k=>by[k]).map(k=>({key:k,name:names[k]||k,
+    points:months.map(m=>({ym:m,mean:(by[k][m]&&by[k][m].n)?by[k][m].sum/by[k][m].n:null,n:by[k][m]?by[k][m].n:0}))}));
+  return {months,series};
+}
+function trendSVG(audits){
+  const {months,series}=monthlySeries(audits);
+  if(months.length<2) return `<div class="note" style="border-left-color:var(--rule-bold)">Not enough months in this range yet to show a trend — the line builds as visits accumulate across months.</div>`;
+  const W=760,H=300,L=38,R=14,T=16,B=46, iw=W-L-R, ih=H-T-B;
+  const x=i=> L + (months.length===1?iw/2:iw*i/(months.length-1));
+  const y=v=> T + ih*(1-v);
+  let g='';
+  [0,.25,.5,.75,1].forEach(v=>{ g+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="var(--rule)" stroke-width="1"/><text x="${L-6}" y="${y(v)+3}" text-anchor="end" font-size="10" fill="var(--faint)" font-family="var(--mono)">${Math.round(v*100)}</text>`; });
+  const step=Math.max(1,Math.ceil(months.length/8));
+  months.forEach((m,i)=>{ if(i%step===0||i===months.length-1){ const [yy,mm]=m.split('-'); g+=`<text x="${x(i)}" y="${H-B+18}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--mono)">${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+mm-1]}<tspan fill="var(--faint)"> '${yy.slice(2)}</tspan></text>`; } });
+  series.forEach(s=>{
+    const col=COM_COLOR[s.key]||'var(--forest)'; let d='',started=false;
+    s.points.forEach((p,i)=>{ if(p.mean==null){ started=false; return; } d+=(started?'L':'M')+x(i)+' '+y(p.mean)+' '; started=true; });
+    g+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+    s.points.forEach((p,i)=>{ if(p.mean==null) return; g+=`<circle cx="${x(i)}" cy="${y(p.mean)}" r="${p.n>=3?3.6:2.6}" fill="${col}"/>`; });
+  });
+  const legend=series.map(s=>`<span class="lg"><span class="dot" style="background:${COM_COLOR[s.key]}"></span>${esc(s.name)}</span>`).join('');
+  return `<div class="chartwrap"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Monthly mean score by commodity">${g}</svg></div><div class="legend">${legend}<span class="lg-note">mean item score (%) per month · larger dots = more observations</span></div>`;
+}
+function itemTrends(audits){
+  const ds=audits.map(auditDate).filter(Boolean).sort(); if(ds.length<4) return {};
+  const mid=ds[Math.floor(ds.length/2)]; const agg={};
+  for(const a of audits){ const half=auditDate(a)<mid?'e':'l'; const cm=agg[a.commodity]||(agg[a.commodity]={});
+    for(const r of (a.responses||[])){ if(r.value==null) continue; const it=cm[r.code]||(cm[r.code]={e:[0,0],l:[0,0]}); it[half][0]+=r.value/2; it[half][1]++; } }
+  const out={};
+  for(const com in agg){ out[com]={}; for(const code in agg[com]){ const o=agg[com][code];
+    if(o.e[1]>=2&&o.l[1]>=2){ const diff=(o.l[0]/o.l[1])-(o.e[0]/o.e[1]); out[com][code]= diff>0.08?'up':diff<-0.08?'down':'flat'; } } }
+  return out;
+}
+function trendArrow(dir){
+  if(dir==='up') return '<span class="tr up" title="improving vs earlier in range">▲</span>';
+  if(dir==='down') return '<span class="tr down" title="worsening vs earlier in range">▼</span>';
+  if(dir==='flat') return '<span class="tr flat" title="little change">→</span>';
+  return '<span class="tr none" title="not enough data to compare">·</span>';
+}
+
 function render(){
-  const A=analyze(AUDITS); const P=document.getElementById('page'); let H='';
+  const audits=currentAudits();
+  const A=analyze(audits); const P=document.getElementById('page'); let H='';
+  const trends=itemTrends(audits);
   const stagesCovered=Object.values(A.byCom).reduce((n,C)=>n+C.stageList.length,0);
   H+=`<div class="mast">
     <p class="eyebrow">Managalas Conservation Area · MCApp · Value Chains</p>
     <h1>Value Chain Audit — Training Needs</h1>
     <div class="sub">Where practice is weakest across the vanilla, coffee and cocoa value chains — so training goes where it is needed most.</div>
-    <div class="meta"><span>Period <b>${fmtDate(A.minD)} – ${fmtDate(A.maxD)}</b> (PNG)</span><span>Built from <b>${A.total}</b> audit visits</span><span>Generated <b>${fmtDate(pngDate(new Date().toISOString()))}</b></span></div>
+    <div class="meta"><span>Showing <b>${fmtDate(A.minD)||'—'} – ${fmtDate(A.maxD)||'—'}</b> (PNG)</span><span><b>${A.total}</b> audit visits</span><span>Generated <b>${fmtDate(pngDate(new Date().toISOString()))}</b></span></div>
   </div>`;
+  const pre=(p,lbl)=>`<button class="${STATE.preset===p?'on':''}" onclick="setPreset('${p}')">${lbl}</button>`;
+  H+=`<div class="controls">
+    <div class="presets">${pre('all','All')}${pre('12m','Last 12 mo')}${pre('6m','Last 6 mo')}${pre('3m','Last 3 mo')}${pre('ytd','This year')}</div>
+    <div class="range">
+      <label>From <input type="date" id="fromD" value="${STATE.from}" min="${MIN_D}" max="${MAX_D}" onchange="setRange()"></label>
+      <label>To <input type="date" id="toD" value="${STATE.to}" min="${MIN_D}" max="${MAX_D}" onchange="setRange()"></label>
+    </div>
+  </div>`;
+  if(A.total===0){ P.innerHTML=H+`<div class="note" style="border-left-color:var(--bad)">No audits in this date range.</div>`; return; }
   H+=`<div class="kpis">
     <div class="kpi"><div class="v">${A.total}</div><div class="l">Audit visits</div></div>
     <div class="kpi"><div class="v">${Object.keys(A.byCom).length}</div><div class="l">Value chains</div></div>
@@ -206,7 +301,10 @@ function render(){
     <div class="kpi"><div class="v">${A.auditors}</div><div class="l">Auditors</div></div>
     <div class="kpi"><div class="v">${A.photoN}</div><div class="l">Practice photos</div></div>
   </div>`;
-  H+=`<div class="note">One visit scores one stage, so the picture builds up over seasons. Each item is scored on the same basis (Yes 100% · Partial 50% · No 0%, the critical double-weight set aside so items compare), then ranked by <b>shortfall</b> — the gap to full marks. The highest shortfall is the first training priority.</div>`;
+  H+=`<h2>Change over time</h2>`;
+  H+=`<div class="cmeta" style="margin-bottom:8px">Overall practice score by month, per value chain — the signal for whether training is moving the needle. Use the date filter above to focus a period.</div>`;
+  H+=trendSVG(audits);
+  H+=`<div class="note">One visit scores one stage, so the picture builds up over seasons. Each item is scored on the same basis (Yes 100% · Partial 50% · No 0%, the critical double-weight set aside so items compare), then ranked by <b>shortfall</b> — the gap to full marks. The <b>trend arrow</b> compares the later half of the selected range with the earlier half.</div>`;
 
   COM_ORDER.filter(k=>A.byCom[k]).forEach(k=>{
     const C=A.byCom[k];
@@ -214,7 +312,8 @@ function render(){
     H+=`<div class="cmeta"><span class="chip">${C.visits} visits</span><span class="chip">overall ${Math.round(C.mean*100)}%</span><span class="chip">${C.auditors.size} auditor${C.auditors.size!==1?'s':''}</span><span class="chip">${C.zones.size} zone${C.zones.size!==1?'s':''}</span></div>`;
 
     H+=`<h3>Top training priorities</h3>`;
-    H+=`<table><thead><tr><th class="n">#</th><th>Practice</th><th>Stage</th><th class="n">Obs</th><th>Y / P / N</th><th>Shortfall</th></tr></thead><tbody>`;
+    H+=`<table><thead><tr><th class="n">#</th><th>Practice</th><th>Stage</th><th class="n">Obs</th><th>Y / P / N</th><th>Shortfall</th><th class="tc">Trend</th></tr></thead><tbody>`;
+    const ctr=trends[k]||{};
     C.itemList.slice(0,12).forEach((it,i)=>{
       const sfPct=Math.round(it.shortfall*100);
       H+=`<tr>
@@ -224,6 +323,7 @@ function render(){
         <td class="n">${it.n}</td>
         <td class="ypn"><span class="y">${it.yes||0}</span> / <span class="p">${it.partial||0}</span> / <span class="no">${it.no||0}</span></td>
         <td><div class="sf"><div class="sf-bar"><div class="sf-fill" style="width:${sfPct}%;background:${scoreColor(it.mean)}"></div></div><span class="sf-v">${sfPct}%</span></div></td>
+        <td class="tc">${trendArrow(ctr[it.code])}</td>
       </tr>`;
     });
     H+=`</tbody></table>`;

@@ -5397,6 +5397,7 @@ select.msel {
       .vc-meth{font-size:0.68rem;color:#999;text-align:right;white-space:nowrap;}
       .vc-crit{font-size:0.6rem;font-weight:700;color:#C62828;background:#FDECEA;border:1px solid #F5C2BE;border-radius:10px;padding:1px 6px;margin-left:4px;text-transform:uppercase;vertical-align:middle;}
       .vc-hint{font-size:0.72rem;color:#6A1B9A;background:#F7F2FB;border-radius:6px;padding:5px 8px;margin-bottom:7px;}
+      .vc-shade-btn{margin-left:6px;border:1px solid #6A1B9A;background:#fff;color:#6A1B9A;border-radius:7px;padding:3px 9px;font-size:0.72rem;font-weight:600;cursor:pointer;white-space:nowrap;}
       .vc-opts{display:flex;flex-direction:column;gap:5px;}
       .vc-opt{display:flex;gap:8px;align-items:flex-start;text-align:left;border:1px solid #e3e3e3;background:#fff;border-radius:8px;padding:7px 9px;cursor:pointer;width:100%;}
       .vc-opt-k{font-weight:700;font-size:0.76rem;flex-shrink:0;min-width:48px;}
@@ -5475,6 +5476,23 @@ select.msel {
           <button class="btn-primary" style="flex:1;background:#C62828;" onclick="vcPickPractice('bad')">Bad practice</button>
         </div>
         <button style="width:100%;margin-top:10px;background:none;border:none;color:#888;font-size:0.8rem;padding:6px;cursor:pointer;" onclick="vcCancelPractice()">Cancel</button>
+      </div>
+
+      <!-- Shade meter overlay (on-device canopy analysis; photo discarded) -->
+      <div id="vcShadeMeter" style="display:none;position:fixed;inset:0;z-index:60;background:#fff;overflow-y:auto;">
+        <div class="top-bar" style="background:#6A1B9A;">
+          <button class="back-btn" onclick="vcShadeClose()">←</button>
+          <div><div class="bar-title">Shade meter</div><div class="bar-sub">Analysed on the phone · photo discarded</div></div>
+        </div>
+        <div style="padding:16px;">
+          <div class="vc-hint" style="margin-bottom:12px;">Hold the phone flat, lens pointing straight up from the vine, sun out of the frame. Take up to 3 photos across the plot. Each photo is analysed here and discarded — nothing is stored or sent.</div>
+          <div id="vcShadeResult" style="text-align:center;padding:16px;border:1px solid #eee;border-radius:12px;margin-bottom:12px;"></div>
+          <div id="vcShadeStrip" style="margin-bottom:12px;"></div>
+          <button class="btn-primary" style="background:#6A1B9A;width:100%;" onclick="vcShadeShoot()">📷 Take a photo (looking up)</button>
+          <button class="btn-primary" id="vcShadeApplyBtn" style="background:#2E6B38;width:100%;margin-top:10px;display:none;" onclick="vcShadeApply()">Use this result ✓</button>
+          <div style="font-size:0.7rem;color:#999;text-align:center;margin-top:12px;">Blue = sky, dark = canopy. Check the mask looks right before using the result.</div>
+        </div>
+        <input type="file" id="vcShadeInput" accept="image/*" capture="environment" style="display:none;" onchange="vcShadeHandle(this)">
       </div>
     </div>
 
@@ -12208,7 +12226,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v124'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v125'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -16812,7 +16830,7 @@ function vcItemCardHtml(it){
   }
   var crit = it.critical ? '<span class="vc-crit">critical</span>' : '';
   var special='';
-  if(it.special==='shade') special='<div class="vc-hint">'+icon('camera',12)+' Vertical photo from the vine, looking straight up (sun out of the lens). Put the % sky in the note.</div>';
+  if(it.special==='shade') special='<div class="vc-hint">'+icon('camera',12)+' Point straight up from the vine (sun out of the lens). <button type="button" class="vc-shade-btn" onclick="vcOpenShadeMeter(\''+it.code+'\')">Measure shade</button></div>';
   else if(it.special==='receipt') special='<div class="vc-hint">'+icon('document',12)+' Sight the receipt; add a photo if useful.</div>';
   else if(it.special==='pricelist') special='<div class="vc-hint">'+icon('money',12)+' Needs the buyer price list loaded.</div>';
   var naOn = r.response==='na';
@@ -16973,6 +16991,103 @@ function submitVcGrant(){
         } else { status.textContent='Sync: '+(d.message||'failed'); status.style.color='#E65100'; }
       }).catch(function(){ btn.disabled=false; btn.textContent='Record Authorisation →'; status.textContent='No network — try again when online.'; status.style.color='#E65100'; });
   } else { btn.disabled=false; btn.textContent='Record Authorisation →'; status.textContent='No endpoint configured.'; status.style.color='#E65100'; }
+}
+
+
+
+/* ── On-device shade / canopy meter (vanilla M2-1) ───────────────────────
+   An upward photo is classified sky-vs-canopy ON THE PHONE (ForestCrowns-
+   style gap fraction: Otsu split on brightness, with a green-foliage guard).
+   ONLY the % sky / % shade is kept — the photo is analysed and discarded,
+   never stored or transmitted. Up to 3 photos are averaged; the result maps
+   to the checklist band and can be applied to the shade item (the expert can
+   still override). A small mask preview lets the expert sanity-check. ── */
+var _vcShadeItem = '';
+var _vcShadeResults = [];              /* [{pctSky, mask}] transient, max 3 */
+var VC_SHADE_MAX = 3;
+
+function vcOpenShadeMeter(itemCode){ _vcShadeItem = itemCode || 'M2-1'; _vcShadeResults = []; vcShadeRender(); _setVisible('vcShadeMeter', true); }
+function vcShadeClose(){ _vcShadeResults = []; _setVisible('vcShadeMeter', false); }
+function vcShadeShoot(){ var inp=document.getElementById('vcShadeInput'); if(inp){ inp.value=''; inp.click(); } }
+
+function vcShadeHandle(input){
+  var file=input.files&&input.files[0]; if(!file) return;
+  if(_vcShadeResults.length>=VC_SHADE_MAX){ toast('Up to '+VC_SHADE_MAX+' photos.'); return; }
+  var reader=new FileReader();
+  reader.onload=function(e){
+    analyzeShade(e.target.result, function(res){
+      if(res){ _vcShadeResults.push(res); vcShadeRender(); }   /* original photo dropped here */
+      else toast('Could not read that photo — try again.');
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function analyzeShade(dataUrl, cb){
+  try{
+    var img=new Image();
+    img.onload=function(){
+      var W=240, H=Math.max(1, Math.round(W*img.height/(img.width||1)));
+      var c=document.createElement('canvas'); c.width=W; c.height=H;
+      var ctx=c.getContext('2d'); ctx.drawImage(img,0,0,W,H);
+      var data; try{ data=ctx.getImageData(0,0,W,H).data; }catch(err){ cb(null); return; }
+      var N=W*H, lum=new Uint8Array(N), hist=new Array(256); for(var h=0;h<256;h++) hist[h]=0;
+      for(var i=0,p=0;i<N;i++,p+=4){ var r=data[p],g=data[p+1],b=data[p+2]; var L=(r*299+g*587+b*114)/1000|0; lum[i]=L; hist[L]++; }
+      /* Otsu threshold (dark canopy vs bright sky) */
+      var total=N, sum=0; for(var t=0;t<256;t++) sum+=t*hist[t];
+      var sumB=0,wB=0,maxVar=-1,thr=128;
+      for(var k=0;k<256;k++){ wB+=hist[k]; if(wB===0) continue; var wF=total-wB; if(wF===0) break; sumB+=k*hist[k];
+        var mB=sumB/wB, mF=(sum-sumB)/wF, v=wB*wF*(mB-mF)*(mB-mF); if(v>maxVar){ maxVar=v; thr=k; } }
+      /* Classify: sky = bright AND not green-dominant (excludes sunlit foliage) */
+      var sky=0; var mc=document.createElement('canvas'); mc.width=W; mc.height=H; var mctx=mc.getContext('2d');
+      var mimg=mctx.createImageData(W,H); var md=mimg.data;
+      for(var j=0,q=0;j<N;j++,q+=4){ var r2=data[q],g2=data[q+1],b2=data[q+2];
+        var isSky=(lum[j]>thr) && !(g2>r2+8 && g2>b2+8);
+        if(isSky){ md[q]=150; md[q+1]=200; md[q+2]=235; md[q+3]=255; sky++; }
+        else { md[q]=28; md[q+1]=58; md[q+2]=34; md[q+3]=255; } }
+      mctx.putImageData(mimg,0,0);
+      cb({ pctSky: Math.round(sky/N*100), mask: mc.toDataURL('image/png') });
+    };
+    img.onerror=function(){ cb(null); };
+    img.src=dataUrl;
+  }catch(e){ cb(null); }
+}
+
+function vcShadeAvg(){ if(!_vcShadeResults.length) return null; var s=0; _vcShadeResults.forEach(function(r){ s+=r.pctSky; }); return Math.round(s/_vcShadeResults.length); }
+function vcShadeBand(pctSky){
+  if(pctSky>=40 && pctSky<=60) return {band:'yes', label:'Good (40–60% sky)', color:'#2E6B38'};
+  if((pctSky>=20&&pctSky<=39)||(pctSky>=61&&pctSky<=80)) return {band:'partial', label:'Partial', color:'#B45309'};
+  return {band:'no', label:'Out of range', color:'#C62828'};
+}
+function vcShadeRender(){
+  var strip=document.getElementById('vcShadeStrip');
+  if(strip) strip.innerHTML=_vcShadeResults.map(function(r,i){
+    return '<div class="vc-thumb"><img src="'+r.mask+'" style="border-color:#6A1B9A;"><span class="vc-tag" style="background:#6A1B9A;">'+r.pctSky+'%</span><button type="button" class="vc-xr" onclick="vcShadeDrop('+i+')">×</button></div>';
+  }).join('');
+  var avg=vcShadeAvg(); var out=document.getElementById('vcShadeResult');
+  if(out){
+    if(avg==null){ out.innerHTML='<span style="color:#aaa;">Take a photo looking straight up.</span>'; }
+    else { var bd=vcShadeBand(avg);
+      out.innerHTML='<div style="font-size:1.7rem;font-weight:800;color:#6A1B9A;line-height:1;">'+avg+'% sky</div>'+
+        '<div style="font-size:0.86rem;color:#555;margin-top:4px;">'+(100-avg)+'% shade · <span style="color:'+bd.color+';font-weight:700;">'+bd.label+'</span></div>'+
+        '<div style="font-size:0.7rem;color:#999;margin-top:3px;">average of '+_vcShadeResults.length+' photo'+(_vcShadeResults.length>1?'s':'')+'</div>'; }
+  }
+  var ab=document.getElementById('vcShadeApplyBtn'); if(ab) ab.style.display = (avg==null)?'none':'';
+}
+function vcShadeDrop(i){ _vcShadeResults.splice(i,1); vcShadeRender(); }
+function vcShadeApply(){
+  var avg=vcShadeAvg(); if(avg==null){ toast('Take a photo first.'); return; }
+  var bd=vcShadeBand(avg); var code=_vcShadeItem||'M2-1';
+  var cur=_vcResponses[code]||{};
+  cur.response=bd.band;
+  cur.note='Shade meter: '+avg+'% sky ('+(100-avg)+'% shade), '+_vcShadeResults.length+' photo'+(_vcShadeResults.length>1?'s':'');
+  _vcResponses[code]=cur;
+  var el=document.getElementById('vc-card-'+code);
+  var it=_vcModule&&_vcModule.items.filter(function(i){return i.code===code;})[0];
+  if(el&&it) el.outerHTML=vcItemCardHtml(it);
+  vcUpdateScore();
+  _vcShadeResults=[]; _setVisible('vcShadeMeter', false);
+  toast('Shade applied: '+avg+'% sky');
 }
 
 

@@ -140,6 +140,22 @@
   .cc{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;color:var(--muted);white-space:nowrap}
   .cc .ccd{width:9px;height:9px;border-radius:2px;display:inline-block}
   .shared{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:middle}
+  .cc .ccd{width:9px;height:9px;border-radius:2px;display:inline-block}
+  .hg-scroll{overflow-x:auto}
+  .heatgrid{display:grid;gap:4px;min-width:420px;margin-top:4px}
+  .hg-th{}
+  .hg-ch{font-size:.72rem;font-weight:600;color:var(--muted);text-align:center;padding:4px 2px;display:flex;align-items:center;justify-content:center;gap:5px}
+  .hg-ch.all{color:var(--ink)}
+  .hg-ch .ccd{width:9px;height:9px;border-radius:2px;display:inline-block}
+  .hg-lbl{font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-right:8px}
+  .hg-lbl .hg-obs{font-family:var(--mono);font-size:.64rem;color:var(--faint);font-weight:400;width:100%}
+  .hg-cell{border-radius:7px;min-height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;line-height:1}
+  .hg-cell .hg-v{font-family:var(--mono);font-size:1rem;font-weight:700}
+  .hg-cell .hg-n{font-family:var(--mono);font-size:.6rem;opacity:.85;margin-top:2px}
+  .hg-cell.empty{background:var(--panel2);color:var(--faint);font-family:var(--mono)}
+  .hg-legend{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.74rem;color:var(--muted)}
+  .hg-scale{width:120px;height:9px;border-radius:999px;background:linear-gradient(90deg,rgb(178,52,38),rgb(201,124,26),rgb(122,160,63),rgb(42,116,47))}
+  .hg-lnote{color:var(--faint);margin-left:auto}
   .seg{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 2px}
   .seg button{font-family:var(--sans);font-size:.8rem;font-weight:600;border:1px solid var(--rule-bold);background:var(--page);color:var(--muted);border-radius:999px;padding:5px 14px;cursor:pointer}
   .seg button.on{background:var(--forest);color:#fff;border-color:var(--forest)}
@@ -162,6 +178,14 @@ const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&l
 const pngDate = iso => { const d=new Date(iso); return isNaN(d)?'':new Date(d.getTime()+10*3600000).toISOString().slice(0,10); };
 const fmtDate = ymd => { if(!ymd) return ''; const [y,m,dd]=ymd.split('-'); return dd+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]+' '+y; };
 function scoreColor(v){ /* v 0..1 */ return v>=0.75?'var(--good)':v>=0.5?'var(--warn)':'var(--bad)'; }
+function _lerp(a,b,t){ return Math.round(a+(b-a)*t); }
+function heatColor(v){ /* continuous red→amber→green for the heat grid */
+  if(v==null||isNaN(v)) return null;
+  const stops=[[0,[178,52,38]],[0.5,[201,124,26]],[0.75,[122,160,63]],[1,[42,116,47]]];
+  let c=stops[stops.length-1][1];
+  for(let i=0;i<stops.length-1;i++){ if(v<=stops[i+1][0]){ const t=(v-stops[i][0])/(stops[i+1][0]-stops[i][0]); const A=stops[i][1],B=stops[i+1][1]; c=[_lerp(A[0],B[0],t),_lerp(A[1],B[1],t),_lerp(A[2],B[2],t)]; break; } }
+  return 'rgb('+c[0]+','+c[1]+','+c[2]+')';
+}
 
 /* ---- analysis (same inputs the phones upload) ---- */
 function analyze(audits){
@@ -344,21 +368,22 @@ function render(){
   const themes=crossThemes(audits);
   if(themes.length){
     H+=`<h2>Common weaknesses — all value chains</h2>`;
-    H+=`<div class="cmeta" style="margin-bottom:8px">The same practices grouped across vanilla, coffee and cocoa, so a weakness shared by every crop (train it once, help three chains) stands apart from a crop-specific one. Ranked by shortfall; the by-crop figures show whether it is shared or concentrated.</div>`;
-    H+=`<table class="theme"><thead><tr><th>Theme</th><th class="n">Obs</th><th>All crops</th><th>By crop</th></tr></thead><tbody>`;
-    themes.filter(t=>t.theme!=='Other').forEach(t=>{
-      const mp=Math.round(t.mean*100);
-      const per=COM_ORDER.filter(k=>t.com[k]).map(k=>{const c=t.com[k],m=c.sum/c.n;
-        return `<span class="cc"><i class="ccd" style="background:${COM_COLOR[k]}"></i>${esc(c.name)} <b style="color:${scoreColor(m)}">${Math.round(m*100)}%</b></span>`;}).join('');
-      const shared = (t.spread>0 && t.spread<0.15 && COM_ORDER.filter(k=>t.com[k]).length>=2) ? '<span class="shared" title="similar across crops — a shared weakness">shared</span>' : '';
-      H+=`<tr>
-        <td><b>${esc(t.theme)}</b> ${shared}</td>
-        <td class="n">${t.n}</td>
-        <td><div class="sf"><div class="sf-bar"><div class="sf-fill" style="width:${mp}%;background:${scoreColor(t.mean)}"></div></div><span class="sf-v">${mp}%</span></div></td>
-        <td class="cc-wrap">${per}</td>
-      </tr>`;
+    H+=`<div class="cmeta" style="margin-bottom:10px">The same practices grouped into shared themes, so a weakness common to every crop (train it once, help three chains) stands apart from a crop-specific one. A red row is a <b>shared weakness</b>; a single red cell is <b>concentrated</b> in one crop. Ranked weakest-first.</div>`;
+    const rows=themes.filter(t=>t.theme!=='Other');
+    const cropsPresent=COM_ORDER.filter(k=>rows.some(t=>t.com[k]));
+    const cell=(v,n)=>{ const bg=heatColor(v); if(bg==null) return `<div class="hg-cell empty">—</div>`;
+      return `<div class="hg-cell" style="background:${bg}"><span class="hg-v">${Math.round(v*100)}%</span><span class="hg-n">${n}</span></div>`; };
+    let G=`<div class="hg-scroll"><div class="heatgrid" style="grid-template-columns:minmax(148px,1.5fr) repeat(${cropsPresent.length+1},minmax(70px,1fr))">`;
+    G+=`<div class="hg-th"></div><div class="hg-ch all">All crops</div>`+cropsPresent.map(k=>`<div class="hg-ch"><i class="ccd" style="background:${COM_COLOR[k]}"></i>${esc((rows.find(t=>t.com[k])||{com:{}}).com[k]?rows.find(t=>t.com[k]).com[k].name:k)}</div>`).join('');
+    rows.forEach(t=>{
+      const shared=(t.spread>0 && t.spread<0.15 && cropsPresent.filter(k=>t.com[k]).length>=2)?'<span class="shared" title="similar across crops">shared</span>':'';
+      G+=`<div class="hg-lbl">${esc(t.theme)} ${shared}<span class="hg-obs">${t.n} obs</span></div>`;
+      G+=cell(t.mean,t.n);
+      cropsPresent.forEach(k=>{ const c=t.com[k]; G+= c?cell(c.sum/c.n,c.n):`<div class="hg-cell empty">—</div>`; });
     });
-    H+=`</tbody></table>`;
+    G+=`</div></div>`;
+    G+=`<div class="hg-legend"><span>Weak</span><span class="hg-scale"></span><span>Strong</span><span class="hg-lnote">cell = mean practice score · small number = observations</span></div>`;
+    H+=G;
   }
 
   COM_ORDER.filter(k=>A.byCom[k]).forEach(k=>{

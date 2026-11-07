@@ -1022,6 +1022,54 @@ function getAuthorisations(stewardId) {
   }
 }
 
+/* ─── Value-chain auditor authorisations ────────────────────────────────
+ * Separate from training. A coordinator authorises specific people (any role)
+ * to complete value-chain audits for a commodity. Stored in _vc_auditors.json:
+ *   { "<stewardId>": [ {commodity, authorised_by, basis, authorised_at,
+ *                        status}, ... ], ... }
+ * The phone fetches ?action=vc_auditors&stewardId=... and unlocks the audit
+ * tile for each commodity granted. ── */
+function loadVcAuditorsFile() {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_vc_auditors.json');
+  if (files.hasNext()) { try { return JSON.parse(files.next().getBlob().getDataAsString()); } catch(e){ return {}; } }
+  return {};
+}
+function saveVcAuditorsFile(data) {
+  var folder = getDataFolder();
+  var files  = folder.getFilesByName('_vc_auditors.json');
+  var json   = JSON.stringify(data, null, 2);
+  if (files.hasNext()) { files.next().setContent(json); }
+  else { folder.createFile('_vc_auditors.json', json, MimeType.PLAIN_TEXT); }
+}
+function grantVcAuthorisation(record) {
+  if (!record || !record.stewardId || !record.commodity) {
+    return { status:'error', message:'Missing stewardId or commodity' };
+  }
+  try {
+    var data = loadVcAuditorsFile();
+    var sid  = String(record.stewardId).trim().toUpperCase();
+    if (!data[sid]) data[sid] = [];
+    var exists = data[sid].some(function(r){ return r.commodity === record.commodity && r.status !== 'revoked'; });
+    if (!exists) { data[sid].push(record); }
+    saveVcAuditorsFile(data);
+    return { status:'ok', message:'Auditor authorised', stewardId:sid, commodity:record.commodity, duplicate:exists };
+  } catch(err) { return { status:'error', message:err.toString() }; }
+}
+function getVcAuditors(stewardId) {
+  if (!stewardId) {
+    return ContentService.createTextOutput(JSON.stringify({ status:'error', message:'Missing stewardId' })).setMimeType(ContentService.MimeType.JSON);
+  }
+  try {
+    var data = loadVcAuditorsFile();
+    var recs = data[String(stewardId).trim().toUpperCase()] || [];
+    var commodities = recs.filter(function(r){ return r.status !== 'revoked'; }).map(function(r){ return r.commodity; });
+    return ContentService.createTextOutput(JSON.stringify({ status:'ok', stewardId:stewardId, commodities:commodities })).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ status:'error', message:err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
 /* ─── Trainer Certification ─────────────────────────────────────────── */
 /*
  * Trainer certs are stored in a single JSON file _trainer_certs.json in the
@@ -1586,7 +1634,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood', 'update_indicative_price'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood', 'update_indicative_price', 'grant_vc_authorisation'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1615,6 +1663,13 @@ function doPost(e) {
       var result = grantAuthorisation(body.record);
       return ContentService
         .createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (body._action === 'grant_vc_authorisation') {
+      var vcRes = grantVcAuthorisation(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(vcRes))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -1882,7 +1937,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-07.1 — renamed to MCApp in report titles; no-attendance verification queue + alert';
+var BACKEND_VERSION = '2026-11-07.2 — value-chain audit: per-commodity auditor authorisation + training-needs report';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {
@@ -1919,6 +1974,11 @@ function doGet(e) {
   if (action === 'trainer_certs') {
     var stewId = (e.parameter && e.parameter.stewardId) || '';
     return getTrainerCerts(stewId);
+  }
+
+  if (action === 'vc_auditors') {
+    var vcSid = (e.parameter && e.parameter.stewardId) || '';
+    return getVcAuditors(vcSid);
   }
 
   if (action === 'zone_report') {
@@ -3795,6 +3855,104 @@ function installVerificationDigestTrigger() {
   ScriptApp.newTrigger('verificationQueueReport').timeBased().everyWeeks(1).onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7).create();
 }
 
+/* ─── Value-chain training-needs analysis ───────────────────────────────
+ * Walks every uploaded record for value-chain audits (modules.vc_audit) and
+ * builds the per-item training-needs ranking: each item scored on the SAME
+ * basis (value/2, ignoring the critical double-weight so items compare), then
+ * ranked by shortfall (1 − mean). Highest shortfall = first training priority.
+ * Also a per-stage summary and the good/bad practice photo tally. Emails the
+ * field-reports lead (or REPORT_EMAILS) and files a spreadsheet in Reports. ── */
+function collectVcAudits() {
+  var out = [];
+  var root = getDataFolder();
+  var zones = root.getFolders();
+  while (zones.hasNext()) {
+    var zf = zones.next();
+    if (zf.getName().charAt(0) === '_') continue;            /* skip config/system folders */
+    var stewards = zf.getFolders();
+    while (stewards.hasNext()) {
+      var sf = stewards.next();
+      var files = sf.getFiles();
+      while (files.hasNext()) {
+        var f = files.next(); var nm = f.getName();
+        if (nm.indexOf('MCA_') !== 0 || nm.slice(-5) !== '.json') continue;
+        try {
+          var body = JSON.parse(f.getBlob().getDataAsString());
+          var arr = body && body.modules && body.modules.vc_audit;
+          if (arr && arr.length) { for (var i=0;i<arr.length;i++) out.push(arr[i]); }
+        } catch(e) {}
+      }
+    }
+  }
+  return out;
+}
+function vcTrainingNeedsReport() {
+  var audits = collectVcAudits();
+  var ss = SpreadsheetApp.create('MCApp Value-chain training needs — ' + _pngDate(new Date(),'yyyy-MM-dd'));
+  var byCommodity = {};
+  audits.forEach(function(a){
+    var com = a.commodity || 'unknown';
+    var C = byCommodity[com] || (byCommodity[com] = { visits:0, items:{}, modules:{}, photos:{good:0,bad:0} });
+    C.visits++;
+    (a.responses||[]).forEach(function(r){
+      if (r.value == null) return;                           /* skip N/A / unset */
+      var sc = r.value/2;                                    /* 0, .5, 1 — unweighted */
+      var it = C.items[r.code] || (C.items[r.code] = { code:r.code, item:r.item, module:a.module_code, module_name:a.module_name, critical:!!r.critical, n:0, sum:0, yes:0, partial:0, no:0 });
+      it.n++; it.sum += sc;
+      if (r.response==='yes') it.yes++; else if (r.response==='partial') it.partial++; else if (r.response==='no') it.no++;
+      var M = C.modules[a.module_code] || (C.modules[a.module_code] = { code:a.module_code, name:a.module_name, n:0, sum:0, critFail:0, visits:0 });
+      M.n++; M.sum += sc; if (r.critical && r.response==='no') M.critFail++;
+    });
+    var seen = {}; (a.responses||[]).forEach(function(r){ if(!seen[a.module_code]){ seen[a.module_code]=1; var M=C.modules[a.module_code]; if(M) M.visits++; } });
+    (a.photos||[]).forEach(function(p){ if(p.practice==='good') C.photos.good++; else if(p.practice==='bad') C.photos.bad++; });
+  });
+
+  Object.keys(byCommodity).forEach(function(com){
+    var C = byCommodity[com];
+    /* Training-priority sheet: items ranked by shortfall */
+    var sh = ss.insertSheet(com + ' — priorities');
+    sh.appendRow(['Rank','Item code','Stage','Item','Critical','Observations','Yes','Partial','No','Mean %','Shortfall']);
+    var items = Object.keys(C.items).map(function(k){ var it=C.items[k]; it.mean=it.n?it.sum/it.n:0; it.shortfall=1-it.mean; return it; });
+    items.sort(function(a,b){ return (b.shortfall-a.shortfall) || (b.n-a.n); });
+    items.forEach(function(it,i){
+      sh.appendRow([i+1, it.code, it.module+' '+(it.module_name||''), it.item, it.critical?'Yes':'', it.n, it.yes, it.partial, it.no, Math.round(it.mean*100), Math.round(it.shortfall*100)]);
+    });
+    if (!items.length) sh.appendRow(['(no audits logged yet)','','','','','','','','','','']);
+    /* Stage summary */
+    var ms = ss.insertSheet(com + ' — by stage');
+    ms.appendRow(['Stage','Name','Responses','Mean %','Critical No','Visits']);
+    Object.keys(C.modules).sort().forEach(function(k){ var M=C.modules[k]; ms.appendRow([M.code, M.name, M.n, M.n?Math.round(M.sum/M.n*100):'', M.critFail, M.visits]); });
+    ms.appendRow([]); ms.appendRow(['Visits (audits)', C.visits, 'Practice photos', 'good '+C.photos.good, 'bad '+C.photos.bad, '']);
+  });
+  try { ss.deleteSheet(ss.getSheetByName('Sheet1')); } catch(e){}
+
+  var reportsFolder = getOrCreateFolder('Reports', getDataFolder());
+  var ssFile = DriveApp.getFileById(ss.getId());
+  try { reportsFolder.addFile(ssFile); DriveApp.getRootFolder().removeFile(ssFile); } catch(e){}
+
+  var rcp = loadRecipients() || {};
+  var to = rcp.field_reports_to || (REPORT_EMAILS && REPORT_EMAILS[0]) || '';
+  if (to) {
+    var L = ['MCApp — value-chain training needs', '', 'Audits analysed: ' + audits.length, ''];
+    Object.keys(byCommodity).forEach(function(com){
+      var C = byCommodity[com];
+      var items = Object.keys(C.items).map(function(k){ var it=C.items[k]; it.mean=it.n?it.sum/it.n:0; it.shortfall=1-it.mean; return it; })
+                    .sort(function(a,b){ return (b.shortfall-a.shortfall)||(b.n-a.n); });
+      L.push(com.toUpperCase() + ' — ' + C.visits + ' audits. Top training priorities:');
+      items.slice(0,8).forEach(function(it,i){ L.push('  ' + (i+1) + '. ' + it.code + ' ' + it.item + ' — ' + Math.round(it.mean*100) + '% (' + it.n + ' obs)'); });
+      if (!items.length) L.push('  (no items scored yet)');
+      L.push('');
+    });
+    L.push('Full breakdown (per item + per stage) in the Reports folder on Drive.');
+    try { MailApp.sendEmail(to, 'MCApp — value-chain training needs (' + _pngDate(new Date(),'d MMM yyyy') + ')', L.join('\n')); } catch(e){}
+  }
+  return { status:'ok', audits: audits.length };
+}
+function installVcTrainingNeedsTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){ if (t.getHandlerFunction()==='vcTrainingNeedsReport') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('vcTrainingNeedsReport').timeBased().onMonthDay(1).atHour(8).create();
+}
+
 function installAllReportTriggers() {
   var jobs = [
     ['Distribution',     installMonthlyDistributionTrigger],
@@ -3807,7 +3965,8 @@ function installAllReportTriggers() {
     ['Water quality',    installWaterQualityTrigger],
     ['Upload activity',  installUploadActivityTrigger],
     ['Field maps',       installFreemapExportTrigger],
-    ['No-attendance digest', installVerificationDigestTrigger]
+    ['No-attendance digest', installVerificationDigestTrigger],
+    ['VC training needs', installVcTrainingNeedsTrigger]
   ];
   var done = [], failed = [];
   jobs.forEach(function(j){

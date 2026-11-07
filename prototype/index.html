@@ -1671,6 +1671,7 @@ select.msel {
           <button class="btn-outline" id="enrollDateReviewBtn" style="display:none;margin-top:8px;width:100%;border-color:#00695C;color:#00695C;" onclick="showScreen('screen-date-review')"><span data-icon="calendar" data-size="14"></span> Date Review</button>
           <button class="btn-outline" id="enrollEnrolmentsBtn" style="display:none;margin-top:8px;width:100%;border-color:#6A1B9A;color:#6A1B9A;" onclick="nav('screen-enrolments')"><span data-icon="people" data-size="14"></span> Enrolled People</button>
           <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()"><span data-icon="mortarboard" data-size="14"></span> Grant Training Authorisation</button>
+          <button class="btn-outline" id="enrollGrantVcAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#6A1B9A;color:#6A1B9A;" onclick="showGrantVcAuth()"><span data-icon="clipboard" data-size="14"></span> Authorise Value-Chain Auditor</button>
           <button class="btn-outline" id="enrollIssuesBtn" style="display:none;margin-top:8px;width:100%;border-color:#AD1457;color:#AD1457;" onclick="showScreen('screen-issue-reports')"><span data-icon="warning" data-size="14"></span> Issue Reports</button>
           <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')"><span data-icon="clipboard" data-size="14"></span> Manage Training Topics</button>
           <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-zone-config')"><span data-icon="gear" data-size="14"></span> Manage Zones</button>
@@ -2078,6 +2079,10 @@ select.msel {
           <div class="module-tile" id="tile-training" data-fo="1" data-vc="1" onclick="nav('screen-training-setup')">
             <span class="module-emoji" data-icon="mortarboard" data-size="26"></span>
             <span class="module-name">Training</span>
+          </div>
+          <div class="module-tile" id="tile-vc-audit" data-fo="1" data-vc="1" style="display:none;" onclick="nav('screen-vc-audit')">
+            <span class="module-emoji" data-icon="clipboard" data-size="26"></span>
+            <span class="module-name">Value Chains Audit</span>
           </div>
           <div class="module-tile" id="tile-distribution" data-fo="1" data-vc="1" style="display:none;" onclick="nav('screen-distribution')">
             <span class="module-emoji" data-icon="box" data-size="26"></span>
@@ -5381,6 +5386,134 @@ select.msel {
     <!-- ══════════════════════════════════════
          SCREEN: TRAINING RECORDS — LIST
     ══════════════════════════════════════ -->
+    <!-- ══ VALUE CHAINS AUDIT (expert-gated) ══ -->
+    <style>
+      .vc-modpill{display:block;width:100%;text-align:left;border:1px solid #E0D6EC;background:#fff;border-radius:9px;padding:9px 11px;margin-bottom:7px;font-size:0.8rem;color:#333;cursor:pointer;}
+      .vc-modpill.on{border-color:#6A1B9A;background:#F3EEF8;color:#4A148C;font-weight:600;}
+      .vc-modpill .vc-ct{float:right;color:#999;font-size:0.72rem;background:#f0f0f0;border-radius:10px;padding:1px 7px;}
+      .vc-card{border:1px solid #eee;border-radius:10px;padding:10px 12px;margin-bottom:9px;background:#fff;}
+      .vc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:7px;}
+      .vc-name{font-weight:700;font-size:0.86rem;color:#222;}
+      .vc-meth{font-size:0.68rem;color:#999;text-align:right;white-space:nowrap;}
+      .vc-crit{font-size:0.6rem;font-weight:700;color:#C62828;background:#FDECEA;border:1px solid #F5C2BE;border-radius:10px;padding:1px 6px;margin-left:4px;text-transform:uppercase;vertical-align:middle;}
+      .vc-hint{font-size:0.72rem;color:#6A1B9A;background:#F7F2FB;border-radius:6px;padding:5px 8px;margin-bottom:7px;}
+      .vc-opts{display:flex;flex-direction:column;gap:5px;}
+      .vc-opt{display:flex;gap:8px;align-items:flex-start;text-align:left;border:1px solid #e3e3e3;background:#fff;border-radius:8px;padding:7px 9px;cursor:pointer;width:100%;}
+      .vc-opt-k{font-weight:700;font-size:0.76rem;flex-shrink:0;min-width:48px;}
+      .vc-opt-d{font-size:0.76rem;color:#555;line-height:1.3;}
+      .vc-opt.on .vc-opt-d{color:#222;}
+      .vc-row{display:flex;gap:7px;align-items:center;margin-top:8px;}
+      .vc-na{flex-shrink:0;border:1px solid #ddd;background:#fff;border-radius:8px;padding:7px 10px;font-size:0.74rem;color:#777;cursor:pointer;}
+      .vc-na.on{border-color:#555;background:#555;color:#fff;}
+      .vc-note{flex:1;min-width:0;border:1px solid #e0e0e0;border-radius:8px;padding:7px 9px;font-size:0.78rem;}
+      .vc-photo{flex-shrink:0;border:1px solid #ddd;background:#fff;border-radius:8px;padding:7px 9px;font-size:0.74rem;color:#6A1B9A;cursor:pointer;}
+      .vc-photo.has{border-color:#6A1B9A;background:#F3EEF8;}
+      .vc-thumb{position:relative;display:inline-block;margin:0 6px 6px 0;}
+      .vc-thumb img{height:58px;width:58px;object-fit:cover;border-radius:6px;border:2px solid #2E6B38;}
+      .vc-tag{position:absolute;bottom:2px;left:2px;font-size:0.55rem;color:#fff;padding:0 3px;border-radius:3px;}
+      .vc-xr{position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid #ccc;border-radius:50%;width:18px;height:18px;line-height:1;color:#C62828;cursor:pointer;}
+      .vc-sum{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:#fff;border:1px solid #eee;border-radius:10px;padding:8px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.05);}
+      .vc-sum .c{text-align:center;}
+      .vc-sum .v{font-size:1.05rem;font-weight:800;color:#6A1B9A;line-height:1;}
+      .vc-sum .l{font-size:0.58rem;color:#999;margin-top:3px;text-transform:uppercase;letter-spacing:.03em;}
+      .vc-pill{display:inline-block;font-size:0.72rem;font-weight:700;border-radius:999px;padding:2px 8px;}
+    </style>
+
+    <div class="screen" id="screen-vc-audit">
+      <div class="top-bar" style="background:#6A1B9A;">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div><div class="bar-title">Value Chains Audit</div><div class="bar-sub">Vanilla · one stage per visit</div></div>
+      </div>
+      <div style="padding:16px;padding-bottom:90px;">
+        <div style="background:#F3EEF8;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.76rem;color:#4A148C;">
+          Score the one stage you are observing right now. The dataset builds up across visits and seasons and shows where training is most needed. Photos are optional — tag each as good or bad practice.
+        </div>
+
+        <!-- Farmer (light, optional) -->
+        <div class="card" style="padding:10px 12px;margin-bottom:12px;">
+          <div style="font-size:0.74rem;color:#888;margin-bottom:8px;">Farmer <span style="color:#bbb;">(optional — leave blank if unknown)</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <input type="text" id="vcFarmerId" class="form-input" placeholder="Farmer ID" autocomplete="off">
+            <input type="text" id="vcFarmerName" class="form-input" placeholder="Name" autocomplete="off">
+          </div>
+          <input type="text" id="vcFarmerVillage" class="form-input" placeholder="Village" autocomplete="off" style="margin-top:8px;">
+        </div>
+
+        <div id="vcGpsStatus" style="font-size:0.74rem;color:#888;margin-bottom:12px;"></div>
+
+        <!-- Stage picker -->
+        <div class="form-group">
+          <label class="form-label">Process stage observed</label>
+          <div id="vcModulePills"></div>
+        </div>
+
+        <!-- Items (shown once a stage is picked) -->
+        <div id="vcItemsWrap" style="display:none;">
+          <div id="vcSummary" class="vc-sum">
+            <div class="c"><div class="v" id="vcScored">0/0</div><div class="l">Scored</div></div>
+            <div class="c"><div class="v" id="vcScorePct">—</div><div class="l">Stage score</div></div>
+            <div class="c"><div class="v" id="vcCritFail">0</div><div class="l">Critical No</div></div>
+            <div class="c"><div class="v"><span id="vcPriority" class="vc-pill" style="background:#f2f2f2;color:#888;">—</span></div><div class="l">Priority</div></div>
+          </div>
+          <div id="vcModuleTitle" style="font-weight:700;font-size:0.9rem;color:#4A148C;margin-bottom:8px;"></div>
+          <div id="vcItems"></div>
+          <div style="margin-top:4px;"><div id="vcPhotoStrip"></div></div>
+        </div>
+
+        <button class="btn-primary" id="vcSaveBtn" style="background:#6A1B9A;width:100%;margin-top:14px;display:none;" onclick="submitVcAudit()">Save audit ✓</button>
+      </div>
+
+      <!-- hidden photo input -->
+      <input type="file" id="vcPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="vcHandlePhoto(this)">
+
+      <!-- practice chooser sheet -->
+      <div id="vcPracticeSheet" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:50;background:#fff;border-top:1px solid #eee;box-shadow:0 -2px 14px rgba(0,0,0,.12);padding:16px;">
+        <div style="font-weight:700;font-size:0.86rem;margin-bottom:4px;">Tag this photo</div>
+        <div style="font-size:0.74rem;color:#888;margin-bottom:12px;">Is it showing good practice or bad practice? (Used to build training materials.)</div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-primary" style="flex:1;background:#2E6B38;" onclick="vcPickPractice('good')">Good practice</button>
+          <button class="btn-primary" style="flex:1;background:#C62828;" onclick="vcPickPractice('bad')">Bad practice</button>
+        </div>
+        <button style="width:100%;margin-top:10px;background:none;border:none;color:#888;font-size:0.8rem;padding:6px;cursor:pointer;" onclick="vcCancelPractice()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ══ Coordinator: authorise a value-chain auditor ══ -->
+    <div class="screen" id="screen-grant-vc-auth">
+      <div class="top-bar" style="background:#6A1B9A;">
+        <button class="back-btn" onclick="showScreen('screen-enroll')">←</button>
+        <div><div class="bar-title">Authorise Value-Chain Auditor</div><div class="bar-sub">Coordinator only · expert verification</div></div>
+      </div>
+      <div style="padding:16px;">
+        <div style="background:#F3EEF8;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.78rem;color:#4A148C;">
+          Authorise a specific person (any role) to complete value-chain audits for a commodity. This is a separate, higher bar than training — only people who can reliably judge the crop in the field. It unlocks the Value Chains Audit tile on their phone.
+        </div>
+        <div class="form-group">
+          <label class="form-label">Steward / Officer ID <span style="color:#B71C1C;">*</span></label>
+          <input type="text" id="vcgStewId" class="form-input" placeholder="e.g. MCA-F7A" autocomplete="off" style="text-transform:uppercase;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Commodity <span style="color:#B71C1C;">*</span></label>
+          <div id="vcgCommodityPills" style="display:flex;gap:8px;">
+            <button type="button" class="weather-pill" data-c="vanilla" style="flex:1;" onclick="vcgSetCommodity('vanilla',this)">Vanilla</button>
+            <button type="button" class="weather-pill" data-c="coffee" style="flex:1;" onclick="vcgSetCommodity('coffee',this)">Coffee</button>
+            <button type="button" class="weather-pill" data-c="cocoa" style="flex:1;" onclick="vcgSetCommodity('cocoa',this)">Cocoa</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Basis / evidence of expertise <span style="font-size:0.72rem;font-weight:400;color:#888;">(optional)</span></label>
+          <input type="text" id="vcgBasis" class="form-input" placeholder="e.g. 10 yrs vanilla extension; assessed by Matilda">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Authorised by <span style="color:#B71C1C;">*</span></label>
+          <input type="text" id="vcgAuthorisedBy" class="form-input" placeholder="Your name / initials">
+        </div>
+        <button class="btn-primary" id="vcgSubmitBtn" style="background:#6A1B9A;width:100%;margin-top:6px;" onclick="submitVcGrant()">Record Authorisation →</button>
+        <div id="vcgStatus" style="margin-top:12px;font-size:0.82rem;text-align:center;"></div>
+      </div>
+    </div>
+
+
     <div class="screen" id="screen-training-setup">
       <div class="top-bar" style="background:#5C3D7A;">
         <button class="back-btn" onclick="goBack()">←</button>
@@ -5933,7 +6066,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-performance','screen-recent-activity',
   'screen-ack','screen-profile','screen-timesheet',
-  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-distribution','screen-livelihood','screen-market-prices','screen-set-price','screen-price-report','screen-data-export'
+  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-vc-audit','screen-grant-vc-auth','screen-distribution','screen-livelihood','screen-market-prices','screen-set-price','screen-price-report','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -6038,6 +6171,7 @@ function nav(id) {
   if (id === 'screen-data-export') { updateRecordCounts(); updateStorageInfo(); }
   if (id === 'screen-dashboard')   { updateSyncWarning(); updateStorageWarning(); renderDashboardStatus(); colorDashTiles(); renderDueReminders(); }
   if (id === 'screen-training-record') initTrainingRecord();
+  if (id === 'screen-vc-audit') initVcAudit();
   if (id === 'screen-timesheet') loadTimesheetData();
   if (id === 'screen-meteo-record') initMeteoRecord();
   /* Restore autosave draft when entering any form screen */
@@ -6355,6 +6489,7 @@ function enrollCheckPasscode() {
       document.getElementById('enrollUpdateProfileBtn').style.display = 'block';
       var _epb = document.getElementById('enrollEnrolmentsBtn'); if (_epb) _epb.style.display = 'block';
       document.getElementById('enrollGrantAuthBtn').style.display = 'block';
+      var _vcb = document.getElementById('enrollGrantVcAuthBtn'); if (_vcb) _vcb.style.display = 'block';
       document.getElementById('enrollApproveWaterBtn').style.display = 'block';
       document.getElementById('enrollApproveFacBtn').style.display = 'block';
       document.getElementById('enrollApproveMetBtn').style.display = 'block';
@@ -6684,6 +6819,7 @@ function verifyFp() {
           cacheStewardProfile();
           try { postEnrolmentPing(profile); } catch(e){}
           syncAuthorisations(profile);
+          try { syncVcAuthorisations(profile); } catch(e){}
           history = [];
           var role = profile.role || 'clan_steward';
           var dest = (role === 'zone_staff' || role === 'mcf_staff') ? 'screen-reports' : 'screen-dashboard';
@@ -6725,6 +6861,7 @@ function verifyFp() {
         cacheStewardProfile();
         try { postEnrolmentPing(profile); } catch(e){}  /* keep the backend roster current */
         syncAuthorisations(profile);  /* fetch any new coordinator-granted authorisations */
+        try { syncVcAuthorisations(profile); } catch(e){}
         history = [];
         var role = profile.role || 'clan_steward';
         var dest = (role === 'zone_staff' || role === 'mcf_staff')
@@ -12029,8 +12166,8 @@ if ('serviceWorker' in navigator) {
 ══════════════════════════════════════ */
 var mcaDB = null;
 var DB_NAME = 'MCA_StewardData';
-var DB_VERSION = 17;
-var STORES = ['mafia','qabb','water','phenology','trees','meteo','conservation','followups','schedule','pheno_plots','training','auth','drafts','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions','livelihood','gate_selfies','price_reports'];
+var DB_VERSION = 18;
+var STORES = ['mafia','qabb','water','phenology','trees','meteo','conservation','followups','schedule','pheno_plots','training','auth','drafts','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions','livelihood','gate_selfies','price_reports','vc_audit'];
 
 function openDB(cb) {
   if (mcaDB) { if (cb) cb(mcaDB); return; }
@@ -12071,7 +12208,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v123'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v124'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12251,6 +12388,11 @@ function cacheStewardProfile() {
                         (role === 'clan_steward' && authTopics.length > 0));
         trainingTile.style.display = canTrain ? '' : 'none';
       }
+      /* Value Chains Audit — expert-gated, per commodity. Visible only to
+         people the coordinator has authorised as auditors (any role). */
+      var vcAuthed = (records[0].authorised_commodities || []).length > 0;
+      var vcTile = document.getElementById('tile-vc-audit');
+      if (vcTile) vcTile.style.display = (vcAuthed || isOversight()) ? '' : 'none';
       /* Handover & Distribution: field officers + Project/MCF & Zone staff (not
          plain clan stewards). */
       var distTile = document.getElementById('tile-distribution');
@@ -13778,7 +13920,7 @@ function markStoreSynced(storeName, ids, cb) {
 
 /* ── Update per-module sync status on export screen ── */
 var DATA_STORES = ['mafia','qabb','water','phenology','pheno_plots',
-  'conservation','followups','freemap','trees','meteo','training','schedule','distributions','livelihood','gate_selfies','price_reports'];
+  'conservation','followups','freemap','trees','meteo','training','schedule','distributions','livelihood','gate_selfies','price_reports','vc_audit'];
 
 /* ── Dashboard tile colours ───────────────────────────────────────────────
    Give each module its own colour (grouped into families so the grid reads as
@@ -15670,6 +15812,1169 @@ function submitTrainingRecord() {
     setTimeout(function() { nav('screen-training-setup'); }, 800);
   });
 }
+
+/* value-chain checklist data (generated from the vanilla pilot workbook) */
+var VC_CHECKLIST = {
+ "vanilla": {
+  "name": "Vanilla",
+  "bands": {
+   "high": 0.5,
+   "medium": 0.75
+  },
+  "modules": [
+   {
+    "code": "M1",
+    "name": "Planting day (planting site)",
+    "items": [
+     {
+      "code": "M1-1",
+      "item": "Cutting length",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 cuttings",
+      "yes": "1.2 m or longer with 8 or more nodes.",
+      "partial": "0.6 to 1.2 m.",
+      "no": "Under 0.6 m.",
+      "weight": 1
+     },
+     {
+      "code": "M1-2",
+      "item": "Cutting health",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 cuttings",
+      "yes": "None with rot or spots.",
+      "partial": "1 affected.",
+      "no": "2 or more affected.",
+      "weight": 1
+     },
+     {
+      "code": "M1-3",
+      "item": "Support spacing (pace it)",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Row",
+      "yes": "1.5 to 2 m.",
+      "partial": "1 to 1.5 m or 2 to 3 m.",
+      "no": "Any other spacing.",
+      "weight": 1
+     },
+     {
+      "code": "M1-4",
+      "item": "Support suitable for loops",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Row",
+      "yes": "Branches or a crossbar at or below working height to hang loops from.",
+      "partial": "Branches only above reach.",
+      "no": "Bare trunk.",
+      "weight": 1
+     },
+     {
+      "code": "M1-5",
+      "item": "Planting depth",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 cuttings",
+      "yes": "2 to 3 nodes buried and a leaf litter bed under the cutting.",
+      "partial": "1 or 4 nodes buried, or right depth but no litter bed.",
+      "no": "No node buried, or 5 or more buried.",
+      "weight": 1
+     },
+     {
+      "code": "M1-6",
+      "item": "Mulch extent",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 cuttings",
+      "yes": "Covers the ground all round the base out to 50 cm.",
+      "partial": "Covers part of that area.",
+      "no": "Bare.",
+      "weight": 1
+     },
+     {
+      "code": "M1-7",
+      "item": "Mulch depth",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 cuttings",
+      "yes": "5 cm or more.",
+      "partial": "2 to under 5 cm.",
+      "no": "Under 2 cm.",
+      "weight": 1
+     }
+    ]
+   },
+   {
+    "code": "M2",
+    "name": "Established vine plot",
+    "items": [
+     {
+      "code": "M2-1",
+      "item": "Shade",
+      "critical": false,
+      "method": "Photo (app)",
+      "scope": "1 vertical photo from the vine, looking straight up, sun not in the lens. App grades sky vs canopy. Any time of day.",
+      "yes": "About 40 to 60% sky.",
+      "partial": "20 to 39% or 61 to 80% sky.",
+      "no": "Under 20% or over 80% sky.",
+      "weight": 1,
+      "special": "shade"
+     },
+     {
+      "code": "M2-2",
+      "item": "Support suitable for loops",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Row",
+      "yes": "Branches or a crossbar at or below working height to hang loops from.",
+      "partial": "Branches only above reach.",
+      "no": "Bare trunk.",
+      "weight": 1
+     },
+     {
+      "code": "M2-3",
+      "item": "Working height",
+      "critical": true,
+      "method": "Observe",
+      "scope": "10 vines",
+      "yes": "All flowering and pod-bearing vine at or below 1.5 m.",
+      "partial": "1 to 3 vines with parts above reach.",
+      "no": "4 or more vines above reach.",
+      "weight": 2
+     },
+     {
+      "code": "M2-4",
+      "item": "Loops",
+      "critical": false,
+      "method": "Observe",
+      "scope": "10 vines",
+      "yes": "3 or more loops on each vine.",
+      "partial": "1 to 2 loops on each, or 3 or more on only some.",
+      "no": "Straight vines.",
+      "weight": 1
+     },
+     {
+      "code": "M2-5",
+      "item": "Loop spacing",
+      "critical": false,
+      "method": "Observe",
+      "scope": "10 vines",
+      "yes": "30 cm or more between loops, no tangling.",
+      "partial": "Tangling on 1 to 3 vines.",
+      "no": "Tangling on 4 or more vines.",
+      "weight": 1
+     },
+     {
+      "code": "M2-6",
+      "item": "Weeding done",
+      "critical": false,
+      "method": "Observe",
+      "scope": "10 vines",
+      "yes": "No weeds within 1 m of the base.",
+      "partial": "Weeds at 1 to 4 vines.",
+      "no": "Weeds at 5 or more vines.",
+      "weight": 1
+     },
+     {
+      "code": "M2-7",
+      "item": "Mulch extent",
+      "critical": false,
+      "method": "Observe",
+      "scope": "10 vines",
+      "yes": "Covers the ground all round the base out to 50 cm.",
+      "partial": "Covers part of that area.",
+      "no": "Bare.",
+      "weight": 1
+     },
+     {
+      "code": "M2-8",
+      "item": "Mulch depth",
+      "critical": false,
+      "method": "Observe",
+      "scope": "10 vines",
+      "yes": "5 cm or more.",
+      "partial": "2 to under 5 cm.",
+      "no": "Under 2 cm.",
+      "weight": 1
+     },
+     {
+      "code": "M2-9",
+      "item": "Disease",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Walk the row",
+      "yes": "No yellow or collapsed vines.",
+      "partial": "Fewer than 1 in 10 vines affected.",
+      "no": "1 in 10 or more affected.",
+      "weight": 1
+     }
+    ]
+   },
+   {
+    "code": "M3",
+    "name": "Pollination (at the vines, morning)",
+    "items": [
+     {
+      "code": "M3-1",
+      "item": "Timing",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Pollination session",
+      "yes": "Flowers opened that morning and work finished before about noon.",
+      "partial": "A mix of that morning's and older flowers, or finished after noon.",
+      "no": "Mostly older flowers.",
+      "weight": 2
+     },
+     {
+      "code": "M3-2",
+      "item": "Technique",
+      "critical": true,
+      "method": "Observe",
+      "scope": "3 flowers",
+      "yes": "3 done correctly.",
+      "partial": "2 done correctly.",
+      "no": "0 or 1 done correctly.",
+      "weight": 2
+     },
+     {
+      "code": "M3-3",
+      "item": "Bunch thinning (Matilda sets the target flowers per bunch)",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 bunches",
+      "yes": "All 5 at or below target.",
+      "partial": "1 to 2 bunches above target.",
+      "no": "3 or more bunches above target.",
+      "weight": 1
+     },
+     {
+      "code": "M3-4",
+      "item": "Fruit set (ask: of last season's pollinated flowers, how many made pods? Record as reported)",
+      "critical": false,
+      "method": "Ask",
+      "scope": "Farmer report",
+      "yes": "About 7 in 10 or more.",
+      "partial": "About 4 to 6 in 10.",
+      "no": "Fewer than 4 in 10.",
+      "weight": 1
+     }
+    ]
+   },
+   {
+    "code": "M4",
+    "name": "Pods on the vine",
+    "items": [
+     {
+      "code": "M4-1",
+      "item": "Theft control",
+      "critical": true,
+      "method": "Observe and ask",
+      "scope": "Garden",
+      "yes": "Garden within sight of a house or visited daily, and the owner can state the pod count.",
+      "partial": "One of those.",
+      "no": "Neither.",
+      "weight": 2
+     },
+     {
+      "code": "M4-2",
+      "item": "Maturity (ask the pollination month, then inspect)",
+      "critical": true,
+      "method": "Ask, then observe",
+      "scope": "5 pods",
+      "yes": "All 5 have a yellowing tip and the pollination month was 8 to 9 months ago.",
+      "partial": "1 pod does not match.",
+      "no": "2 or more do not match.",
+      "weight": 2
+     }
+    ]
+   },
+   {
+    "code": "M5",
+    "name": "Harvest day",
+    "items": [
+     {
+      "code": "M5-1",
+      "item": "Maturity of picked pods",
+      "critical": true,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "5 of 5 mature.",
+      "partial": "4 of 5 mature.",
+      "no": "3 or fewer mature.",
+      "weight": 2
+     },
+     {
+      "code": "M5-2",
+      "item": "Picking damage",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "None split or torn.",
+      "partial": "1 split or torn.",
+      "no": "2 or more split or torn.",
+      "weight": 1
+     },
+     {
+      "code": "M5-3",
+      "item": "Sorting",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Harvest",
+      "yes": "Splits, shorts and diseased pods in separate containers.",
+      "partial": "Some separated.",
+      "no": "All mixed.",
+      "weight": 1
+     },
+     {
+      "code": "M5-4",
+      "item": "Picking to start of killing",
+      "critical": false,
+      "method": "Ask",
+      "scope": "Batch",
+      "yes": "Same day.",
+      "partial": "Next day.",
+      "no": "2 or more days.",
+      "weight": 1
+     }
+    ]
+   },
+   {
+    "code": "M6",
+    "name": "Killing (processing site)",
+    "items": [
+     {
+      "code": "M6-1",
+      "item": "Temperature",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Batch",
+      "yes": "Thermometer used.",
+      "partial": "Done but not measured.",
+      "no": "Killing not done.",
+      "weight": 2
+     },
+     {
+      "code": "M6-2",
+      "item": "Time",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Batch",
+      "yes": "Timed with a clock or phone.",
+      "partial": "Done but not timed.",
+      "no": "Not done.",
+      "weight": 2
+     },
+     {
+      "code": "M6-3",
+      "item": "Batch size",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Batch",
+      "yes": "Within the equipment limit and pods fully covered.",
+      "partial": "One of those.",
+      "no": "Overloaded and not covered.",
+      "weight": 1
+     },
+     {
+      "code": "M6-4",
+      "item": "Pod condition after killing",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "Evenly browning, none burst.",
+      "partial": "1 burst.",
+      "no": "2 or more burst.",
+      "weight": 1
+     },
+     {
+      "code": "M6-5",
+      "item": "Smoke",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Pod location",
+      "yes": "No cooking fire, burning or smoking within 10 m of the pods, and not in a cooking house.",
+      "partial": "A smoke source within 10 m of the pods.",
+      "no": "In the cooking house or above a fire.",
+      "weight": 2
+     },
+     {
+      "code": "M6-6",
+      "item": "Contamination (coffee, tobacco, strong-smelling goods)",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Pod location",
+      "yes": "No coffee, tobacco or other strong-smelling goods in the same building.",
+      "partial": "In the same building but a different room, or sealed.",
+      "no": "In the same room or container.",
+      "weight": 1
+     }
+    ]
+   },
+   {
+    "code": "M7",
+    "name": "Sweating",
+    "items": [
+     {
+      "code": "M7-1",
+      "item": "Insulation",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Batch",
+      "yes": "Pods wrapped or boxed, covered and warm to the touch.",
+      "partial": "Covered but cool.",
+      "no": "Open.",
+      "weight": 2
+     },
+     {
+      "code": "M7-2",
+      "item": "Duration (ask the start time)",
+      "critical": true,
+      "method": "Ask",
+      "scope": "Batch",
+      "yes": "Still covered at 24 hours or more.",
+      "partial": "Under 24 hours.",
+      "no": "Uncovered.",
+      "weight": 2
+     },
+     {
+      "code": "M7-3",
+      "item": "Pod colour",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "All uniform dark brown.",
+      "partial": "1 to 2 uneven.",
+      "no": "3 or more pale or green.",
+      "weight": 1
+     },
+     {
+      "code": "M7-4",
+      "item": "Mould or sour smell",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "None.",
+      "partial": "A faint smell, or 1 pod affected.",
+      "no": "2 or more pods affected, or a strong smell.",
+      "weight": 1
+     },
+     {
+      "code": "M7-5",
+      "item": "Smoke",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Pod location",
+      "yes": "No cooking fire, burning or smoking within 10 m of the pods, and not in a cooking house.",
+      "partial": "A smoke source within 10 m of the pods.",
+      "no": "In the cooking house or above a fire.",
+      "weight": 2
+     },
+     {
+      "code": "M7-6",
+      "item": "Contamination (coffee, tobacco, strong-smelling goods)",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Pod location",
+      "yes": "No coffee, tobacco or other strong-smelling goods in the same building.",
+      "partial": "In the same building but a different room, or sealed.",
+      "no": "In the same room or container.",
+      "weight": 1
+     }
+    ]
+   },
+   {
+    "code": "M8",
+    "name": "Drying",
+    "items": [
+     {
+      "code": "M8-1",
+      "item": "Off the ground",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Drying area",
+      "yes": "On raised racks.",
+      "partial": "On mats or tarps on the ground.",
+      "no": "On bare ground.",
+      "weight": 2
+     },
+     {
+      "code": "M8-2",
+      "item": "Rain protection",
+      "critical": false,
+      "method": "Observe and ask",
+      "scope": "Drying area",
+      "yes": "Cover on site and pods brought in before rain.",
+      "partial": "Cover on site but pods were wetted.",
+      "no": "No cover, or rained on.",
+      "weight": 1
+     },
+     {
+      "code": "M8-3",
+      "item": "Turning (ask)",
+      "critical": false,
+      "method": "Ask",
+      "scope": "Batch",
+      "yes": "Turned daily and drying is even.",
+      "partial": "Turned less often.",
+      "no": "Not turned.",
+      "weight": 1
+     },
+     {
+      "code": "M8-4",
+      "item": "Case hardening",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "None, skin wrinkled evenly.",
+      "partial": "1 shiny and hard.",
+      "no": "2 or more shiny and hard.",
+      "weight": 1
+     },
+     {
+      "code": "M8-5",
+      "item": "Moisture",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Batch",
+      "yes": "Meter reading within the buyer target.",
+      "partial": "Feel test only.",
+      "no": "Not checked.",
+      "weight": 1
+     },
+     {
+      "code": "M8-6",
+      "item": "Smoke",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Pod location",
+      "yes": "No cooking fire, burning or smoking within 10 m of the pods, and not in a cooking house.",
+      "partial": "A smoke source within 10 m of the pods.",
+      "no": "In the cooking house or above a fire.",
+      "weight": 2
+     },
+     {
+      "code": "M8-7",
+      "item": "Contamination (coffee, tobacco, strong-smelling goods)",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Pod location",
+      "yes": "No coffee, tobacco or other strong-smelling goods in the same building.",
+      "partial": "In the same building but a different room, or sealed.",
+      "no": "In the same room or container.",
+      "weight": 1
+     }
+    ]
+   },
+   {
+    "code": "M9",
+    "name": "Conditioning (store)",
+    "items": [
+     {
+      "code": "M9-1",
+      "item": "Closed box",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Box",
+      "yes": "Closed with a lid.",
+      "partial": "Loose lid or cloth cover.",
+      "no": "Open.",
+      "weight": 2
+     },
+     {
+      "code": "M9-2",
+      "item": "Box and lining",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Box",
+      "yes": "Box is odour-free, with a clean, dry, unused lining that has not held other goods (for example new wax or greaseproof paper, or clean food-grade plastic). Matilda to confirm acceptable materials with the buyer.",
+      "partial": "Clean but previously used material.",
+      "no": "Used clothing, fertiliser or rice sacks, or any material with an odour.",
+      "weight": 1
+     },
+     {
+      "code": "M9-3",
+      "item": "Mould check (ask, then inspect)",
+      "critical": false,
+      "method": "Ask, then observe",
+      "scope": "5 pods",
+      "yes": "Checked weekly and no mould.",
+      "partial": "Not checked but no mould.",
+      "no": "Mould present.",
+      "weight": 1
+     },
+     {
+      "code": "M9-4",
+      "item": "Time in box (ask)",
+      "critical": false,
+      "method": "Ask",
+      "scope": "Box",
+      "yes": "4 weeks or more.",
+      "partial": "Under 4 weeks at sale.",
+      "no": "Start date not known.",
+      "weight": 1
+     },
+     {
+      "code": "M9-5",
+      "item": "Smoke",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Pod location",
+      "yes": "No cooking fire, burning or smoking within 10 m of the pods, and not in a cooking house.",
+      "partial": "A smoke source within 10 m of the pods.",
+      "no": "In the cooking house or above a fire.",
+      "weight": 2
+     },
+     {
+      "code": "M9-6",
+      "item": "Contamination (coffee, tobacco, strong-smelling goods)",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Pod location",
+      "yes": "No coffee, tobacco or other strong-smelling goods in the same building.",
+      "partial": "In the same building but a different room, or sealed.",
+      "no": "In the same room or container.",
+      "weight": 1
+     }
+    ]
+   },
+   {
+    "code": "M10",
+    "name": "Quality assessment (sample 5 pods from one batch)",
+    "items": [
+     {
+      "code": "M10-1",
+      "item": "Colour",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "All uniform dark brown to black.",
+      "partial": "1 to 2 uneven.",
+      "no": "3 or more pale, green or with red patches.",
+      "weight": 1
+     },
+     {
+      "code": "M10-2",
+      "item": "Flexibility (bend each around a finger)",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "None crack.",
+      "partial": "1 cracks.",
+      "no": "2 or more crack.",
+      "weight": 1
+     },
+     {
+      "code": "M10-3",
+      "item": "Surface",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "Oily or glossy.",
+      "partial": "Slightly dry.",
+      "no": "Brittle, sticky or wet.",
+      "weight": 1
+     },
+     {
+      "code": "M10-4",
+      "item": "Splits",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "None.",
+      "partial": "1.",
+      "no": "2 or more.",
+      "weight": 1
+     },
+     {
+      "code": "M10-5",
+      "item": "Aroma (smell all 5)",
+      "critical": true,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "Sweet and clean.",
+      "partial": "Weak.",
+      "no": "Smoky, sour, musty or foreign smell.",
+      "weight": 2
+     },
+     {
+      "code": "M10-6",
+      "item": "Mould or insect damage",
+      "critical": false,
+      "method": "Observe",
+      "scope": "5 pods",
+      "yes": "None.",
+      "partial": "1.",
+      "no": "2 or more.",
+      "weight": 1
+     },
+     {
+      "code": "M10-7",
+      "item": "Moisture",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Batch",
+      "yes": "Meter reading within the buyer target.",
+      "partial": "Feel test only.",
+      "no": "Not checked.",
+      "weight": 1
+     },
+     {
+      "code": "M10-8",
+      "item": "Separation by quality",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Batch",
+      "yes": "Sorted by the criteria above, with splits and rejects kept apart.",
+      "partial": "Some sorting.",
+      "no": "Not sorted.",
+      "weight": 1
+     },
+     {
+      "code": "M10-9",
+      "item": "Bundles",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Batch",
+      "yes": "Standard weight and weighed.",
+      "partial": "Standard weight but not weighed.",
+      "no": "Not standard.",
+      "weight": 1
+     },
+     {
+      "code": "M10-10",
+      "item": "Understands grade (ask)",
+      "critical": false,
+      "method": "Ask",
+      "scope": "Farmer",
+      "yes": "Can say the grade of the batch and name 2 qualities that raise it.",
+      "partial": "Knows the grade only.",
+      "no": "Neither.",
+      "weight": 1
+     }
+    ]
+   },
+   {
+    "code": "M11",
+    "name": "Storage room",
+    "items": [
+     {
+      "code": "M11-1",
+      "item": "Sealed container",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Store",
+      "yes": "Sealed, food-grade or lined.",
+      "partial": "Lined but unsealed.",
+      "no": "Open or a sack.",
+      "weight": 2
+     },
+     {
+      "code": "M11-2",
+      "item": "Box and lining",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Store",
+      "yes": "Box is odour-free, with a clean, dry, unused lining that has not held other goods (for example new wax or greaseproof paper, or clean food-grade plastic). Matilda to confirm acceptable materials with the buyer.",
+      "partial": "Clean but previously used material.",
+      "no": "Used clothing, fertiliser or rice sacks, or any material with an odour.",
+      "weight": 1
+     },
+     {
+      "code": "M11-3",
+      "item": "Location",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Store",
+      "yes": "Dry and ventilated.",
+      "partial": "One of those.",
+      "no": "Damp and closed.",
+      "weight": 1
+     },
+     {
+      "code": "M11-4",
+      "item": "Smoke",
+      "critical": true,
+      "method": "Observe",
+      "scope": "Pod location",
+      "yes": "No cooking fire, burning or smoking within 10 m of the pods, and not in a cooking house.",
+      "partial": "A smoke source within 10 m of the pods.",
+      "no": "In the cooking house or above a fire.",
+      "weight": 2
+     },
+     {
+      "code": "M11-5",
+      "item": "Contamination (coffee, tobacco, strong-smelling goods)",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Pod location",
+      "yes": "No coffee, tobacco or other strong-smelling goods in the same building.",
+      "partial": "In the same building but a different room, or sealed.",
+      "no": "In the same room or container.",
+      "weight": 1
+     },
+     {
+      "code": "M11-6",
+      "item": "Pest and mould checks (ask, then inspect)",
+      "critical": false,
+      "method": "Ask, then observe",
+      "scope": "5 pods",
+      "yes": "Checked in the last 2 weeks and none found.",
+      "partial": "Not checked but none found.",
+      "no": "A problem found.",
+      "weight": 1
+     },
+     {
+      "code": "M11-7",
+      "item": "Batch identity",
+      "critical": false,
+      "method": "Observe and ask",
+      "scope": "Batch",
+      "yes": "Labelled with date, weight and quality class, or the owner can state all three.",
+      "partial": "Some of the three.",
+      "no": "None.",
+      "weight": 1
+     }
+    ]
+   },
+   {
+    "code": "M12",
+    "name": "Sale",
+    "items": [
+     {
+      "code": "M12-1",
+      "item": "Price agreed before delivery",
+      "critical": false,
+      "method": "Ask and sight receipt",
+      "scope": "Sale",
+      "yes": "Agreed and recorded on the receipt or note.",
+      "partial": "Agreed but not recorded.",
+      "no": "Not agreed.",
+      "weight": 1,
+      "special": "receipt"
+     },
+     {
+      "code": "M12-2",
+      "item": "Quality grade discussed and agreed",
+      "critical": false,
+      "method": "Ask and sight receipt",
+      "scope": "Sale",
+      "yes": "Grade discussed with the farmer, agreed, and written on the receipt.",
+      "partial": "Agreed verbally, not recorded.",
+      "no": "Not discussed, or set by the buyer alone.",
+      "weight": 1,
+      "special": "receipt"
+     },
+     {
+      "code": "M12-3",
+      "item": "Weighed at sale",
+      "critical": false,
+      "method": "Ask and sight receipt",
+      "scope": "Sale",
+      "yes": "Weighed and recorded on the receipt.",
+      "partial": "Weighed but not recorded.",
+      "no": "Not weighed.",
+      "weight": 1,
+      "special": "receipt"
+     },
+     {
+      "code": "M12-4",
+      "item": "Payment (ask). Record the amount, date promised and whether a receipt was given",
+      "critical": false,
+      "method": "Ask",
+      "scope": "Sale",
+      "yes": "Full payment in cash or online at the point of sale.",
+      "partial": "Part paid at sale, balance promised.",
+      "no": "Full payment promised for later.",
+      "weight": 1,
+      "special": "receipt"
+     },
+     {
+      "code": "M12-5",
+      "item": "Knows price (needs buyer price list loaded in MCApp)",
+      "critical": false,
+      "method": "Ask",
+      "scope": "Farmer",
+      "yes": "States the price for own grade and for the next higher grade, matching the buyer's current list.",
+      "partial": "Own grade only.",
+      "no": "Neither.",
+      "weight": 1,
+      "special": "pricelist"
+     },
+     {
+      "code": "M12-6",
+      "item": "Transport",
+      "critical": false,
+      "method": "Observe",
+      "scope": "Sale",
+      "yes": "Sealed container, away from smoke and strong-smelling goods.",
+      "partial": "One of those.",
+      "no": "Neither.",
+      "weight": 1
+     },
+     {
+      "code": "M12-7",
+      "item": "Buyer feedback",
+      "critical": false,
+      "method": "Ask",
+      "scope": "Sale",
+      "yes": "Feedback given and recorded.",
+      "partial": "Given verbally only.",
+      "no": "None.",
+      "weight": 1
+     }
+    ]
+   }
+  ]
+ }
+};
+
+
+/* ══════════════════════════════════════
+   VALUE CHAINS AUDIT  (expert-gated; vanilla pilot)
+   A coordinator authorises specific people (ANY role) as auditors PER
+   COMMODITY — kept entirely separate from training. One visit scores ONE
+   process stage at one place/time; the dataset builds over seasons and feeds
+   a per-item training-needs ranking (computed off-device). Photos are
+   optional, tagged by stage and good/bad practice for reuse in training.
+══════════════════════════════════════ */
+var VC_COMMODITY = 'vanilla';            /* pilot; coffee / cocoa later */
+var _vcModule = null;                    /* selected stage (module) object */
+var _vcResponses = {};                   /* itemCode -> {response, note} */
+var _vcPhotos = [];                      /* {data, stage, item_code, practice} */
+var _vcGps = null;
+
+function vcChecklist(){ return (typeof VC_CHECKLIST!=='undefined' && VC_CHECKLIST[VC_COMMODITY]) || null; }
+function vcIsAuditor(){
+  var prof = window._cachedProfile || {};
+  var cz = prof.authorised_commodities || [];
+  return cz.indexOf(VC_COMMODITY) !== -1;
+}
+
+function initVcAudit(){
+  if (!vcIsAuditor() && !isOversight()){
+    toast('Value-chain audit is limited to authorised auditors.');
+    goBack(); return;
+  }
+  _vcModule = null; _vcResponses = {}; _vcPhotos = []; _vcGps = null;
+  ['vcFarmerId','vcFarmerName','vcFarmerVillage'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  vcBuildModulePicker();
+  _setVisible('vcItemsWrap', false);
+  _setVisible('vcSummary', false);
+  _setVisible('vcPracticeSheet', false);
+  vcRenderPhotos();
+  var save=document.getElementById('vcSaveBtn'); if(save) save.style.display='none';
+  var g=document.getElementById('vcGpsStatus');
+  if(g){ g.innerHTML=''+icon('pin',13)+' Acquiring location…'; g.style.color='#888'; }
+  captureGPS(function(gps,err){
+    if(gps){ _vcGps=gps; if(g){ g.innerHTML=''+icon('pin',13)+' '+gps.lat+'°, '+gps.lng+'° ±'+gps.accuracy+'m'; g.style.color='#2E6B38'; } }
+    else { if(g){ g.innerHTML=''+icon('warning',13)+' '+err+' — saved without location, flagged'; g.style.color='#E65100'; } }
+  });
+  var cl=vcChecklist();
+  var sub=document.querySelector('#screen-vc-audit .bar-sub'); if(sub) sub.textContent=(cl?cl.name:'')+' · one stage per visit';
+}
+
+function vcBuildModulePicker(){
+  var cl=vcChecklist(); var box=document.getElementById('vcModulePills'); if(!box||!cl) return;
+  box.innerHTML = cl.modules.map(function(m){
+    return '<button type="button" class="vc-modpill" data-m="'+m.code+'" onclick="vcSelectModule(\''+m.code+'\')"><strong>'+m.code+'</strong> '+_esc(m.name)+' <span class="vc-ct">'+m.items.length+'</span></button>';
+  }).join('');
+}
+
+function vcSelectModule(code){
+  var cl=vcChecklist(); if(!cl) return;
+  if (Object.keys(_vcResponses).length>0 && _vcModule && _vcModule.code!==code){
+    if(!confirm('Switch stage? Responses entered for '+_vcModule.code+' will be cleared.')) return;
+  }
+  _vcModule = cl.modules.filter(function(m){return m.code===code;})[0] || null;
+  _vcResponses = {};
+  document.querySelectorAll('#vcModulePills .vc-modpill').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-m')===code); });
+  vcRenderItems();
+  _setVisible('vcItemsWrap', true);
+  _setVisible('vcSummary', true);
+  var save=document.getElementById('vcSaveBtn'); if(save) save.style.display='';
+  vcUpdateScore();
+  var wrap=document.getElementById('vcItemsWrap'); if(wrap) wrap.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function vcRenderItems(){
+  var wrap=document.getElementById('vcItems'); if(!wrap||!_vcModule) return;
+  var title=document.getElementById('vcModuleTitle'); if(title) title.textContent=_vcModule.code+' · '+_vcModule.name;
+  wrap.innerHTML = _vcModule.items.map(function(it){ return vcItemCardHtml(it); }).join('');
+}
+
+function vcItemCardHtml(it){
+  var r=_vcResponses[it.code]||{};
+  function opt(val,label,desc,color){
+    var on=r.response===val;
+    return '<button type="button" class="vc-opt'+(on?' on':'')+'" style="'+(on?'border-color:'+color+';background:'+color+'14;':'')+'" onclick="vcSetResponse(\''+it.code+'\',\''+val+'\')">'+
+      '<span class="vc-opt-k" style="color:'+color+';">'+label+'</span><span class="vc-opt-d">'+_esc(desc)+'</span></button>';
+  }
+  var crit = it.critical ? '<span class="vc-crit">critical</span>' : '';
+  var special='';
+  if(it.special==='shade') special='<div class="vc-hint">'+icon('camera',12)+' Vertical photo from the vine, looking straight up (sun out of the lens). Put the % sky in the note.</div>';
+  else if(it.special==='receipt') special='<div class="vc-hint">'+icon('document',12)+' Sight the receipt; add a photo if useful.</div>';
+  else if(it.special==='pricelist') special='<div class="vc-hint">'+icon('money',12)+' Needs the buyer price list loaded.</div>';
+  var naOn = r.response==='na';
+  var nPhoto = _vcPhotos.filter(function(p){return p.item_code===it.code;}).length;
+  return '<div class="vc-card" id="vc-card-'+it.code+'">'+
+    '<div class="vc-head"><div class="vc-name">'+_esc(it.item)+' '+crit+'</div><div class="vc-meth">'+_esc(it.method)+(it.scope?' · '+_esc(it.scope):'')+'</div></div>'+
+    special+
+    '<div class="vc-opts">'+opt('yes','Yes',it.yes,'#2E6B38')+opt('partial','Partial',it.partial,'#B45309')+opt('no','No',it.no,'#C62828')+'</div>'+
+    '<div class="vc-row">'+
+      '<button type="button" class="vc-na'+(naOn?' on':'')+'" onclick="vcSetResponse(\''+it.code+'\',\'na\')">N/A</button>'+
+      '<input type="text" class="vc-note" id="vc-note-'+it.code+'" placeholder="Note / value (optional)" value="'+_esc(r.note||'')+'" oninput="vcSetNote(\''+it.code+'\',this.value)">'+
+      '<button type="button" class="vc-photo'+(nPhoto?' has':'')+'" onclick="vcAddPhoto(\''+it.code+'\')">'+icon('camera',14)+(nPhoto?' '+nPhoto:'')+'</button>'+
+    '</div>'+
+  '</div>';
+}
+
+function vcSetResponse(code,val){
+  var cur=_vcResponses[code]||{};
+  if(cur.response===val){ delete cur.response; } else { cur.response=val; }
+  _vcResponses[code]=cur;
+  var el=document.getElementById('vc-card-'+code);
+  var it=_vcModule.items.filter(function(i){return i.code===code;})[0];
+  if(el&&it){ el.outerHTML=vcItemCardHtml(it); }
+  vcUpdateScore();
+}
+function vcSetNote(code,v){ var cur=_vcResponses[code]||{}; cur.note=v; _vcResponses[code]=cur; }
+
+function vcComputeScore(){
+  var pts=0,max=0,scored=0,na=0,critFail=0,total=_vcModule?_vcModule.items.length:0;
+  (_vcModule?_vcModule.items:[]).forEach(function(it){
+    var r=_vcResponses[it.code]||{}; var resp=r.response;
+    if(!resp) return;
+    if(resp==='na'){ na++; return; }
+    scored++;
+    var val = resp==='yes'?2:resp==='partial'?1:0;
+    var w = it.weight||1;
+    pts += val*w; max += 2*w;
+    if(it.critical && resp==='no') critFail++;
+  });
+  var score = max>0 ? pts/max : 0;
+  var cl=vcChecklist(); var bH=(cl&&cl.bands.high)||0.5, bM=(cl&&cl.bands.medium)||0.75;
+  var priority = (scored===0)?'—': (critFail>0 || score<bH) ? 'high' : (score<bM) ? 'medium' : 'low';
+  return {pts:pts,max:max,score:score,scored:scored,na:na,critFail:critFail,total:total,notScored:total-scored-na,priority:priority};
+}
+function vcUpdateScore(){
+  var s=vcComputeScore();
+  var set=function(id,v){var el=document.getElementById(id); if(el) el.textContent=v;};
+  set('vcScored', s.scored+'/'+s.total);
+  set('vcScorePct', s.scored? Math.round(s.score*100)+'%':'—');
+  var pr=document.getElementById('vcPriority');
+  if(pr){ var map={high:['High','#C62828','#FDECEA'],medium:['Medium','#B45309','#FDF6EC'],low:['Low','#2E6B38','#EAF3EA']}; map['—']=['—','#888','#f2f2f2'];
+    var m=map[s.priority]||map['—']; pr.textContent=m[0]; pr.style.color=m[1]; pr.style.background=m[2]; }
+  var cf=document.getElementById('vcCritFail'); if(cf) cf.textContent=s.critFail;
+}
+
+function vcAddPhoto(itemCode){ window._vcPhotoItem=itemCode||''; var inp=document.getElementById('vcPhotoInput'); if(inp){ inp.value=''; inp.click(); } }
+function vcHandlePhoto(input){
+  var file=input.files&&input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){ window._vcPendingPhoto={data:e.target.result, item_code:window._vcPhotoItem||'', stage:_vcModule?_vcModule.code:''}; _setVisible('vcPracticeSheet', true); };
+  reader.readAsDataURL(file);
+}
+function vcPickPractice(practice){
+  var p=window._vcPendingPhoto; if(!p){ _setVisible('vcPracticeSheet',false); return; }
+  p.practice=practice; _vcPhotos.push(p); window._vcPendingPhoto=null;
+  _setVisible('vcPracticeSheet', false);
+  vcRenderPhotos();
+  if(p.item_code){ var el=document.getElementById('vc-card-'+p.item_code); var it=_vcModule&&_vcModule.items.filter(function(i){return i.code===p.item_code;})[0]; if(el&&it) el.outerHTML=vcItemCardHtml(it); }
+  toast('Photo added — '+practice+' practice ('+_vcPhotos.length+')');
+}
+function vcCancelPractice(){ window._vcPendingPhoto=null; _setVisible('vcPracticeSheet', false); }
+function vcRenderPhotos(){
+  var box=document.getElementById('vcPhotoStrip'); if(!box) return;
+  box.innerHTML=_vcPhotos.map(function(p,i){
+    var bc=p.practice==='good'?'#2E6B38':'#C62828';
+    return '<div class="vc-thumb"><img src="'+p.data+'" style="border-color:'+bc+';"><span class="vc-tag" style="background:'+bc+';">'+_esc(p.item_code||p.stage||'')+'</span><button type="button" class="vc-xr" onclick="vcRemovePhoto('+i+')">×</button></div>';
+  }).join('');
+}
+function vcRemovePhoto(i){ _vcPhotos.splice(i,1); vcRenderPhotos(); }
+
+function submitVcAudit(){
+  if(!_vcModule){ toast('Pick a process stage first.'); return; }
+  var s=vcComputeScore();
+  if(s.scored===0){ toast('Score at least one item before saving.'); return; }
+  var prof=window._cachedProfile||{}; var cl=vcChecklist();
+  var responses=_vcModule.items.map(function(it){
+    var r=_vcResponses[it.code]||{}; var resp=r.response||'';
+    var val = resp==='yes'?2:resp==='partial'?1:resp==='no'?0:null;
+    return {code:it.code, item:it.item, critical:!!it.critical, weight:it.weight||1, response:resp, value:val, note:(r.note||'').trim()};
+  }).filter(function(x){ return x.response; });
+  var rec={
+    commodity:VC_COMMODITY, commodity_name: cl?cl.name:VC_COMMODITY,
+    module_code:_vcModule.code, module_name:_vcModule.name,
+    visit_id:'VA-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6),
+    farmer_id:(document.getElementById('vcFarmerId').value||'').trim(),
+    farmer_name:(document.getElementById('vcFarmerName').value||'').trim(),
+    farmer_village:(document.getElementById('vcFarmerVillage').value||'').trim(),
+    assessor_id: prof.stewardId||'', assessor_name: prof.name||'',
+    assessor_zone: prof.zone||'', assessor_zone_id: prof.zone_id||'',
+    responses: responses, photos: _vcPhotos.slice(),
+    points_earned:s.pts, max_points:s.max, module_score:Math.round(s.score*1000)/1000,
+    items_scored:s.scored, items_total:s.total, criticals_failed:s.critFail, priority:s.priority,
+    gps:_vcGps||null, gps_source:(_vcGps&&_vcGps.source)||null, location_missing:!_vcGps,
+    recorded_at:new Date().toISOString(), app_build:APP_BUILD
+  };
+  saveRecord('vc_audit', rec, function(){
+    toast('Audit saved ✓ ('+_vcModule.code+')');
+    _vcModule=null; _vcResponses={}; _vcPhotos=[]; vcRenderPhotos();
+    setTimeout(function(){ nav('screen-dashboard'); }, 700);
+  });
+}
+
+/* ── Gating sync: pull auditor authorisations from the backend on login ── */
+function syncVcAuthorisations(profile){
+  if(!UPLOAD_ENDPOINT||!navigator.onLine||!profile) return;
+  var sid=profile.stewardId||''; if(!sid) return;
+  fetch(UPLOAD_ENDPOINT+'?action=vc_auditors&stewardId='+encodeURIComponent(sid))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.status!=='ok'||!d.commodities) return;
+      var existing=profile.authorised_commodities||[]; var updated=existing.slice(); var changed=false;
+      d.commodities.forEach(function(c){ if(updated.indexOf(c)===-1){ updated.push(c); changed=true; } });
+      if(!changed) return;
+      profile.authorised_commodities=updated;
+      updateRecord('auth',profile,function(){
+        window._cachedProfile=profile;
+        var tile=document.getElementById('tile-vc-audit'); if(tile) tile.style.display = updated.length? '' : 'none';
+        toast('Value-chain auditor access unlocked.');
+      });
+    }).catch(function(){});
+}
+
+/* ── Coordinator: authorise an auditor for a commodity ── */
+var VC_COMMODITIES = ['vanilla','coffee','cocoa'];
+function showGrantVcAuth(){ window._vcgCommodity=''; showScreen('screen-grant-vc-auth'); }
+function vcgSetCommodity(c, btn){
+  window._vcgCommodity=c;
+  document.querySelectorAll('#vcgCommodityPills .weather-pill').forEach(function(b){ var on=b.getAttribute('data-c')===c; b.classList.toggle('active',on); b.style.background=on?'#6A1B9A':''; b.style.color=on?'#fff':''; });
+}
+function submitVcGrant(){
+  var sid=(document.getElementById('vcgStewId').value||'').trim().toUpperCase();
+  var commodity=window._vcgCommodity||'';
+  var by=(document.getElementById('vcgAuthorisedBy').value||'').trim();
+  var basis=(document.getElementById('vcgBasis').value||'').trim();
+  var status=document.getElementById('vcgStatus'); var btn=document.getElementById('vcgSubmitBtn');
+  if(!sid){ toast('Enter the Steward / Officer ID to authorise.'); return; }
+  if(!commodity){ toast('Choose a commodity.'); return; }
+  if(!by){ toast('Enter your name (authorised by).'); return; }
+  btn.disabled=true; btn.textContent='Saving…';
+  var payload={ _action:'grant_vc_authorisation', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret,
+    record:{ stewardId:sid, commodity:commodity, authorised_by:by, basis:basis, authorised_at:new Date().toISOString(), status:'active' } };
+  if(UPLOAD_ENDPOINT){
+    fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+      .then(function(r){return r.json();}).then(function(d){
+        btn.disabled=false; btn.textContent='Record Authorisation →';
+        if(d.status==='ok'){ status.textContent='✓ '+sid+' authorised as '+commodity+' auditor.'; status.style.color='#1B5E20';
+          ['vcgStewId','vcgAuthorisedBy','vcgBasis'].forEach(function(i){var e=document.getElementById(i); if(e)e.value='';}); window._vcgCommodity=''; vcgSetCommodity('',null);
+        } else { status.textContent='Sync: '+(d.message||'failed'); status.style.color='#E65100'; }
+      }).catch(function(){ btn.disabled=false; btn.textContent='Record Authorisation →'; status.textContent='No network — try again when online.'; status.style.color='#E65100'; });
+  } else { btn.disabled=false; btn.textContent='Record Authorisation →'; status.textContent='No endpoint configured.'; status.style.color='#E65100'; }
+}
+
 
 /* ══════════════════════════════════════
    TIMESHEET SYSTEM

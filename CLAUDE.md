@@ -1,4 +1,4 @@
-# MCA Steward App — project rules
+# MCApp — project rules
 
 Working agreements for this repo. These are binding unless the user overrides them.
 

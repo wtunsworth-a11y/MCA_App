@@ -1,4 +1,4 @@
-# MCA Steward App — Administrator's Manual
+# MCApp — Administrator's Manual
 
 **For the project coordinator · Version 3 · October 2026**
 
@@ -11,7 +11,7 @@ steward tasks see the [Field Guide](field-guide.md).
 
 ## 1. System overview
 
-The MCA Steward App is an offline-first Progressive Web App (PWA) that runs on
+The MCApp is an offline-first Progressive Web App (PWA) that runs on
 steward phones. Records are held locally in IndexedDB and uploaded to a Google
 Apps Script backend (which writes JSON files to Google Drive) whenever there is
 signal.

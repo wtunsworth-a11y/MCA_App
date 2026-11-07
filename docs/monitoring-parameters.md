@@ -1,4 +1,4 @@
-# MCA Steward App — Monitoring Parameters
+# MCApp — Monitoring Parameters
 
 **Reference catalogue · Version 3 · October 2026**
 

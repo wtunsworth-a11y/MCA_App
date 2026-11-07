@@ -1,4 +1,4 @@
-/* MCA Steward App — Service Worker v4
+/* MCApp — Service Worker v4
  *
  * Strategy: stale-while-revalidate (matches MCA_Hunt pattern).
  * - Every request is served from cache immediately for speed.
@@ -8,7 +8,7 @@
  *
  * Bump CACHE_NAME on a deploy you want to force a clean re-cache.
  */
-const CACHE_NAME = 'mca-steward-v122';
+const CACHE_NAME = 'mcapp-v123';
 const CORE_ASSETS = [
   './',
   './index.html',

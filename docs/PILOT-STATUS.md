@@ -1,4 +1,4 @@
-# MCA Steward App — Pilot Status & Handover
+# MCApp — Pilot Status & Handover
 
 *Last updated: 2026-10-10. This is the single source of truth for **where the
 project is right now** — deployment state, what works, what's stub, the roles,

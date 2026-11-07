@@ -1,4 +1,4 @@
-# MCA Steward App — Functions
+# MCApp — Functions
 
 **Capability list · Version 4 · November 2026**
 

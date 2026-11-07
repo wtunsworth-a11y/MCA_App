@@ -1,5 +1,5 @@
 /**
- * MCA Steward App — Google Apps Script upload + reporting endpoint
+ * MCApp — Google Apps Script upload + reporting endpoint
  *
  * SETUP (takes ~5 minutes):
  *  1. Go to https://script.google.com → click "New Project"
@@ -1882,7 +1882,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-05.4 — no-attendance verification queue + alert to field-reports lead';
+var BACKEND_VERSION = '2026-11-07.1 — renamed to MCApp in report titles; no-attendance verification queue + alert';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {
@@ -1953,7 +1953,7 @@ function doGet(e) {
   /* Ping / preflight — server_time is the authoritative UTC clock the app
      anchors to so it can detect a wrong device date offline. */
   return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ready', app: 'MCA Steward Upload v3', server_time: new Date().toISOString() }))
+    .createTextOutput(JSON.stringify({ status: 'ready', app: 'MCApp Upload v3', server_time: new Date().toISOString() }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -1962,7 +1962,7 @@ function weeklyReport() {
   var report = buildMCFReport('weekly');
   var dataFolder = getDataFolder();
 
-  var lines = ['MCA Steward App — Weekly Summary Report', ''];
+  var lines = ['MCApp — Weekly Summary Report', ''];
   lines.push('Period: ' + report.from + ' to ' + report.to + ' (' + report.days + ' days)');
   lines.push('Active zones:    ' + report.active_zones + ' of ' + report.total_zones);
   lines.push('Active stewards: ' + report.total_stewards);
@@ -1998,7 +1998,7 @@ function monthlyReport() {
   var report = buildMCFReport('prevmonth');
   var dataFolder = getDataFolder();
 
-  var lines = ['MCA Steward App — Monthly Summary Report', ''];
+  var lines = ['MCApp — Monthly Summary Report', ''];
   lines.push('Period: ' + report.from + ' to ' + report.to + ' (previous calendar month)');
   lines.push('Active zones:    ' + report.active_zones + ' of ' + report.total_zones);
   lines.push('Active stewards: ' + report.total_stewards);
@@ -2418,7 +2418,7 @@ function monthlyDistributionReport(period) {
   });
 
   var body = [
-    'MCA Steward App — Monthly distribution / handover ledger',
+    'MCApp — Monthly distribution / handover ledger',
     '',
     'Month: ' + ym + ' (PNG time)',
     'Handovers: ' + rows.length,
@@ -3124,7 +3124,7 @@ function fieldOfficerReports(period) {
   });
 
   if (!made.length) { Logger.log('Field officer reports ' + ym + ': no activity.'); return { status:'ok', month:ym, made:[] }; }
-  var body = ['MCA Steward App — Field officer reports — ' + ym + ' (PNG time)','',
+  var body = ['MCApp — Field officer reports — ' + ym + ' (PNG time)','',
     'Officers active: ' + summaryRows.length,
     'Training sessions: ' + trainingRows.length,
     'Field maps & observations: ' + mapRows.length,
@@ -3290,7 +3290,7 @@ function clanComplianceReport(period) {
   if (rcp.field_reports_to && to.indexOf(rcp.field_reports_to) === -1) to.push(rcp.field_reports_to);
   to.forEach(function(email){ try { ssFile.addViewer(email); } catch(e){} });
 
-  var body = ['MCA Steward App — Clan-steward compliance — ' + ym + ' (PNG time)','',
+  var body = ['MCApp — Clan-steward compliance — ' + ym + ' (PNG time)','',
     'Clan stewards in the roster: ' + rows.length,
     '',
     'Report (Google Sheet): ' + ss.getUrl(),
@@ -3403,7 +3403,7 @@ function annualComplianceReport(year) {
   var rcp=loadRecipients(); var to=REPORT_EMAILS.slice();
   if (rcp.field_reports_to && to.indexOf(rcp.field_reports_to)===-1) to.push(rcp.field_reports_to);
   to.forEach(function(email){ try{ ssFile.addViewer(email); }catch(e){} });
-  var body=['MCA Steward App — Annual clan-steward compliance — '+year+' (PNG time)','',
+  var body=['MCApp — Annual clan-steward compliance — '+year+' (PNG time)','',
     'Clan stewards in the roster: '+rows.length,
     '',
     'Report (Google Sheet): '+ss.getUrl(),
@@ -3592,7 +3592,7 @@ function waterQualityReport() {
   if (rcp.field_reports_to && to.indexOf(rcp.field_reports_to)===-1) to.push(rcp.field_reports_to);
   to.forEach(function(email){ try{ ssFile.addViewer(email); }catch(e){} });
   var srcCount = Object.keys(bySource).length;
-  var body = ['MCA Steward App — Water quality report — ' + stamp + ' (PNG time)','',
+  var body = ['MCApp — Water quality report — ' + stamp + ' (PNG time)','',
     'Sources with readings: ' + srcCount + '   ·   total readings: ' + readings.length,
     '',
     'Report (Google Sheet): ' + ss.getUrl(),

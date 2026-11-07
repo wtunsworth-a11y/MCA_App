@@ -1,4 +1,4 @@
-# MCA Steward App — Field Guide
+# MCApp — Field Guide
 
 **For clan stewards and field officers · Version 3 · October 2026**
 

@@ -1,4 +1,4 @@
-# MCA Steward App — Installation Guide
+# MCApp — Installation Guide
 
 **For coordinators setting up phones · Version 3 · October 2026**
 
@@ -160,7 +160,7 @@ reassigned to a different steward, or enrolment to redo.
 1. **Send Data** (see the warning above).
 2. **Remove the app icon** — long-press the MCA app icon on the home screen →
    **Uninstall** (or drag it to *Uninstall*). Alternatively: *Settings → Apps →
-   MCA Steward App → Uninstall*.
+   MCApp → Uninstall*.
 3. **Clear the site's data** (this is the step that forces a truly clean
    reinstall — it clears the cached app, the local database and the stored
    fingerprint record):
@@ -215,7 +215,7 @@ old build, **fully close the app** (swipe it from recent apps) and reopen. The
   jumps Recent tabs → Share → … → Settings with no install entry.) Work through
   these in order — it's almost always one of the first two:
   1. **It may already be installed.** Check the app drawer / home screen for an
-     **MCA Steward** icon. If it's there, just open that — there's nothing to
+     **MCApp** icon. If it's there, just open that — there's nothing to
      install.
   2. **Reload once.** On a brand-new first visit the service worker hasn't
      registered yet, so Chrome doesn't offer install. **Pull down to refresh**

@@ -1,6 +1,6 @@
 # MCA_App
 
-MCA Steward App — an offline-first PWA for clan stewards in the Managalas
+MCApp — an offline-first PWA for clan stewards in the Managalas
 Conservation Area (MCA).
 
 Field testing for MaFIA as a PWA at

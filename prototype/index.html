@@ -6543,7 +6543,7 @@ function enrollRegisterThumb(thumbNum) {
   navigator.credentials.create({
     publicKey: {
       challenge: challenge,
-      rp: { id: rpId, name: 'MCA Steward App' },
+      rp: { id: rpId, name: 'MCApp' },
       user: { id: userId, name: enrolledProfile.stewardId, displayName: enrolledProfile.name + ' (biometric ' + thumbNum + ')' },
       pubKeyCredParams: [
         { type: 'public-key', alg: -7 },
@@ -12071,7 +12071,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mca-steward-v122'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v123'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

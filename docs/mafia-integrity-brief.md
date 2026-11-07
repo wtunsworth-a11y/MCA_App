@@ -203,6 +203,45 @@ through the same data-driven report approach used for the value-chain reports.
 
 ---
 
+## Further signals to consider (for later refinement)
+
+The classification works from what's already captured; these sharpen the
+**integrity** reading and are worth designing in over time.
+
+- **How recent the stumps / cutting are.** Integrity depends not just on
+  *whether* trees were cut (Module G: G5 cut, G6–G8 stump tallies) but on *how
+  recently*. **Fresh** stumps (pale cut face, sap, green leaves still on the
+  slash, no regrowth) signal **ongoing clearing**; **old/weathered** stumps
+  (grey, mossy, coppice regrowth) are historical and part of the land's past.
+  This is exactly what separates a *healthy fallow* (fine) from *recent cutting
+  in a fallow* (not fine). Consider a **Fresh / Old** sub-select on G5 (or a new
+  recency indicator). The same "recency" logic applies to fire signs and damage.
+- **Crop ripeness & harvest timeliness.** Beyond "crops present / maintained",
+  the integrity signal is whether **ripe crops are harvested in time or left to
+  waste**. Capture, when crops are present, *ripe-and-harvested* vs
+  *ripe-and-unharvested (wasted)* — a food-security and economic signal.
+  Interpret against the agricultural calendar.
+- **Litter / rubbish.** A pollution signal anywhere (plastic especially); a hard
+  integrity penalty. New Module G yes/no (not currently captured).
+- **Seasonality / the swidden rotation.** A single visit is a snapshot of a
+  cycle (clear → plant → grow → harvest → fallow → regrow). Interpret
+  observations — and remote alerts — against the **season and rotation**, so
+  routine garden activity isn't mis-scored as degradation.
+- **Ongoing deforestation — RADD is a good remote trigger, confirmed.** RADD
+  (Sentinel-1 **radar**) detects forest disturbance **through cloud**, near-real
+  time (6–12-day observations, weekly alerts, ~10 m), with high- and
+  low-confidence tiers — the right remote source for persistently cloudy
+  Managalas, demonstrably working in New Guinea, and already the basis of
+  MCApp's disturbance feed. Two caveats carry into the integrity work: (1) it
+  flags *where forest was cleared, not why* — pair every alert with **ground
+  verification** and the **land-use / integrity context** (routine fallow
+  clearing in a garden mosaic is not new forest loss); (2) C-band radar is
+  moisture-sensitive, so use the **high-confidence** alerts and watch false
+  positives on wet/swamp ground. Net: a strong trigger for *where* to look; the
+  ground + land-use layer says whether it *matters*.
+
+---
+
 ## Open decisions (for Will) and first-week plan
 
 **Decisions to confirm**

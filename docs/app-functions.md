@@ -1,6 +1,6 @@
 # MCApp — Functions
 
-**Capability list · Version 4 · November 2026**
+**Capability list · Version 5 · November 2026**
 
 A companion to [monitoring-parameters.md](monitoring-parameters.md): that
 document lists *what the app captures*; this one lists *what the app does*,
@@ -57,6 +57,23 @@ grouped by who uses it.
   the live venue photo + location — which is flagged for independent
   verification (see §3).
 - **Observations** and **Patrols** (present as screens).
+
+**Value Chains Audit** (expert-gated — vanilla live; coffee & cocoa draft)
+- A separate, higher bar than training: only people the coordinator has
+  **authorised as auditors for a commodity** (any role) see the tile — kept
+  entirely distinct from trainer certification.
+- Score **one process stage per visit** (planting → … → sale) against a
+  structured checklist (Yes / Partial / No = 2 / 1 / 0; critical items
+  double-weighted and able to flag a stage). The dataset builds up over
+  seasons and feeds a **training-needs analysis** (see §3).
+- Minimal friction to maximise volume: farmer identity is **light and optional**
+  (ID / name / village). **GPS is captured automatically** per visit (flagged,
+  never blocks). Photos are optional, each **tagged by stage and good/bad
+  practice** for reuse as training material (full-quality, linked not re-stored).
+- **On-device shade meter** for canopy items: an upward photo is graded
+  **sky-vs-canopy on the phone** (ForestCrowns-style), keeping only the **% sky
+  / % shade** — the photo is analysed and discarded, never stored or sent. Up to
+  3 photos averaged, with per-crop sky-% bands.
 
 **Disturbance verification (clan-owned)**
 - See **Disturbance Alerts** routed to your clan — satellite-detected fires,
@@ -118,6 +135,10 @@ Reached behind the coordinator unlock (passcode + server key).
 - **Manage Training Topics** — edit topics; flag which can be certified.
 - **Grant Training Authorisation / Certify Trainer** — authorise a person to
   deliver a topic; record trainer certifications.
+- **Authorise Value-Chain Auditor** — authorise a specific person (any role) to
+  complete value-chain audits for a commodity (vanilla / coffee / cocoa). A
+  deliberately higher bar than training, kept separate from it; unlocks the
+  Value Chains Audit tile on their phone.
 - **Update Existing Profile** — correct a person's details (e.g. clan).
 - **Reports** — view zone and all-zones (MCF) activity reports.
 
@@ -127,15 +148,17 @@ Reached behind the coordinator unlock (passcode + server key).
 
 - **Offline-first PWA** — installable to the home screen; loads and runs with
   no signal (service worker, stale-while-revalidate cache).
-- **Local database** — IndexedDB (`MCA_StewardData`, v9, 24 stores) with
+- **Local database** — IndexedDB (`MCA_StewardData`, v18, 28 stores) with
   **storage-persistence protection** so data isn't auto-deleted.
 - **Biometric security** — WebAuthn, up to two credentials per device
   (e.g. two fingers) for backup.
 - **Backend sync** — Google Apps Script web app writes records to Google Drive;
   shared **registries** (`_water_sources`, `_facilities`, `_met_stations`,
   `_pheno_plots`, `_calendar`, `_disturbances`, `_zones`, `_topics`, `_clans`,
-  `_authorisations`, `_recipients`, `_livelihood`, `_prices`) sync approvals,
-  ownership and reference lists between coordinators and down to steward phones.
+  `_authorisations`, `_vc_auditors`, `_recipients`, `_livelihood`, `_prices`)
+  sync approvals, ownership and reference lists between coordinators and down to
+  steward phones. Auditor authorisations (`_vc_auditors`) unlock the Value Chains
+  Audit tile per commodity on the authorised person's next online login.
 - **Full-quality media + retention** — photos and video are stored at full
   resolution in each steward's `media/` folder (large video via a resumable
   direct-to-Drive upload). Records are kept in full on the phone for **~30 days
@@ -174,6 +197,17 @@ Reached behind the coordinator unlock (passcode + server key).
   weekly **no-attendance** digest. Recipients are held off-device in
   `_recipients.json`. Live report endpoints (zone and MCF) remain for in-app
   viewing.
+- **Value-chain training-needs report** — a live, always-current report served
+  by the web app (`?action=vc_report`) and linked from a monthly email. Built
+  from the audit records, it ranks each commodity's practices by **shortfall**
+  (where practice is weakest = where to train), with: a **date filter** and a
+  **change-over-time** trend (monthly score per crop + per-item ▲/▼ arrows); a
+  **cross-chain heat grid** that groups practices into shared themes (agronomy,
+  harvest, processing & drying, **hygiene & contamination**, quality, storage,
+  **sales & market**) so a weakness common to all crops stands apart from a
+  crop-specific one; and a **good/bad practice photo library** that links each
+  image to its full-resolution Drive original (never re-stored). Draft
+  commodities (coffee/cocoa) are badged.
 - **Map & export** — in-app zone map with activity layers; **KML / GPX export**
   of mapped points and tracks.
 
@@ -181,13 +215,19 @@ Reached behind the coordinator unlock (passcode + server key).
 
 ## 4. Not yet built
 
-- **Findings reporting** — the monitoring *values* (water quality, service
-  delivery, infrastructure faults, instrument function, phenophase, etc.) are
-  captured and stored but not yet aggregated, trended, or presented. The
-  scheduled reports now cover **activity, effort and compliance** across people,
-  zones and clans; topic-based **findings** PDFs (forest integrity, disturbance,
-  management, livelihood) are in design but not yet generated automatically.
+- **Findings reporting** — **value-chain findings are now built** (the live
+  training-needs report: shortfall ranking, change-over-time, cross-chain themes
+  and the practice-photo library). The other monitoring *values* (water quality,
+  service delivery, infrastructure faults, instrument function, phenophase, etc.)
+  are captured and stored but not yet aggregated, trended, or presented; those
+  scheduled reports still cover **activity, effort and compliance** only, and
+  topic-based **findings** PDFs (forest integrity, disturbance, management,
+  livelihood) are in design but not yet generated automatically.
   (See [monitoring-parameters.md §5](monitoring-parameters.md).)
+- **Value Chains Audit — coffee & cocoa checklists** are rough **drafts**
+  (placeholders, not yet reviewed); vanilla is the live pilot. Shade-meter
+  calibration (fixed circular crop / shade card) and a coordinator-editable
+  theme map are possible refinements.
 - Clan-ownership gating for the pre-existing modules (MaFIA, QABB, conservation,
   gardens, trees) — currently only water, facilities, met and phenology are
   gated.

@@ -38,8 +38,8 @@ exactly what land use is read from:
 - **D** vegetation & forest condition (D1–D4 size-class tallies, D5 canopy cover,
   D6 composition, D7 spacing, D14 epiphytes, D15 fallen logs, D17 invasives,
   D18 kunai, …)
-- **E** undergrowth & cultivation (E1 garden crops, E2 cash crops; **E3/E4
-  weeded-maintained — see note below**)
+- **E** undergrowth & cultivation (E1 garden crops, E2 cash crops — each a
+  yes/no with a **Maintained / Overgrown** sub-select that carries management)
 - **F** wildlife indicators (present/absent + count)
 - **G** human use (fire, cutting, stumps, old garden, tracks, activity…)
 - **H** comments
@@ -103,17 +103,18 @@ blank cells, ties are inevitable.
 
 ### Sharpen the inputs
 
-- **Add the management indicators (E3/E4).** The Template tab already defines
-  **E3 GC-WeededMaintained** and **E4 CC-WeededMaintained**, but the classifier
-  subset ignores them. They are what separate a **well-managed garden (good)**
-  from an **unmanaged one (less good)** — essential for the integrity score.
-  **App dependency:** MCApp's MaFIA form currently captures E1/E2 only; capturing
-  E3/E4 is a small field-form change to make before management can be scored.
+- **Management is already captured — use it.** MCApp's MaFIA form records
+  **E1 "Garden crops present"** and **E2 "Cash crops present"** each with a
+  **Maintained / Overgrown** sub-select (the saved keys are `E1_ST*_sub` /
+  `E2_ST*_sub`). That IS the spreadsheet's E3/E4 "weeded-maintained" — no new
+  field needed. **Managed Garden** = E1/E2 Yes + sub **Maintained**;
+  **Unmanaged Garden** = Yes + sub **Overgrown**. The classifier's subset should
+  pull these sub-values in.
 - **Expand the class list (confirmed — classes can be added).** Target set:
-  - *Primary Forest*, *Secondary Forest*, *Planted Forest*, *Abandoned Garden /
-    Fallow* (as now);
-  - split *Garden* into **Managed Garden** vs **Unmanaged Garden** (via E3/E4 —
-    this is the garden split that matters for integrity);
+  - *Primary Forest*, *Secondary Forest*, *Planted Forest*, *Fallow* (as now);
+  - split *Garden* into **Managed Garden** vs **Unmanaged Garden** (via the
+    E1/E2 Maintained/Overgrown sub-select — the garden split that matters for
+    integrity);
   - add **Kunai / degraded grassland** (D18 kunai, repeated burning) and
     **Settlement / track corridor** (G12 roads + G13 activity).
   - **Riparian** is better treated as a **place-context flag** (Phase 2, from
@@ -154,20 +155,34 @@ placeholders:**
 | Situation | Integrity |
 |---|---|
 | Remote, intact Primary/Secondary forest | **High** — pristine where it can be |
+| **Healthy regenerating fallow** (resting land in the rotation) | **Good** — part of a productive cycle |
 | Well-managed garden, near village, off rivers, away from sensitive sites | **High** — productive where it should be |
 | Planted forest, managed | Moderate–High |
+| **Fallow with *recent* tree cutting** (fresh stumps in the regrowth) | **Low** — cutting where it should be left to regrow |
 | Managed garden on/near a river (riparian breach) | **Low** |
-| Unmanaged / abandoned garden (where active use was expected) | **Low** |
-| Unharvested crops (food/cash left to waste) | **Low** |
+| Unmanaged / overgrown garden (active use expected, not maintained) | **Low** |
+| Ripe crops left unharvested (food/cash wasted) | **Low** |
 | Disturbance (cutting, fire, tracks) in a *remote* area | **Low** |
 | Litter / rubbish, anywhere | **Low** (hard penalty) |
 | Degraded / kunai grassland from repeated burning | **Low** |
 
-**Field-form gaps to close for the full rubric** (confirm with Will): there is
-currently **no "litter / rubbish" indicator** and **no "crop harvested vs
-unharvested" indicator** in MaFIA — both are named as integrity signals, so
-they'd need adding to the form. Disturbance signals (fire, cutting, stumps,
-tracks) already exist in Module G; remoteness comes from Phase-2 context.
+Note: **fallow is not a negative** — a healthy fallow is land resting in a
+productive rotation and scores well; what pulls it down is **recent tree
+cutting** in it (read from Module G: G5 trees cut and the G6–G8 stump tallies,
+especially larger/fresh stumps). Likewise a garden is good when *managed* and
+poor when *overgrown* — the E1/E2 Maintained/Overgrown sub-select already
+carries that.
+
+**Field-form additions for the full rubric** (schema-driven — the collector and
+completeness gate pick up new rows automatically):
+- **Litter / rubbish** — a new yes/no in Module G (not currently captured).
+- **Ripe crops left unharvested** — in Module E, gated on crops present (E1/E2 =
+  Yes): a "harvested in time vs wasted" signal. (Management — maintained vs
+  overgrown — is already captured; this is the *separate* harvest-timeliness
+  signal.)
+Both are small, deliberate survey changes — best deployed together with a build
+bump, not silently mid-pilot. Disturbance signals (fire, cutting, stumps, tracks)
+already exist in Module G; remoteness comes from Phase-2 context.
 
 ### Step C — Integrity Score
 Combine into a per-sub-transect score (0–100 or **High / Moderate / Low**
@@ -197,14 +212,17 @@ through the same data-driven report approach used for the value-chain reports.
    Secondary / Planted forest, Managed vs Unmanaged garden, Abandoned/Fallow,
    Kunai/degraded, Settlement; Riparian handled as a place-context flag.
    Signatures to be tuned on the real data.
-3. **Field-form additions** to enable the full rubric: E3/E4 (management),
-   litter/rubbish, crop-harvested — which to add now.
+3. **Field-form additions** to enable the full rubric (management is already
+   captured via the E1/E2 Maintained/Overgrown sub-select): add **litter /
+   rubbish** (Module G) and **ripe-crops-unharvested** (Module E) — confirm
+   wording, then deploy together.
 4. **Score shape** — 0–100 vs High/Moderate/Low banding (or both).
 
 **Suggested first week for Theo**
 1. Load the real MaFIA records; confirm the data shape (indicators × ST columns).
 2. Reproduce the spreadsheet classifier, then switch it to **best-fit scoring +
    confidence + needs_review**; resolve the Primary/Secondary tie.
-3. Fold in E3/E4 and the proposed extra classes; tune signatures on real data.
+3. Fold in the E1/E2 Maintained/Overgrown sub-select (managed vs unmanaged) and
+   the proposed extra classes; tune signatures on real data.
 4. Produce a per-sub-transect classification table + a short note on accuracy and
    which cases needed expert review — the input for the Phase-2 scoring design.

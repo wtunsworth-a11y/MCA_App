@@ -135,6 +135,11 @@
   th.tc,td.tc{text-align:center;width:46px}
   .tr{font-size:.9rem;font-weight:700}
   .tr.up{color:var(--good)} .tr.down{color:var(--bad)} .tr.flat{color:var(--faint)} .tr.none{color:var(--rule-bold)}
+  table.theme td{vertical-align:middle}
+  .cc-wrap{display:flex;flex-wrap:wrap;gap:6px 12px}
+  .cc{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;color:var(--muted);white-space:nowrap}
+  .cc .ccd{width:9px;height:9px;border-radius:2px;display:inline-block}
+  .shared{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:middle}
   .seg{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 2px}
   .seg button{font-family:var(--sans);font-size:.8rem;font-weight:600;border:1px solid var(--rule-bold);background:var(--page);color:var(--muted);border-radius:999px;padding:5px 14px;cursor:pointer}
   .seg button.on{background:var(--forest);color:#fff;border-color:var(--forest)}
@@ -257,6 +262,35 @@ function trendSVG(audits){
   const legend=series.map(s=>`<span class="lg"><span class="dot" style="background:${COM_COLOR[s.key]}"></span>${esc(s.name)}</span>`).join('');
   return `<div class="chartwrap"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Monthly mean score by commodity">${g}</svg></div><div class="legend">${legend}<span class="lg-note">mean item score (%) per month · larger dots = more observations</span></div>`;
 }
+/* ---- cross-chain themes: group every item into a shared theme so a weakness
+   common to all crops stands apart from a crop-specific one. Hygiene and sales
+   are cross-cutting (they live inside several stages), so they are matched on
+   the item text first; everything else falls to its process stage. ---- */
+const THEME_ORDER=['Agronomy & field','Harvest','Processing & drying','Hygiene & contamination','Quality & grading','Storage','Sales & market','Other'];
+function themeOf(item, stage){
+  const it=(item||'').toLowerCase(), st=(stage||'').toLowerCase();
+  if(/smoke|contaminat|mould|mold|pest|sour smell|odour|odor/.test(it)) return 'Hygiene & contamination';
+  if(/nursery|planting|young|mature|vine plot|pollinat/.test(st)) return 'Agronomy & field';
+  if(/harvest|pods on the vine|pod break/.test(st)) return 'Harvest';
+  if(/killing|sweating|ferment|wash|pulp|dry/.test(st)) return 'Processing & drying';
+  if(/quality/.test(st)) return 'Quality & grading';
+  if(/conditioning|storage/.test(st)) return 'Storage';
+  if(/\bsale\b/.test(st)) return 'Sales & market';
+  return 'Other';
+}
+function crossThemes(audits){
+  const T={};
+  for(const a of audits){ for(const r of (a.responses||[])){ if(r.value==null) continue;
+    const th=themeOf(r.item, a.module_name), sc=r.value/2;
+    const t=T[th]||(T[th]={theme:th,n:0,sum:0,com:{}});
+    t.n++; t.sum+=sc;
+    const c=t.com[a.commodity]||(t.com[a.commodity]={n:0,sum:0,name:a.commodity_name});
+    c.n++; c.sum+=sc;
+  }}
+  return Object.values(T).map(t=>{t.mean=t.n?t.sum/t.n:0; t.shortfall=1-t.mean; t.spread=0;
+    const ms=COM_ORDER.filter(k=>t.com[k]).map(k=>t.com[k].sum/t.com[k].n); if(ms.length>1){ t.spread=Math.max(...ms)-Math.min(...ms); }
+    return t;}).sort((a,b)=> b.shortfall-a.shortfall);
+}
 function itemTrends(audits){
   const ds=audits.map(auditDate).filter(Boolean).sort(); if(ds.length<4) return {};
   const mid=ds[Math.floor(ds.length/2)]; const agg={};
@@ -305,6 +339,27 @@ function render(){
   H+=`<div class="cmeta" style="margin-bottom:8px">Overall practice score by month, per value chain — the signal for whether training is moving the needle. Use the date filter above to focus a period.</div>`;
   H+=trendSVG(audits);
   H+=`<div class="note">One visit scores one stage, so the picture builds up over seasons. Each item is scored on the same basis (Yes 100% · Partial 50% · No 0%, the critical double-weight set aside so items compare), then ranked by <b>shortfall</b> — the gap to full marks. The <b>trend arrow</b> compares the later half of the selected range with the earlier half.</div>`;
+
+  /* cross-chain: common weaknesses by theme */
+  const themes=crossThemes(audits);
+  if(themes.length){
+    H+=`<h2>Common weaknesses — all value chains</h2>`;
+    H+=`<div class="cmeta" style="margin-bottom:8px">The same practices grouped across vanilla, coffee and cocoa, so a weakness shared by every crop (train it once, help three chains) stands apart from a crop-specific one. Ranked by shortfall; the by-crop figures show whether it is shared or concentrated.</div>`;
+    H+=`<table class="theme"><thead><tr><th>Theme</th><th class="n">Obs</th><th>All crops</th><th>By crop</th></tr></thead><tbody>`;
+    themes.filter(t=>t.theme!=='Other').forEach(t=>{
+      const mp=Math.round(t.mean*100);
+      const per=COM_ORDER.filter(k=>t.com[k]).map(k=>{const c=t.com[k],m=c.sum/c.n;
+        return `<span class="cc"><i class="ccd" style="background:${COM_COLOR[k]}"></i>${esc(c.name)} <b style="color:${scoreColor(m)}">${Math.round(m*100)}%</b></span>`;}).join('');
+      const shared = (t.spread>0 && t.spread<0.15 && COM_ORDER.filter(k=>t.com[k]).length>=2) ? '<span class="shared" title="similar across crops — a shared weakness">shared</span>' : '';
+      H+=`<tr>
+        <td><b>${esc(t.theme)}</b> ${shared}</td>
+        <td class="n">${t.n}</td>
+        <td><div class="sf"><div class="sf-bar"><div class="sf-fill" style="width:${mp}%;background:${scoreColor(t.mean)}"></div></div><span class="sf-v">${mp}%</span></div></td>
+        <td class="cc-wrap">${per}</td>
+      </tr>`;
+    });
+    H+=`</tbody></table>`;
+  }
 
   COM_ORDER.filter(k=>A.byCom[k]).forEach(k=>{
     const C=A.byCom[k];

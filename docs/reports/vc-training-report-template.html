@@ -1,0 +1,272 @@
+<!doctype html>
+<!--
+  MCApp — Value Chain Audit: Training Needs report (TEMPLATE, data-driven)
+
+  HOW IT IS FED
+  -------------
+  The page renders entirely from one array, AUDITS, in the shape the phones
+  upload (modules.vc_audit records). To produce a real report, replace the
+  `/*__AUDITS__*/ []` placeholder below with the audit records for the period.
+  Each record needs: commodity, commodity_name, commodity_draft, module_code,
+  module_name, assessor_id/name, assessor_zone_id/zone, recorded_at,
+  responses[{code,item,critical,weight,response,value}], and
+  photos[{stage,stage_name,item_code,practice:'good'|'bad',caption,
+          thumb_url,original_url}].
+
+  PHOTOS / LINKING TO ORIGINALS
+  -----------------------------
+  The report never re-stores images. For each audit photo the backend resolves
+  the record's {_media:"<filename>"} reference to the file in the steward's
+  Drive media/ folder and sets:
+    original_url = that file's Drive link (webViewLink)   -> opened on click
+    thumb_url    = Drive thumbnail link, e.g. .../thumbnail?id=<ID>&sz=w320
+  (In this demo thumb_url is omitted and a placeholder tile is drawn instead.)
+
+  The analysis (per-item shortfall ranking, per-stage means, per-commodity
+  rollups) is computed in-page and mirrors the backend vcTrainingNeedsReport().
+-->
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Value Chain Training Needs</title>
+<meta name="description" content="Training-needs analysis built from MCApp value-chain audits — ranked by where practice is weakest, with good/bad practice photos linked to their originals.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#eceee9; --page:#ffffff; --panel:#f5f6f2; --panel2:#eef2ec;
+    --ink:#1a211c; --muted:#5c665e; --faint:#8b958c;
+    --rule:#dde2d8; --rule-bold:#b9c1b7;
+    --forest:#245a2b; --forest-ink:#163d1b; --forest-soft:#e7f0e6;
+    --good:#2e7d32; --good-soft:#e7f2e8;
+    --bad:#b4440e; --bad-soft:#f8e7dc; --bad-ink:#8f3509;
+    --warn:#b45309; --warn-soft:#fbf0e1;
+    --serif:'Source Serif 4',Georgia,serif;
+    --sans:'IBM Plex Sans',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0f1310; --page:#161b17; --panel:#1e241f; --panel2:#232a24;
+    --ink:#e7ece7; --muted:#a3ada5; --faint:#7a847b;
+    --rule:#2b332d; --rule-bold:#3b443d;
+    --forest:#6bbf72; --forest-ink:#8fd196; --forest-soft:#1b2a1e;
+    --good:#67b56d; --good-soft:#1b2a1e;
+    --bad:#e78a52; --bad-soft:#2f2016; --bad-ink:#f0a176;
+    --warn:#e0a35c; --warn-soft:#2d2114;
+    color-scheme:dark;
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0f1310; --page:#161b17; --panel:#1e241f; --panel2:#232a24;
+    --ink:#e7ece7; --muted:#a3ada5; --faint:#7a847b;
+    --rule:#2b332d; --rule-bold:#3b443d;
+    --forest:#6bbf72; --forest-ink:#8fd196; --forest-soft:#1b2a1e;
+    --good:#67b56d; --good-soft:#1b2a1e;
+    --bad:#e78a52; --bad-soft:#2f2016; --bad-ink:#f0a176;
+    --warn:#e0a35c; --warn-soft:#2d2114;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;margin:0;-webkit-font-smoothing:antialiased}
+  .page{max-width:1000px;margin:24px auto;background:var(--page);border:1px solid var(--rule);border-radius:6px;box-shadow:0 2px 18px rgba(0,0,0,.09);padding:clamp(20px,4vw,44px)}
+  @media (max-width:560px){ .page{margin:10px;padding:16px} }
+  .mast{border-bottom:3px double var(--rule-bold);padding-bottom:18px;margin-bottom:22px}
+  .eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--forest);margin:0 0 8px}
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(1.7rem,4vw,2.3rem);line-height:1.08;margin:0;letter-spacing:-.015em;text-wrap:balance}
+  .sub{font-family:var(--serif);font-size:1.05rem;color:var(--muted);margin-top:6px}
+  .meta{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:12px;font-size:.82rem;color:var(--muted)}
+  .meta b{color:var(--ink);font-weight:600}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:22px 0 6px}
+  @media (max-width:640px){ .kpis{grid-template-columns:repeat(2,1fr)} }
+  .kpi{background:var(--panel);border:1px solid var(--rule);border-radius:9px;padding:13px 14px}
+  .kpi .v{font-family:var(--mono);font-size:1.55rem;font-weight:700;color:var(--forest-ink);line-height:1}
+  .kpi .l{font-size:.72rem;color:var(--muted);margin-top:6px}
+  h2{font-family:var(--serif);font-size:1.35rem;font-weight:700;margin:34px 0 4px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  h3{font-family:var(--sans);font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:20px 0 8px}
+  .draft{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:999px;padding:2px 9px}
+  .cmeta{font-size:.82rem;color:var(--muted);margin:2px 0 0}
+  .cmeta .chip{display:inline-block;font-family:var(--mono);font-size:.74rem;color:var(--forest-ink);background:var(--forest-soft);border-radius:6px;padding:1px 8px;margin-right:6px}
+  table{border-collapse:collapse;width:100%;font-size:.86rem;margin-top:6px}
+  th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:middle}
+  th{font-size:.67rem;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600}
+  td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .rank{font-family:var(--mono);font-weight:700;color:var(--forest-ink)}
+  .crit{font-size:.58rem;font-weight:700;color:var(--bad-ink);background:var(--bad-soft);border:1px solid var(--bad);border-radius:999px;padding:1px 6px;text-transform:uppercase;margin-left:5px}
+  .sf{display:flex;align-items:center;gap:8px;min-width:120px}
+  .sf-bar{flex:1;height:8px;border-radius:999px;background:var(--panel2);overflow:hidden}
+  .sf-fill{height:100%;border-radius:999px}
+  .sf-v{font-family:var(--mono);font-size:.78rem;width:34px;text-align:right}
+  .ypn{font-family:var(--mono);font-size:.74rem;color:var(--muted);white-space:nowrap}
+  .ypn .y{color:var(--good)} .ypn .p{color:var(--warn)} .ypn .no{color:var(--bad)}
+  .stages{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
+  .st{border:1px solid var(--rule);border-radius:8px;padding:9px 11px;background:var(--panel)}
+  .st .sc{font-family:var(--mono);font-size:1.25rem;font-weight:700;line-height:1}
+  .st .nm{font-size:.74rem;color:var(--muted);margin-top:3px;line-height:1.25}
+  .st .ex{font-size:.66rem;color:var(--faint);margin-top:5px;font-family:var(--mono)}
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px;margin-top:10px}
+  .shot{border:1px solid var(--rule-bold);border-radius:9px;overflow:hidden;background:var(--panel);text-decoration:none;color:inherit;display:block;transition:transform .08s ease, box-shadow .08s ease}
+  .shot:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.14)}
+  .shot img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--panel2)}
+  .shot .cap{padding:8px 10px}
+  .shot .pr{font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:1px 7px}
+  .shot .pr.good{background:var(--good-soft);color:var(--good)}
+  .shot .pr.bad{background:var(--bad-soft);color:var(--bad-ink)}
+  .shot .ct{font-size:.78rem;margin:5px 0 2px;line-height:1.25}
+  .shot .mt{font-size:.68rem;color:var(--faint);font-family:var(--mono);display:flex;justify-content:space-between;gap:6px;align-items:center}
+  .shot .open{color:var(--forest)}
+  .note{font-size:.82rem;color:var(--muted);background:var(--panel);border:1px solid var(--rule);border-left:3px solid var(--forest);border-radius:6px;padding:11px 14px;margin-top:14px}
+  .foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);font-size:.78rem;color:var(--faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 2px}
+  .seg button{font-family:var(--sans);font-size:.8rem;font-weight:600;border:1px solid var(--rule-bold);background:var(--page);color:var(--muted);border-radius:999px;padding:5px 14px;cursor:pointer}
+  .seg button.on{background:var(--forest);color:#fff;border-color:var(--forest)}
+  @media print{ body{background:#fff} .page{box-shadow:none;border:none;margin:0;max-width:none} .shot:hover{transform:none;box-shadow:none} .seg{display:none} .toolbar{display:none} }
+  @page{size:A4;margin:14mm}
+  .toolbar{max-width:1000px;margin:14px auto -8px;display:flex;justify-content:flex-end;gap:8px;padding:0 10px}
+  .toolbar button{font-family:var(--sans);font-size:.78rem;border:1px solid var(--rule-bold);background:var(--page);color:var(--muted);border-radius:7px;padding:6px 12px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="toolbar"><button onclick="window.print()">Print / Save PDF</button></div>
+<div class="page" id="page"></div>
+
+<script>
+const AUDITS = /*__AUDITS__*/ [];
+
+/* ---- helpers ---- */
+const COM_ORDER = ['vanilla','coffee','cocoa'];
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pngDate = iso => { const d=new Date(iso); return isNaN(d)?'':new Date(d.getTime()+10*3600000).toISOString().slice(0,10); };
+const fmtDate = ymd => { if(!ymd) return ''; const [y,m,dd]=ymd.split('-'); return dd+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]+' '+y; };
+function scoreColor(v){ /* v 0..1 */ return v>=0.75?'var(--good)':v>=0.5?'var(--warn)':'var(--bad)'; }
+
+/* ---- analysis (same inputs the phones upload) ---- */
+function analyze(audits){
+  const byCom={};
+  let minD=null,maxD=null; const allAuditors=new Set(); let photoN=0;
+  for(const a of audits){
+    const d=pngDate(a.recorded_at); if(d){ if(!minD||d<minD)minD=d; if(!maxD||d>maxD)maxD=d; }
+    allAuditors.add(a.assessor_id);
+    const C = byCom[a.commodity] || (byCom[a.commodity]={key:a.commodity,name:a.commodity_name,draft:!!a.commodity_draft,visits:0,items:{},stages:{},photos:[],auditors:new Set(),zones:new Set()});
+    C.visits++; C.auditors.add(a.assessor_id); if(a.assessor_zone_id) C.zones.add(a.assessor_zone_id);
+    const st=C.stages[a.module_code]||(C.stages[a.module_code]={code:a.module_code,name:a.module_name,n:0,sum:0,critFail:0,visits:0});
+    st.visits++;
+    for(const r of (a.responses||[])){
+      if(r.value==null) continue;
+      const sc=r.value/2;
+      const it=C.items[r.code]||(C.items[r.code]={code:r.code,item:r.item,stage:a.module_code,stage_name:a.module_name,critical:!!r.critical,n:0,sum:0,yes:0,partial:0,no:0});
+      it.n++; it.sum+=sc; it[r.response]=(it[r.response]||0)+1;
+      st.n++; st.sum+=sc; if(r.critical&&r.response==='no') st.critFail++;
+    }
+    for(const p of (a.photos||[])){ photoN++; C.photos.push(Object.assign({},p,{assessor:a.assessor_name,date:pngDate(a.recorded_at),farmer_village:a.farmer_village})); }
+  }
+  for(const k in byCom){ const C=byCom[k];
+    C.itemList=Object.values(C.items).map(it=>{it.mean=it.n?it.sum/it.n:0; it.shortfall=1-it.mean; return it;})
+      .sort((a,b)=> (b.shortfall-a.shortfall) || (b.n-a.n));
+    C.stageList=Object.values(C.stages).map(s=>{s.mean=s.n?s.sum/s.n:0; return s;})
+      .sort((a,b)=> a.code.localeCompare(b.code,undefined,{numeric:true}));
+    C.mean = C.itemList.length? C.itemList.reduce((x,it)=>x+it.mean,0)/C.itemList.length : 0;
+  }
+  return {byCom, minD, maxD, auditors:allAuditors.size, photoN, total:audits.length};
+}
+
+/* ---- placeholder thumbnail (stands in for the real Drive photo in this demo) ---- */
+function thumb(practice, stageName, caption){
+  const c=document.createElement('canvas'); c.width=320; c.height=240; const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,240);
+  if(practice==='good'){ g.addColorStop(0,'#3f7d44'); g.addColorStop(1,'#1f4a26'); }
+  else { g.addColorStop(0,'#b4551f'); g.addColorStop(1,'#7a3410'); }
+  x.fillStyle=g; x.fillRect(0,0,320,240);
+  x.globalAlpha=.16; x.fillStyle='#fff';
+  for(let i=0;i<40;i++){ x.beginPath(); x.arc(Math.random()*320,Math.random()*240,4+Math.random()*26,0,7); x.fill(); }
+  x.globalAlpha=1;
+  x.fillStyle='rgba(0,0,0,.28)'; x.fillRect(0,168,320,72);
+  x.fillStyle='#fff'; x.font='600 15px "IBM Plex Sans",sans-serif';
+  x.fillText(stageName.length>34?stageName.slice(0,33)+'…':stageName, 14, 192);
+  x.font='400 12px "IBM Plex Sans",sans-serif'; x.fillStyle='rgba(255,255,255,.85)';
+  x.fillText(caption.length>40?caption.slice(0,39)+'…':caption, 14, 212);
+  x.font='italic 10px "IBM Plex Sans",sans-serif'; x.fillStyle='rgba(255,255,255,.6)';
+  x.fillText('sample image — real capture on Drive', 14, 230);
+  return c.toDataURL('image/jpeg',0.72);
+}
+
+/* ---- render ---- */
+function render(){
+  const A=analyze(AUDITS); const P=document.getElementById('page'); let H='';
+  const stagesCovered=Object.values(A.byCom).reduce((n,C)=>n+C.stageList.length,0);
+  H+=`<div class="mast">
+    <p class="eyebrow">Managalas Conservation Area · MCApp · Value Chains</p>
+    <h1>Value Chain Audit — Training Needs</h1>
+    <div class="sub">Where practice is weakest across the vanilla, coffee and cocoa value chains — so training goes where it is needed most.</div>
+    <div class="meta"><span>Period <b>${fmtDate(A.minD)} – ${fmtDate(A.maxD)}</b> (PNG)</span><span>Built from <b>${A.total}</b> audit visits</span><span>Generated <b>${fmtDate(pngDate(new Date().toISOString()))}</b></span></div>
+  </div>`;
+  H+=`<div class="kpis">
+    <div class="kpi"><div class="v">${A.total}</div><div class="l">Audit visits</div></div>
+    <div class="kpi"><div class="v">${Object.keys(A.byCom).length}</div><div class="l">Value chains</div></div>
+    <div class="kpi"><div class="v">${stagesCovered}</div><div class="l">Stages with data</div></div>
+    <div class="kpi"><div class="v">${A.auditors}</div><div class="l">Auditors</div></div>
+    <div class="kpi"><div class="v">${A.photoN}</div><div class="l">Practice photos</div></div>
+  </div>`;
+  H+=`<div class="note">One visit scores one stage, so the picture builds up over seasons. Each item is scored on the same basis (Yes 100% · Partial 50% · No 0%, the critical double-weight set aside so items compare), then ranked by <b>shortfall</b> — the gap to full marks. The highest shortfall is the first training priority.</div>`;
+
+  COM_ORDER.filter(k=>A.byCom[k]).forEach(k=>{
+    const C=A.byCom[k];
+    H+=`<h2>${esc(C.name)} ${C.draft?'<span class="draft">draft checklist</span>':''}</h2>`;
+    H+=`<div class="cmeta"><span class="chip">${C.visits} visits</span><span class="chip">overall ${Math.round(C.mean*100)}%</span><span class="chip">${C.auditors.size} auditor${C.auditors.size!==1?'s':''}</span><span class="chip">${C.zones.size} zone${C.zones.size!==1?'s':''}</span></div>`;
+
+    H+=`<h3>Top training priorities</h3>`;
+    H+=`<table><thead><tr><th class="n">#</th><th>Practice</th><th>Stage</th><th class="n">Obs</th><th>Y / P / N</th><th>Shortfall</th></tr></thead><tbody>`;
+    C.itemList.slice(0,12).forEach((it,i)=>{
+      const sfPct=Math.round(it.shortfall*100);
+      H+=`<tr>
+        <td class="n rank">${i+1}</td>
+        <td>${esc(it.item)}${it.critical?'<span class="crit">critical</span>':''}<div style="font-size:.66rem;color:var(--faint);font-family:var(--mono)">${esc(it.code)}</div></td>
+        <td style="font-size:.78rem;color:var(--muted)">${esc(it.stage)} · ${esc(it.stage_name)}</td>
+        <td class="n">${it.n}</td>
+        <td class="ypn"><span class="y">${it.yes||0}</span> / <span class="p">${it.partial||0}</span> / <span class="no">${it.no||0}</span></td>
+        <td><div class="sf"><div class="sf-bar"><div class="sf-fill" style="width:${sfPct}%;background:${scoreColor(it.mean)}"></div></div><span class="sf-v">${sfPct}%</span></div></td>
+      </tr>`;
+    });
+    H+=`</tbody></table>`;
+
+    H+=`<h3>By stage</h3><div class="stages">`;
+    C.stageList.forEach(s=>{
+      H+=`<div class="st"><div class="sc" style="color:${scoreColor(s.mean)}">${s.n?Math.round(s.mean*100)+'%':'—'}</div>
+        <div class="nm"><b>${esc(s.code)}</b> ${esc(s.name)}</div>
+        <div class="ex">${s.visits} visit${s.visits!==1?'s':''}${s.critFail?' · '+s.critFail+' critical No':''}</div></div>`;
+    });
+    H+=`</div>`;
+  });
+
+  /* practice gallery */
+  const allPhotos=[]; COM_ORDER.filter(k=>A.byCom[k]).forEach(k=>A.byCom[k].photos.forEach(p=>allPhotos.push(Object.assign({commodity:A.byCom[k].name},p))));
+  const good=allPhotos.filter(p=>p.practice==='good').length, bad=allPhotos.filter(p=>p.practice==='bad').length;
+  H+=`<h2>Good &amp; bad practice — photo library</h2>`;
+  H+=`<div class="note">Photos the auditors flagged, tagged by stage and as good or bad practice — ready to reuse as training material. The report keeps a light thumbnail and <b>links each one to the full-resolution original on Drive</b> (click any photo); nothing is re-stored here. <b>${good} good</b> · <b>${bad} bad</b>.</div>`;
+  H+=`<div class="seg" id="galSeg">
+     <button class="on" data-f="all" onclick="galFilter('all',this)">All (${allPhotos.length})</button>
+     <button data-f="good" onclick="galFilter('good',this)">Good (${good})</button>
+     <button data-f="bad" onclick="galFilter('bad',this)">Bad (${bad})</button></div>`;
+  H+=`<div class="gallery" id="gallery"></div>`;
+
+  P.innerHTML=H;
+  window.__photos=allPhotos; galFilter('all');
+}
+
+function galFilter(f, btn){
+  if(btn){ document.querySelectorAll('#galSeg button').forEach(b=>b.classList.toggle('on',b===btn)); }
+  const list=(window.__photos||[]).filter(p=> f==='all'||p.practice===f);
+  document.getElementById('gallery').innerHTML = list.map(p=>{
+    const t = p.thumb_url || thumb(p.practice, p.stage_name||p.stage||'', p.caption||'');
+    return `<a class="shot" href="${esc(p.original_url||'#')}" target="_blank" rel="noopener">
+      <img src="${t}" alt="${esc(p.caption||'')}" loading="lazy">
+      <div class="cap">
+        <span class="pr ${p.practice}">${p.practice} practice</span>
+        <div class="ct">${esc(p.caption||'')}</div>
+        <div class="mt"><span>${esc(p.commodity||'')} · ${esc(p.stage||'')}</span><span class="open">↗ original</span></div>
+      </div></a>`;
+  }).join('');
+}
+render();
+</script>
+</body>
+</html>

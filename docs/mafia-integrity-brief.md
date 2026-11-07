@@ -109,10 +109,18 @@ blank cells, ties are inevitable.
   from an **unmanaged one (less good)** — essential for the integrity score.
   **App dependency:** MCApp's MaFIA form currently captures E1/E2 only; capturing
   E3/E4 is a small field-form change to make before management can be scored.
-- **Consider adding classes for integrity** (confirm with Will):
-  *Managed garden* vs *Unmanaged garden* (via E3/E4), *Riparian* (A4/A5 water +
-  Phase-2 proximity), *Kunai / degraded grassland* (D18), *Settlement / track
-  corridor* (G12 roads + G13 activity). Primary/Secondary/Planted/Fallow stay.
+- **Expand the class list (confirmed — classes can be added).** Target set:
+  - *Primary Forest*, *Secondary Forest*, *Planted Forest*, *Abandoned Garden /
+    Fallow* (as now);
+  - split *Garden* into **Managed Garden** vs **Unmanaged Garden** (via E3/E4 —
+    this is the garden split that matters for integrity);
+  - add **Kunai / degraded grassland** (D18 kunai, repeated burning) and
+    **Settlement / track corridor** (G12 roads + G13 activity).
+  - **Riparian** is better treated as a **place-context flag** (Phase 2, from
+    water proximity) layered onto whatever the land use is — a garden can be
+    riparian — rather than its own land-use class; keep it a class only where the
+    sub-transect *is* a watercourse/bank.
+  Add classes freely; tune each one's signature against the real data next week.
 
 ### Phase 1 deliverable
 A classifier (spreadsheet formulas, then a script/notebook) that takes a MaFIA
@@ -185,8 +193,10 @@ through the same data-driven report approach used for the value-chain reports.
 **Decisions to confirm**
 1. **Spatial layers available** for Phase 2 (rivers, villages, roads, sensitive
    sites, protected core, DEM).
-2. **Final class list** (keep 5, or add managed/unmanaged garden, riparian,
-   kunai/degraded, settlement).
+2. **Class list — decided: classes can be added.** Target set is Primary /
+   Secondary / Planted forest, Managed vs Unmanaged garden, Abandoned/Fallow,
+   Kunai/degraded, Settlement; Riparian handled as a place-context flag.
+   Signatures to be tuned on the real data.
 3. **Field-form additions** to enable the full rubric: E3/E4 (management),
    litter/rubbish, crop-harvested — which to add now.
 4. **Score shape** — 0–100 vs High/Moderate/Low banding (or both).

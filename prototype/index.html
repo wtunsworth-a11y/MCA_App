@@ -12305,7 +12305,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v129'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v130'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12489,7 +12489,7 @@ function cacheStewardProfile() {
          people the coordinator has authorised as auditors (any role). */
       var vcAuthed = (records[0].authorised_commodities || []).length > 0;
       var vcTile = document.getElementById('tile-vc-audit');
-      if (vcTile) vcTile.style.display = (vcAuthed || isOversight()) ? '' : 'none';
+      if (vcTile) vcTile.style.display = vcAuthed ? '' : 'none';   /* no oversight bypass — must be authorised */
       /* Handover & Distribution: field officers + Project/MCF & Zone staff (not
          plain clan stewards). */
       var distTile = document.getElementById('tile-distribution');
@@ -19717,8 +19717,10 @@ var _vcGps = null;
 
 function vcChecklist(){ return (typeof VC_CHECKLIST!=='undefined' && _vcCommodity && VC_CHECKLIST[_vcCommodity]) || null; }
 function vcAvailableCommodities(){
+  /* Expert-gated, strictly: ONLY commodities the coordinator has authorised for
+     this person. No role bypass — oversight does not get it for free; a
+     coordinator (or anyone) must be explicitly authorised per commodity. */
   var all = (typeof VC_CHECKLIST!=='undefined') ? Object.keys(VC_CHECKLIST) : [];
-  if (isOversight()) return all;                               /* oversight can audit any */
   var cz = (window._cachedProfile||{}).authorised_commodities || [];
   return all.filter(function(c){ return cz.indexOf(c) !== -1; });
 }

@@ -103,6 +103,18 @@ body {
 }
 .scroll-content::-webkit-scrollbar { width: 0; }
 
+/* Enrolled-person picker (approval screens) */
+.ep-wrap { position: relative; }
+.ep-list { border: 1px solid #ddd; border-radius: 8px; margin-top: 4px; max-height: 240px; overflow-y: auto; background: #fff; display: none; box-shadow: 0 4px 14px rgba(0,0,0,.1); }
+.ep-list.open { display: block; }
+.ep-item { padding: 8px 11px; cursor: pointer; border-bottom: 1px solid #f1f1f1; }
+.ep-item:last-child { border-bottom: 0; }
+.ep-item:active, .ep-item:hover { background: #F3EEF8; }
+.ep-item .nm { font-weight: 600; font-size: 0.88rem; color: #222; }
+.ep-item .mt { font-size: 0.72rem; color: #888; font-family: monospace; margin-top: 1px; }
+.ep-none { padding: 9px 11px; color: #999; font-size: 0.8rem; }
+.ep-chosen { margin-top: 6px; font-size: 0.82rem; color: #1B5E20; background: #E8F5E9; border: 1px solid #C8E6C9; border-radius: 8px; padding: 7px 10px; }
+
 /* ── Top App Bar ── */
 .top-bar {
   background: #1B5E20;
@@ -1846,9 +1858,12 @@ select.msel {
         <div style="background:#E8F5E9;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.78rem;color:#1B5E20;">
           Use this when a clan steward or field officer has completed a qualifying course and received certification. This creates a permanent record in Drive and unlocks training delivery for that topic on their phone.
         </div>
-        <div class="form-group">
-          <label class="form-label">Steward / Officer ID <span style="color:#B71C1C;">*</span></label>
-          <input type="text" id="gaStewId" class="form-input" placeholder="e.g. MCA-007" autocomplete="off" style="text-transform:uppercase;">
+        <div class="form-group ep-wrap">
+          <label class="form-label">Person to authorise <span style="color:#B71C1C;">*</span></label>
+          <input type="text" id="gaPersonSearch" class="form-input" placeholder="Type a name or ID…" autocomplete="off" oninput="epFilter('ga')" onfocus="epFilter('ga')">
+          <div id="gaPersonList" class="ep-list"></div>
+          <div id="gaPersonChosen" class="ep-chosen" style="display:none;"></div>
+          <input type="hidden" id="gaStewId">
         </div>
         <div class="form-group">
           <label class="form-label">Topics Certified <span style="color:#B71C1C;">*</span></label>
@@ -5518,9 +5533,12 @@ select.msel {
         <div style="background:#F3EEF8;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.78rem;color:#4A148C;">
           Authorise a specific person (any role) to complete value-chain audits for a commodity. This is a separate, higher bar than training — only people who can reliably judge the crop in the field. It unlocks the Value Chains Audit tile on their phone.
         </div>
-        <div class="form-group">
-          <label class="form-label">Steward / Officer ID <span style="color:#B71C1C;">*</span></label>
-          <input type="text" id="vcgStewId" class="form-input" placeholder="e.g. MCA-F7A" autocomplete="off" style="text-transform:uppercase;">
+        <div class="form-group ep-wrap">
+          <label class="form-label">Person to authorise <span style="color:#B71C1C;">*</span></label>
+          <input type="text" id="vcgPersonSearch" class="form-input" placeholder="Type a name or ID…" autocomplete="off" oninput="epFilter('vcg')" onfocus="epFilter('vcg')">
+          <div id="vcgPersonList" class="ep-list"></div>
+          <div id="vcgPersonChosen" class="ep-chosen" style="display:none;"></div>
+          <input type="hidden" id="vcgStewId">
         </div>
         <div class="form-group">
           <label class="form-label">Commodity <span style="color:#B71C1C;">*</span></label>
@@ -6132,6 +6150,7 @@ function showScreen(id) {
   }
   if (id === 'screen-grant-auth') {
     initGrantAuthScreen();
+    epInit('ga');
   }
   if (id === 'screen-update-profile') {
     renderUpdateProfileScreen();
@@ -6593,6 +6612,54 @@ function fetchEnrolRoster(cb){
     })
     .catch(function(){ if(cb) cb(window._enrolRoster); });
 }
+
+/* ── Enrolled-person picker (searchable by name or ID) ───────────────────
+   Used on the approval screens so the coordinator picks a real enrolled
+   person — searchable by name (easier to remember) — and sees the name + ID
+   confirmed before authorising. Reuses the roster from ?action=enrolments. ── */
+function _epRoleZone(p){ var role=(_ENROL_ROLE_LABELS[p.role]||p.role||''); var z=p.zone||p.zone_id||''; return [role,z].filter(Boolean).join(' · '); }
+function epEnsureRoster(){
+  if(!(window._enrolRoster && window._enrolRoster.length)){
+    try{ getAllRecords('auth', function(recs){ var c=null; if(recs) recs.forEach(function(r){ if(r.id==='enrolments') c=r.enrolments; }); if(c&&c.length&&!(window._enrolRoster&&window._enrolRoster.length)) window._enrolRoster=c; }); }catch(_){}
+  }
+  try{ fetchEnrolRoster(function(){}); }catch(_){}   /* refresh when online */
+}
+function epInit(prefix){
+  var s=document.getElementById(prefix+'PersonSearch'); if(s) s.value='';
+  var hid=document.getElementById(prefix+'StewId'); if(hid) hid.value='';
+  var ch=document.getElementById(prefix+'PersonChosen'); if(ch){ ch.style.display='none'; ch.innerHTML=''; }
+  var l=document.getElementById(prefix+'PersonList'); if(l){ l.innerHTML=''; l.classList.remove('open'); }
+  epEnsureRoster();
+}
+function epFilter(prefix){
+  var inp=document.getElementById(prefix+'PersonSearch'); if(!inp) return;
+  var q=(inp.value||'').trim().toLowerCase();
+  var l=document.getElementById(prefix+'PersonList'); if(!l) return;
+  var roster=window._enrolRoster||[];
+  if(!roster.length){ epEnsureRoster(); l.innerHTML='<div class="ep-none">Loading enrolled people… go online once to fetch the roster, then try again.</div>'; l.classList.add('open'); return; }
+  var matches = q ? roster.filter(function(p){ return String(p.name||'').toLowerCase().indexOf(q)!==-1 || String(p.stewardId||'').toLowerCase().indexOf(q)!==-1; }) : roster.slice();
+  matches.sort(function(a,b){ return String(a.name||'').localeCompare(String(b.name||'')); });
+  window._epMatches = matches.slice(0,40);
+  if(!window._epMatches.length){ l.innerHTML='<div class="ep-none">No match — check the spelling, or the person may not be enrolled yet.</div>'; }
+  else {
+    l.innerHTML = window._epMatches.map(function(p,i){
+      var rz=_epRoleZone(p);
+      return '<div class="ep-item" onclick="epPick(\''+prefix+'\','+i+')"><div class="nm">'+_esc(p.name||'(no name)')+'</div><div class="mt">'+_esc(p.stewardId||'')+(rz?' · '+_esc(rz):'')+'</div></div>';
+    }).join('');
+  }
+  l.classList.add('open');
+}
+function epPick(prefix, i){
+  var p=(window._epMatches||[])[i]; if(!p) return;
+  var hid=document.getElementById(prefix+'StewId'); if(hid) hid.value=p.stewardId||'';
+  var s=document.getElementById(prefix+'PersonSearch'); if(s) s.value=p.name||p.stewardId||'';
+  var l=document.getElementById(prefix+'PersonList'); if(l){ l.classList.remove('open'); l.innerHTML=''; }
+  var ch=document.getElementById(prefix+'PersonChosen'); if(ch){ var rz=_epRoleZone(p); ch.style.display=''; ch.innerHTML='✓ Selected: <strong>'+_esc(p.name||'')+'</strong> <span style="font-family:monospace;color:#555;">'+_esc(p.stewardId||'')+'</span>'+(rz?' <span style="color:#888;">· '+_esc(rz)+'</span>':''); }
+}
+document.addEventListener('click', function(e){
+  if(e.target && e.target.closest && e.target.closest('.ep-wrap')) return;
+  var open=document.querySelectorAll('.ep-list.open'); for(var i=0;i<open.length;i++) open[i].classList.remove('open');
+});
 function _rosterHolder(id){ id=(id||'').trim().toUpperCase(); var r=window._enrolRoster||[]; for(var i=0;i<r.length;i++){ if(String(r[i].stewardId||'').trim().toUpperCase()===id) return r[i]; } return null; }
 function _rosterByName(nameKey, excludeId){ excludeId=(excludeId||'').trim().toUpperCase(); var r=window._enrolRoster||[]; for(var i=0;i<r.length;i++){ if(String(r[i].name||'').trim().toLowerCase()===nameKey && String(r[i].stewardId||'').trim().toUpperCase()!==excludeId) return r[i]; } return null; }
 /* Live feedback as the coordinator types the ID. */
@@ -12238,7 +12305,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v128'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v129'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -13332,6 +13399,7 @@ function clearGrantAuthForm() {
   ['gaStewId','gaCertDate','gaCertOrg','gaCertNum','gaAuthorisedBy','gaNewTopicPropose'].forEach(function(fid) {
     var el = document.getElementById(fid); if (el) el.value = '';
   });
+  try { epInit('ga'); } catch(_){}
   var container = document.getElementById('gaTopicsList');
   if (container) container.querySelectorAll('input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
   var photo = document.getElementById('gaCertPhoto');
@@ -19875,7 +19943,7 @@ function syncVcAuthorisations(profile){
 
 /* ── Coordinator: authorise an auditor for a commodity ── */
 var VC_COMMODITIES = ['vanilla','coffee','cocoa'];
-function showGrantVcAuth(){ window._vcgCommodity=''; showScreen('screen-grant-vc-auth'); }
+function showGrantVcAuth(){ window._vcgCommodity=''; showScreen('screen-grant-vc-auth'); epInit('vcg'); }
 function vcgSetCommodity(c, btn){
   window._vcgCommodity=c;
   document.querySelectorAll('#vcgCommodityPills .weather-pill').forEach(function(b){ var on=b.getAttribute('data-c')===c; b.classList.toggle('active',on); b.style.background=on?'#6A1B9A':''; b.style.color=on?'#fff':''; });
@@ -19897,7 +19965,7 @@ function submitVcGrant(){
       .then(function(r){return r.json();}).then(function(d){
         btn.disabled=false; btn.textContent='Record Authorisation →';
         if(d.status==='ok'){ status.textContent='✓ '+sid+' authorised as '+commodity+' auditor.'; status.style.color='#1B5E20';
-          ['vcgStewId','vcgAuthorisedBy','vcgBasis'].forEach(function(i){var e=document.getElementById(i); if(e)e.value='';}); window._vcgCommodity=''; vcgSetCommodity('',null);
+          ['vcgAuthorisedBy','vcgBasis'].forEach(function(i){var e=document.getElementById(i); if(e)e.value='';}); try{ epInit('vcg'); }catch(_){} window._vcgCommodity=''; vcgSetCommodity('',null);
         } else { status.textContent='Sync: '+(d.message||'failed'); status.style.color='#E65100'; }
       }).catch(function(){ btn.disabled=false; btn.textContent='Record Authorisation →'; status.textContent='No network — try again when online.'; status.style.color='#E65100'; });
   } else { btn.disabled=false; btn.textContent='Record Authorisation →'; status.textContent='No endpoint configured.'; status.style.color='#E65100'; }

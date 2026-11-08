@@ -6512,6 +6512,17 @@ function updateDashHeader(profile) {
   }
 }
 
+/* Ask the backend whether the coordinator server key is correct. cb({valid,
+   configured}) on a reply, or cb(null) if the backend can't be reached. */
+function verifyCoordinatorKey(key, cb) {
+  if (!UPLOAD_ENDPOINT || !navigator.onLine) { cb(null); return; }
+  fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({ _action:'verify_coordinator', _secret:UPLOAD_SECRET, _coordinator_secret:key }) })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ cb(d); })
+    .catch(function(){ cb(null); });
+}
+
 /* ── Enrollment: Step 1 — Passcode ── */
 function enrollCheckPasscode() {
   var val = (document.getElementById('enrollPasscode').value || '').trim();
@@ -6523,41 +6534,43 @@ function enrollCheckPasscode() {
   btn.textContent = 'Checking…';
   document.getElementById('enrollPassStatus').textContent = '';
   sha256Hex(val).then(function(hash) {
-    if (hash === ENROLL_PASSCODE_HASH) {
-      /* Capture server key in memory — never persisted anywhere */
-      window._coordSecret = serverKey;
-      /* Clear the input field immediately — no reason to leave it on screen */
-      document.getElementById('enrollPasscode').value = '';
-      document.getElementById('enrollServerKey').value = '';
-      /* Show coordinator options: enroll, manage zones, manage topics, update profile */
-      btn.disabled = false;
-      btn.innerHTML = ''+icon('plus',13)+' Enroll New Person →';
-      btn.onclick = enrollGoToStep2;
-      document.getElementById('enrollManageZonesBtn').style.display = 'block';
-      document.getElementById('enrollManageTopicsBtn').style.display = 'block';
-      document.getElementById('enrollUpdateProfileBtn').style.display = 'block';
-      var _epb = document.getElementById('enrollEnrolmentsBtn'); if (_epb) _epb.style.display = 'block';
-      document.getElementById('enrollGrantAuthBtn').style.display = 'block';
-      var _vcb = document.getElementById('enrollGrantVcAuthBtn'); if (_vcb) _vcb.style.display = 'block';
-      document.getElementById('enrollApproveWaterBtn').style.display = 'block';
-      document.getElementById('enrollApproveFacBtn').style.display = 'block';
-      document.getElementById('enrollApproveMetBtn').style.display = 'block';
-      document.getElementById('enrollApproveTreeBtn').style.display = 'block';
-      document.getElementById('enrollDateReviewBtn').style.display = 'block';
-      document.getElementById('enrollIssuesBtn').style.display = 'block';
-      document.getElementById('enrollPassStatus').textContent = '✓ Coordinator verified. Choose an action.';
-      document.getElementById('enrollPassStatus').style.color = '#2E7D32';
-      /* Pre-load zones and topics ready for step 2, and the live roster so a
-         duplicate ID/name can be caught as the coordinator types. */
-      loadZonesForEnrollment();
-      loadTopicsForEnrollment();
-      fetchEnrolRoster();
-    } else {
+    if (hash !== ENROLL_PASSCODE_HASH) {
       document.getElementById('enrollPassStatus').textContent = '✗ Incorrect passcode. Contact your coordinator.';
       document.getElementById('enrollPassStatus').style.color = '#B71C1C';
       btn.disabled = false;
       btn.textContent = 'Verify →';
+      return;
     }
+    /* Passcode OK — now verify the SERVER KEY with the backend before unlocking,
+       so a wrong/blank key is caught here rather than later on a grant/approve. */
+    function _coordUnlock(note) {
+      window._coordSecret = serverKey;                  /* in memory only — never persisted */
+      document.getElementById('enrollPasscode').value = '';
+      document.getElementById('enrollServerKey').value = '';
+      btn.disabled = false;
+      btn.innerHTML = ''+icon('plus',13)+' Enroll New Person →';
+      btn.onclick = enrollGoToStep2;
+      ['enrollManageZonesBtn','enrollManageTopicsBtn','enrollUpdateProfileBtn','enrollEnrolmentsBtn','enrollGrantAuthBtn','enrollGrantVcAuthBtn','enrollApproveWaterBtn','enrollApproveFacBtn','enrollApproveMetBtn','enrollApproveTreeBtn','enrollDateReviewBtn','enrollIssuesBtn'].forEach(function(bid){ var el=document.getElementById(bid); if (el) el.style.display='block'; });
+      var _st=document.getElementById('enrollPassStatus'); _st.textContent=note; _st.style.color='#2E7D32';
+      loadZonesForEnrollment();
+      loadTopicsForEnrollment();
+      fetchEnrolRoster();
+    }
+    function _coordFail(msg) {
+      var _st=document.getElementById('enrollPassStatus'); _st.textContent=msg; _st.style.color='#B71C1C';
+      btn.disabled=false; btn.textContent='Verify →';
+    }
+    if (!UPLOAD_ENDPOINT || !navigator.onLine) {
+      _coordUnlock('✓ Passcode verified (offline — your server key is checked on your first coordinator action).');
+      return;
+    }
+    btn.textContent = 'Verifying key…';
+    verifyCoordinatorKey(serverKey, function(res) {
+      if (res && res.valid) { _coordUnlock('✓ Coordinator verified. Choose an action.'); }
+      else if (res && res.configured === false) { _coordFail('✗ No coordinator server key is set on the backend — run setCoordinatorSecret() once in Apps Script.'); }
+      else if (res && res.valid === false) { _coordFail('✗ Server key not recognised. Check it in Apps Script → Project Settings → COORDINATOR_SECRET.'); }
+      else { _coordUnlock('✓ Passcode verified (couldn’t reach the server to check the key — it is checked on your first action).'); }
+    });
   });
 }
 
@@ -12305,7 +12318,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v130'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v131'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

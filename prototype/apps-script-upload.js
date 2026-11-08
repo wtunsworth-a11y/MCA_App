@@ -1632,6 +1632,17 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    /* Verify the coordinator server key at unlock, so a wrong/blank key is
+     * caught at the unlock screen instead of failing later on a grant/approve.
+     * Returns whether a key is configured on the backend and whether the one
+     * supplied matches. Not a coordinator write action — only a check. */
+    if (body._action === 'verify_coordinator') {
+      var _vck = getCoordinatorSecret();
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', configured: !!_vck, valid: (!!_vck && body._coordinator_secret === _vck) }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
     var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood', 'update_indicative_price', 'grant_vc_authorisation'];
@@ -1937,7 +1948,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-08.4 — value-chain report: + theme x crop heat grid';
+var BACKEND_VERSION = '2026-11-08.5 — verify_coordinator endpoint (key check at unlock)';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {

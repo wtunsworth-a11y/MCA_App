@@ -1070,6 +1070,44 @@ function getVcAuditors(stewardId) {
   }
 }
 
+/* ─── Clan-steward module training (coordinator-granted module unlocks) ──────
+ * _module_training.json: { "<stewardId>": [ {module, authorised_by,
+ * authorised_at, status}, ... ] }. A trainable data module opens on a clan
+ * steward's phone only once it's listed here. Fetched via
+ * ?action=module_training&stewardId=... ── */
+function loadModuleTrainingFile() {
+  var folder = getDataFolder(); var files = folder.getFilesByName('_module_training.json');
+  if (files.hasNext()) { try { return JSON.parse(files.next().getBlob().getDataAsString()); } catch(e){ return {}; } }
+  return {};
+}
+function saveModuleTrainingFile(data) {
+  var folder = getDataFolder(); var files = folder.getFilesByName('_module_training.json'); var json = JSON.stringify(data, null, 2);
+  if (files.hasNext()) { files.next().setContent(json); } else { folder.createFile('_module_training.json', json, MimeType.PLAIN_TEXT); }
+}
+function grantModuleTraining(record) {
+  if (!record || !record.stewardId || !record.modules || !record.modules.length) {
+    return { status:'error', message:'Missing stewardId or modules' };
+  }
+  try {
+    var data = loadModuleTrainingFile(); var sid = String(record.stewardId).trim().toUpperCase();
+    if (!data[sid]) data[sid] = [];
+    record.modules.forEach(function(m){
+      var exists = data[sid].some(function(r){ return r.module === m && r.status !== 'revoked'; });
+      if (!exists) data[sid].push({ module:m, authorised_by:record.authorised_by||'', authorised_at:record.authorised_at||new Date().toISOString(), status:'active' });
+    });
+    saveModuleTrainingFile(data);
+    return { status:'ok', message:'Modules unlocked', stewardId:sid, count:record.modules.length };
+  } catch(err) { return { status:'error', message:err.toString() }; }
+}
+function getModuleTraining(stewardId) {
+  if (!stewardId) { return ContentService.createTextOutput(JSON.stringify({ status:'error', message:'Missing stewardId' })).setMimeType(ContentService.MimeType.JSON); }
+  try {
+    var data = loadModuleTrainingFile(); var recs = data[String(stewardId).trim().toUpperCase()] || [];
+    var modules = recs.filter(function(r){ return r.status !== 'revoked'; }).map(function(r){ return r.module; });
+    return ContentService.createTextOutput(JSON.stringify({ status:'ok', stewardId:stewardId, modules:modules })).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) { return ContentService.createTextOutput(JSON.stringify({ status:'error', message:err.toString() })).setMimeType(ContentService.MimeType.JSON); }
+}
+
 /* ─── Trainer Certification ─────────────────────────────────────────── */
 /*
  * Trainer certs are stored in a single JSON file _trainer_certs.json in the
@@ -1645,7 +1683,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood', 'update_indicative_price', 'grant_vc_authorisation'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood', 'update_indicative_price', 'grant_vc_authorisation', 'grant_module_training'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1681,6 +1719,13 @@ function doPost(e) {
       var vcRes = grantVcAuthorisation(body.record);
       return ContentService
         .createTextOutput(JSON.stringify(vcRes))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (body._action === 'grant_module_training') {
+      var mtRes = grantModuleTraining(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(mtRes))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -1948,7 +1993,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-08.5 — verify_coordinator endpoint (key check at unlock)';
+var BACKEND_VERSION = '2026-11-08.6 — clan-steward module training gating + weekly new-approvals section';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {
@@ -1990,6 +2035,11 @@ function doGet(e) {
   if (action === 'vc_auditors') {
     var vcSid = (e.parameter && e.parameter.stewardId) || '';
     return getVcAuditors(vcSid);
+  }
+
+  if (action === 'module_training') {
+    var mtSid = (e.parameter && e.parameter.stewardId) || '';
+    return getModuleTraining(mtSid);
   }
 
   if (action === 'vc_report') {
@@ -2843,6 +2893,28 @@ function _typeSummary(types) {
   return keys.map(function(k){ return _moduleLabel(k) + ': ' + types[k]; }).join(' · ');
 }
 
+/* Reads a data-folder JSON registry by name (returns {} if absent/bad). */
+function _readDataJson(name) {
+  try { var fs = getDataFolder().getFilesByName(name); if (fs.hasNext()) return JSON.parse(fs.next().getBlob().getDataAsString()); } catch(e){}
+  return {};
+}
+/* "New approvals this window" — trainer certs, value-chain auditors and
+ * clan-steward module unlocks granted since cutMs, resolved to names. */
+function _newApprovalsLines(cutMs) {
+  var roster = loadEnrolments() || {};
+  function nm(sid){ sid=String(sid); var r=roster[sid]||roster[sid.trim().toUpperCase()]; return (r&&r.name)?(r.name+' ('+sid+')'):sid; }
+  function recent(iso){ var t=Date.parse(iso||''); return !isNaN(t) && (!cutMs || t>=cutMs); }
+  function scan(obj, fmt){ var out=[]; Object.keys(obj).forEach(function(sid){ (obj[sid]||[]).forEach(function(r){ if(r.status!=='revoked' && recent(r.authorised_at)) out.push('  • '+nm(sid)+' — '+fmt(r)+' (by '+(r.authorised_by||'?')+', '+_pngDate(new Date(r.authorised_at),'d MMM')+')'); }); }); return out; }
+  var tlines = scan(_readDataJson('_trainer_certs.json'), function(r){ return 'Training: '+(r.topic_name||r.topic_id||''); });
+  var alines = scan(_readDataJson('_vc_auditors.json'),   function(r){ return (r.commodity||'')+' auditor'; });
+  var mlines = scan(_readDataJson('_module_training.json'),function(r){ return 'Module: '+(r.module||''); });
+  var out = ['New approvals this window:'];
+  out.push(' Training (' + tlines.length + '):');            out = out.concat(tlines.length ? tlines : ['  (none)']);
+  out.push(' Value-chain auditors (' + alines.length + '):'); out = out.concat(alines.length ? alines : ['  (none)']);
+  out.push(' Clan-steward modules (' + mlines.length + '):'); out = out.concat(mlines.length ? mlines : ['  (none)']);
+  return out;
+}
+
 function uploadActivityReport(period) {
   period = (typeof period === 'string') ? period : 'weekly';
   var now = Date.now(), cutMs, label;
@@ -2896,6 +2968,8 @@ function uploadActivityReport(period) {
       if (a.highlights && a.highlights.length) lines.push('    e.g. ' + a.highlights.join('  |  '));
     });
   }
+  lines.push('');
+  lines = lines.concat(_newApprovalsLines(cutMs));
   lines.push('');
   lines.push('Full per-upload ledger (no photos/video): ' + ssFile.getUrl());
 

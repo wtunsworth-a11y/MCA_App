@@ -1684,6 +1684,7 @@ select.msel {
           <button class="btn-outline" id="enrollEnrolmentsBtn" style="display:none;margin-top:8px;width:100%;border-color:#6A1B9A;color:#6A1B9A;" onclick="nav('screen-enrolments')"><span data-icon="people" data-size="14"></span> Enrolled People</button>
           <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()"><span data-icon="mortarboard" data-size="14"></span> Grant Training Authorisation</button>
           <button class="btn-outline" id="enrollGrantVcAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#6A1B9A;color:#6A1B9A;" onclick="showGrantVcAuth()"><span data-icon="clipboard" data-size="14"></span> Authorise Value-Chain Auditor</button>
+          <button class="btn-outline" id="enrollGrantModuleBtn" style="display:none;margin-top:8px;width:100%;border-color:#00695C;color:#00695C;" onclick="showGrantModuleTraining()"><span data-icon="unlock" data-size="14"></span> Unlock Clan-Steward Modules</button>
           <button class="btn-outline" id="enrollIssuesBtn" style="display:none;margin-top:8px;width:100%;border-color:#AD1457;color:#AD1457;" onclick="showScreen('screen-issue-reports')"><span data-icon="warning" data-size="14"></span> Issue Reports</button>
           <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')"><span data-icon="clipboard" data-size="14"></span> Manage Training Topics</button>
           <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-zone-config')"><span data-icon="gear" data-size="14"></span> Manage Zones</button>
@@ -2046,39 +2047,39 @@ select.msel {
             <span class="module-emoji" data-icon="tag" data-size="26"></span>
             <span class="module-name">Local Price Report</span>
           </div>
-          <div class="module-tile" data-fo="1" data-vc="1" onclick="nav('screen-freemap')">
+          <div class="module-tile" data-tmod="freemap" data-fo="1" data-vc="1" onclick="nav('screen-freemap')">
             <span class="module-emoji" data-icon="pin" data-size="26"></span>
             <span class="module-name">Field Mapping</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-sdm')">
+          <div class="module-tile" data-tmod="sdm" onclick="nav('screen-sdm')">
             <span class="module-emoji" data-icon="clipboard" data-size="26"></span>
             <span class="module-name">Service Delivery Monitoring</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-water-setup')">
+          <div class="module-tile" data-tmod="water" onclick="nav('screen-water-setup')">
             <span class="module-emoji" data-icon="river" data-size="26"></span>
             <span class="module-name">Water Quality</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-pheno-setup')">
+          <div class="module-tile" data-tmod="phenology" onclick="nav('screen-pheno-setup')">
             <span class="module-emoji" data-icon="flower" data-size="26"></span>
             <span class="module-name">Phenology</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-meteo-setup')">
+          <div class="module-tile" data-tmod="met" onclick="nav('screen-meteo-setup')">
             <span class="module-emoji" data-icon="cloudrain" data-size="26"></span>
             <span class="module-name">Weather Station</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-mafia-setup')">
+          <div class="module-tile" data-tmod="mafia" onclick="nav('screen-mafia-setup')">
             <span class="module-emoji" data-icon="barchart" data-size="26"></span>
             <span class="module-name">MaFIA Tool</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-qabb-setup')">
+          <div class="module-tile" data-tmod="qabb" onclick="nav('screen-qabb-setup')">
             <span class="module-emoji" data-icon="butterfly" data-size="26"></span>
             <span class="module-name">QABB Butterfly Survey</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-conserv-setup')">
+          <div class="module-tile" data-tmod="conservation" onclick="nav('screen-conserv-setup')">
             <span class="module-emoji" data-icon="sprout" data-size="26"></span>
             <span class="module-name">Conservation Activities</span>
           </div>
-          <div class="module-tile" onclick="nav('screen-alerts')">
+          <div class="module-tile" data-tmod="disturbance" onclick="nav('screen-alerts')">
             <span class="module-emoji" data-icon="warning" data-size="26"></span>
             <span class="module-name">Disturbance Alerts</span>
           </div>
@@ -5561,6 +5562,36 @@ select.msel {
       </div>
     </div>
 
+    <!-- ══ Coordinator: unlock clan-steward modules after training ══ -->
+    <div class="screen" id="screen-grant-module-training">
+      <div class="top-bar" style="background:#00695C;">
+        <button class="back-btn" onclick="showScreen('screen-enroll')">←</button>
+        <div><div class="bar-title">Unlock Clan-Steward Modules</div><div class="bar-sub">Coordinator only · after training</div></div>
+      </div>
+      <div class="scroll-content" style="padding:16px;">
+        <div style="background:#E0F2F1;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.78rem;color:#00695C;">
+          A clan steward's data modules stay locked until you mark them trained. Tick every module they have completed training for — those tiles then open on their phone. Field officers and other roles are not gated.
+        </div>
+        <div class="form-group ep-wrap">
+          <label class="form-label">Clan steward <span style="color:#B71C1C;">*</span></label>
+          <input type="text" id="mtPersonSearch" class="form-input" placeholder="Type a name or ID…" autocomplete="off" oninput="epFilter('mt')" onfocus="epFilter('mt')">
+          <div id="mtPersonList" class="ep-list"></div>
+          <div id="mtPersonChosen" class="ep-chosen" style="display:none;"></div>
+          <input type="hidden" id="mtStewId">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Modules trained <span style="color:#B71C1C;">*</span></label>
+          <div id="mtModuleList" style="background:#f9f9f9;border:1px solid #d0d0d0;border-radius:8px;padding:4px 10px;"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Authorised by <span style="color:#B71C1C;">*</span></label>
+          <input type="text" id="mtAuthorisedBy" class="form-input" placeholder="Your name / initials">
+        </div>
+        <button class="btn-primary" id="mtSubmitBtn" style="background:#00695C;width:100%;margin-top:6px;" onclick="submitModuleTraining()">Unlock Modules →</button>
+        <div id="mtStatus" style="margin-top:12px;font-size:0.82rem;text-align:center;"></div>
+      </div>
+    </div>
+
 
     <div class="screen" id="screen-training-setup">
       <div class="top-bar" style="background:#5C3D7A;">
@@ -6114,7 +6145,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-performance','screen-recent-activity',
   'screen-ack','screen-profile','screen-timesheet',
-  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-vc-audit','screen-grant-vc-auth','screen-distribution','screen-livelihood','screen-market-prices','screen-set-price','screen-price-report','screen-data-export'
+  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-vc-audit','screen-grant-vc-auth','screen-grant-module-training','screen-distribution','screen-livelihood','screen-market-prices','screen-set-price','screen-price-report','screen-data-export'
 ];
 
 let currentScreen = 'screen-splash';
@@ -6184,6 +6215,9 @@ function showScreen(id) {
 
 /* Navigate, pushing to history */
 function nav(id) {
+  /* Clan-steward module gate: a trainable module opens only once the coordinator
+     has marked this steward trained on it. Blocks before navigating. */
+  if (moduleLocked(id)) return;
   history.push(currentScreen);
   // Side effects on enter
   if (id === 'screen-mafia-setup' && !mafiaWorkflowActive) initMafia();
@@ -6550,7 +6584,7 @@ function enrollCheckPasscode() {
       btn.disabled = false;
       btn.innerHTML = ''+icon('plus',13)+' Enroll New Person →';
       btn.onclick = enrollGoToStep2;
-      ['enrollManageZonesBtn','enrollManageTopicsBtn','enrollUpdateProfileBtn','enrollEnrolmentsBtn','enrollGrantAuthBtn','enrollGrantVcAuthBtn','enrollApproveWaterBtn','enrollApproveFacBtn','enrollApproveMetBtn','enrollApproveTreeBtn','enrollDateReviewBtn','enrollIssuesBtn'].forEach(function(bid){ var el=document.getElementById(bid); if (el) el.style.display='block'; });
+      ['enrollManageZonesBtn','enrollManageTopicsBtn','enrollUpdateProfileBtn','enrollEnrolmentsBtn','enrollGrantAuthBtn','enrollGrantVcAuthBtn','enrollGrantModuleBtn','enrollApproveWaterBtn','enrollApproveFacBtn','enrollApproveMetBtn','enrollApproveTreeBtn','enrollDateReviewBtn','enrollIssuesBtn'].forEach(function(bid){ var el=document.getElementById(bid); if (el) el.style.display='block'; });
       var _st=document.getElementById('enrollPassStatus'); _st.textContent=note; _st.style.color='#2E7D32';
       loadZonesForEnrollment();
       loadTopicsForEnrollment();
@@ -6930,6 +6964,7 @@ function verifyFp() {
           try { postEnrolmentPing(profile); } catch(e){}
           syncAuthorisations(profile);
           try { syncVcAuthorisations(profile); } catch(e){}
+          try { syncModuleTraining(profile); } catch(e){}
           history = [];
           var role = profile.role || 'clan_steward';
           var dest = (role === 'zone_staff' || role === 'mcf_staff') ? 'screen-reports' : 'screen-dashboard';
@@ -6972,6 +7007,7 @@ function verifyFp() {
         try { postEnrolmentPing(profile); } catch(e){}  /* keep the backend roster current */
         syncAuthorisations(profile);  /* fetch any new coordinator-granted authorisations */
         try { syncVcAuthorisations(profile); } catch(e){}
+        try { syncModuleTraining(profile); } catch(e){}
         history = [];
         var role = profile.role || 'clan_steward';
         var dest = (role === 'zone_staff' || role === 'mcf_staff')
@@ -12318,7 +12354,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v131'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v132'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -12532,6 +12568,12 @@ function cacheStewardProfile() {
         /* Visiting consultants see only what they use: record training given and
            map the sites they visit (plus Export Data to get records off-phone). */
         else if (role === 'consultant') { if (t.getAttribute('data-vc') !== '1') t.style.display = 'none'; }
+        /* Clan stewards: a trainable module stays LOCKED until the coordinator
+           marks them trained on it (trained_modules). Other roles aren't gated. */
+        else if (role === 'clan_steward') {
+          var tm = t.getAttribute('data-tmod');
+          if (tm && (records[0].trained_modules || []).indexOf(tm) === -1) t.style.display = 'none';
+        }
       });
       /* Hide a group header when its role-filtered group has no visible tiles. */
       _applyGroupHeaders();
@@ -19937,6 +19979,48 @@ function submitVcAudit(){
 }
 
 /* ── Gating sync: pull auditor authorisations from the backend on login ── */
+/* ── Clan-steward module training gating ─────────────────────────────────
+   Each trainable data module opens for a clan steward only after the
+   coordinator has marked them trained on it (profile.trained_modules). Other
+   roles are never gated by this. Synced from the backend on login, like the
+   training/auditor authorisations. ── */
+var TRAINED_MODULES = [
+  {key:'mafia',        label:'MaFIA — Forest Integrity',  screen:'screen-mafia-setup'},
+  {key:'qabb',         label:'QABB — Butterfly Survey',   screen:'screen-qabb-setup'},
+  {key:'water',        label:'Water Sources & Quality',   screen:'screen-water-setup'},
+  {key:'met',          label:'Met Instruments',           screen:'screen-meteo-setup'},
+  {key:'phenology',    label:'Phenology',                 screen:'screen-pheno-setup'},
+  {key:'conservation', label:'Conservation',              screen:'screen-conserv-setup'},
+  {key:'disturbance',  label:'Disturbance Verification',  screen:'screen-alerts'},
+  {key:'freemap',      label:'Field Mapping',             screen:'screen-freemap'},
+  {key:'sdm',          label:'Service Delivery',          screen:'screen-sdm'}
+];
+function _moduleForScreen(id){ for(var i=0;i<TRAINED_MODULES.length;i++){ if(TRAINED_MODULES[i].screen===id) return TRAINED_MODULES[i]; } return null; }
+/* True (and toasts) when a clan steward hasn't been trained for this screen's
+   module, so navigation to it should be blocked. All other roles pass. */
+function moduleLocked(screenId){
+  var prof=window._cachedProfile||{};
+  if((prof.role||'clan_steward')!=='clan_steward') return false;
+  var m=_moduleForScreen(screenId); if(!m) return false;
+  if((prof.trained_modules||[]).indexOf(m.key)!==-1) return false;
+  try{ toast(m.label+' opens once you have been trained on it — ask your coordinator.'); }catch(_){}
+  return true;
+}
+function syncModuleTraining(profile){
+  if(!UPLOAD_ENDPOINT||!navigator.onLine||!profile) return;
+  var sid=profile.stewardId||''; if(!sid) return;
+  fetch(UPLOAD_ENDPOINT+'?action=module_training&stewardId='+encodeURIComponent(sid))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.status!=='ok'||!d.modules) return;
+      var existing=profile.trained_modules||[]; var updated=existing.slice(); var changed=false;
+      d.modules.forEach(function(k){ if(updated.indexOf(k)===-1){ updated.push(k); changed=true; } });
+      if(!changed) return;
+      profile.trained_modules=updated;
+      updateRecord('auth',profile,function(){ window._cachedProfile=profile; try{ cacheStewardProfile(); }catch(_){} toast('New module(s) unlocked — see your dashboard.'); });
+    }).catch(function(){});
+}
+
 function syncVcAuthorisations(profile){
   if(!UPLOAD_ENDPOINT||!navigator.onLine||!profile) return;
   var sid=profile.stewardId||''; if(!sid) return;
@@ -19959,6 +20043,39 @@ function syncVcAuthorisations(profile){
 /* ── Coordinator: authorise an auditor for a commodity ── */
 var VC_COMMODITIES = ['vanilla','coffee','cocoa'];
 function showGrantVcAuth(){ window._vcgCommodity=''; showScreen('screen-grant-vc-auth'); epInit('vcg'); }
+
+/* ── Coordinator: unlock clan-steward modules after training ── */
+function showGrantModuleTraining(){
+  var box=document.getElementById('mtModuleList');
+  if(box) box.innerHTML=TRAINED_MODULES.map(function(m){
+    return '<label style="display:flex;align-items:center;gap:9px;padding:7px 2px;font-size:0.85rem;cursor:pointer;border-bottom:1px solid #eee;"><input type="checkbox" value="'+m.key+'" style="width:18px;height:18px;flex-shrink:0;"> '+_esc(m.label)+'</label>';
+  }).join('');
+  var st=document.getElementById('mtStatus'); if(st) st.textContent='';
+  var ab=document.getElementById('mtAuthorisedBy'); if(ab) ab.value='';
+  showScreen('screen-grant-module-training');
+  epInit('mt');
+}
+function submitModuleTraining(){
+  var sid=(document.getElementById('mtStewId').value||'').trim().toUpperCase();
+  var by=(document.getElementById('mtAuthorisedBy').value||'').trim();
+  var mods=[]; document.querySelectorAll('#mtModuleList input[type=checkbox]:checked').forEach(function(c){ mods.push(c.value); });
+  var status=document.getElementById('mtStatus'); var btn=document.getElementById('mtSubmitBtn');
+  if(!sid){ toast('Choose the clan steward.'); return; }
+  if(mods.length===0){ toast('Tick at least one module.'); return; }
+  if(!by){ toast('Enter your name (authorised by).'); return; }
+  btn.disabled=true; btn.textContent='Saving…';
+  var payload={ _action:'grant_module_training', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret,
+    record:{ stewardId:sid, modules:mods, authorised_by:by, authorised_at:new Date().toISOString(), status:'active' } };
+  if(UPLOAD_ENDPOINT){
+    fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+      .then(function(r){return r.json();}).then(function(d){
+        btn.disabled=false; btn.textContent='Unlock Modules →';
+        if(d.status==='ok'){ status.textContent='✓ '+mods.length+' module(s) unlocked for '+sid+'.'; status.style.color='#00695C';
+          epInit('mt'); document.querySelectorAll('#mtModuleList input[type=checkbox]').forEach(function(c){c.checked=false;}); document.getElementById('mtAuthorisedBy').value='';
+        } else { status.textContent='Sync: '+(d.message||'failed'); status.style.color='#E65100'; }
+      }).catch(function(){ btn.disabled=false; btn.textContent='Unlock Modules →'; status.textContent='No network — try again when online.'; status.style.color='#E65100'; });
+  } else { btn.disabled=false; btn.textContent='Unlock Modules →'; status.textContent='No endpoint configured.'; status.style.color='#E65100'; }
+}
 function vcgSetCommodity(c, btn){
   window._vcgCommodity=c;
   document.querySelectorAll('#vcgCommodityPills .weather-pill').forEach(function(b){ var on=b.getAttribute('data-c')===c; b.classList.toggle('active',on); b.style.background=on?'#6A1B9A':''; b.style.color=on?'#fff':''; });

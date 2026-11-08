@@ -5426,7 +5426,7 @@ select.msel {
         <button class="back-btn" onclick="goBack()">←</button>
         <div><div class="bar-title">Value Chains Audit</div><div class="bar-sub">Vanilla · one stage per visit</div></div>
       </div>
-      <div style="padding:16px;padding-bottom:90px;">
+      <div class="scroll-content" style="padding:16px;padding-bottom:90px;">
         <div style="background:#F3EEF8;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.76rem;color:#4A148C;">
           Score the one stage you are observing right now. The dataset builds up across visits and seasons and shows where training is most needed. Photos are optional — tag each as good or bad practice.
         </div>
@@ -5514,7 +5514,7 @@ select.msel {
         <button class="back-btn" onclick="showScreen('screen-enroll')">←</button>
         <div><div class="bar-title">Authorise Value-Chain Auditor</div><div class="bar-sub">Coordinator only · expert verification</div></div>
       </div>
-      <div style="padding:16px;">
+      <div class="scroll-content" style="padding:16px;">
         <div style="background:#F3EEF8;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.78rem;color:#4A148C;">
           Authorise a specific person (any role) to complete value-chain audits for a commodity. This is a separate, higher bar than training — only people who can reliably judge the crop in the field. It unlocks the Value Chains Audit tile on their phone.
         </div>
@@ -12238,7 +12238,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v126'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v127'; /* kept in step with the service-worker CACHE_NAME */
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY

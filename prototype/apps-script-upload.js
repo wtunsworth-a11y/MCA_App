@@ -1084,6 +1084,25 @@ function saveModuleTrainingFile(data) {
   var folder = getDataFolder(); var files = folder.getFilesByName('_module_training.json'); var json = JSON.stringify(data, null, 2);
   if (files.hasNext()) { files.next().setContent(json); } else { folder.createFile('_module_training.json', json, MimeType.PLAIN_TEXT); }
 }
+/* Zone-default module unlocks: _module_defaults.json = { "<zone_id>": ["water",
+ * "phenology", ...] }. A clan steward whose enrolment zone appears here
+ * auto-unlocks those modules at login, on top of any explicit per-steward
+ * grant — so a whole zone can be pre-approved before anyone registers, with no
+ * manual grant each. Read-only merge: it never writes to _module_training.json,
+ * so deleting/editing this file re-tightens the gate immediately. Only applies
+ * to role === 'clan_steward' (other roles are never module-gated). */
+function loadModuleDefaultsFile() {
+  var folder = getDataFolder(); var files = folder.getFilesByName('_module_defaults.json');
+  if (files.hasNext()) { try { return JSON.parse(files.next().getBlob().getDataAsString()); } catch(e){ return {}; } }
+  return {};
+}
+function _findEnrolmentRecord(stewardId) {
+  var map = loadEnrolments() || {};
+  if (map[stewardId]) return map[stewardId];
+  var norm = String(stewardId).trim().toUpperCase().replace(/\s+/g, '');
+  for (var k in map) { if (String(k).trim().toUpperCase().replace(/\s+/g, '') === norm) return map[k]; }
+  return null;
+}
 function grantModuleTraining(record) {
   if (!record || !record.stewardId || !record.modules || !record.modules.length) {
     return { status:'error', message:'Missing stewardId or modules' };
@@ -1103,7 +1122,17 @@ function getModuleTraining(stewardId) {
   if (!stewardId) { return ContentService.createTextOutput(JSON.stringify({ status:'error', message:'Missing stewardId' })).setMimeType(ContentService.MimeType.JSON); }
   try {
     var data = loadModuleTrainingFile(); var recs = data[String(stewardId).trim().toUpperCase()] || [];
-    var modules = recs.filter(function(r){ return r.status !== 'revoked'; }).map(function(r){ return r.module; });
+    var modSet = {};
+    recs.filter(function(r){ return r.status !== 'revoked'; }).forEach(function(r){ modSet[r.module] = true; });
+    /* Merge in any zone-default unlocks for a clan steward (pre-approved zone) */
+    try {
+      var enr = _findEnrolmentRecord(stewardId);
+      if (enr && String(enr.role) === 'clan_steward') {
+        var zdef = loadModuleDefaultsFile()[enr.zone_id || ''];
+        if (zdef && zdef.length) { zdef.forEach(function(m){ if (m) modSet[m] = true; }); }
+      }
+    } catch(e) { /* defaults are best-effort; never block explicit grants */ }
+    var modules = Object.keys(modSet);
     return ContentService.createTextOutput(JSON.stringify({ status:'ok', stewardId:stewardId, modules:modules })).setMimeType(ContentService.MimeType.JSON);
   } catch(err) { return ContentService.createTextOutput(JSON.stringify({ status:'error', message:err.toString() })).setMimeType(ContentService.MimeType.JSON); }
 }
@@ -1993,7 +2022,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-08.6 — clan-steward module training gating + weekly new-approvals section';
+var BACKEND_VERSION = '2026-11-08.7 — zone-default module unlocks (pre-approve a zone for clan-steward modules)';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {

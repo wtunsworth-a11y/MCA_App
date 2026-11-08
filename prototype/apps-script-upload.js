@@ -1935,6 +1935,17 @@ function doPost(e) {
     }
 
     /* Normal steward data upload */
+    /* Guard: a body that still carries an _action here is an unrecognized or
+     * misrouted action (e.g. a coordinator action from an older client, or one
+     * that predates its handler). Do NOT store it as a record — that path
+     * previously dead-lettered coordinator POSTs, secret and all, into
+     * Unzoned/UNKNOWN. Reject unless the body actually carries steward data. */
+    if (body._action && !(body.steward && body.steward.stewardId)) {
+      Logger.log('Rejected unrecognized action "' + body._action + '"');
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'error', message: 'Unknown action: ' + body._action }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     var folder = getDataFolder();
 
     /* Determine zone folder name */
@@ -1948,6 +1959,12 @@ function doPost(e) {
     var stewardName = (body.steward && body.steward.name)      || 'Unknown';
     var subName     = sid + '_' + stewardName.replace(/\s+/g,'_');
     var subFolder   = getOrCreateFolder(subName, zoneFolder);
+
+    /* Never persist auth fields to disk (defense in depth): strip the upload
+     * secret and any coordinator key from the body before it is written, so no
+     * record file on Drive ever contains a credential. */
+    delete body._secret;
+    delete body._coordinator_secret;
 
     /* Minify on disk — the app sends many small per-record files now, so there
      * is no need to pretty-print each one. */
@@ -2022,7 +2039,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-08.7 — zone-default module unlocks (pre-approve a zone for clan-steward modules)';
+var BACKEND_VERSION = '2026-11-08.8 — never persist credentials to records; reject misrouted actions (was dead-lettering coordinator POSTs to Unzoned/UNKNOWN)';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {

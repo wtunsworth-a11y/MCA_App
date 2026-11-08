@@ -3898,6 +3898,12 @@ select.msel {
           <!-- Oversight tools — shown only for Project/MCF & Zone staff -->
           <div id="profileOversightTools" style="display:none;">
             <button class="btn-outline" style="width:100%;margin:6px 0 4px;border-color:#1565C0;color:#1565C0;" onclick="openReports()"><span data-icon="barchart" data-size="14"></span> MCF Summary / Reports</button>
+          </div>
+          <!-- Coordinator Tools — shown for oversight roles; for any other role it
+               stays hidden until a deliberate gesture (tap the app-version line 5×)
+               reveals it, so a coordinator can reach it on ANY phone (e.g. to
+               re-role a steward). Still gated by the passcode + server key inside. -->
+          <div id="profileCoordWrap" style="display:none;">
             <button class="btn-outline" style="width:100%;margin:6px 0 4px;border-color:#5C3D7A;color:#5C3D7A;" onclick="nav('screen-enroll')"><span data-icon="gear" data-size="14"></span> Coordinator Tools (enrol, approve, zones)</button>
           </div>
           <!-- Trainer certifications — shown only when certs exist for this steward -->
@@ -3910,7 +3916,7 @@ select.msel {
             <img src="logos/Logo_EU_v1.png" alt="Funded by the European Union">
             <div class="eu-logo-caption">This application is supported by the European Union through the Managalas Conservation Foundation project.</div>
           </div>
-          <div class="version">v1.0.0-prototype &nbsp;|&nbsp; MCApp</div>
+          <div class="version" id="appVersionLine" style="cursor:default;" onclick="coordGestureTap()">v1.0.0-prototype &nbsp;|&nbsp; MCApp</div>
           <div class="version" id="appBuildLine" style="margin-top:-8px;"></div>
           <button class="btn-outline" id="checkUpdateBtn" style="width:100%;margin-bottom:8px;border-color:#1B5E20;color:#1B5E20;" onclick="checkForAppUpdate()"><span data-icon="upload" data-size="14"></span> Check for updates</button>
           <button class="btn-outline-red" onclick="toast('Logging out…');setTimeout(()=>{showScreen('screen-fingerprint')},950)">Logout</button>
@@ -12354,7 +12360,25 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v132'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v133'; /* kept in step with the service-worker CACHE_NAME */
+
+/* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
+   a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a
+   coordinator reach it even on a clan-steward device (e.g. to re-role someone).
+   Still gated by the passcode + server key inside. Kept hidden so stewards
+   don't normally see it; the reveal resets each time the Profile is opened. */
+var _coordTapCount = 0, _coordTapTimer = null;
+function coordGestureTap() {
+  _coordTapCount++;
+  if (_coordTapTimer) clearTimeout(_coordTapTimer);
+  _coordTapTimer = setTimeout(function(){ _coordTapCount = 0; }, 2500);
+  if (_coordTapCount >= 5) {
+    _coordTapCount = 0; if (_coordTapTimer) clearTimeout(_coordTapTimer);
+    var w = document.getElementById('profileCoordWrap');
+    if (w) { w.style.display = 'block'; try { hydrateIcons(w); } catch(e){} }
+    try { toast('Coordinator access unlocked — tap Coordinator Tools'); } catch(e){}
+  }
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    CLOCK TRUST / DATE SANITY
@@ -13680,6 +13704,12 @@ function loadProfileScreen() {
       /* Oversight tools (MCF Summary + Coordinator) — only for oversight roles */
       var ovTools = document.getElementById('profileOversightTools');
       if (ovTools) { ovTools.style.display = isOversight() ? 'block' : 'none'; hydrateIcons(ovTools); }
+      /* Coordinator Tools: visible for oversight roles; for everyone else it
+         stays hidden until the version-line gesture reveals it. Reset the tap
+         counter and re-hide on every profile render so it is never left exposed. */
+      _coordTapCount = 0;
+      var coordWrap = document.getElementById('profileCoordWrap');
+      if (coordWrap) { coordWrap.style.display = isOversight() ? 'block' : 'none'; hydrateIcons(coordWrap); }
 
       /* Trainer certifications section */
       getAllRecords('trainerCerts', function(certs) {

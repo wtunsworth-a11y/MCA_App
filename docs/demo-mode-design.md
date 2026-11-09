@@ -4,8 +4,10 @@
 
 **How to open the Demo:** take the normal app URL and either append `?demo=1`
 or use the `demo.html` launcher next to it (e.g. `…/prototype/demo.html`). It
-opens straight to a demo dashboard — no enrolment, no fingerprint — with a
-**DEMO** badge top-right. Nothing it does is ever uploaded.
+opens on the **identity-verification screen** with a short explainer of *why*
+real stewards verify — then a tap continues (no real fingerprint/face needed)
+to the demo dashboard. A **DEMO** badge sits top-right. Nothing it does is ever
+uploaded.
 
 A parallel **Demo** version of MCApp for showing the project to off-site
 supporters and donors. Same look and feel as the real app, but with access
@@ -83,14 +85,20 @@ uploads) — not in source control.
 - **MaFIA transect interstitial** — "Generating a random transect within your
   clan land" with a circling icon, showing a 100 m transect with 20 m
   sub-transects for ~3 s, then the data-entry screen.
+- **Verification explainer** — the login screen is shown on open with a note on
+  *why* stewards verify (fingerprint/face → the trained steward is the one on
+  site → training integrity + data quality); a tap continues, nothing enforced.
 
 ## What's switched off in Demo
 
-- **Location (GPS) gating** on data-entry screens.
-- **Fingerprint / WebAuthn gating** for access.
+- **Location (GPS) gating** on data-entry screens (a canned Managalas fix is
+  returned, no permission prompt).
+- **Fingerprint / WebAuthn gating** for access — **shown, not enforced**: the
+  verification screen appears with an explainer of why we verify (training
+  integrity + data quality), and a tap continues instead of a real check.
 
 Both are wrapped so the **real app's gating is untouched** — the demo only
-*skips* them, it does not remove the code.
+*skips* (or illustrates) them, it does not remove the code.
 
 ## Privacy & safety
 

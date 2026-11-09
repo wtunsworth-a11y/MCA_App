@@ -1994,6 +1994,10 @@ select.msel {
         <div class="fp-instruction" id="fpInstruction">Touch to log in</div>
         <div class="fp-status" id="fpStatus"></div>
         <div class="fp-user" id="fpUser"></div>
+        <div id="demoVerifyNote" style="display:none;margin:18px 14px 0;background:#FFF8E1;border:1px solid #FFE082;border-radius:12px;padding:12px 14px;text-align:left;">
+          <div style="font-weight:800;color:#8D6E00;font-size:0.82rem;margin-bottom:4px;">Why we verify identity</div>
+          <div style="font-size:0.78rem;color:#5D4037;line-height:1.45;">In the real app, every steward signs in with a <strong>fingerprint or face photo</strong> before recording any data. This confirms the <strong>trained</strong> steward is the one on site — protecting training integrity and data quality. <em>In this demo it is shown but not required — tap above to continue.</em></div>
+        </div>
       </div>
       <div class="fp-footer">
         <div class="partner-logo-bar" style="border-top:1px solid #f0f0f0;gap:8px 12px;">
@@ -6479,7 +6483,7 @@ window.addEventListener('load', () => {
   try { checkBrowserForInstall(); } catch(e) {}
 
   setTimeout(() => {
-    if (DEMO) { try { demoBootstrap(); } catch(e){ showScreen('screen-enroll'); } return; }
+    if (DEMO) { try { demoStartLogin(); } catch(e){ try { demoBootstrap(); } catch(_){ showScreen('screen-enroll'); } } return; }
     getAllRecords('auth', function(records) {
       if (records && records.length > 0) {
         showScreen('screen-fingerprint');
@@ -6935,6 +6939,7 @@ function enrollFinish() {
 /* Relabel the login prompt for selfie-verified phones (no fingerprint), so the
    steward knows to take a photo rather than touch a sensor. */
 function setupLoginScreen() {
+  if (typeof DEMO !== 'undefined' && DEMO) return; /* demo controls this screen */
   var instr = document.getElementById('fpInstruction');
   getAllRecords('auth', function(records) {
     var profile = (records && records.length > 0) ? records[0] : null;
@@ -6944,6 +6949,8 @@ function setupLoginScreen() {
 }
 var fpBusy = false;
 function verifyFp() {
+  /* Demo: no real verification — the tap just proceeds into the dashboard. */
+  if (typeof DEMO !== 'undefined' && DEMO) { try { demoBootstrap(); } catch(e){} return; }
   if (fpBusy) return;
   fpBusy = true;
   var ring   = document.getElementById('fpRing');
@@ -12410,6 +12417,17 @@ function demoShowBadge(){
   document.body.appendChild(b);
 }
 
+/* Demo: open on the real verification screen with an explainer (so viewers see
+   where and why stewards verify), then tap through — no real fingerprint/selfie. */
+function demoStartLogin(){
+  showScreen('screen-fingerprint');
+  try { demoShowBadge(); } catch(e){}
+  try { var instr = document.getElementById('fpInstruction'); if (instr) instr.textContent = 'Tap to continue (demo)'; } catch(e){}
+  try { var note = document.getElementById('demoVerifyNote'); if (note) note.style.display = 'block'; } catch(e){}
+  try { var u = document.getElementById('fpUser'); if (u) u.textContent = ''; } catch(e){}
+  try { var s = document.getElementById('fpStatus'); if (s) s.textContent = ''; } catch(e){}
+}
+
 /* ══════════════════════════════════════
    PWA: Service Worker Registration
 ══════════════════════════════════════ */
@@ -12504,7 +12522,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v135'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v136'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a

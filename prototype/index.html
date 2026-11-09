@@ -9379,7 +9379,8 @@ function alertAccess(){
     role:role,
     seesAll: isOversight() || fieldView,   /* interim until zone/clan boundaries exist */
     canVerify: !fieldView,                 /* field officers do not verify alerts */
-    scope: (role==='mcf_staff'||role==='project_staff') ? 'All MCA'
+    scope: (typeof DEMO!=='undefined' && DEMO) ? 'All MCA'
+         : (role==='mcf_staff'||role==='project_staff') ? 'All MCA'
          : role==='zone_staff' ? 'All zones'
          : fieldView ? 'Your zone'
          : (myClan()||'your clan')
@@ -10367,6 +10368,9 @@ function myClan(){ return (window._cachedProfile && window._cachedProfile.clan) 
    session) see every clan's items so they can supervise and test, while clan
    stewards stay restricted to their own clan. */
 function isOversight(){
+  /* Demo: treat the demo steward's clan as the whole MCA, so the map, alerts
+     and every clan-scoped view show all clans' data (read-only). */
+  if (typeof DEMO !== 'undefined' && DEMO) return true;
   var role = (window._cachedProfile && window._cachedProfile.role) || '';
   return role === 'mcf_staff' || role === 'project_staff' || role === 'zone_staff' || !!window._coordSecret;
 }
@@ -12500,7 +12504,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v134'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v135'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a
@@ -13843,7 +13847,10 @@ function loadProfileScreen() {
 
       /* Oversight tools (MCF Summary + Coordinator) — only for oversight roles */
       var ovTools = document.getElementById('profileOversightTools');
-      if (ovTools) { ovTools.style.display = isOversight() ? 'block' : 'none'; hydrateIcons(ovTools); }
+      /* In demo, isOversight() is forced true for data scope — but keep the
+         profile looking like a steward's (don't surface Reports/Coordinator). */
+      var _showOv = (typeof DEMO !== 'undefined' && DEMO) ? false : isOversight();
+      if (ovTools) { ovTools.style.display = _showOv ? 'block' : 'none'; hydrateIcons(ovTools); }
       /* Coordinator Tools: visible for oversight roles; for everyone else it
          stays hidden until the version-line gesture reveals it. Reset the tap
          counter and re-hide on every profile render so it is never left exposed. */

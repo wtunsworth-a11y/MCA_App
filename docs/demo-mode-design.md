@@ -63,6 +63,14 @@ uploads) — not in source control.
    Layers that aren't populated yet show an empty/"coming soon" state rather
    than an error.
 
+   **Whole-MCA scope.** In demo the steward's clan is treated as the **whole
+   MCA** (`isOversight()` is forced true for data scope only), so the **map**
+   and **disturbance alerts** show recent **fires and forest clearance across
+   the entire MCA** — not a single clan. The MCA boundary draws from the
+   vendored GeoJSON; fire (NASA FIRMS) and clearance (GFW/RADD) detections load
+   read-only via `?action=disturbances` (GET). The profile still looks like a
+   steward's (the oversight Reports/Coordinator buttons stay hidden in demo).
+
 3. **Storage: same-origin, namespaced.** Demo uses its own IndexedDB database
    and cache names (`MCA_DemoData`, `mcapp-demo-*`) so real and demo data never
    co-mingle on a phone that has both. (Hard origin isolation — a separate

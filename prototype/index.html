@@ -6221,6 +6221,12 @@ function showScreen(id) {
 
 /* Navigate, pushing to history */
 function nav(id) {
+  /* Demo: show the MaFIA "generating a random transect" interstitial once,
+     then proceed into the real screen. */
+  if (typeof DEMO !== 'undefined' && DEMO && id === 'screen-mafia-setup' && !window._demoSkipMafiaIntro) {
+    demoMafiaInterstitial(function(){ window._demoSkipMafiaIntro = true; nav(id); window._demoSkipMafiaIntro = false; });
+    return;
+  }
   /* Clan-steward module gate: a trainable module opens only once the coordinator
      has marked this steward trained on it. Blocks before navigating. */
   if (moduleLocked(id)) return;
@@ -6473,6 +6479,7 @@ window.addEventListener('load', () => {
   try { checkBrowserForInstall(); } catch(e) {}
 
   setTimeout(() => {
+    if (DEMO) { try { demoBootstrap(); } catch(e){ showScreen('screen-enroll'); } return; }
     getAllRecords('auth', function(records) {
       if (records && records.length > 0) {
         showScreen('screen-fingerprint');
@@ -10674,6 +10681,8 @@ function captureGPS(callback, opts) {
      Degrades gracefully: if high-accuracy GNSS can't fix (indoors, under
      canopy, timed out), it retries with a coarser network/last-known fix
      rather than returning nothing. gps.source is 'gps' or 'coarse'. */
+  /* Demo: return a canned Managalas fix without prompting for location. */
+  if (typeof DEMO !== 'undefined' && DEMO) { callback({ lat:'-9.20150', lng:'148.42100', accuracy:12, source:'demo' }, null); return; }
   opts = opts || {};
   if (!navigator.geolocation) {
     callback(null, 'Location not supported on this device');
@@ -12267,9 +12276,140 @@ function checkForAppUpdate(){
 }
 
 /* ══════════════════════════════════════
+   DEMO MODE — supporters / donors build
+   Activated by URL (?demo=1, or a /demo path/file). Same codebase as the real
+   app; every demo-only behaviour is guarded by DEMO so the real app is
+   unchanged. In demo: no service worker, separate (namespaced) storage, access
+   gating off, and NOTHING is ever uploaded — writes are swallowed locally and a
+   dummy "upload" screen makes clear no data left the phone. Read-only map
+   layers still load from the real backend (GET only).
+══════════════════════════════════════ */
+var DEMO = (function(){
+  try {
+    return /[?&]demo=1(&|$)/.test(location.search) ||
+           /(^|\/)demo(\/|\.html)?($|[?#])/.test(location.pathname);
+  } catch(e){ return false; }
+})();
+
+if (DEMO) {
+  /* Never let anything leave the phone: swallow every POST to the backend,
+     returning a fake success so the app's save paths complete. GETs (the
+     read-only map registries) pass through untouched. A real record save (body
+     carries a steward block / chunk) also triggers the dummy upload screen. */
+  (function(){
+    var _realFetch = window.fetch ? window.fetch.bind(window) : null;
+    if (!_realFetch) return;
+    window.fetch = function(input, init){
+      try {
+        var url = (typeof input === 'string') ? input : (input && input.url) || '';
+        var method = ((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+        if (method === 'POST' && /script\.google\.com/.test(url)) {
+          var b = (init && typeof init.body === 'string') ? init.body : '';
+          if (/"steward"\s*:|"chunk_uid"\s*:/.test(b)) { try { demoUploadOverlay(); } catch(e){} }
+          return Promise.resolve(new Response(
+            JSON.stringify({ status:'ok', demo:true, message:'Demo — not uploaded' }),
+            { status:200, headers:{ 'Content-Type':'application/json' } }
+          ));
+        }
+      } catch(e){}
+      return _realFetch(input, init);
+    };
+  })();
+}
+
+/* Dummy "upload" overlay — spinner, then a clear note that nothing was sent.
+   Debounced so a burst of per-record saves shows a single overlay. */
+var _demoUploadBusy = false;
+function demoUploadOverlay(){
+  if (_demoUploadBusy) return; _demoUploadBusy = true;
+  if (!document.getElementById('demoSpinKeyframes')) {
+    var st = document.createElement('style'); st.id = 'demoSpinKeyframes';
+    st.textContent = '@keyframes demospin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(st);
+  }
+  var o = document.createElement('div');
+  o.id = 'demoUploadOverlay';
+  o.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;';
+  o.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px 22px;width:min(320px,86vw);text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.3);">'
+    + '<div id="demoUpSpin" style="width:46px;height:46px;margin:4px auto 14px;border:4px solid #E0E0E0;border-top-color:#2E7D32;border-radius:50%;animation:demospin 0.9s linear infinite;"></div>'
+    + '<div id="demoUpMsg" style="font-size:0.95rem;font-weight:700;color:#1B5E20;">Uploading…</div>'
+    + '<div id="demoUpSub" style="font-size:0.78rem;color:#555;margin-top:6px;">Sending to the project server</div>'
+    + '</div>';
+  document.body.appendChild(o);
+  setTimeout(function(){
+    var sp = document.getElementById('demoUpSpin'), msg = document.getElementById('demoUpMsg'), sub = document.getElementById('demoUpSub');
+    if (sp){ sp.style.animation = 'none'; sp.style.border = 'none'; sp.innerHTML = '<div style="font-size:40px;line-height:46px;color:#2E7D32;">&#10003;</div>'; }
+    if (msg){ msg.textContent = 'Illustrative only'; msg.style.color = '#B26A00'; }
+    if (sub){ sub.innerHTML = '<strong>No data left this phone.</strong><br>This is a demonstration — nothing was uploaded.'; }
+  }, 1600);
+  setTimeout(function(){ var el = document.getElementById('demoUploadOverlay'); if (el) el.remove(); _demoUploadBusy = false; }, 4200);
+}
+
+/* MaFIA demo interstitial — "generating a random transect…" with a 100 m /
+   20 m transect diagram, then proceed to the real screen. */
+function demoMafiaInterstitial(done){
+  if (!document.getElementById('demoSpinKeyframes')) {
+    var st = document.createElement('style'); st.id = 'demoSpinKeyframes';
+    st.textContent = '@keyframes demospin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(st);
+  }
+  var o = document.createElement('div');
+  o.id = 'demoMafiaIntro';
+  o.style.cssText = 'position:fixed;inset:0;z-index:100000;background:#0B2E13;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;';
+  o.innerHTML = ''
+    + '<div style="width:46px;height:46px;margin-bottom:16px;border:4px solid rgba(255,255,255,0.25);border-top-color:#8BC34A;border-radius:50%;animation:demospin 0.9s linear infinite;"></div>'
+    + '<div style="font-size:1rem;font-weight:700;margin-bottom:4px;">Generating a random transect</div>'
+    + '<div style="font-size:0.82rem;opacity:0.85;margin-bottom:20px;">within your clan land…</div>'
+    + '<svg width="300" height="90" viewBox="0 0 300 90" style="max-width:82vw;">'
+      + '<line x1="12" y1="55" x2="288" y2="55" stroke="#8BC34A" stroke-width="3"/>'
+      + '<line x1="12" y1="46" x2="12" y2="64" stroke="#8BC34A" stroke-width="3"/>'
+      + '<line x1="288" y1="46" x2="288" y2="64" stroke="#8BC34A" stroke-width="3"/>'
+      + '<line x1="67.2" y1="48" x2="67.2" y2="62" stroke="#C5E1A5" stroke-width="2"/>'
+      + '<line x1="122.4" y1="48" x2="122.4" y2="62" stroke="#C5E1A5" stroke-width="2"/>'
+      + '<line x1="177.6" y1="48" x2="177.6" y2="62" stroke="#C5E1A5" stroke-width="2"/>'
+      + '<line x1="232.8" y1="48" x2="232.8" y2="62" stroke="#C5E1A5" stroke-width="2"/>'
+      + '<text x="150" y="28" fill="#ffffff" font-size="12" text-anchor="middle" font-family="sans-serif">100 m transect</text>'
+      + '<text x="150" y="82" fill="#C5E1A5" font-size="10" text-anchor="middle" font-family="sans-serif">five 20 m sub-transects</text>'
+    + '</svg>';
+  document.body.appendChild(o);
+  setTimeout(function(){ var el = document.getElementById('demoMafiaIntro'); if (el) el.remove(); if (done) done(); }, 3000);
+}
+
+/* Build a demo steward profile (all modules unlocked) and open the dashboard,
+   skipping enrolment + fingerprint login entirely. */
+function demoBootstrap(){
+  var mods;
+  try { mods = TRAINED_MODULES.map(function(m){ return m.key; }); }
+  catch(e){ mods = ['mafia','qabb','water','phenology','met','conservation','disturbance','freemap','sdm']; }
+  var p = {
+    id: 1, stewardId:'DEMO-CS', name:'Demo Steward', role:'clan_steward',
+    zone:'Z09 — Zone 9', zone_id:'Z09', clan:'Tabuwai', village:'Biriri',
+    enrolled: new Date().toISOString(), verify_method:'selfie',
+    trained_modules: mods, authorised_topics: [], authorised_commodities: ['vanilla','coffee','cocoa']
+  };
+  window._cachedProfile = p;
+  function go(){
+    try { updateDashHeader(p); } catch(e){}
+    showScreen('screen-dashboard');
+    try { demoShowBadge(); } catch(e){}
+  }
+  try { updateRecord('auth', p, function(){ go(); }); } catch(e){ go(); }
+}
+
+/* Persistent DEMO badge so it is always obvious this is not the real app. */
+function demoShowBadge(){
+  if (document.getElementById('demoBadge')) return;
+  var b = document.createElement('div');
+  b.id = 'demoBadge';
+  b.style.cssText = 'position:fixed;top:8px;right:8px;z-index:99999;background:#B26A00;color:#fff;font-size:0.66rem;font-weight:800;letter-spacing:0.5px;padding:3px 8px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.3);pointer-events:none;';
+  b.textContent = 'DEMO';
+  document.body.appendChild(b);
+}
+
+/* ══════════════════════════════════════
    PWA: Service Worker Registration
 ══════════════════════════════════════ */
-if ('serviceWorker' in navigator) {
+if (!DEMO && 'serviceWorker' in navigator) {
   /* Auto-apply updates: when a new service worker takes control (because a
      deploy bumped the cache), reload once so the latest build shows without
      the usual "open twice" dance. Only when a controller already existed at
@@ -12317,7 +12457,7 @@ if ('serviceWorker' in navigator) {
    LOCAL DATABASE: IndexedDB wrapper
 ══════════════════════════════════════ */
 var mcaDB = null;
-var DB_NAME = 'MCA_StewardData';
+var DB_NAME = DEMO ? 'MCA_DemoData' : 'MCA_StewardData';
 var DB_VERSION = 18;
 var STORES = ['mafia','qabb','water','phenology','trees','meteo','conservation','followups','schedule','pheno_plots','training','auth','drafts','trainerCerts','water_sources','facilities','facility_visits','met_stations','met_readings','calendar','freemap','disturbances','issues','distributions','livelihood','gate_selfies','price_reports','vc_audit'];
 
@@ -12360,7 +12500,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v133'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v134'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a
@@ -20029,6 +20169,7 @@ function _moduleForScreen(id){ for(var i=0;i<TRAINED_MODULES.length;i++){ if(TRA
 /* True (and toasts) when a clan steward hasn't been trained for this screen's
    module, so navigation to it should be blocked. All other roles pass. */
 function moduleLocked(screenId){
+  if(typeof DEMO!=='undefined' && DEMO) return false;
   var prof=window._cachedProfile||{};
   if((prof.role||'clan_steward')!=='clan_steward') return false;
   var m=_moduleForScreen(screenId); if(!m) return false;

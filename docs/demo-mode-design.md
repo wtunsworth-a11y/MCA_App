@@ -1,6 +1,11 @@
 # MCApp — Demo mode (for supporters & donors)
 
-**Status: design, not yet built · November 2026**
+**Status: BUILT (app v134) · November 2026**
+
+**How to open the Demo:** take the normal app URL and either append `?demo=1`
+or use the `demo.html` launcher next to it (e.g. `…/prototype/demo.html`). It
+opens straight to a demo dashboard — no enrolment, no fingerprint — with a
+**DEMO** badge top-right. Nothing it does is ever uploaded.
 
 A parallel **Demo** version of MCApp for showing the project to off-site
 supporters and donors. Same look and feel as the real app, but with access

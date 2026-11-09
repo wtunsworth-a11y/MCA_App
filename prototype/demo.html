@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MCApp — Demo</title>
+<meta name="robots" content="noindex">
+<!--
+  Demo launcher. The Demo is the SAME app (index.html) running with the DEMO
+  flag on, so visuals and features always match the real app with no separate
+  copy to maintain. This thin page just forwards to index.html?demo=1 so the
+  shareable link is clean (…/demo.html). In demo mode the app never uploads,
+  uses its own namespaced storage, and skips location/fingerprint gating.
+-->
+<script>
+  try { location.replace('index.html?demo=1' + (location.hash || '')); }
+  catch (e) { location.href = 'index.html?demo=1'; }
+</script>
+</head>
+<body style="margin:0;background:#0B2E13;color:#fff;font-family:system-ui,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;">
+  <p style="opacity:0.85;">Opening the MCApp demo… <a href="index.html?demo=1" style="color:#8BC34A;">continue</a></p>
+</body>
+</html>

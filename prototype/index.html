@@ -1662,6 +1662,11 @@ select.msel {
       </div>
       <div class="enroll-body" id="enrollBody">
 
+        <!-- Shown via JS when this phone's existing profile is incomplete/cleared -->
+        <div id="enrollIncompleteNote" style="display:none;background:#FFEBEE;border:1px solid #EF9A9A;border-radius:12px;padding:12px 14px;margin-bottom:14px;color:#B71C1C;font-size:0.82rem;line-height:1.45;">
+          <strong>⚠️ This phone isn't fully set up.</strong> Its saved profile is incomplete or was cleared, so it can't be used to record data. Please return this handset to your <strong>coordinator</strong> to be re-enrolled.
+        </div>
+
         <!-- STEP 1: Passcode -->
         <div id="enrollStep1">
           <div class="enroll-section-title">Coordinator Passcode</div>
@@ -6485,7 +6490,13 @@ window.addEventListener('load', () => {
   setTimeout(() => {
     if (DEMO) { try { demoStartLogin(); } catch(e){ try { demoBootstrap(); } catch(_){ showScreen('screen-enroll'); } } return; }
     getAllRecords('auth', function(records) {
-      if (records && records.length > 0) {
+      var p = (records && records.length > 0) ? records[0] : null;
+      if (p && !profileComplete(p)) {
+        /* Degraded/incomplete profile — don't open a broken session; send the
+           phone back to the coordinator to be re-enrolled. */
+        showScreen('screen-enroll');
+        var _n = document.getElementById('enrollIncompleteNote'); if (_n) _n.style.display = 'block';
+      } else if (p) {
         showScreen('screen-fingerprint');
       } else {
         showScreen('screen-enroll');
@@ -6550,6 +6561,14 @@ function timeGreeting() {
 }
 
 /* Update dashboard header from stored profile */
+/* A usable profile must have a name, a steward ID and a role. A record missing
+   any of these is a broken/partial enrolment (e.g. the phone was used to enrol
+   someone else, which replaces the profile, or its storage was cleared) and must
+   not be allowed to run a live session. */
+function profileComplete(p){
+  return !!(p && String(p.name||'').trim() && String(p.stewardId||'').trim() && String(p.role||'').trim());
+}
+
 function updateDashHeader(profile) {
   var firstName = (profile.name || '').split(' ')[0];
   var greet = document.getElementById('dashGreeting');
@@ -6627,6 +6646,22 @@ function enrollCheckPasscode() {
 
 /* ── Enrollment: Step 1 verified → Step 2 ── */
 function enrollGoToStep2() {
+  /* Warn before replacing an existing profile: enrolling a new person on this
+     phone overwrites whoever is already set up on it (one profile per handset). */
+  getAllRecords('auth', function(recs){
+    var existing = (recs && recs.length > 0) ? recs[0] : null;
+    var who = existing && (String(existing.name||'').trim() || String(existing.stewardId||'').trim());
+    if (who) {
+      var ok = confirm('⚠️ This phone is already set up for ' + who + '.\n\n'
+        + 'Enrolling a new person REPLACES ' + who + '’s profile on THIS phone — their login and any records not yet synced will be lost.\n\n'
+        + 'Only continue if you are setting up THIS handset for a different person. To add someone else, use THEIR phone.\n\n'
+        + 'Replace ' + who + '?');
+      if (!ok) return;
+    }
+    _enrollShowStep2();
+  });
+}
+function _enrollShowStep2() {
   document.getElementById('enrollStep1').style.display = 'none';
   document.getElementById('enrollStep2').style.display = 'block';
   document.getElementById('edot1').classList.remove('active');
@@ -6916,7 +6951,7 @@ function enrollFinish() {
     consent:   (enrolledProfile && enrolledProfile.consent) || null,
     enrolled:  new Date().toISOString()
   };
-  saveRecord('auth', record, function() {
+  replaceAuthProfile(record, function() {
     document.getElementById('enrollStep4').style.display = 'none';
     document.getElementById('enrollDone').style.display = 'block';
     document.getElementById('enrollDoneName').textContent = enrolledProfile.name + ' — ' + enrolledProfile.clan;
@@ -12537,7 +12572,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v137'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v138'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a
@@ -13790,9 +13825,10 @@ function syncAuthorisations(profile) {
       });
       if (!changed) return;
 
-      /* Save updated profile */
+      /* Save updated profile (put, not add — add silently fails on the existing
+         id:1, which previously dropped topic-authorisation syncs). */
       profile.authorised_topics = updated;
-      saveRecord('auth', profile, function() {
+      updateRecord('auth', profile, function() {
         window._cachedProfile = profile;
         /* Re-run tile visibility */
         var role   = profile.role || 'clan_steward';
@@ -14215,6 +14251,27 @@ function saveRecord(storeName, data, cb) {
       toast('Save error');
       if (cb) cb(false);
     };
+  });
+}
+
+/* Write the device's single enrolled profile, REPLACING any previous one.
+   Enrolment used saveRecord (store.add) with a fixed id:1, which silently
+   failed when a profile already existed — leaving the on-screen view and the
+   stored record out of sync (how a half-overwritten profile gets stuck).
+   Clearing the store then putting one record guarantees exactly one clean
+   profile, so a confirmed re-enrol/replace actually takes effect. */
+function replaceAuthProfile(record, cb){
+  openDB(function(db){
+    if(!db){ toast('Storage error — profile not saved'); if(cb) cb(false); return; }
+    try {
+      var tx = db.transaction('auth','readwrite');
+      var store = tx.objectStore('auth');
+      store.clear();
+      record.id = 1;
+      store.put(record);
+      tx.oncomplete = function(){ try{ updateRecordCounts(); }catch(e){} if(cb) cb(true); };
+      tx.onerror = function(){ toast('Save error'); if(cb) cb(false); };
+    } catch(e){ toast('Save error'); if(cb) cb(false); }
   });
 }
 

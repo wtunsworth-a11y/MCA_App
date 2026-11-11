@@ -7053,6 +7053,12 @@ function verifyFp() {
 /* ── Front-camera capture (file input → data URI). Simple + reliable on low-end
    Android (no getUserMedia). Returns null if nothing was taken. ── */
 function selfieCapture(cb) {
+  if (typeof DEMO !== 'undefined' && DEMO) {
+    /* Demo: don't open the camera — note that a face photo confirms identity here. */
+    try { toast('✓ Identity confirmed (demo — a face photo is taken here in the real app)'); } catch(e){}
+    if (cb) cb('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+    return;
+  }
   try {
     var inp = document.createElement('input');
     inp.type = 'file'; inp.accept = 'image/*'; inp.setAttribute('capture', 'user');
@@ -7089,6 +7095,15 @@ function queueGateSelfie(context, photo, cb) {
    selfie method capture a face photo instead, which is queued for audit. ── */
 function webAuthnVerify(opts) {
   /* opts: { btnId, txtId, setVerified, onSuccess, onFail } */
+  if (typeof DEMO !== 'undefined' && DEMO) {
+    /* Demo: skip the camera / fingerprint at field gates — mark confirmed and
+       note that this is where the steward's identity is verified for real. */
+    if (opts.txtId) { var _td=document.getElementById(opts.txtId); if(_td) _td.textContent = '✓ Identity confirmed (demo — verified here in the real app)'; }
+    if (opts.btnId) { var _bd=document.getElementById(opts.btnId); if(_bd) _bd.classList.add('verified'); }
+    try { if (opts.setVerified) opts.setVerified(true); } catch(e){}
+    try { if (opts.onSuccess) opts.onSuccess(); } catch(e){}
+    return;
+  }
   if (opts.txtId) { var t0=document.getElementById(opts.txtId); if(t0) t0.textContent = 'Checking…'; }
   getAllRecords('auth', function(records) {
     var profile = (records && records.length > 0) ? records[0] : null;
@@ -12522,7 +12537,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v136'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v137'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a

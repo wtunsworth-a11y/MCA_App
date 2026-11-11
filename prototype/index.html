@@ -7347,7 +7347,7 @@ function mafiaSetTape(has){
 function _mafiaNavTo(target, label){
   mafiaNavTarget={ target:target, label:label };
   var lab=document.getElementById('mfNavLabel'); if(lab) lab.textContent=label;
-  if(mafiaWatchId==null && navigator.geolocation){
+  if(!(typeof DEMO!=='undefined' && DEMO) && mafiaWatchId==null && navigator.geolocation){
     mafiaWatchId=navigator.geolocation.watchPosition(function(pos){
       window._mafiaPos={lat:pos.coords.latitude, lon:pos.coords.longitude, acc:Math.round(pos.coords.accuracy||0), heading:(pos.coords.heading!=null&&!isNaN(pos.coords.heading)?pos.coords.heading:null)};
       _mafiaTrackAppend(window._mafiaPos);
@@ -7377,6 +7377,12 @@ function _mafiaTrackAppend(pos){
   mafiaTrack.push(pt); mafiaTrackLast=pt;
 }
 function _mafiaUpdateNav(){
+  if (typeof DEMO !== 'undefined' && DEMO && mafiaNavTarget && mafiaNavTarget.target) {
+    /* Demo: simulate standing exactly at the current target so the walk gates
+       (arrival at start + each sub-transect end) pass instantly instead of
+       waiting for real GPS movement that never happens. */
+    window._mafiaPos = { lat: mafiaNavTarget.target.lat, lon: mafiaNavTarget.target.lon, acc: 8, heading: null };
+  }
   var pos=window._mafiaPos, nav=mafiaNavTarget; if(!pos||!nav) return;
   var here={lat:pos.lat, lon:pos.lon};
   var dist=_haversine(here, nav.target);
@@ -12576,7 +12582,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v139'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v140'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a

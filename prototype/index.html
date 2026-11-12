@@ -5585,7 +5585,7 @@ select.msel {
       </div>
       <div class="scroll-content" style="padding:16px;">
         <div style="background:#E0F2F1;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.78rem;color:#00695C;">
-          A clan steward's data modules stay locked until you mark them trained. Tick every module they have completed training for — those tiles then open on their phone. Field officers and other roles are not gated.
+          A clan steward's data modules stay locked until you mark them trained. Pick the steward, then set their access: <strong>tick</strong> a module to open it, <strong>untick</strong> to revoke it (the tile locks again). Changes reach their phone at next online login. Field officers and other roles are not gated.
         </div>
         <div class="form-group ep-wrap">
           <label class="form-label">Clan steward <span style="color:#B71C1C;">*</span></label>
@@ -5602,7 +5602,7 @@ select.msel {
           <label class="form-label">Authorised by <span style="color:#B71C1C;">*</span></label>
           <input type="text" id="mtAuthorisedBy" class="form-input" placeholder="Your name / initials">
         </div>
-        <button class="btn-primary" id="mtSubmitBtn" style="background:#00695C;width:100%;margin-top:6px;" onclick="submitModuleTraining()">Unlock Modules →</button>
+        <button class="btn-primary" id="mtSubmitBtn" style="background:#00695C;width:100%;margin-top:6px;" onclick="submitModuleTraining()">Save module access →</button>
         <div id="mtStatus" style="margin-top:12px;font-size:0.82rem;text-align:center;"></div>
       </div>
     </div>
@@ -6754,6 +6754,7 @@ function epPick(prefix, i){
   var s=document.getElementById(prefix+'PersonSearch'); if(s) s.value=p.name||p.stewardId||'';
   var l=document.getElementById(prefix+'PersonList'); if(l){ l.classList.remove('open'); l.innerHTML=''; }
   var ch=document.getElementById(prefix+'PersonChosen'); if(ch){ var rz=_epRoleZone(p); ch.style.display=''; ch.innerHTML='✓ Selected: <strong>'+_esc(p.name||'')+'</strong> <span style="font-family:monospace;color:#555;">'+_esc(p.stewardId||'')+'</span>'+(rz?' <span style="color:#888;">· '+_esc(rz)+'</span>':''); }
+  if(prefix==='mt'){ try{ mtLoadCurrent(p.stewardId||''); }catch(e){} }
 }
 document.addEventListener('click', function(e){
   if(e.target && e.target.closest && e.target.closest('.ep-wrap')) return;
@@ -12582,7 +12583,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v140'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v141'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a
@@ -20291,11 +20292,16 @@ function syncModuleTraining(profile){
     .then(function(r){return r.json();})
     .then(function(d){
       if(d.status!=='ok'||!d.modules) return;
-      var existing=profile.trained_modules||[]; var updated=existing.slice(); var changed=false;
-      d.modules.forEach(function(k){ if(updated.indexOf(k)===-1){ updated.push(k); changed=true; } });
-      if(!changed) return;
-      profile.trained_modules=updated;
-      updateRecord('auth',profile,function(){ window._cachedProfile=profile; try{ cacheStewardProfile(); }catch(_){} toast('New module(s) unlocked — see your dashboard.'); });
+      /* Replace (not merge) so a coordinator REVOKE actually drops the tile —
+         the server list is authoritative for this steward's module access. */
+      var before=(profile.trained_modules||[]).slice().sort().join('|');
+      var after=d.modules.slice().sort().join('|');
+      if(before===after) return;
+      var gained=d.modules.some(function(k){ return (profile.trained_modules||[]).indexOf(k)===-1; });
+      profile.trained_modules=d.modules.slice();
+      updateRecord('auth',profile,function(){ window._cachedProfile=profile; try{ cacheStewardProfile(); }catch(_){}
+        try{ if(currentScreen==='screen-dashboard'){ colorDashTiles(); } }catch(_){}
+        toast(gained ? 'New module(s) unlocked — see your dashboard.' : 'Your module access was updated.'); });
     }).catch(function(){});
 }
 
@@ -20324,6 +20330,7 @@ function showGrantVcAuth(){ window._vcgCommodity=''; showScreen('screen-grant-vc
 
 /* ── Coordinator: unlock clan-steward modules after training ── */
 function showGrantModuleTraining(){
+  window._mtCurrent = [];
   var box=document.getElementById('mtModuleList');
   if(box) box.innerHTML=TRAINED_MODULES.map(function(m){
     return '<label style="display:flex;align-items:center;gap:9px;padding:7px 2px;font-size:0.85rem;cursor:pointer;border-bottom:1px solid #eee;"><input type="checkbox" value="'+m.key+'" style="width:18px;height:18px;flex-shrink:0;"> '+_esc(m.label)+'</label>';
@@ -20333,26 +20340,59 @@ function showGrantModuleTraining(){
   showScreen('screen-grant-module-training');
   epInit('mt');
 }
+/* When a steward is picked, load their CURRENT module access and pre-tick it,
+   so the coordinator sets the final state (tick = grant, untick = revoke). */
+function mtLoadCurrent(sid){
+  window._mtCurrent = [];
+  document.querySelectorAll('#mtModuleList input[type=checkbox]').forEach(function(c){ c.checked=false; });
+  var st=document.getElementById('mtStatus');
+  if(!sid || !UPLOAD_ENDPOINT || !navigator.onLine){ return; }
+  if(st){ st.textContent='Loading current access…'; st.style.color='#555'; }
+  fetch(UPLOAD_ENDPOINT+'?action=module_training&stewardId='+encodeURIComponent(sid))
+    .then(function(r){return r.json();}).then(function(d){
+      var cur=(d && d.status==='ok' && d.modules) ? d.modules : [];
+      window._mtCurrent = cur.slice();
+      document.querySelectorAll('#mtModuleList input[type=checkbox]').forEach(function(c){ c.checked = cur.indexOf(c.value)!==-1; });
+      if(st){ st.textContent = cur.length ? ('Currently has '+cur.length+' module(s). Tick to grant, untick to revoke.') : 'No modules yet — tick the ones they are trained on.'; st.style.color='#555'; }
+    }).catch(function(){ if(st){ st.textContent='Could not load current access — try again online.'; st.style.color='#E65100'; } });
+}
 function submitModuleTraining(){
   var sid=(document.getElementById('mtStewId').value||'').trim().toUpperCase();
   var by=(document.getElementById('mtAuthorisedBy').value||'').trim();
-  var mods=[]; document.querySelectorAll('#mtModuleList input[type=checkbox]:checked').forEach(function(c){ mods.push(c.value); });
+  var ticked=[]; document.querySelectorAll('#mtModuleList input[type=checkbox]:checked').forEach(function(c){ ticked.push(c.value); });
   var status=document.getElementById('mtStatus'); var btn=document.getElementById('mtSubmitBtn');
   if(!sid){ toast('Choose the clan steward.'); return; }
-  if(mods.length===0){ toast('Tick at least one module.'); return; }
   if(!by){ toast('Enter your name (authorised by).'); return; }
+  var current=window._mtCurrent||[];
+  var toGrant=ticked.filter(function(m){ return current.indexOf(m)===-1; });
+  var toRevoke=current.filter(function(m){ return ticked.indexOf(m)===-1; });
+  if(toGrant.length===0 && toRevoke.length===0){ toast('No changes — tick to grant or untick to revoke.'); return; }
+  if(toRevoke.length){
+    var names=toRevoke.map(function(k){ var m=TRAINED_MODULES.filter(function(x){return x.key===k;})[0]; return m?m.label:k; }).join(', ');
+    if(!confirm('Revoke from '+sid+': '+names+'.\n\nThose tiles will LOCK on their phone at next online login. Continue?')) return;
+  }
+  if(!UPLOAD_ENDPOINT){ status.textContent='No endpoint configured.'; status.style.color='#E65100'; return; }
   btn.disabled=true; btn.textContent='Saving…';
-  var payload={ _action:'grant_module_training', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret,
-    record:{ stewardId:sid, modules:mods, authorised_by:by, authorised_at:new Date().toISOString(), status:'active' } };
-  if(UPLOAD_ENDPOINT){
-    fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-      .then(function(r){return r.json();}).then(function(d){
-        btn.disabled=false; btn.textContent='Unlock Modules →';
-        if(d.status==='ok'){ status.textContent='✓ '+mods.length+' module(s) unlocked for '+sid+'.'; status.style.color='#00695C';
-          epInit('mt'); document.querySelectorAll('#mtModuleList input[type=checkbox]').forEach(function(c){c.checked=false;}); document.getElementById('mtAuthorisedBy').value='';
-        } else { status.textContent='Sync: '+(d.message||'failed'); status.style.color='#E65100'; }
-      }).catch(function(){ btn.disabled=false; btn.textContent='Unlock Modules →'; status.textContent='No network — try again when online.'; status.style.color='#E65100'; });
-  } else { btn.disabled=false; btn.textContent='Unlock Modules →'; status.textContent='No endpoint configured.'; status.style.color='#E65100'; }
+  var now=new Date().toISOString();
+  var calls=[];
+  if(toGrant.length){ calls.push({ _action:'grant_module_training', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret, record:{ stewardId:sid, modules:toGrant, authorised_by:by, authorised_at:now, status:'active' } }); }
+  if(toRevoke.length){ calls.push({ _action:'revoke_module_training', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret, record:{ stewardId:sid, modules:toRevoke, authorised_by:by, authorised_at:now } }); }
+  var okAll=true;
+  var runNext=function(idx){
+    if(idx>=calls.length){
+      btn.disabled=false; btn.textContent='Save module access →';
+      if(okAll){
+        var parts=[]; if(toGrant.length) parts.push(toGrant.length+' granted'); if(toRevoke.length) parts.push(toRevoke.length+' revoked');
+        status.textContent='✓ '+parts.join(' · ')+' for '+sid+'.'; status.style.color='#00695C';
+        window._mtCurrent=ticked.slice();
+      } else { status.textContent='Sync problem — check and try again.'; status.style.color='#E65100'; }
+      return;
+    }
+    fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(calls[idx])})
+      .then(function(r){return r.json();}).then(function(d){ if(!(d&&d.status==='ok')) okAll=false; runNext(idx+1); })
+      .catch(function(){ okAll=false; runNext(idx+1); });
+  };
+  runNext(0);
 }
 function vcgSetCommodity(c, btn){
   window._vcgCommodity=c;

@@ -1118,6 +1118,28 @@ function grantModuleTraining(record) {
     return { status:'ok', message:'Modules unlocked', stewardId:sid, count:record.modules.length };
   } catch(err) { return { status:'error', message:err.toString() }; }
 }
+/* Revoke previously-granted modules: mark them status 'revoked' so
+ * getModuleTraining stops returning them and the steward's device drops the
+ * tile on next online login (the app's syncModuleTraining replaces, not adds). */
+function revokeModuleTraining(record) {
+  if (!record || !record.stewardId || !record.modules || !record.modules.length) {
+    return { status:'error', message:'Missing stewardId or modules' };
+  }
+  try {
+    var data = loadModuleTrainingFile(); var sid = String(record.stewardId).trim().toUpperCase();
+    var recs = data[sid] || [];
+    var revoke = {}; record.modules.forEach(function(m){ revoke[m] = true; });
+    var n = 0;
+    recs.forEach(function(r){
+      if (revoke[r.module] && r.status !== 'revoked') {
+        r.status = 'revoked'; r.revoked_by = record.authorised_by || ''; r.revoked_at = record.authorised_at || new Date().toISOString(); n++;
+      }
+    });
+    data[sid] = recs;
+    saveModuleTrainingFile(data);
+    return { status:'ok', message:'Modules revoked', stewardId:sid, count:n };
+  } catch(err) { return { status:'error', message:err.toString() }; }
+}
 function getModuleTraining(stewardId) {
   if (!stewardId) { return ContentService.createTextOutput(JSON.stringify({ status:'error', message:'Missing stewardId' })).setMimeType(ContentService.MimeType.JSON); }
   try {
@@ -1712,7 +1734,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood', 'update_indicative_price', 'grant_vc_authorisation', 'grant_module_training'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood', 'update_indicative_price', 'grant_vc_authorisation', 'grant_module_training', 'revoke_module_training'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1755,6 +1777,13 @@ function doPost(e) {
       var mtRes = grantModuleTraining(body.record);
       return ContentService
         .createTextOutput(JSON.stringify(mtRes))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (body._action === 'revoke_module_training') {
+      var mtRev = revokeModuleTraining(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(mtRev))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -2039,7 +2068,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-08.8 — never persist credentials to records; reject misrouted actions (was dead-lettering coordinator POSTs to Unzoned/UNKNOWN)';
+var BACKEND_VERSION = '2026-11-12.1 — module-training revoke (revoke_module_training); incl. .8 never-persist-credentials + reject misrouted actions';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {

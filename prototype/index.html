@@ -6509,10 +6509,10 @@ window.addEventListener('load', () => {
    WEBAUTHN — helpers, enrollment, login
 ══════════════════════════════════════ */
 
-/* Coordinator passcode: SHA-256('T@nkF1y')
-   Change this hash if you change the passcode.
+/* Coordinator passcode: stored only as its SHA-256 hash below — never the
+   plaintext in the repo. Change this hash if you change the passcode.
    Generate a new hash at: https://emn178.github.io/online-tools/sha256.html */
-var ENROLL_PASSCODE_HASH = 'c6947da476b0cc558081178ca6714ca2c8e37687c9656f33a915bf5eaf5e4d6e';
+var ENROLL_PASSCODE_HASH = '4ce24c0c3d40e78688864c3f5d43cd5b9913ce6a3a62d0c57289d5526d9a4a7d';
 
 /* Coordinator server key — held in memory only for this session.
    Never written to IndexedDB, localStorage, or any persisted storage.
@@ -12583,7 +12583,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v141'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v142'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a

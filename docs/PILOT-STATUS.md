@@ -151,9 +151,9 @@ Date Review). Media is inline; keep videos short (10–20 s). See
 - **Fingerprint (WebAuthn)** is real and now **hard-required in the field** —
   a device with no sensor is **blocked** from on-site readings (was fail-open).
   Login was always hard-closed.
-- **Coordinator passcode** `T@nkF1y` (sha256 in app) gates enrolment — **keep it
-  out of the repo**. **Server key** lives only in Script Properties — never
-  committed, typed in per session.
+- **Coordinator passcode** (stored only as a sha256 hash in the app, plaintext
+  kept out of the repo) gates enrolment. **Server key** lives only in Script
+  Properties — never committed, typed in per session.
 
 ## 6a. Date integrity (clock trust)
 

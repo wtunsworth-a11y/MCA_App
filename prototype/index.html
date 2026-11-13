@@ -11444,6 +11444,10 @@ function initLivelihood(){
   var g=document.getElementById('lvhGPS'); if(g) g.textContent='—';
   var sm=document.getElementById('lvhSiteMeta'); if(sm) sm.textContent='';
   lvhRenderPhotos();
+  /* Auto-capture location on open so officers don't have to remember to tap it.
+     Still optional/graceful: if there's no fix the record saves location_missing
+     flagged, and the "Capture location" button re-acquires in place. */
+  try{ lvhCaptureGps(); }catch(e){}
   /* Populate the site picker from the synced registry, grouped by type */
   var sel=document.getElementById('lvhSite'); var empty=document.getElementById('lvhSiteEmpty');
   if(sel){
@@ -12583,7 +12587,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v142'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v143'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a

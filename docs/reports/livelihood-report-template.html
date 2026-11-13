@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Livelihood Site Visits</title>
+<meta name="description" content="Standard report format for MCA livelihood project site-visit records.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --paper:#FBFAF8; --ink:#23221F; --muted:#6E6A60; --line:#E6E2D8;
+    --forest:#1B5E20; --olive:#6B6B1F; --olive-soft:#F3F2E6;
+    --good:#2E7D32; --warn:#B26A00; --bad:#B3261E; --card:#FFFFFF;
+    --sans:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --serif:'Fraunces',Georgia,'Times New Roman',serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5;
+    -webkit-font-smoothing:antialiased;font-size:15px;}
+  .wrap{max-width:860px;margin:0 auto;padding:28px 20px 60px;}
+
+  /* Masthead */
+  .mast{border-bottom:3px solid var(--forest);padding-bottom:16px;margin-bottom:8px;}
+  .eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--olive);font-weight:700;}
+  h1{font-family:var(--serif);font-weight:600;font-size:2.1rem;line-height:1.1;margin:.2em 0 .15em;text-wrap:balance;}
+  .sub{color:var(--muted);font-size:.9rem;}
+  .meta-line{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:.82rem;color:var(--muted);}
+  .meta-line b{color:var(--ink);font-weight:600;}
+
+  /* Summary tiles */
+  .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:18px 0 26px;}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+  .tile .n{font-family:var(--serif);font-size:1.6rem;font-weight:600;line-height:1;}
+  .tile .l{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+  .tile.flag .n{color:var(--warn);}
+
+  /* Record card */
+  .rec{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:18px;
+    box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .rec-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;
+    padding:14px 18px;background:var(--olive-soft);border-bottom:1px solid var(--line);}
+  .rec-head h2{font-family:var(--serif);font-size:1.22rem;font-weight:600;margin:0;line-height:1.15;}
+  .pill{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+    background:#fff;border:1px solid #D8D6C4;color:var(--olive);border-radius:999px;padding:3px 9px;white-space:nowrap;}
+  .rec-sub{font-size:.8rem;color:var(--muted);margin-top:3px;}
+  .rec-body{padding:16px 18px;}
+
+  .facts{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:.82rem;color:var(--muted);margin-bottom:14px;}
+  .facts b{color:var(--ink);font-weight:600;}
+
+  .fields{display:grid;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .f{display:grid;grid-template-columns:170px 1fr;gap:0;border-bottom:1px solid var(--line);}
+  .f:last-child{border-bottom:none;}
+  .f .k{background:#FAFAF6;padding:9px 12px;font-size:.76rem;font-weight:600;color:var(--muted);
+    letter-spacing:.02em;text-transform:uppercase;border-right:1px solid var(--line);}
+  .f .v{padding:9px 13px;font-size:.92rem;}
+  .f .v.empty{color:#B6B2A6;font-style:italic;}
+
+  .photos{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .ph{flex:0 0 auto;width:120px;}
+  .ph .box{height:84px;border:1px dashed #CFC9B6;border-radius:8px;background:
+    repeating-linear-gradient(45deg,#FBFAF2,#FBFAF2 7px,#F4F2E6 7px,#F4F2E6 14px);
+    display:flex;align-items:center;justify-content:center;color:#A79F86;font-size:.72rem;}
+  .ph .cap{font-size:.64rem;color:var(--muted);margin-top:4px;word-break:break-all;line-height:1.3;}
+
+  .foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;
+    margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted);}
+  .loc.ok{color:var(--good);} .loc.miss{color:var(--warn);font-weight:600;}
+  .flags{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-size:.72rem;font-weight:600;border-radius:999px;padding:3px 9px;}
+  .chip.warn{background:#FBF0DD;color:var(--warn);}
+  .chip.bad{background:#FBE3E1;color:var(--bad);}
+
+  .note{font-size:.8rem;color:var(--muted);background:#FFFDF5;border:1px solid #EFE9D4;border-radius:10px;
+    padding:11px 14px;margin:0 0 22px;}
+  .tmpl-note{font-size:.76rem;color:var(--muted);border-left:3px solid var(--olive);padding:4px 0 4px 12px;margin:26px 0 0;}
+  footer.doc{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);font-size:.76rem;color:var(--muted);}
+
+  @media print{
+    body{background:#fff;font-size:12px;}
+    .wrap{max-width:none;padding:0;}
+    .rec{break-inside:avoid;box-shadow:none;}
+    .summary{break-inside:avoid;}
+    .ph .box{background:#f3f2e6;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <div class="eyebrow">Managalas Conservation Area · Livelihood Monitoring</div>
+    <h1>Livelihood Site Visits</h1>
+    <div class="sub">Standard report of field site-visit records for livelihood project sites.</div>
+    <div class="meta-line" id="metaLine"></div>
+  </header>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="note">
+    <strong>About this report.</strong> One entry per recorded site visit. Each visit captures the
+    project's <b>structure &amp; status</b>, observed <b>signs of use</b> and <b>condition/survival</b>,
+    any <b>field notes</b>, <b>issues arising</b>, and <b>inputs needed</b> — plus photos and a GPS
+    location. Location is captured automatically; where a fix wasn't available the record is still kept
+    and <b>flagged for review</b>. Photos are held on Drive and linked by filename.
+  </div>
+
+  <div id="records"></div>
+
+  <p class="tmpl-note">Template: this layout is generated from the livelihood records array below. Swap
+    the array (or wire it to the backend <code>?action=…</code> feed) and every livelihood visit renders
+    in this same standard format.</p>
+
+  <footer class="doc">
+    Generated <span id="genDate"></span> · Managalas Conservation Area · CIFOR-ICRAF.
+    Times shown in Pacific/Port_Moresby (PNG, UTC+10). Photos link to originals held on Drive.
+  </footer>
+</div>
+
+<script>
+/* ---- Livelihood records (sample = real site visits by Solomon Kotumba) ----
+   Replace this array, or inject it from the backend, to render any set. */
+const RECORDS = /*__LVH__*/ [
+  { site:"Piggery — Zone 7B", type:"Piggery", zone:"Z07B", clan:"",
+    officer:"Solomon Kotumba", officer_id:"CIFOR-ICRAF -ST",
+    recorded_at:"2026-11-08T23:41:11.962Z",
+    structure_status:"Project hire transport quotation",
+    signs_of_use:"", survival:"", stories:"", issues:"",
+    inputs_needed:"Current issues need 3 other alternatives for convenience",
+    photos:["CIFORICRAFST-LVH-20261109T0941-494J_0.jpg"],
+    gps:{lat:"-9.13891",lng:"148.38747",accuracy:20,source:"gps"} },
+
+  { site:"Piggery — Zone 5", type:"Piggery", zone:"Z05", clan:"",
+    officer:"Solomon Kotumba", officer_id:"CIFOR-ICRAF -ST",
+    recorded_at:"2026-11-07T04:48:23.512Z",
+    structure_status:"Proposed piggery project site",
+    signs_of_use:"", survival:"", stories:"", issues:"No issues",
+    inputs_needed:"Transport sand gravel",
+    photos:["CIFORICRAFST-LVH-20261107T1448-458J_0.jpg"],
+    gps:null },
+
+  { site:"Vegetable farm — Zone 5", type:"Vegetable farm", zone:"Z05", clan:"",
+    officer:"Solomon Kotumba", officer_id:"CIFOR-ICRAF -ST",
+    recorded_at:"2026-11-07T04:44:47.729Z",
+    structure_status:"Project site piggery",
+    signs_of_use:"", survival:"", stories:"", issues:"No commitment",
+    inputs_needed:"More sand and stones",
+    photos:["CIFORICRAFST-LVH-20261107T1444-6ME6_0.jpg","CIFORICRAFST-LVH-20261107T1444-6ME6_1.jpg"],
+    gps:{lat:"-9.06279",lng:"148.31976",accuracy:6,source:"gps"} },
+
+  { site:"Piggery — Zone 5", type:"Piggery", zone:"Z05", clan:"",
+    officer:"Solomon Kotumba", officer_id:"CIFOR-ICRAF -ST",
+    recorded_at:"2026-11-06T09:45:53.195Z",
+    structure_status:"Proposed piggery project site",
+    signs_of_use:"Initial sand and gravel /stones still the same", survival:"", stories:"",
+    issues:"", inputs_needed:"Needs commitment to progressive results",
+    photos:[], gps:null },
+];
+
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function png(iso){ // UTC ISO -> PNG (UTC+10) formatted
+  if(!iso) return "—";
+  const d=new Date(new Date(iso).getTime()+10*3600*1000);
+  let h=d.getUTCHours(), m=d.getUTCMinutes(), ap=h<12?'am':'pm';
+  let h12=h%12; if(h12===0) h12=12;
+  return d.getUTCDate()+' '+MONTHS[d.getUTCMonth()]+' '+d.getUTCFullYear()+', '+h12+':'+String(m).padStart(2,'0')+' '+ap+' PNG';
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+const FIELDS=[
+  ['Structure & status','structure_status'],
+  ['Signs of use','signs_of_use'],
+  ['Condition / survival','survival'],
+  ['Field notes','stories'],
+  ['Issues arising','issues'],
+  ['Inputs needed','inputs_needed'],
+];
+
+/* summary */
+const byType={}; let missing=0, withPhotos=0;
+RECORDS.forEach(r=>{ byType[r.type]=(byType[r.type]||0)+1; if(!r.gps) missing++; if((r.photos||[]).length) withPhotos++; });
+document.getElementById('summary').innerHTML =
+  tile(RECORDS.length,'site visits') +
+  Object.entries(byType).map(([t,n])=>tile(n,t)).join('') +
+  tile(withPhotos,'with photos') +
+  tile(missing,'no GPS — review', missing>0);
+function tile(n,l,flag){ return '<div class="tile'+(flag?' flag':'')+'"><div class="n">'+n+'</div><div class="l">'+esc(l)+'</div></div>'; }
+
+/* meta line */
+const dates=RECORDS.map(r=>r.recorded_at).filter(Boolean).sort();
+document.getElementById('metaLine').innerHTML =
+  '<span>Visits: <b>'+png(dates[0]).split(',')[0]+' – '+png(dates[dates.length-1]).split(',')[0]+'</b></span>'+
+  '<span>Officers: <b>'+[...new Set(RECORDS.map(r=>r.officer))].join(', ')+'</b></span>'+
+  '<span>Sites: <b>'+new Set(RECORDS.map(r=>r.site)).size+'</b></span>';
+
+/* records */
+document.getElementById('records').innerHTML = RECORDS.map(r=>{
+  const rows = FIELDS.map(([label,key])=>{
+    const v=(r[key]||'').trim();
+    return '<div class="f"><div class="k">'+label+'</div><div class="v'+(v?'':' empty')+'">'+(v?esc(v):'— not recorded')+'</div></div>';
+  }).join('');
+  const photos = (r.photos&&r.photos.length)
+    ? '<div class="photos">'+r.photos.map(p=>'<div class="ph"><div class="box">photo</div><div class="cap">'+esc(p)+'</div></div>').join('')+'</div>'
+    : '';
+  const loc = r.gps
+    ? '<span class="loc ok">◎ '+esc(r.gps.lat)+', '+esc(r.gps.lng)+' · ±'+esc(r.gps.accuracy)+' m'+(r.gps.source==='coarse'?' (approx)':'')+'</span>'
+    : '<span class="loc miss">◎ No GPS fix — flagged for review</span>';
+  const flags=[];
+  if(!r.gps) flags.push('<span class="chip warn">location missing</span>');
+  if(r.type==='Vegetable farm' && /piggery/i.test(r.structure_status||'')) flags.push('<span class="chip bad">type/status mismatch</span>');
+  const flagsHtml = flags.length?'<div class="flags">'+flags.join('')+'</div>':'';
+  return ''+
+  '<article class="rec">'+
+    '<div class="rec-head"><div><h2>'+esc(r.site)+'</h2>'+
+      '<div class="rec-sub">'+esc(r.officer)+' · '+esc(r.officer_id)+'</div></div>'+
+      '<span class="pill">'+esc(r.type)+'</span></div>'+
+    '<div class="rec-body">'+
+      '<div class="facts">'+
+        '<span>Zone <b>'+esc(r.zone||'—')+'</b></span>'+
+        '<span>Clan <b>'+esc(r.clan||'—')+'</b></span>'+
+        '<span>Visited <b>'+png(r.recorded_at)+'</b></span>'+
+      '</div>'+
+      '<div class="fields">'+rows+'</div>'+
+      photos+
+      '<div class="foot">'+loc+flagsHtml+'</div>'+
+    '</div>'+
+  '</article>';
+}).join('');
+
+document.getElementById('genDate').textContent = png(new Date().toISOString());
+</script>
+</body>
+</html>

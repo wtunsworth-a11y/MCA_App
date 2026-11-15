@@ -7762,10 +7762,12 @@ function submitFacility() {
     proposed_clan: myClan(), owner_clan: null, owner_clan_2: null,
     registered_date: now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear()
   };
-  saveRecord('facilities', data, function(){
-    postRegisterFacility(data);
-    toast('Facility submitted for approval ✓');
-    nav('screen-facilities');
+  saveRecord('facilities', data, function(ok, newId){
+    if (newId != null) data.id = newId;
+    registrySubmitMedia('facilities', data, facPhotoData, postRegisterFacility, function(){
+      toast('Facility submitted for approval ✓');
+      nav('screen-facilities');
+    });
   });
 }
 
@@ -7802,7 +7804,9 @@ function renderFacilityApprove() {
       h += '<span style="font-size:0.92rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span>';
       h += '<span style="font-size:0.68rem;font-weight:700;color:#283593;background:#e8eaf6;border:1px solid #9fa8da;padding:2px 8px;border-radius:10px;">'+tm.label+'</span>';
       h += '</div>';
-      if (r.photo) h += '<img src="'+r.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" alt="Facility photo">';
+      var _fp = r.photo_thumb || r.photo;
+      if (_fp) h += '<img src="'+_fp+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" alt="Facility photo">';
+      else if (r.photo_url) h += '<a href="'+r.photo_url+'" target="_blank" rel="noopener" style="display:inline-block;margin-bottom:8px;font-size:0.8rem;color:#1565C0;">View photo ↗</a>';
       h += '<div style="font-size:0.74rem;color:#666;">'+icon('pin',13)+' '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
       h += '<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Proposed by '+(r.proposed_by||'—')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
       if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
@@ -8000,7 +8004,8 @@ function facRegistryRecord(r) {
   return {
     uid: r.uid, name: r.name, facility_type: r.facility_type,
     lat: r.lat, lng: r.lng, gps_accuracy: r.gps_accuracy,
-    description: r.description, photo: r.photo || null,
+    description: r.description, photo: null,
+    photo_thumb: r.photo_thumb || null, photo_file: r.photo_file || null, photo_url: r.photo_url || null,
     status: r.status, proposed_by: r.proposed_by, proposed_clan: r.proposed_clan,
     owner_clan: r.owner_clan || null, owner_clan_2: r.owner_clan_2 || null,
     registered_date: r.registered_date, approved_date: r.approved_date || null, approved_by: r.approved_by || null
@@ -8110,7 +8115,7 @@ function submitMetStation(){
   if(!metPhotoData){toast('Capture a reference photo first.');return;}
   var months=['January','February','March','April','May','June','July','August','September','October','November','December']; var now=new Date();
   var data={ survey_type:'met_station', uid:generateRecordId('MET'), name:name, met_type:metSelectedType, lat:metGPSFix.lat, lng:metGPSFix.lng, gps_accuracy:metGPSFix.accuracy, description:((document.getElementById('metDesc')||{}).value||'').trim(), photo:metPhotoData, status:'pending', proposed_by:(window._cachedProfile&&window._cachedProfile.stewardId)||'', proposed_clan:myClan(), owner_clan:null, owner_clan_2:null, registered_date:now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear() };
-  saveRecord('met_stations', data, function(){ postRegisterMet(data); toast('Instrument submitted for approval ✓'); nav('screen-met-stations'); });
+  saveRecord('met_stations', data, function(ok, newId){ if (newId != null) data.id = newId; registrySubmitMedia('met_stations', data, metPhotoData, postRegisterMet, function(){ toast('Instrument submitted for approval ✓'); nav('screen-met-stations'); }); });
 }
 
 /* approval */
@@ -8128,7 +8133,9 @@ function renderMetApprove(){
       var own2Opts='<option value="">None (single clan)</option>'+clans.map(function(cl){return '<option value="'+cl+'">'+cl+'</option>';}).join('');
       h+='<div class="card" style="padding:12px 14px;margin-bottom:12px;">';
       h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;"><span style="font-size:0.92rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span><span style="font-size:0.68rem;font-weight:700;color:#37474F;background:#ECEFF1;border:1px solid #B0BEC5;padding:2px 8px;border-radius:10px;">'+tm.label+'</span></div>';
-      if(r.photo) h+='<img src="'+r.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;">';
+      var _mp = r.photo_thumb || r.photo;
+      if(_mp) h+='<img src="'+_mp+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;">';
+      else if(r.photo_url) h+='<a href="'+r.photo_url+'" target="_blank" rel="noopener" style="display:inline-block;margin-bottom:8px;font-size:0.8rem;color:#1565C0;">View photo ↗</a>';
       h+='<div style="font-size:0.74rem;color:#666;">'+icon('pin',13)+' '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
       h+='<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Proposed by '+(r.proposed_by||'—')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
       if(r.description) h+='<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
@@ -8213,7 +8220,7 @@ function submitMetReading(){
 }
 
 /* central sync */
-function metRegistryRecord(r){ return { uid:r.uid, name:r.name, met_type:r.met_type, lat:r.lat, lng:r.lng, gps_accuracy:r.gps_accuracy, description:r.description, photo:r.photo||null, status:r.status, proposed_by:r.proposed_by, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, registered_date:r.registered_date, approved_date:r.approved_date||null, approved_by:r.approved_by||null }; }
+function metRegistryRecord(r){ return { uid:r.uid, name:r.name, met_type:r.met_type, lat:r.lat, lng:r.lng, gps_accuracy:r.gps_accuracy, description:r.description, photo:null, photo_thumb:r.photo_thumb||null, photo_file:r.photo_file||null, photo_url:r.photo_url||null, status:r.status, proposed_by:r.proposed_by, proposed_clan:r.proposed_clan, owner_clan:r.owner_clan||null, owner_clan_2:r.owner_clan_2||null, registered_date:r.registered_date, approved_date:r.approved_date||null, approved_by:r.approved_by||null }; }
 function postRegisterMet(rec){ if(!UPLOAD_ENDPOINT||!navigator.onLine||!rec||!rec.uid) return; fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'register_met_station',_secret:UPLOAD_SECRET,record:metRegistryRecord(rec)})}).catch(function(){}); }
 function pushMetRegistry(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} getAllRecords('met_stations', function(rows){ var list=rows.map(metRegistryRecord).filter(function(r){return r.uid;}); fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_action:'update_met_stations',_secret:UPLOAD_SECRET,_coordinator_secret:window._coordSecret,met_stations:list})}).then(function(r){return r.json();}).then(function(d){if(cb)cb(d&&d.status==='ok');}).catch(function(){if(cb)cb(false);}); }); }
 function syncMetFromServer(cb){ if(!UPLOAD_ENDPOINT||!navigator.onLine){if(cb)cb(false);return;} fetch(UPLOAD_ENDPOINT+'?action=met_stations').then(function(r){return r.json();}).then(function(d){ if(!d||d.status!=='ok'||!d.met_stations){if(cb)cb(false);return;} getAllRecords('met_stations', function(localRows){ var byUid={}; localRows.forEach(function(r){if(r.uid)byUid[r.uid]=r;}); var pending=d.met_stations.slice(); var next=function(){ if(pending.length===0){if(cb)cb(true);return;} var sr=pending.shift(); if(!sr.uid){next();return;} var local=byUid[sr.uid]; if(local){ ['name','met_type','lat','lng','gps_accuracy','description','photo','status','owner_clan','owner_clan_2','approved_date','approved_by','proposed_by','proposed_clan','registered_date'].forEach(function(k){local[k]=sr[k];}); updateRecord('met_stations', local, function(){next();}); } else { sr.survey_type='met_station'; sr.synced=true; saveRecord('met_stations', sr, function(){next();}); } }; next(); }); }).catch(function(){if(cb)cb(false);}); }
@@ -10570,10 +10577,12 @@ function submitWaterSource() {
     owner_clan: null, owner_clan_2: null,
     registered_date: now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear()
   };
-  saveRecord('water_sources', data, function(){
-    postRegisterWaterSource(data);
-    toast('Water source submitted for approval ✓');
-    nav('screen-water-sources');
+  saveRecord('water_sources', data, function(ok, newId){
+    if (newId != null) data.id = newId;
+    registrySubmitMedia('water_sources', data, wsPhotoData, postRegisterWaterSource, function(){
+      toast('Water source submitted for approval ✓');
+      nav('screen-water-sources');
+    });
   });
 }
 
@@ -10583,7 +10592,8 @@ function wsRegistryRecord(r) {
   return {
     uid: r.uid, name: r.name, source_type: r.source_type,
     lat: r.lat, lng: r.lng, gps_accuracy: r.gps_accuracy,
-    description: r.description, photo: r.photo || null,
+    description: r.description, photo: null,
+    photo_thumb: r.photo_thumb || null, photo_file: r.photo_file || null, photo_url: r.photo_url || null,
     status: r.status, proposed_by: r.proposed_by, proposed_clan: r.proposed_clan,
     owner_clan: r.owner_clan || null, owner_clan_2: r.owner_clan_2 || null,
     registered_date: r.registered_date, approved_date: r.approved_date || null,
@@ -10679,7 +10689,9 @@ function renderWaterApprove() {
       h += '<span style="font-size:0.92rem;font-weight:700;">'+icon(tm.key,18)+' '+(r.name||'(unnamed)')+'</span>';
       h += '<span style="font-size:0.68rem;font-weight:700;color:#F57F17;background:#FFF8E1;border:1px solid #FFE082;padding:2px 8px;border-radius:10px;">'+tm.label+'</span>';
       h += '</div>';
-      if (r.photo) h += '<img src="'+r.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" alt="Source photo">';
+      var _wp = r.photo_thumb || r.photo;
+      if (_wp) h += '<img src="'+_wp+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" alt="Source photo">';
+      else if (r.photo_url) h += '<a href="'+r.photo_url+'" target="_blank" rel="noopener" style="display:inline-block;margin-bottom:8px;font-size:0.8rem;color:#1565C0;">View photo ↗</a>';
       h += '<div style="font-size:0.74rem;color:#666;">'+icon('pin',13)+' '+(r.lat||'?')+', '+(r.lng||'?')+'</div>';
       h += '<div style="font-size:0.74rem;color:#666;margin-bottom:6px;">Proposed by '+(r.proposed_by||'—')+' · clan <strong>'+(r.proposed_clan||'—')+'</strong></div>';
       if (r.description) h += '<div style="font-size:0.73rem;color:#888;margin-bottom:8px;">'+r.description+'</div>';
@@ -12609,7 +12621,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v144'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v145'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a
@@ -14957,11 +14969,69 @@ function _postMedia(name, dataUri, recordUid, cb) {
     var to = setTimeout(function(){ if (ctrl) { try { ctrl.abort(); } catch(_){} } }, 90000);
     fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: body, signal: ctrl ? ctrl.signal : undefined })
       .then(function(r){ return r.json(); })
-      .then(function(d){ clearTimeout(to); if (d && d.status === 'ok') cb(true, d.file); else retry(); })
+      .then(function(d){ clearTimeout(to); if (d && d.status === 'ok') cb(true, d.file, d.url); else retry(); })
       .catch(function(){ clearTimeout(to); retry(); });
   }
   function retry() { if (tries < max) setTimeout(attempt, 1000 * Math.pow(2, tries)); else cb(false); }
   attempt();
+}
+
+/* ── Registry media separation ─────────────────────────────────────────────
+   Map registries (water sources, facilities, met stations) must NOT carry a
+   full inline photo — that is what ballooned _water_sources.json to 38 MB.
+   Instead we keep a SMALL inline thumbnail on the shared row (so the map and
+   approval screen still render offline) and push the full-resolution photo to
+   its own media file (the same per-steward media/ folder the survey photos use),
+   recording only a {photo_file, photo_url} reference on the row. */
+function makeRegistryThumb(dataUri, cb){
+  if (!dataUri || String(dataUri).indexOf('data:') !== 0) { cb(null); return; }
+  try {
+    var img = new Image();
+    img.onload = function(){
+      try {
+        var MAX = 320, scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        var c = document.createElement('canvas');
+        c.width  = Math.max(1, Math.round(img.width  * scale));
+        c.height = Math.max(1, Math.round(img.height * scale));
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        cb(c.toDataURL('image/jpeg', 0.6));   /* ~320px @ q0.6 ≈ 15–25 KB */
+      } catch(e) { cb(null); }
+    };
+    img.onerror = function(){ cb(null); };
+    img.src = dataUri;
+  } catch(e) { cb(null); }
+}
+/* Make sure _uploadSteward is populated for a live (non-"Send All") upload. */
+function _ensureUploadSteward(cb){
+  if (window._uploadSteward && window._uploadSteward.stewardId) { cb(); return; }
+  function set(pr){ pr = pr || {}; window._uploadSteward = {
+    name: pr.name||'Unknown', stewardId: pr.stewardId||'UNKNOWN', clan: pr.clan||'',
+    zone: pr.zone||'', zone_id: pr.zone_id||'', village: pr.village||'', role: pr.role||'clan_steward' }; cb(); }
+  var p = window._cachedProfile;
+  if (p && p.stewardId) { set(p); return; }
+  try { getAllRecords('auth', function(a){ set((a && a[0]) || {}); }); } catch(e) { set({}); }
+}
+/* Thumbnail the row, upload the full photo to its media file, record the
+   reference, then sync the (small) registry row via postFn. Offline-safe: the
+   row still syncs with its thumbnail; the full photo uploads on a later pass. */
+function registrySubmitMedia(store, record, fullPhoto, postFn, doneCb){
+  function finish(){ try { postFn(record); } catch(e){} if (doneCb) doneCb(); }
+  makeRegistryThumb(fullPhoto, function(thumb){
+    record.photo_thumb = thumb || null;
+    updateRecord(store, record, function(){
+      if (!UPLOAD_ENDPOINT || !navigator.onLine || !fullPhoto) { finish(); return; }
+      _ensureUploadSteward(function(){
+        var mime = ((String(fullPhoto).match(/^data:([^;]+)/) || [])[1]) || 'image/jpeg';
+        var ext  = (mime.indexOf('png') >= 0 ? 'png' : 'jpg');
+        var name = String(record.uid).replace(/[^A-Za-z0-9_-]/g,'_') + '_ref.' + ext;
+        _postMedia(name, fullPhoto, record.uid, function(ok, file, url){
+          if (ok) { record.photo_file = file || name; record.photo_url = url || null;
+                    updateRecord(store, record, function(){ finish(); }); }
+          else { finish(); }   /* stays local with its thumbnail; retries later */
+        });
+      });
+    });
+  });
 }
 
 /* ── Resumable DIRECT-to-Drive upload for large media (video) ──────────────

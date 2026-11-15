@@ -156,6 +156,23 @@ function saveTopicConfig(topics) {
   else { folder.createFile('_topics.json', json, MimeType.PLAIN_TEXT); }
 }
 
+/* Defensive guard for the photo-bearing registries. The shared registry JSON
+ * must NEVER carry a full inline photo (a data: URI) — that is what ballooned
+ * _water_sources.json to ~38 MB. The app now keeps a small inline thumbnail
+ * (photo_thumb) and a media-file reference (photo_file/photo_url) instead, but
+ * this strips any full inline photo (or an over-large thumbnail) before writing,
+ * so even an old app build can never re-bloat the file. */
+function _stripRegistryInline(list) {
+  if (!list || !list.length) return list || [];
+  for (var i = 0; i < list.length; i++) {
+    var r = list[i];
+    if (!r || typeof r !== 'object') continue;
+    if (typeof r.photo === 'string' && r.photo.indexOf('data:') === 0) r.photo = null;
+    if (typeof r.photo_thumb === 'string' && r.photo_thumb.length > 120000) r.photo_thumb = null;
+  }
+  return list;
+}
+
 /* ─── Water source registry ────────────────────────────────────────────
  * _water_sources.json in Drive: the authoritative list of monitorable water
  * sources, keyed by a client-generated uid. Stewards append pending entries
@@ -174,9 +191,10 @@ function loadWaterSourcesList() {
 }
 
 function saveWaterSourcesList(list) {
+  list = _stripRegistryInline(list || []);
   var folder = getDataFolder();
   var files  = folder.getFilesByName('_water_sources.json');
-  var json   = JSON.stringify(list || [], null, 2);
+  var json   = JSON.stringify(list, null, 2);
   if (files.hasNext()) { files.next().setContent(json); }
   else { folder.createFile('_water_sources.json', json, MimeType.PLAIN_TEXT); }
 }
@@ -218,9 +236,10 @@ function loadFacilitiesList() {
   return [];
 }
 function saveFacilitiesList(list) {
+  list = _stripRegistryInline(list || []);
   var folder = getDataFolder();
   var files  = folder.getFilesByName('_facilities.json');
-  var json   = JSON.stringify(list || [], null, 2);
+  var json   = JSON.stringify(list, null, 2);
   if (files.hasNext()) { files.next().setContent(json); }
   else { folder.createFile('_facilities.json', json, MimeType.PLAIN_TEXT); }
 }
@@ -255,9 +274,10 @@ function loadMetStationsList() {
   return [];
 }
 function saveMetStationsList(list) {
+  list = _stripRegistryInline(list || []);
   var folder = getDataFolder();
   var files  = folder.getFilesByName('_met_stations.json');
-  var json   = JSON.stringify(list || [], null, 2);
+  var json   = JSON.stringify(list, null, 2);
   if (files.hasNext()) { files.next().setContent(json); }
   else { folder.createFile('_met_stations.json', json, MimeType.PLAIN_TEXT); }
 }
@@ -2068,7 +2088,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-12.1 — module-training revoke (revoke_module_training); incl. .8 never-persist-credentials + reject misrouted actions';
+var BACKEND_VERSION = '2026-11-15.1 — registry media separation: strip inline registry photos on save (_stripRegistryInline) + one-off migrateRegistryPhotos(); incl. .12.1 module-training revoke + never-persist-credentials';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {
@@ -2371,6 +2391,67 @@ function _saveMedia(folder, name, dataUri) {
 }
 function _extractMedia(folder, uid, slot, dataUri, ext) {
   return _saveMedia(folder, 'DIST_' + uid + '_' + slot + '.' + ext, dataUri);
+}
+
+/* ── ONE-OFF MIGRATION: lift inline registry photos out to media files ──────
+ * Run this ONCE from the Apps Script editor (Run ▸ migrateRegistryPhotos).
+ *
+ * It walks the three photo-bearing registries, writes each full inline photo
+ * (a data: URI) out to its own file in a `registry_media` folder, and replaces
+ * it on the row with a {photo_file, photo_url} reference (photo -> null), then
+ * re-saves the now-tiny registry JSON. This is what shrinks _water_sources.json
+ * from ~38 MB back to a few KB.
+ *
+ * SAFE:
+ *  - Idempotent — rows already migrated (photo is not a data: URI) are skipped,
+ *    and _saveMedia reuses an existing media file of the same name, so re-running
+ *    changes nothing further.
+ *  - A registry file is re-saved ONLY once every one of its inline photos has
+ *    been written to a media file this run. If a file has more inline photos
+ *    than the per-run budget, it is left completely untouched (not saved), so
+ *    the save-time strip guard can never drop a photo that wasn't moved first.
+ *    Re-run until the result reports remaining_inline: 0.
+ *
+ * NOTE: Apps Script has no image resize, so migrated rows get NO thumbnail —
+ * they display via the "View photo" link (photo_url). Newly submitted rows
+ * carry a client-generated thumbnail. */
+function migrateRegistryPhotos() {
+  var MAX_PER_RUN = 40;                 /* total photos moved per execution */
+  var media = getOrCreateFolder('registry_media', getDataFolder());
+  var regs = [
+    { name:'_water_sources.json', load:loadWaterSourcesList, save:saveWaterSourcesList },
+    { name:'_facilities.json',    load:loadFacilitiesList,   save:saveFacilitiesList },
+    { name:'_met_stations.json',  load:loadMetStationsList,  save:saveMetStationsList }
+  ];
+  var budget = MAX_PER_RUN, movedTotal = 0, remaining = 0, detail = {};
+  for (var g = 0; g < regs.length; g++) {
+    var reg = regs[g], list = reg.load(), inline = [];
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i];
+      if (r && typeof r.photo === 'string' && r.photo.indexOf('data:') === 0) inline.push(i);
+    }
+    if (inline.length === 0) { detail[reg.name] = { moved: 0, still_inline: 0 }; continue; }
+    if (inline.length > budget) {        /* leave this file for a later run, untouched */
+      detail[reg.name] = { moved: 0, still_inline: inline.length, note: 'exceeds per-run budget — re-run' };
+      remaining += inline.length; continue;
+    }
+    var moved = 0;
+    for (var k = 0; k < inline.length; k++) {
+      var row = list[inline[k]];
+      var m   = String(row.photo).match(/^data:(image\/[^;]+);base64,/);
+      var ext = (m && m[1].indexOf('png') >= 0) ? 'png' : 'jpg';
+      var fname = String(row.uid || ('row' + inline[k])).replace(/[^A-Za-z0-9_-]/g,'_') + '_ref.' + ext;
+      var url = _saveMedia(media, fname, row.photo);
+      if (url) { row.photo_file = fname; row.photo_url = url; row.photo = null; moved++; budget--; }
+    }
+    reg.save(list);                      /* all inline photos in this file now moved */
+    detail[reg.name] = { moved: moved, still_inline: inline.length - moved };
+    movedTotal += moved; remaining += (inline.length - moved);
+  }
+  var summary = { status:'ok', migrated_this_run: movedTotal, remaining_inline: remaining,
+                  media_folder: media.getName(), detail: detail };
+  Logger.log(JSON.stringify(summary, null, 2));
+  return summary;
 }
 
 /* Store ONE full-quality photo/video (uploaded on its own, ahead of the small

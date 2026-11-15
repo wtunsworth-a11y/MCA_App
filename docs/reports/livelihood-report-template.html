@@ -47,8 +47,9 @@
   .f .v.empty{color:#B6B2A6;font-style:italic;}
 
   .photos{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;}
-  .ph{width:150px;}
-  .ph .box{height:104px;border:1px dashed #CFC9B6;border-radius:8px;background:
+  .ph{width:220px;}
+  .ph img{width:100%;height:auto;display:block;border-radius:8px;border:1px solid var(--line);}
+  .ph .box{height:150px;border:1px dashed #CFC9B6;border-radius:8px;background:
     repeating-linear-gradient(45deg,#FBFAF2,#FBFAF2 7px,#F4F2E6 7px,#F4F2E6 14px);
     display:flex;align-items:center;justify-content:center;color:#A79F86;font-size:.74rem;}
   .ph .cap{font-size:.64rem;color:var(--muted);margin-top:4px;word-break:break-all;line-height:1.3;}
@@ -146,7 +147,7 @@ document.getElementById('report').innerHTML = RECORDS.map(r=>{
   }).join('');
   const photos = (r.photos&&r.photos.length)
     ? '<div class="section-label" style="margin-top:20px;">Photos</div><div class="photos">'+
-      r.photos.map(p=>'<div class="ph">'+(PHOTOS[p]?('<img src="'+PHOTOS[p]+'" alt="'+esc(p)+'" style="width:100%;height:104px;object-fit:cover;display:block;border-radius:8px;">'):'<div class="box">photo</div>')+'<div class="cap">'+esc(p)+'</div></div>').join('')+'</div>'
+      r.photos.map(p=>'<div class="ph">'+(PHOTOS[p]?('<img src="'+PHOTOS[p]+'" alt="'+esc(p)+'">'):'<div class="box">photo</div>')+'<div class="cap">'+esc(p)+'</div></div>').join('')+'</div>'
     : '';
   const loc = r.gps
     ? '<span class="loc ok">◎ '+esc(r.gps.lat)+', '+esc(r.gps.lng)+' · ±'+esc(r.gps.accuracy)+' m'+(r.gps.source==='coarse'?' (approx)':'')+'</span>'

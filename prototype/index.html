@@ -1690,6 +1690,7 @@ select.msel {
           <button class="btn-outline" id="enrollGrantAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#1B5E20;color:#1B5E20;" onclick="showGrantAuth()"><span data-icon="mortarboard" data-size="14"></span> Grant Training Authorisation</button>
           <button class="btn-outline" id="enrollGrantVcAuthBtn" style="display:none;margin-top:8px;width:100%;border-color:#6A1B9A;color:#6A1B9A;" onclick="showGrantVcAuth()"><span data-icon="clipboard" data-size="14"></span> Authorise Value-Chain Auditor</button>
           <button class="btn-outline" id="enrollGrantModuleBtn" style="display:none;margin-top:8px;width:100%;border-color:#00695C;color:#00695C;" onclick="showGrantModuleTraining()"><span data-icon="unlock" data-size="14"></span> Unlock Clan-Steward Modules</button>
+          <button class="btn-outline" id="enrollVerifyBtn" style="display:none;margin-top:8px;width:100%;border-color:#1565C0;color:#1565C0;" onclick="showVerifyApprovals()"><span data-icon="shieldcheck" data-size="14"></span> Verify Approvals (on server)</button>
           <button class="btn-outline" id="enrollIssuesBtn" style="display:none;margin-top:8px;width:100%;border-color:#AD1457;color:#AD1457;" onclick="showScreen('screen-issue-reports')"><span data-icon="warning" data-size="14"></span> Issue Reports</button>
           <button class="btn-outline" id="enrollManageTopicsBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-topics-config')"><span data-icon="clipboard" data-size="14"></span> Manage Training Topics</button>
           <button class="btn-outline" id="enrollManageZonesBtn" style="display:none;margin-top:8px;width:100%;" onclick="showScreen('screen-zone-config')"><span data-icon="gear" data-size="14"></span> Manage Zones</button>
@@ -5578,6 +5579,26 @@ select.msel {
     </div>
 
     <!-- ══ Coordinator: unlock clan-steward modules after training ══ -->
+    <div class="screen" id="screen-verify-approvals">
+      <div class="top-bar" style="background:#1565C0;">
+        <button class="back-btn" onclick="showScreen('screen-enroll')">←</button>
+        <div><div class="bar-title">Verify Approvals</div><div class="bar-sub">What's actually recorded on the server</div></div>
+      </div>
+      <div class="scroll-content" style="padding:16px;">
+        <div style="background:#E3F2FD;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.78rem;color:#0D47A1;">
+          Pick a person to see what the <strong>server</strong> has for them — trainer certifications, unlocked modules, training authorisations and value-chain audit access. Anything you approved that isn't shown here <strong>did not reach the server</strong>. Re-send a missing trainer certification with one tap (you must be unlocked as coordinator and online).
+        </div>
+        <div class="form-group ep-wrap">
+          <label class="form-label">Person</label>
+          <input type="text" id="vaPersonSearch" class="form-input" placeholder="Type a name or ID…" autocomplete="off" oninput="epFilter('va')" onfocus="epFilter('va')">
+          <div id="vaPersonList" class="ep-list"></div>
+          <div id="vaPersonChosen" class="ep-chosen" style="display:none;"></div>
+          <input type="hidden" id="vaStewId">
+        </div>
+        <div id="vaResult"></div>
+      </div>
+    </div>
+
     <div class="screen" id="screen-grant-module-training">
       <div class="top-bar" style="background:#00695C;">
         <button class="back-btn" onclick="showScreen('screen-enroll')">←</button>
@@ -6160,7 +6181,7 @@ const ALL_SCREENS = [
   'screen-motion-entry','screen-motion-verify','screen-motion-vote','screen-motion-locked',
   'screen-performance','screen-recent-activity',
   'screen-ack','screen-profile','screen-timesheet',
-  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-vc-audit','screen-grant-vc-auth','screen-grant-module-training','screen-distribution','screen-livelihood','screen-market-prices','screen-set-price','screen-price-report','screen-data-export'
+  'screen-under-construction','screen-meteo-setup','screen-meteo-record','screen-conserv-setup','screen-conserv-record','screen-conserv-followup','screen-conserv-schedule','screen-training-setup','screen-training-record','screen-vc-audit','screen-grant-vc-auth','screen-grant-module-training','screen-distribution','screen-livelihood','screen-market-prices','screen-set-price','screen-price-report','screen-data-export','screen-verify-approvals'
 ];
 
 let currentScreen = 'screen-splash';
@@ -6620,7 +6641,7 @@ function enrollCheckPasscode() {
       btn.disabled = false;
       btn.innerHTML = ''+icon('plus',13)+' Enroll New Person →';
       btn.onclick = enrollGoToStep2;
-      ['enrollManageZonesBtn','enrollManageTopicsBtn','enrollUpdateProfileBtn','enrollEnrolmentsBtn','enrollGrantAuthBtn','enrollGrantVcAuthBtn','enrollGrantModuleBtn','enrollApproveWaterBtn','enrollApproveFacBtn','enrollApproveMetBtn','enrollApproveTreeBtn','enrollDateReviewBtn','enrollIssuesBtn'].forEach(function(bid){ var el=document.getElementById(bid); if (el) el.style.display='block'; });
+      ['enrollManageZonesBtn','enrollManageTopicsBtn','enrollUpdateProfileBtn','enrollEnrolmentsBtn','enrollGrantAuthBtn','enrollGrantVcAuthBtn','enrollGrantModuleBtn','enrollVerifyBtn','enrollApproveWaterBtn','enrollApproveFacBtn','enrollApproveMetBtn','enrollApproveTreeBtn','enrollDateReviewBtn','enrollIssuesBtn'].forEach(function(bid){ var el=document.getElementById(bid); if (el) el.style.display='block'; });
       var _st=document.getElementById('enrollPassStatus'); _st.textContent=note; _st.style.color='#2E7D32';
       loadZonesForEnrollment();
       loadTopicsForEnrollment();
@@ -6755,6 +6776,7 @@ function epPick(prefix, i){
   var l=document.getElementById(prefix+'PersonList'); if(l){ l.classList.remove('open'); l.innerHTML=''; }
   var ch=document.getElementById(prefix+'PersonChosen'); if(ch){ var rz=_epRoleZone(p); ch.style.display=''; ch.innerHTML='✓ Selected: <strong>'+_esc(p.name||'')+'</strong> <span style="font-family:monospace;color:#555;">'+_esc(p.stewardId||'')+'</span>'+(rz?' <span style="color:#888;">· '+_esc(rz)+'</span>':''); }
   if(prefix==='mt'){ try{ mtLoadCurrent(p.stewardId||''); }catch(e){} }
+  if(prefix==='va'){ try{ vaLoad(p.stewardId||''); }catch(e){} }
 }
 document.addEventListener('click', function(e){
   if(e.target && e.target.closest && e.target.closest('.ep-wrap')) return;
@@ -12587,7 +12609,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v143'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v144'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a
@@ -20333,6 +20355,76 @@ var VC_COMMODITIES = ['vanilla','coffee','cocoa'];
 function showGrantVcAuth(){ window._vcgCommodity=''; showScreen('screen-grant-vc-auth'); epInit('vcg'); }
 
 /* ── Coordinator: unlock clan-steward modules after training ── */
+/* ── Coordinator: verify what the server actually has (approvals read-back) ──
+   Coordinator approvals are fire-and-forget POSTs with no retry, so one can
+   fail silently (offline, wrong server key) and never land. This screen reads
+   the server back per person so the coordinator can SEE what's recorded, and
+   re-send a trainer certification that's on the phone but not on the server. */
+function showVerifyApprovals(){
+  var r=document.getElementById('vaResult'); if(r) r.innerHTML='';
+  showScreen('screen-verify-approvals');
+  epInit('va');
+}
+function vaLoad(sid){
+  var out=document.getElementById('vaResult'); if(!out) return;
+  if(!sid){ out.innerHTML=''; return; }
+  if(!UPLOAD_ENDPOINT || !navigator.onLine){ out.innerHTML='<div class="matrix-note" style="background:#FFF8E1;border-color:#FFE082;color:#8D6E00;">Go online to read the server.</div>'; return; }
+  out.innerHTML='<div style="color:#888;font-size:0.85rem;padding:10px 0;">Reading the server…</div>';
+  var q=encodeURIComponent(sid);
+  function get(a){ return fetch(UPLOAD_ENDPOINT+'?action='+a+'&stewardId='+q+'&_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).catch(function(){ return null; }); }
+  Promise.all([ get('trainer_certs'), get('module_training'), get('authorisations'), get('vc_auditors') ]).then(function(res){
+    getAllRecords('trainerCerts', function(local){
+      var mine=(local||[]).filter(function(c){ return String(c.stewardId||'')===sid; });
+      vaRender(sid, res, mine);
+    });
+  });
+}
+function _vaSection(title, inner){
+  return '<div style="font-size:0.9rem;font-weight:700;color:#333;margin:16px 0 6px;">'+title+'</div>'+
+    '<div style="border:1px solid #e3e3e3;border-radius:8px;overflow:hidden;">'+inner+'</div>';
+}
+function _vaItem(main, sub){ return '<div style="padding:9px 12px;border-bottom:1px solid #eee;font-size:0.86rem;">✓ '+main+(sub?(' <span style="color:#888;">· '+sub+'</span>'):'')+'</div>'; }
+function _vaEmpty(){ return '<div style="padding:9px 12px;font-size:0.82rem;color:#999;">— none recorded on the server —</div>'; }
+function vaRender(sid, res, localCerts){
+  var out=document.getElementById('vaResult'); if(!out) return;
+  if(!res[0]&&!res[1]&&!res[2]&&!res[3]){ out.innerHTML='<div class="matrix-note" style="background:#FFEBEE;border-color:#EF9A9A;color:#B71C1C;">Couldn\'t reach the server — try again online.</div>'; return; }
+  var certs=(res[0]&&res[0].certs)||[], mods=(res[1]&&res[1].modules)||[], topics=(res[2]&&res[2].authorisations)||[], vc=(res[3]&&res[3].commodities)||[];
+  var h='';
+  h+=_vaSection('Trainer certifications',
+    certs.length ? certs.map(function(c){ return _vaItem(_esc(c.topic_name||c.topic_id||'cert')+(c.status&&c.status!=='active'?(' ('+_esc(c.status)+')'):''), c.cert_date?('cert '+_esc(c.cert_date)):''); }).join('') : _vaEmpty());
+  var sIds=certs.map(function(c){ return c.topic_id; }), sNames=certs.map(function(c){ return String(c.topic_name||'').toLowerCase(); });
+  var missing=localCerts.filter(function(c){ return sIds.indexOf(c.topic_id)===-1 && sNames.indexOf(String(c.topic_name||'').toLowerCase())===-1; });
+  if(missing.length){
+    h+='<div style="margin-top:8px;">'+missing.map(function(c){
+      return '<div style="background:#FFEBEE;border:1px solid #EF9A9A;border-radius:8px;padding:9px 11px;margin-bottom:6px;font-size:0.8rem;color:#B71C1C;">'+
+        '&#9888; <strong>'+_esc(c.topic_name||c.topic_id)+'</strong> is on this phone but <strong>not on the server</strong>.'+
+        '<button data-cid="'+_esc(String(c.id))+'" onclick="vaResendCert(\''+_esc(sid)+'\',this.getAttribute(\'data-cid\'))" style="margin-top:6px;display:block;width:100%;background:#C62828;color:#fff;border:none;border-radius:7px;padding:8px;font-weight:700;font-size:0.8rem;cursor:pointer;">Re-send to server</button>'+
+      '</div>';
+    }).join('')+'</div>';
+  }
+  h+=_vaSection('Modules unlocked',
+    mods.length ? mods.map(function(m){ var lm=(typeof TRAINED_MODULES!=='undefined')?TRAINED_MODULES.filter(function(x){return x.key===m;})[0]:null; return _vaItem(_esc(lm?lm.label:m),''); }).join('') : _vaEmpty());
+  h+=_vaSection('Training authorisations',
+    topics.length ? topics.map(function(t){ return _vaItem(_esc(t.topic_name||t.topic_id||'topic'), t.cert_date?_esc(t.cert_date):''); }).join('') : _vaEmpty());
+  h+=_vaSection('Value-chain audit',
+    vc.length ? vc.map(function(c){ return _vaItem(_esc(c),''); }).join('') : _vaEmpty());
+  out.innerHTML=h;
+}
+function vaResendCert(sid, certId){
+  if(!window._coordSecret){ toast('Unlock as coordinator first (passcode + server key).'); return; }
+  if(!UPLOAD_ENDPOINT||!navigator.onLine){ toast('Go online to re-send.'); return; }
+  getAllRecords('trainerCerts', function(all){
+    var rec=(all||[]).filter(function(x){ return String(x.id)===String(certId) && String(x.stewardId||'')===sid; })[0];
+    if(!rec){ toast('Could not find that certification on this phone.'); return; }
+    toast('Re-sending…');
+    fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({ _action:'certify_trainer', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret, stewardId:sid, records:[rec], cert_photo_b64:null })})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.status==='ok'){ toast('Re-sent ✓'); vaLoad(sid); }
+        else { toast('Re-send failed: '+((d&&d.message)||'coordinator key?')); }
+      }).catch(function(){ toast('Re-send failed — are you online?'); });
+  });
+}
 function showGrantModuleTraining(){
   window._mtCurrent = [];
   var box=document.getElementById('mtModuleList');

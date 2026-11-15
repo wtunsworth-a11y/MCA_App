@@ -116,6 +116,10 @@ const RECORDS = /*__LVH__*/ [
     photos:[], gps:null },
 ];
 
+/* Photo images keyed by media filename. Empty here (a repo-light template);
+   a backend-served or exported copy injects resolved thumbnails/data-URIs so
+   the real photos show instead of filename placeholders. */
+const PHOTOS = /*__PHOTOS__*/ {};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function png(iso){
   if(!iso) return "—";
@@ -142,7 +146,7 @@ document.getElementById('report').innerHTML = RECORDS.map(r=>{
   }).join('');
   const photos = (r.photos&&r.photos.length)
     ? '<div class="section-label" style="margin-top:20px;">Photos</div><div class="photos">'+
-      r.photos.map(p=>'<div class="ph"><div class="box">photo</div><div class="cap">'+esc(p)+'</div></div>').join('')+'</div>'
+      r.photos.map(p=>'<div class="ph">'+(PHOTOS[p]?('<img src="'+PHOTOS[p]+'" alt="'+esc(p)+'" style="width:100%;height:104px;object-fit:cover;display:block;border-radius:8px;">'):'<div class="box">photo</div>')+'<div class="cap">'+esc(p)+'</div></div>').join('')+'</div>'
     : '';
   const loc = r.gps
     ? '<span class="loc ok">◎ '+esc(r.gps.lat)+', '+esc(r.gps.lng)+' · ±'+esc(r.gps.accuracy)+' m'+(r.gps.source==='coarse'?' (approx)':'')+'</span>'

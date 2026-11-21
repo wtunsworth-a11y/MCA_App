@@ -5617,7 +5617,7 @@ select.msel {
         </div>
         <div class="form-group">
           <label class="form-label">Modules trained <span style="color:#B71C1C;">*</span></label>
-          <div id="mtModuleList" style="background:#f9f9f9;border:1px solid #d0d0d0;border-radius:8px;padding:4px 10px;"></div>
+          <div id="mtModuleList" style="background:#f9f9f9;border:1px solid #d0d0d0;border-radius:8px;padding:4px 10px;max-height:44vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;"></div>
         </div>
         <div class="form-group">
           <label class="form-label">Authorised by <span style="color:#B71C1C;">*</span></label>
@@ -12621,7 +12621,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v145'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v146'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a

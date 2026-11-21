@@ -1076,6 +1076,28 @@ function grantVcAuthorisation(record) {
     return { status:'ok', message:'Auditor authorised', stewardId:sid, commodity:record.commodity, duplicate:exists };
   } catch(err) { return { status:'error', message:err.toString() }; }
 }
+/* Revoke previously-granted commodities: mark them status 'revoked' so
+ * getVcAuditors stops returning them and the auditor's phone drops the tile. */
+function revokeVcAuthorisation(record) {
+  if (!record || !record.stewardId || !record.commodities || !record.commodities.length) {
+    return { status:'error', message:'Missing stewardId or commodities' };
+  }
+  try {
+    var data = loadVcAuditorsFile();
+    var sid  = String(record.stewardId).trim().toUpperCase();
+    var recs = data[sid] || [];
+    var revoke = {}; record.commodities.forEach(function(c){ revoke[c] = true; });
+    var n = 0;
+    recs.forEach(function(r){
+      if (revoke[r.commodity] && r.status !== 'revoked') {
+        r.status = 'revoked'; r.revoked_by = record.authorised_by || ''; r.revoked_at = record.authorised_at || new Date().toISOString(); n++;
+      }
+    });
+    data[sid] = recs;
+    saveVcAuditorsFile(data);
+    return { status:'ok', message:'Auditor authorisation revoked', stewardId:sid, count:n };
+  } catch(err) { return { status:'error', message:err.toString() }; }
+}
 function getVcAuditors(stewardId) {
   if (!stewardId) {
     return ContentService.createTextOutput(JSON.stringify({ status:'error', message:'Missing stewardId' })).setMimeType(ContentService.MimeType.JSON);
@@ -1236,6 +1258,35 @@ function certifyTrainer(body) {
     }
 
     return { status: 'ok', stewardId: sid, added: added, total: data[sid].length };
+  } catch(err) {
+    return { status: 'error', message: err.toString() };
+  }
+}
+
+/* Revoke trainer certifications for the given topic_ids: mark the matching
+ * active certs status 'revoked'. The authoritative register then no longer
+ * shows them as active (coordinator read-back + reports reflect it). */
+function revokeTrainerCert(body) {
+  if (!body || !body.stewardId || !body.topic_ids || !body.topic_ids.length) {
+    return { status: 'error', message: 'Missing stewardId or topic_ids' };
+  }
+  try {
+    var data = loadTrainerCertsFile();
+    var want = String(body.stewardId).trim().toUpperCase();
+    var key  = null;
+    for (var k in data) { if (String(k).trim().toUpperCase() === want) { key = k; break; } }
+    if (key === null) { return { status: 'ok', message: 'No certs for steward', stewardId: body.stewardId, count: 0 }; }
+    var recs = data[key] || [];
+    var revoke = {}; body.topic_ids.forEach(function(t){ revoke[t] = true; });
+    var n = 0;
+    recs.forEach(function(r){
+      if (revoke[r.topic_id] && r.status !== 'revoked') {
+        r.status = 'revoked'; r.revoked_by = body.authorised_by || ''; r.revoked_at = body.authorised_at || new Date().toISOString(); n++;
+      }
+    });
+    data[key] = recs;
+    saveTrainerCertsFile(data);
+    return { status: 'ok', message: 'Trainer certification revoked', stewardId: body.stewardId, count: n };
   } catch(err) {
     return { status: 'error', message: err.toString() };
   }
@@ -1754,7 +1805,7 @@ function doPost(e) {
 
     /* Coordinator write actions require a second server-side key in addition to the upload secret.
      * The key is stored in Script Properties (never in the distributed app source). */
-    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood', 'update_indicative_price', 'grant_vc_authorisation', 'grant_module_training', 'revoke_module_training'];
+    var COORDINATOR_ACTIONS = ['update_zones', 'update_topics', 'grant_authorisation', 'certify_trainer', 'update_water_sources', 'update_facilities', 'update_met_stations', 'update_pheno_plots', 'update_calendar', 'update_disturbances', 'update_help', 'update_date_review', 'update_issues', 'update_recipients', 'update_roster', 'update_pheno_targets', 'update_clans', 'update_holidays', 'update_livelihood', 'update_indicative_price', 'grant_vc_authorisation', 'grant_module_training', 'revoke_module_training', 'revoke_vc_authorisation', 'revoke_trainer_cert'];
     if (COORDINATOR_ACTIONS.indexOf(body._action) !== -1) {
       var coordSecret = getCoordinatorSecret();
       if (!coordSecret || body._coordinator_secret !== coordSecret) {
@@ -1786,6 +1837,12 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    if (body._action === 'revoke_vc_authorisation') {
+      var vcRev = revokeVcAuthorisation(body.record);
+      return ContentService
+        .createTextOutput(JSON.stringify(vcRev))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     if (body._action === 'grant_vc_authorisation') {
       var vcRes = grantVcAuthorisation(body.record);
       return ContentService
@@ -1811,6 +1868,13 @@ function doPost(e) {
       var result = certifyTrainer(body);
       return ContentService
         .createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (body._action === 'revoke_trainer_cert') {
+      var tcRev = revokeTrainerCert(body);
+      return ContentService
+        .createTextOutput(JSON.stringify(tcRev))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -2088,7 +2152,7 @@ function doPost(e) {
  *   • open  <your web-app URL>?action=version  in a browser, or
  *   • run   backendVersion()  in the Apps Script editor (see the Execution log).
  * If this doesn't match the file you were given, the deploy is stale. */
-var BACKEND_VERSION = '2026-11-15.1 — registry media separation: strip inline registry photos on save (_stripRegistryInline) + one-off migrateRegistryPhotos(); incl. .12.1 module-training revoke + never-persist-credentials';
+var BACKEND_VERSION = '2026-11-21.1 — revoke endpoints for value-chain auditor (revoke_vc_authorisation) + trainer cert (revoke_trainer_cert), for tick/untick grant screens; incl. .15.1 registry media separation';
 function backendVersion(){ Logger.log('MCA backend ' + BACKEND_VERSION); return BACKEND_VERSION; }
 
 function doGet(e) {

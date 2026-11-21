@@ -1874,9 +1874,10 @@ select.msel {
         </div>
         <div class="form-group">
           <label class="form-label">Topics Certified <span style="color:#B71C1C;">*</span></label>
-          <div id="gaTopicsList" style="background:#f9f9f9;border:1px solid #d0d0d0;border-radius:8px;padding:6px 10px;max-height:180px;overflow-y:auto;">
+          <div id="gaTopicsList" style="background:#f9f9f9;border:1px solid #d0d0d0;border-radius:8px;padding:6px 10px;max-height:44vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;">
             <div style="font-size:0.78rem;color:#888;padding:4px;">Loading topics…</div>
           </div>
+          <div id="gaCurrentNote" style="margin-top:6px;font-size:0.76rem;color:#555;">Pick a person to see what they're already certified for.</div>
         </div>
         <div class="form-group">
           <label class="form-label">Propose Additional Topic <span style="font-size:0.72rem;font-weight:400;color:#888;">(not on list — admin review required)</span></label>
@@ -1904,7 +1905,7 @@ select.msel {
           <label class="form-label">Authorised By</label>
           <input type="text" id="gaAuthorisedBy" class="form-input" placeholder="Your name / initials">
         </div>
-        <button class="enroll-next-btn" onclick="submitGrantAuth()" id="gaSubmitBtn">Record Authorisation →</button>
+        <button class="enroll-next-btn" onclick="submitGrantAuth()" id="gaSubmitBtn">Save certifications →</button>
         <div id="gaStatus" style="font-size:0.8rem;color:#2E7D32;margin-top:10px;text-align:center;"></div>
         <div style="margin-top:16px;padding:12px;background:#FFF3E0;border-radius:8px;font-size:0.75rem;color:#E65100;">
           <strong><span data-icon="warning" data-size="14"></span> Sync note:</strong> The record is saved locally immediately. The steward's app will show their certification badge on their next login when they have signal, or when you sync from their phone.
@@ -5558,12 +5559,9 @@ select.msel {
           <input type="hidden" id="vcgStewId">
         </div>
         <div class="form-group">
-          <label class="form-label">Commodity <span style="color:#B71C1C;">*</span></label>
-          <div id="vcgCommodityPills" style="display:flex;gap:8px;">
-            <button type="button" class="weather-pill" data-c="vanilla" style="flex:1;" onclick="vcgSetCommodity('vanilla',this)">Vanilla</button>
-            <button type="button" class="weather-pill" data-c="coffee" style="flex:1;" onclick="vcgSetCommodity('coffee',this)">Coffee</button>
-            <button type="button" class="weather-pill" data-c="cocoa" style="flex:1;" onclick="vcgSetCommodity('cocoa',this)">Cocoa</button>
-          </div>
+          <label class="form-label">Commodities <span style="color:#B71C1C;">*</span></label>
+          <div id="vcgCommodityList" style="background:#f9f9f9;border:1px solid #d0d0d0;border-radius:8px;padding:4px 10px;max-height:44vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;"></div>
+          <div id="vcgCurrentNote" style="margin-top:6px;font-size:0.76rem;color:#555;"></div>
         </div>
         <div class="form-group">
           <label class="form-label">Basis / evidence of expertise <span style="font-size:0.72rem;font-weight:400;color:#888;">(optional)</span></label>
@@ -5573,7 +5571,7 @@ select.msel {
           <label class="form-label">Authorised by <span style="color:#B71C1C;">*</span></label>
           <input type="text" id="vcgAuthorisedBy" class="form-input" placeholder="Your name / initials">
         </div>
-        <button class="btn-primary" id="vcgSubmitBtn" style="background:#6A1B9A;width:100%;margin-top:6px;" onclick="submitVcGrant()">Record Authorisation →</button>
+        <button class="btn-primary" id="vcgSubmitBtn" style="background:#6A1B9A;width:100%;margin-top:6px;" onclick="submitVcGrant()">Save auditor access →</button>
         <div id="vcgStatus" style="margin-top:12px;font-size:0.82rem;text-align:center;"></div>
       </div>
     </div>
@@ -6777,6 +6775,8 @@ function epPick(prefix, i){
   var ch=document.getElementById(prefix+'PersonChosen'); if(ch){ var rz=_epRoleZone(p); ch.style.display=''; ch.innerHTML='✓ Selected: <strong>'+_esc(p.name||'')+'</strong> <span style="font-family:monospace;color:#555;">'+_esc(p.stewardId||'')+'</span>'+(rz?' <span style="color:#888;">· '+_esc(rz)+'</span>':''); }
   if(prefix==='mt'){ try{ mtLoadCurrent(p.stewardId||''); }catch(e){} }
   if(prefix==='va'){ try{ vaLoad(p.stewardId||''); }catch(e){} }
+  if(prefix==='vcg'){ try{ vcgLoadCurrent(p.stewardId||''); }catch(e){} }
+  if(prefix==='ga'){ try{ gaLoadCurrent(p.stewardId||''); }catch(e){} }
 }
 document.addEventListener('click', function(e){
   if(e.target && e.target.closest && e.target.closest('.ep-wrap')) return;
@@ -12621,7 +12621,7 @@ function openDB(cb) {
  */
 var UPLOAD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqEnJ1XaIXJaIZBElOvvmNfZaN8JdoStMAhOOeTSSogWmcANNkWuMPNwnzyjJCZR8XRg/exec';
 var UPLOAD_SECRET   = 'MCA_STEWARD_UPLOAD_2026'; /* shared secret checked by the script */
-var APP_BUILD       = 'mcapp-v146'; /* kept in step with the service-worker CACHE_NAME */
+var APP_BUILD       = 'mcapp-v147'; /* kept in step with the service-worker CACHE_NAME */
 
 /* Coordinator-tools reveal gesture: tap the Profile app-version line 5× within
    a few seconds to reveal the 'Coordinator Tools' entry on any phone — lets a
@@ -13709,6 +13709,27 @@ function initGrantAuthScreen() {
   });
 }
 
+/* Load the person's CURRENT trainer certifications and pre-tick those topics,
+   so the coordinator can see what's already approved (no re-approving) and
+   untick a topic to revoke it. */
+function gaLoadCurrent(sid){
+  window._gaCurrent = [];
+  document.querySelectorAll('#gaTopicsList input[type=checkbox]').forEach(function(c){ c.checked=false; });
+  var n=document.getElementById('gaCurrentNote');
+  if(!sid || !UPLOAD_ENDPOINT || !navigator.onLine){ if(n){ n.textContent='Go online to see current certifications.'; n.style.color='#8D6E00'; } return; }
+  if(n){ n.textContent='Loading current certifications…'; n.style.color='#555'; }
+  fetch(UPLOAD_ENDPOINT+'?action=trainer_certs&stewardId='+encodeURIComponent(sid)+'&_='+Date.now(),{cache:'no-store'})
+    .then(function(r){return r.json();}).then(function(d){
+      var seen={}, cur=[];
+      ((d&&d.status==='ok'&&d.certs)?d.certs:[]).forEach(function(c){
+        if(c && c.status!=='revoked' && c.topic_id && c.topic_id!=='PROPOSED' && !seen[c.topic_id]){ seen[c.topic_id]=true; cur.push(c.topic_id); }
+      });
+      window._gaCurrent = cur.slice();
+      document.querySelectorAll('#gaTopicsList input[type=checkbox]').forEach(function(c){ c.checked = cur.indexOf(c.value)!==-1; });
+      if(n){ n.textContent = cur.length ? ('Already certified for '+cur.length+' topic(s) — ticked below. Untick to revoke; tick a new one to add.') : 'No certifications yet — tick the topics they are certified for.'; n.style.color='#555'; }
+    }).catch(function(){ if(n){ n.textContent='Could not load current certifications — try again online.'; n.style.color='#E65100'; } });
+}
+
 function gaCertPhotoPreview(input) {
   if (!input.files || !input.files[0]) return;
   var file = input.files[0];
@@ -13759,94 +13780,67 @@ function submitGrantAuth() {
   var status   = document.getElementById('gaStatus');
   var btn      = document.getElementById('gaSubmitBtn');
 
-  /* Collect checked certifiable topics */
-  var checkedBoxes = document.querySelectorAll('#gaTopicsList input[type=checkbox]:checked');
-  var selectedTopics = [];
-  checkedBoxes.forEach(function(cb) {
-    selectedTopics.push({ id: cb.value, name: cb.getAttribute('data-name') || cb.value });
+  /* Checked certifiable topics */
+  var ticked = [];
+  document.querySelectorAll('#gaTopicsList input[type=checkbox]:checked').forEach(function(cb) {
+    ticked.push({ id: cb.value, name: cb.getAttribute('data-name') || cb.value });
   });
+  var tickedIds = ticked.map(function(t){ return t.id; });
+  var current   = window._gaCurrent || [];
+  /* Only grant topics not already certified — don't re-approve the same thing */
+  var toGrant   = ticked.filter(function(t){ return current.indexOf(t.id) === -1; });
+  /* Unticking a currently-held topic revokes it */
+  var toRevoke  = current.filter(function(id){ return tickedIds.indexOf(id) === -1; });
 
-  if (!stewId)   { toast('Please enter the Steward / Officer ID'); return; }
-  if (selectedTopics.length === 0 && !proposed) { toast('Select at least one topic or propose a new one'); return; }
-  if (!certDate) { toast('Please enter the certification date'); return; }
-  if (!certOrg)  { toast('Please enter the certifying organisation'); return; }
+  if (!stewId) { toast('Choose the person to authorise.'); return; }
+  if (toGrant.length === 0 && !proposed && toRevoke.length === 0) { toast('No changes — tick to add, untick to revoke.'); return; }
+  /* Certificate metadata is required only when ADDING a new topic */
+  if (toGrant.length > 0 || proposed) {
+    if (!certDate) { toast('Enter the certification date for the new topic(s).'); return; }
+    if (!certOrg)  { toast('Enter the certifying organisation for the new topic(s).'); return; }
+  }
+  if (!window._coordSecret) { toast('Unlock as coordinator first (passcode + server key).'); return; }
+  if (!UPLOAD_ENDPOINT) { status.textContent = 'No endpoint configured.'; status.style.color = '#E65100'; return; }
+
+  if (toRevoke.length) {
+    var rvNames = toRevoke.map(function(id){ var cb=document.querySelector('#gaTopicsList input[value="'+id+'"]'); return (cb && cb.getAttribute('data-name')) || id; });
+    if (!confirm('Revoke from ' + stewId + ': ' + rvNames.join(', ') + '.\n\nThis removes the certification from the register. Continue?')) return;
+  }
 
   btn.disabled = true; btn.textContent = 'Saving…';
-
   var now = new Date().toISOString();
   var records = [];
-
-  selectedTopics.forEach(function(t) {
-    records.push({
-      id:              'cert_' + stewId + '_' + t.id + '_' + now.slice(0,10).replace(/-/g,''),
-      stewardId:       stewId,
-      topic_id:        t.id,
-      topic_name:      t.name,
-      cert_date:       certDate,
-      certifying_body: certOrg,
-      cert_number:     certNum,
-      authorised_by:   authBy,
-      authorised_at:   now,
-      status:          'active',
-      has_photo:       !!window._gaCertPhotoB64
-    });
+  toGrant.forEach(function(t) {
+    records.push({ id:'cert_'+stewId+'_'+t.id+'_'+now.slice(0,10).replace(/-/g,''), stewardId:stewId, topic_id:t.id, topic_name:t.name, cert_date:certDate, certifying_body:certOrg, cert_number:certNum, authorised_by:authBy, authorised_at:now, status:'active', has_photo:!!window._gaCertPhotoB64 });
   });
-
   if (proposed) {
-    records.push({
-      id:              'cert_' + stewId + '_PROP_' + now.replace(/[^0-9]/g,'').slice(0,14),
-      stewardId:       stewId,
-      topic_id:        'PROPOSED',
-      topic_name:      proposed,
-      cert_date:       certDate,
-      certifying_body: certOrg,
-      cert_number:     certNum,
-      authorised_by:   authBy,
-      authorised_at:   now,
-      status:          'pending',
-      has_photo:       !!window._gaCertPhotoB64
-    });
+    records.push({ id:'cert_'+stewId+'_PROP_'+now.replace(/[^0-9]/g,'').slice(0,14), stewardId:stewId, topic_id:'PROPOSED', topic_name:proposed, cert_date:certDate, certifying_body:certOrg, cert_number:certNum, authorised_by:authBy, authorised_at:now, status:'pending', has_photo:!!window._gaCertPhotoB64 });
   }
-
-  /* Save every record to local trainerCerts store first */
   records.forEach(function(rec) { saveRecord('trainerCerts', rec, function(){}); });
 
-  /* POST to Apps Script */
-  var payload = {
-    _action:             'certify_trainer',
-    _secret:             UPLOAD_SECRET,
-    _coordinator_secret: window._coordSecret,
-    stewardId:           stewId,
-    records:             records,
-    cert_photo_b64:      window._gaCertPhotoB64 || null
-  };
+  var calls = [];
+  if (records.length) { calls.push({ _action:'certify_trainer', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret, stewardId:stewId, records:records, cert_photo_b64:window._gaCertPhotoB64||null }); }
+  if (toRevoke.length) { calls.push({ _action:'revoke_trainer_cert', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret, stewardId:stewId, topic_ids:toRevoke, authorised_by:authBy, authorised_at:now }); }
 
-  if (UPLOAD_ENDPOINT) {
-    fetch(UPLOAD_ENDPOINT, {
-      method: 'POST',
-      headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify(payload)
-    }).then(function(r) { return r.json(); })
-      .then(function(d) {
-        btn.disabled = false; btn.textContent = 'Record Authorisation →';
-        if (d.status === 'ok') {
-          status.textContent = '✓ ' + records.length + ' certification(s) saved for ' + stewId;
-          status.style.color = '#1B5E20';
-          clearGrantAuthForm();
-        } else {
-          status.textContent = 'Saved locally. Drive sync: ' + (d.message || 'failed');
-          status.style.color = '#E65100';
-        }
-      }).catch(function() {
-        btn.disabled = false; btn.textContent = 'Record Authorisation →';
-        status.textContent = 'Saved locally — will sync when online.';
-        status.style.color = '#E65100';
-      });
-  } else {
-    btn.disabled = false; btn.textContent = 'Record Authorisation →';
-    status.textContent = '✓ Saved locally (' + records.length + ' record' + (records.length !== 1 ? 's' : '') + ').';
-    status.style.color = '#2E7D32';
-  }
+  var okAll = true;
+  (function runNext(idx){
+    if (idx >= calls.length) {
+      btn.disabled = false; btn.textContent = 'Save certifications →';
+      if (okAll) {
+        var parts=[]; if (toGrant.length) parts.push(toGrant.length+' added'); if (proposed) parts.push('1 proposed'); if (toRevoke.length) parts.push(toRevoke.length+' revoked');
+        status.textContent = '✓ ' + parts.join(' · ') + ' for ' + stewId + '.'; status.style.color = '#1B5E20';
+        window._gaCurrent = tickedIds.slice();   /* reflect the new current state */
+        ['gaCertNum','gaNewTopicPropose'].forEach(function(i){ var e=document.getElementById(i); if(e) e.value=''; });
+        window._gaCertPhotoB64 = null;
+        var pv=document.getElementById('gaCertPhotoPreview'); if(pv){ pv.style.display='none'; pv.textContent=''; }
+        var pf=document.getElementById('gaCertPhoto'); if(pf) pf.value='';
+      } else { status.textContent = 'Sync problem — check and try again.'; status.style.color = '#E65100'; }
+      return;
+    }
+    fetch(UPLOAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(calls[idx]) })
+      .then(function(r){ return r.json(); }).then(function(d){ if(!(d&&d.status==='ok')) okAll=false; runNext(idx+1); })
+      .catch(function(){ okAll=false; runNext(idx+1); });
+  })(0);
 }
 
 /* ── Fetch authorisations from Drive on login ────────────────────── */
@@ -13898,14 +13892,17 @@ function syncAuthorisations(profile) {
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d.status !== 'ok' || !d.certs || d.certs.length === 0) return;
-      /* Merge remote certs into local trainerCerts store */
+      /* Merge remote certs into local trainerCerts store, and reconcile any
+         the coordinator has since revoked (so the badge drops on this phone). */
       getAllRecords('trainerCerts', function(local) {
-        var localIds = (local || []).map(function(c) { return c.id; });
+        var localById = {}; (local || []).forEach(function(c) { localById[c.id] = c; });
         var newCerts = 0;
         d.certs.forEach(function(cert) {
-          if (localIds.indexOf(cert.id) === -1) {
-            saveRecord('trainerCerts', cert, function(){});
-            newCerts++;
+          var existing = localById[cert.id];
+          if (!existing) {
+            if (cert.status !== 'revoked') { saveRecord('trainerCerts', cert, function(){}); newCerts++; }
+          } else if (cert.status === 'revoked' && existing.status !== 'revoked') {
+            existing.status = 'revoked'; updateRecord('trainerCerts', existing, function(){});
           }
         });
         if (newCerts > 0) {
@@ -13982,7 +13979,7 @@ function loadProfileScreen() {
         var badges  = document.getElementById('trainerCertBadges');
         if (!section || !badges) return;
         var myId = profile.stewardId || '';
-        var myCerts = (certs || []).filter(function(c) { return c.stewardId === myId; });
+        var myCerts = (certs || []).filter(function(c) { return c.stewardId === myId && c.status !== 'revoked'; });
         if (myCerts.length === 0) { section.style.display = 'none'; return; }
         section.style.display = 'block';
         badges.innerHTML = '';
@@ -20422,7 +20419,35 @@ function syncVcAuthorisations(profile){
 
 /* ── Coordinator: authorise an auditor for a commodity ── */
 var VC_COMMODITIES = ['vanilla','coffee','cocoa'];
-function showGrantVcAuth(){ window._vcgCommodity=''; showScreen('screen-grant-vc-auth'); epInit('vcg'); }
+function showGrantVcAuth(){
+  window._vcgCurrent = [];
+  var box=document.getElementById('vcgCommodityList');
+  if(box) box.innerHTML=VC_COMMODITIES.map(function(c){
+    var lab=c.charAt(0).toUpperCase()+c.slice(1);
+    return '<label style="display:flex;align-items:center;gap:9px;padding:7px 2px;font-size:0.85rem;cursor:pointer;border-bottom:1px solid #eee;"><input type="checkbox" value="'+c+'" style="width:18px;height:18px;flex-shrink:0;"> '+lab+'</label>';
+  }).join('');
+  var n=document.getElementById('vcgCurrentNote'); if(n) n.textContent='';
+  var st=document.getElementById('vcgStatus'); if(st) st.textContent='';
+  ['vcgBasis','vcgAuthorisedBy'].forEach(function(i){ var e=document.getElementById(i); if(e) e.value=''; });
+  showScreen('screen-grant-vc-auth');
+  epInit('vcg');
+}
+/* Load the person's CURRENT commodity authorisations and pre-tick them, so the
+   coordinator sets the final state (tick = authorise, untick = revoke). */
+function vcgLoadCurrent(sid){
+  window._vcgCurrent = [];
+  document.querySelectorAll('#vcgCommodityList input[type=checkbox]').forEach(function(c){ c.checked=false; });
+  var n=document.getElementById('vcgCurrentNote');
+  if(!sid || !UPLOAD_ENDPOINT || !navigator.onLine){ return; }
+  if(n){ n.textContent='Loading current access…'; n.style.color='#555'; }
+  fetch(UPLOAD_ENDPOINT+'?action=vc_auditors&stewardId='+encodeURIComponent(sid)+'&_='+Date.now(),{cache:'no-store'})
+    .then(function(r){return r.json();}).then(function(d){
+      var cur=(d && d.status==='ok' && d.commodities) ? d.commodities : [];
+      window._vcgCurrent = cur.slice();
+      document.querySelectorAll('#vcgCommodityList input[type=checkbox]').forEach(function(c){ c.checked = cur.indexOf(c.value)!==-1; });
+      if(n){ n.textContent = cur.length ? ('Currently authorised for '+cur.length+' commodity(ies). Tick to add, untick to revoke.') : 'No commodities yet — tick the ones to authorise.'; n.style.color='#555'; }
+    }).catch(function(){ if(n){ n.textContent='Could not load current access — try again online.'; n.style.color='#E65100'; } });
+}
 
 /* ── Coordinator: unlock clan-steward modules after training ── */
 /* ── Coordinator: verify what the server actually has (approvals read-back) ──
@@ -20560,31 +20585,42 @@ function submitModuleTraining(){
   };
   runNext(0);
 }
-function vcgSetCommodity(c, btn){
-  window._vcgCommodity=c;
-  document.querySelectorAll('#vcgCommodityPills .weather-pill').forEach(function(b){ var on=b.getAttribute('data-c')===c; b.classList.toggle('active',on); b.style.background=on?'#6A1B9A':''; b.style.color=on?'#fff':''; });
-}
 function submitVcGrant(){
   var sid=(document.getElementById('vcgStewId').value||'').trim().toUpperCase();
-  var commodity=window._vcgCommodity||'';
   var by=(document.getElementById('vcgAuthorisedBy').value||'').trim();
   var basis=(document.getElementById('vcgBasis').value||'').trim();
   var status=document.getElementById('vcgStatus'); var btn=document.getElementById('vcgSubmitBtn');
-  if(!sid){ toast('Enter the Steward / Officer ID to authorise.'); return; }
-  if(!commodity){ toast('Choose a commodity.'); return; }
+  var ticked=[]; document.querySelectorAll('#vcgCommodityList input[type=checkbox]:checked').forEach(function(c){ ticked.push(c.value); });
+  if(!sid){ toast('Choose the person to authorise.'); return; }
   if(!by){ toast('Enter your name (authorised by).'); return; }
+  var current=window._vcgCurrent||[];
+  var toGrant=ticked.filter(function(c){ return current.indexOf(c)===-1; });
+  var toRevoke=current.filter(function(c){ return ticked.indexOf(c)===-1; });
+  if(toGrant.length===0 && toRevoke.length===0){ toast('No changes — tick to authorise or untick to revoke.'); return; }
+  if(toRevoke.length){
+    if(!confirm('Revoke from '+sid+': '+toRevoke.join(', ')+'.\n\nThe Value Chains Audit tile for those will LOCK on their phone at next online login. Continue?')) return;
+  }
+  if(!UPLOAD_ENDPOINT){ status.textContent='No endpoint configured.'; status.style.color='#E65100'; return; }
+  if(!window._coordSecret){ toast('Unlock as coordinator first (passcode + server key).'); return; }
   btn.disabled=true; btn.textContent='Saving…';
-  var payload={ _action:'grant_vc_authorisation', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret,
-    record:{ stewardId:sid, commodity:commodity, authorised_by:by, basis:basis, authorised_at:new Date().toISOString(), status:'active' } };
-  if(UPLOAD_ENDPOINT){
-    fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-      .then(function(r){return r.json();}).then(function(d){
-        btn.disabled=false; btn.textContent='Record Authorisation →';
-        if(d.status==='ok'){ status.textContent='✓ '+sid+' authorised as '+commodity+' auditor.'; status.style.color='#1B5E20';
-          ['vcgAuthorisedBy','vcgBasis'].forEach(function(i){var e=document.getElementById(i); if(e)e.value='';}); try{ epInit('vcg'); }catch(_){} window._vcgCommodity=''; vcgSetCommodity('',null);
-        } else { status.textContent='Sync: '+(d.message||'failed'); status.style.color='#E65100'; }
-      }).catch(function(){ btn.disabled=false; btn.textContent='Record Authorisation →'; status.textContent='No network — try again when online.'; status.style.color='#E65100'; });
-  } else { btn.disabled=false; btn.textContent='Record Authorisation →'; status.textContent='No endpoint configured.'; status.style.color='#E65100'; }
+  var now=new Date().toISOString(); var calls=[];
+  toGrant.forEach(function(c){ calls.push({ _action:'grant_vc_authorisation', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret, record:{ stewardId:sid, commodity:c, authorised_by:by, basis:basis, authorised_at:now, status:'active' } }); });
+  if(toRevoke.length){ calls.push({ _action:'revoke_vc_authorisation', _secret:UPLOAD_SECRET, _coordinator_secret:window._coordSecret, record:{ stewardId:sid, commodities:toRevoke, authorised_by:by, authorised_at:now } }); }
+  var okAll=true;
+  (function runNext(idx){
+    if(idx>=calls.length){
+      btn.disabled=false; btn.textContent='Save auditor access →';
+      if(okAll){
+        var parts=[]; if(toGrant.length) parts.push(toGrant.length+' authorised'); if(toRevoke.length) parts.push(toRevoke.length+' revoked');
+        status.textContent='✓ '+parts.join(' · ')+' for '+sid+'.'; status.style.color='#1B5E20';
+        window._vcgCurrent=ticked.slice();
+      } else { status.textContent='Sync problem — check and try again.'; status.style.color='#E65100'; }
+      return;
+    }
+    fetch(UPLOAD_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(calls[idx])})
+      .then(function(r){return r.json();}).then(function(d){ if(!(d&&d.status==='ok')) okAll=false; runNext(idx+1); })
+      .catch(function(){ okAll=false; runNext(idx+1); });
+  })(0);
 }
 
 
